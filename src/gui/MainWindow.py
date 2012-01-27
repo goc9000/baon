@@ -10,18 +10,28 @@ import wx
 
 # end wxGlade
 
+from logic.FileScanner import FileScanner
+
 class MainWindow(wx.Frame):
+    _CHANGE_DELAY_MS = 1200
+    
+    _IMG_FOLDER = 0
+    _IMG_FILE = 1
+    _IMG_ERROR = 2
+    
     def __init__(self, *args, **kwds):
         # begin wxGlade: MainWindow.__init__
         kwds["style"] = wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args, **kwds)
         self.sizer_renames_staticbox = wx.StaticBox(self, -1, "Renamed Files")
+        self.sizer_status_staticbox = wx.StaticBox(self, -1, "Status")
         self.sizer_commands_staticbox = wx.StaticBox(self, -1, "Rename Rules")
         self.label_base_path = wx.StaticText(self, -1, "Base Path")
         self.text_base_path = wx.TextCtrl(self, -1, "")
         self.button_browse_base_path = wx.Button(self, -1, "Browse...")
         self.text_commands = wx.TextCtrl(self, -1, "", style=wx.TE_MULTILINE|wx.TE_WORDWRAP)
         self.list_files = wx.ListCtrl(self, -1, style=wx.LC_REPORT|wx.LC_VRULES|wx.SUNKEN_BORDER)
+        self.label_status = wx.StaticText(self, -1, "label_1")
         self.button_apply = wx.Button(self, wx.ID_APPLY, "")
         self.button_close = wx.Button(self, wx.ID_CLOSE, "")
 
@@ -34,8 +44,14 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self._onClickClose, self.button_close)
         # end wxGlade
         
+        self._initImageList()
         self._initTable()
         self.Bind(wx.EVT_SIZE, self._onResized, self)
+
+        self._changeTimer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._onChangeTimerExpired, self._changeTimer)
+        
+        self._updateAll()
 
     def __set_properties(self):
         # begin wxGlade: MainWindow.__set_properties
@@ -48,6 +64,7 @@ class MainWindow(wx.Frame):
         # begin wxGlade: MainWindow.__do_layout
         sizer_master = wx.BoxSizer(wx.VERTICAL)
         sizer_buttons = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_status = wx.StaticBoxSizer(self.sizer_status_staticbox, wx.HORIZONTAL)
         sizer_renames = wx.StaticBoxSizer(self.sizer_renames_staticbox, wx.HORIZONTAL)
         sizer_commands = wx.StaticBoxSizer(self.sizer_commands_staticbox, wx.HORIZONTAL)
         sizer_fileset = wx.BoxSizer(wx.HORIZONTAL)
@@ -58,7 +75,9 @@ class MainWindow(wx.Frame):
         sizer_commands.Add(self.text_commands, 1, wx.ALL|wx.EXPAND, 8)
         sizer_master.Add(sizer_commands, 0, wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.EXPAND, 8)
         sizer_renames.Add(self.list_files, 1, wx.ALL|wx.EXPAND, 8)
-        sizer_master.Add(sizer_renames, 1, wx.LEFT|wx.RIGHT|wx.EXPAND, 8)
+        sizer_master.Add(sizer_renames, 1, wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.EXPAND, 8)
+        sizer_status.Add(self.label_status, 1, wx.ALL|wx.EXPAND, 8)
+        sizer_master.Add(sizer_status, 0, wx.LEFT|wx.RIGHT|wx.EXPAND, 8)
         sizer_buttons.Add(self.button_apply, 0, wx.RIGHT, 16)
         sizer_buttons.Add(self.button_close, 0, 0, 0)
         sizer_master.Add(sizer_buttons, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 8)
@@ -67,36 +86,113 @@ class MainWindow(wx.Frame):
         self.Centre()
         # end wxGlade
 
+    def _initImageList(self):
+        iconSize = (16, 16)
+        
+        initData = [
+                    (self._IMG_FILE, wx.ART_NORMAL_FILE),
+                    (self._IMG_FOLDER, wx.ART_FOLDER),
+                    (self._IMG_ERROR, wx.ART_ERROR)
+                    ]
+        
+        buff = [ None for dummy in initData ]
+        for tupl in initData:
+            buff[tupl[0]] = wx.ArtProvider.GetBitmap(tupl[1], wx.ART_OTHER, iconSize)
+
+        imgList = wx.ImageList(iconSize[0], iconSize[1])
+        for icn in buff:
+            imgList.Add(icn)
+        self._imageList = imgList
+
     def _initTable(self):
         self.list_files.InsertColumn(0, "From")
         self.list_files.InsertColumn(1, "To")
-
+        
+        self.list_files.SetImageList(self._imageList, wx.IMAGE_LIST_SMALL)
+        
     def _onResized(self, event):
         width = self.list_files.Size[0] / 2
         self.list_files.SetColumnWidth(0, width)
         self.list_files.SetColumnWidth(1, width)
         event.Skip()
 
-    def showFiles(self, fromList, toList):
-        self.list_files.DeleteAllItems()
+    def setup(self, *args, **kwargs):
+        if 'basePath' in kwargs:
+            self.text_base_path.Value = kwargs['basePath']
+        self._updateAll()
+
+    def _showFiles(self, fromList, toList):
+        l = self.list_files
+     
+        while l.ItemCount < len(fromList):
+            l.InsertStringItem(l.ItemCount, "")
+        while l.ItemCount > len(fromList):
+            l.DeleteItem(l.ItemCount - 1)
+        
         for i in range(0, len(fromList)):
-            self.list_files.InsertStringItem(i, fromList[i])
-            self.list_files.SetStringItem(i, 1, toList[i])
+            #l.InsertStringItem(i, "")
             
+            col = 0
+            for item in [ fromList[i], toList[i] ]:
+                l.SetStringItem(i, col, item.filename)
+                
+                img = self._IMG_FILE if not item.isDir else self._IMG_FOLDER
+                l.SetItemColumnImage(i, col, img)
+                
+                col += 1
+
+    def _updateAll(self):
+        self._changeTimer.Stop()
+        
+        try:
+            self._showFiles([], [])
+            if self.text_base_path.Value.strip() == "":
+                self._showInfo("Enter the base path for the files that are to be renamed.")
+                return
+            
+            scanner = FileScanner()
+            files = scanner.scan(self.text_base_path.Value)
+            
+            self._showFiles(files, files)
+            
+            self._showInfo("{0} files found.".format(len(files)))
+        except Exception as e:
+            self._showError("Error scanning for files: {0}".format(str(e)))
+            return
+            
+    def _showInfo(self, message):
+        self.label_status.Label = message
+        self.label_status.ForegroundColour = self.label_base_path.ForegroundColour
+
+    def _showError(self, message):
+        self.label_status.Label = message
+        self.label_status.ForegroundColour = wx.Color(255,0,0)
+
+    def _onChangeTimerExpired(self, event):
+        self._updateAll()
+
     def _onEditBasePath(self, event): # wxGlade: MainWindow.<event_handler>
-        print "Event handler `_onEditBasePath' not implemented"
-        event.Skip()
+        if self._changeTimer.IsRunning():
+            self._changeTimer.Stop()
+            
+        self._changeTimer.Start(self._CHANGE_DELAY_MS, True)
 
     def _onBrowseBasePath(self, event): # wxGlade: MainWindow.<event_handler>
-        print "Event handler `_onBrowseBasePath' not implemented"
-        event.Skip()
-
+        dialog = wx.DirDialog(self,
+                               "Browse For Base Path",
+                               "",
+                               wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
+        if dialog.ShowModal() != dialog.AffirmativeId:
+            return
+        
+        self.text_base_path.Value = dialog.Path
+        self._updateAll()
+        
     def _onClickApply(self, event): # wxGlade: MainWindow.<event_handler>
         print "Event handler `_onClickApply' not implemented"
         event.Skip()
 
     def _onClickClose(self, event): # wxGlade: MainWindow.<event_handler>
-        print "Event handler `_onClickClose' not implemented"
-        event.Skip()
-
+        self.Close()
+        
 # end of class MainWindow
