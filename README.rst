@@ -6,7 +6,7 @@ Description
 -----------
 
 BAON (By Any Other Name) is a mass file renamer specially engineered for
-working with my personal ANTLR-like rule syntax.
+working with my personal rule syntax vaguely reminiscent of ANTLR rewrite rules.
 
 Specification
 -------------
@@ -14,19 +14,23 @@ Specification
 Usage Overview
 ..............
 
-The user's main input into the renaming process is a set of `rewrite rules`
-somewhat similar to those used in ANTLR_. Rules generally take the form:
+The user's main input into the renaming process is a set of `renaming rules`.
+Rules generally take the form:
 
-    `match-specification` ``->`` `rewrite-specification`
+    `pattern-1` `action-1` `pattern-2` `action-2` ... `pattern-N` `action-N`
 
-and bear the following basic semantics: if a filename matches
-`match-specification`, it will be transformed according to
-`rewrite-specification`.
+and bear the following basic semantics: if a file's name can be split into
+components that simultaneously match `pattern-1`, `pattern-2`, ... `pattern-N`
+respectively, the file will be renamed by applying the corresponding actions
+to each of those components so as to obtain the new filename. For instance,
+the rule:
 
-Every file in the current rename session will be walked through all rules
-specified by the user. Whenever a rule matches, the filename will be changed
-accordingly and, unless otherwise specified, processing will continue with the
-next rule (which will now match against the changed filename).
+    ``%d->%02d ' - '->'. ' ..->title``
+    
+will rename a file like "``3 - kaiser waltz.mp3``" to "``03. Kaiser Waltz.mp3``". The ``%d`` matches against the number track number and the corresponding transformation implies rendering the number in two digit format with leading zeroes. The ``' - '`` specifier matches against that exact character sequence, which will then be replaced by the exact text ``'. '``. Finally, the ``..`` specifier matches against the rest of the filename, which will then be passed through the transformation ``title`` that renders the matched text in title caps. Note that the extension is not processed by default.
+
+Unless otherwise specified, a file will be be passed through every rule in the
+set and transformed every time a rule matches.
 
 Once all filenames have been processed, the user will review the complete set
 of transformations and confirm or deny the committal of the new filenames to
@@ -63,59 +67,117 @@ manner, as a number of issues may come into play:
   achieved, so that the original structure may be restored in case the program
   is interrupted during a batch rename operation.
 
-Rules
-.....
+Regular Match Specifiers
+........................
 
-As stated before, rules have the general form:
+BAON supports the following set of match specifiers:
 
-    `matches` ``->`` `rewrites`
+``%d``
+    Matches a **positive, integral** number.
 
-The purpose of the `matches` section is twofold:
+``%`` *n* ``d``
 
-- To identify the filenames to which this particular rule applies
-- To identify different parts in the filenames that do match the rule, so that
-  different rewriting operations can be applied to each
-  
-// TODO:
+    Matches a positive, integral number consisting of exactly *n* digits.
 
-in matches:
-%d   (digits)
-%3d  (exactly 3 digits)
-" arbitrary text "
-*  (everything to the next match)
-case:  (turns case sensitivity on from this point onwards)
-alias=%d (antlr-like aliases)
+``%s``
+    Matches the first contiguous sequence of characters delimited by whitespace
+    (just like its ``scanf`` counterpart). Note that any leading whitespace is
+    forgotten (it will be consumed, but not part of the matched text).
 
-<once the matches end, everything up to the 
-<by default, only the base filename is processed (no extension); to cover that,
- you need a special match>
+``%`` *n* ``s``
+    As above, except only the first *n* characters of the string are matched and
+    consumed.
 
-in rewrites:
+``%c``
+    Matches a single character at the current position, including whitespace.
+    Note that this always succeeds, unless we are at the end of the scope.
 
-%d  (interpret as number, output)
-%02d  (as in printf)
-*  (output as parsed)
-alias  (move alias here; it is removed from the queue, we are still positioned
-        over the element that would come were there no alias)
-alias:%d  (same, but apply %d interpretation)
-title: (and other functions; apply function 'title' (titlecaps) to all text that follows)
-:title (end scope of 'title:' - kind of like a paranthesis)
-!stop (and other predicates; if rule matched, do not process others for this file)
-(' '->'_';'a'->'z')  (an example; upon the text in this match, execute other rules)
+``%`` *n* ``c``
+    As above, but matches exactly *n* characters.
 
-Matches
+``%ws``
+    Matches any amount of whitespace (even none) at this position.
+
+``'`` *exact-text* ``'`` or ``"`` *exact-text* ``"``
+    Matches the exact text between the (double) quotes. All the well-known
+    backslash-based escape sequences may be used.
+
+``/`` *regular-expression* ``/``
+    Matches the regular expression between the slashes. You must use the Python flavor
+    of regular expressions, despite the JavaScript-like delimiters. You may specify
+    flags by adding the following characters immediately after the ending slash:
+   
+   - ``i``: case insensitivity
+
+``..``
+    Matches everything up to the point where the next specifier matches, i.e.
+    if the next specifier is ``%d``, this matches everything up to the next number.
+    It is an error to have two consecutive specifiers of this type.
+
+``$``
+    Matches the end of the current scope. The default scope is the entire filename
+    save for the extension.
+
+``(`` *rule* ``)``
+    Matches the pattern defined by a sub-rule. The sub-rule may itself contain actions
+    that transform the components as they are matched. The content of the match will
+    consist of the entire text matched by the sub-rule after any such transformations
+    have taken place.
+
+``+``
+    States that the previous match will be repeated as many times as possible. Actions
+    may be placed both between the pattern and this sign, in which case they apply to
+    each individual (re-)match as it occurs, or after the sign, in which case they
+    apply to the totality of text that was covered by all the repeated matches.
+
+``*``
+    Like above, but allows for the possibility of there being no first match at all,
+    i.e. it matches 0 or more repetitions of the pattern.
+
+Insertion Match Specifiers
+..........................
+
+``<<`` ``'`` *exact-text* ``'``
+    Matches and consumes no text, but inserts the exact text specified at the current
+    position.
+
+``<<`` *alias*
+    Consumes no text, but inserts the text stored under the given alias at the current
+    position. The text is available for further transformation by actions appearing
+    after this match specifier.
+
+Special Predicate Specifiers
+............................
+
+Predicate specifiers consume and match no text.
+
+``#ext``
+    Extends the scope of the search to cover the entire filename (by default, the
+    extension is excluded from the scope). This only applies for the current rule. If
+    present, this predicate must appear at the beginning of the rule, before any
+    regular match specifier.
+
+``#stop``
+    If the filename matched the rule, stops any further processing for this filename
+    after all transformations have been applied. If present, this must appear at
+    the very end of the rule.
+
+Search-and-replace Match Specifiers
+...................................
+
+``@``
+
+Actions
 .......
 
-Rewrites
-........
+(null)  (render unmodified)
+! (delete)
+->%02d (render as in printf)
+->fail (skips rule if this matched; if in parantheses, fail sub-match)
+->title (title case)
+->upper
+->lower
+->(rule) (apply rule to matched text)
+>>alias (delete and store under alias)
 
-Input Modifiers
-...............
-
-Output Modifiers
-................
-
-Special Predicates
-..................
-
-.. _ANTLR: http://www.antlr.org
+action1 action2 action3 (applies successive actions)
