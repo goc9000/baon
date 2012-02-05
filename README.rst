@@ -101,7 +101,7 @@ BAON supports the following set of match specifiers:
 ``%s``
     Matches the first contiguous sequence of characters delimited by whitespace
     (just like its ``scanf`` counterpart). Note that any leading whitespace is
-    forgotten (it will be consumed, but not part of the matched text).
+    forgotten (it will be consumed, but not appear as part of the matched text).
 
 ``%Ns``
     As above, except only the first *N* characters of the string are matched and
@@ -127,7 +127,7 @@ BAON supports the following set of match specifiers:
     may specify flags by adding any of the following characters immediately
     after the ending slash:
    
-   - ``i``: case insensitivity
+    - ``i``: case insensitivity
 
 ``..``
     Matches everything up to the point where the next specifier matches, i.e.
