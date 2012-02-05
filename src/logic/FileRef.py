@@ -9,3 +9,13 @@ class FileRef(object):
         self.fullPath = fullPath
         self.filename = filename
         self.isDir = os.path.isdir(fullPath)
+
+    def __cmp__(self, other):
+        if self.isDir != other.isDir:
+            return -1 if self.isDir else 1
+        
+        if self.filename != other.filename:
+            return -1 if self.filename < other.filename else 1
+        
+        return 0
+        

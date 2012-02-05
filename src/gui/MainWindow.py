@@ -11,6 +11,8 @@ import wx
 # end wxGlade
 
 from logic.FileScanner import FileScanner
+from logic.RuleParser import RuleParser
+from logic.RuleParser import RuleParseException
 
 class MainWindow(wx.Frame):
     _CHANGE_DELAY_MS = 1200
@@ -40,6 +42,7 @@ class MainWindow(wx.Frame):
 
         self.Bind(wx.EVT_TEXT, self._onEditBasePath, self.text_base_path)
         self.Bind(wx.EVT_BUTTON, self._onBrowseBasePath, self.button_browse_base_path)
+        self.Bind(wx.EVT_TEXT, self._onEditRules, self.text_commands)
         self.Bind(wx.EVT_BUTTON, self._onClickApply, self.button_apply)
         self.Bind(wx.EVT_BUTTON, self._onClickClose, self.button_close)
         # end wxGlade
@@ -130,8 +133,6 @@ class MainWindow(wx.Frame):
             l.DeleteItem(l.ItemCount - 1)
         
         for i in range(0, len(fromList)):
-            #l.InsertStringItem(i, "")
-            
             col = 0
             for item in [ fromList[i], toList[i] ]:
                 l.SetStringItem(i, col, item.filename)
@@ -144,22 +145,74 @@ class MainWindow(wx.Frame):
     def _updateAll(self):
         self._changeTimer.Stop()
         
-        try:
+        commands = self._parseCommands()
+        files = self._scanFiles()
+        
+        if files is None:
             self._showFiles([], [])
+        else:
+            self._showFiles(files, files)
+        
+        if files is None:
+            self._showInfo("Enter the base path for the files that are to be renamed.")
+        elif isinstance(files, Exception):
+            self._showError(str(files))
+        elif len(files) == 0:
+            self._showInfo("No files found.")
+        else:
+            if isinstance(commands, Exception):
+                self._showError(str(commands))
+            else:
+                self._showInfo("{0} files found.".format(len(files)))
+        
+    def _scanFiles(self):
+        try:
             if self.text_base_path.Value.strip() == "":
-                self._showInfo("Enter the base path for the files that are to be renamed.")
-                return
+                return None
             
             scanner = FileScanner()
             files = scanner.scan(self.text_base_path.Value)
             
-            self._showFiles(files, files)
-            
-            self._showInfo("{0} files found.".format(len(files)))
+            return files
         except Exception as e:
-            self._showError("Error scanning for files: {0}".format(str(e)))
-            return
+            return e
+    
+    def _parseCommands(self):
+        try:
+            if self.text_commands.Value.strip() == "":
+                return []
             
+            parser = RuleParser()
+            parser.parse(self.text_commands.Value)
+            
+            self._highlightError(None)
+            return []
+        except RuleParseException as e:
+            self._highlightError(e.line, e.column)
+            return e
+    
+    def _highlightError(self, line = None, col = 0):
+        t = self.text_commands
+        
+        if line is None:
+            t.SetStyle(0, t.GetLastPosition(), t.DefaultStyle)
+            return
+        
+        try:
+            line = max(line, 0)
+            col = max(col, 0)
+            
+            posn = 0
+            for i in range(0, line):
+                posn += t.GetLineLength(i) + 1
+            posn += col
+            
+            errStyle = wx.TextAttr(wx.Color(255,0,0))
+            t.SetStyle(0, posn, t.DefaultStyle)
+            t.SetStyle(posn, t.GetLastPosition(), errStyle)
+        except:
+            t.SetStyle(0, t.GetLastPosition(), t.DefaultStyle)
+        
     def _showInfo(self, message):
         self.label_status.Label = message
         self.label_status.ForegroundColour = self.label_base_path.ForegroundColour
@@ -172,6 +225,12 @@ class MainWindow(wx.Frame):
         self._updateAll()
 
     def _onEditBasePath(self, event): # wxGlade: MainWindow.<event_handler>
+        if self._changeTimer.IsRunning():
+            self._changeTimer.Stop()
+            
+        self._changeTimer.Start(self._CHANGE_DELAY_MS, True)
+
+    def _onEditRules(self, event): # wxGlade: MainWindow.<event_handler>
         if self._changeTimer.IsRunning():
             self._changeTimer.Stop()
             
@@ -194,5 +253,5 @@ class MainWindow(wx.Frame):
 
     def _onClickClose(self, event): # wxGlade: MainWindow.<event_handler>
         self.Close()
-        
+
 # end of class MainWindow
