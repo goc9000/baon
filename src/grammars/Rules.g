@@ -4,6 +4,11 @@ options {
     language=Python;
 }
 
+@header {
+    from logic.RuleSet import *
+    from logic.utils import *
+}
+
 @rulecatch {
 except RecognitionException as exc:
     raise exc
@@ -23,9 +28,10 @@ def recover(self, exc):
     raise exc
 }
 
-OP_DELETE : '!';
-OP_INSERT : '<<';
-OP_SAVE   : '>>';
+OP_BETWEEN : '..';
+OP_DELETE  : '!';
+OP_INSERT  : '<<';
+OP_SAVE    : '>>';
 
 WS : (' '|'\t') {$channel=HIDDEN;};
 
@@ -52,22 +58,53 @@ fragment UNICODE_ESC : '\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT;
 ID : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
    ;
 
-xruleset : xrule_sep? xrule (xrule_sep xrule)* xrule_sep? EOF;
+xruleset returns [ RuleSet rset ]
+        : { rset=RuleSet() }
+          xrule_sep? r0=xrule { rset.rules.append($r0.rule) }
+          (xrule_sep ru=xrule { rset.rules.append($ru.rule) })*
+          xrule_sep? EOF;
 
 xrule_sep : (LINE_SEP | ';')+;
 
-xrule : (xmatch xaction*)+;
+xrule returns [ Rule rule ]
+        : { rule=Rule() }
+          (te=xterm { rule.terms.append($te.term) })+;
 
-xmatch : xliteral_match
-       | xinsertion_match
-       ;
+xterm returns [ Term term ]
+        : { term=Term() }
+          ma=xmatch { term.match = $ma.match }
+          (ac=xaction { term.actions.append($ac.action) })*;
 
-xaction : xaction_delete
-        | xaction_save
+xmatch returns [ Match match ]
+        : (
+          m=xliteral_match
+        | m=xbetween_match
+        | m=xinsertion_match
+        ) { match=$m.match };
+
+xaction returns [ Action action ]
+        : (
+          a=xaction_delete
+        | a=xaction_save
+        ) { action=$a.action };
+
+xliteral_match returns [ LiteralMatch match ]
+        : LITERAL { match = LiteralMatch(decodeLiteral($LITERAL.text)) }
         ;
 
-xliteral_match: LITERAL;
-xinsertion_match : OP_INSERT (LITERAL | ID);
+xbetween_match returns [ BetweenMatch match ]
+        : OP_BETWEEN { match = BetweenMatch() }
+        ;
 
-xaction_delete: OP_DELETE;
-xaction_save: OP_SAVE ID;
+xinsertion_match returns [ InsertionMatch match ]
+        : OP_INSERT ( LITERAL { match = InsertLiteralMatch(decodeLiteral($LITERAL.text)) }
+                    | ID { match = InsertAliasMatch($ID.text) } )
+        ;
+
+xaction_delete returns [ DeleteAction action ]
+        : OP_DELETE { action = DeleteAction() }
+        ;
+
+xaction_save returns [ SaveAction action ]
+        : OP_SAVE ID { action = SaveAction($ID.text) }
+        ;

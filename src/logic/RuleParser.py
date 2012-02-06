@@ -1,12 +1,11 @@
 import antlr3
 
-from genparser.RulesLexer import RulesLexer
-from genparser.RulesParser import RulesParser
+from genparsers.RulesLexer import RulesLexer
+from genparsers.RulesParser import RulesParser
 
 class RuleParser(object):
     '''
-    Note: this is currently a wrapper for the ANTLR3-generated class. It was
-    made like this to enable changing the backend if needed
+    Note: this is currently just a thin wrapper for the ANTLR3-generated class.
     '''
 
     def __init__(self):
@@ -19,7 +18,9 @@ class RuleParser(object):
         parser = RulesParser(tokStream)
         
         try:
-            parser.xruleset()
+            ruleset = parser.xruleset()
+            
+            return ruleset
         except antlr3.RecognitionException as e:
             raise RuleParseException("Syntax error", e.line-1, e.charPositionInLine)
         

@@ -13,6 +13,9 @@ import wx
 from logic.FileScanner import FileScanner
 from logic.RuleParser import RuleParser
 from logic.RuleParser import RuleParseException
+from logic.Renamer import Renamer
+from logic.RuleSet import RuleSet
+from logic.RuleSet import RuleCheckException
 
 class MainWindow(wx.Frame):
     _CHANGE_DELAY_MS = 1200
@@ -135,23 +138,27 @@ class MainWindow(wx.Frame):
         for i in range(0, len(fromList)):
             col = 0
             for item in [ fromList[i], toList[i] ]:
-                l.SetStringItem(i, col, item.filename)
+                if isinstance(item, Exception):
+                    text = str(item)
+                    img = self._IMG_ERROR
+                else:
+                    text = item.filename
+                    img = self._IMG_FILE if not item.isDir else self._IMG_FOLDER
                 
-                img = self._IMG_FILE if not item.isDir else self._IMG_FOLDER
+                l.SetStringItem(i, col, text)
                 l.SetItemColumnImage(i, col, img)
-                
                 col += 1
 
     def _updateAll(self):
         self._changeTimer.Stop()
         
-        commands = self._parseCommands()
+        ruleset = self._parseCommands()
         files = self._scanFiles()
         
         if files is None:
-            self._showFiles([], [])
+            filesLeft = filesRight = []
         else:
-            self._showFiles(files, files)
+            filesLeft = filesRight = files
         
         if files is None:
             self._showInfo("Enter the base path for the files that are to be renamed.")
@@ -160,10 +167,17 @@ class MainWindow(wx.Frame):
         elif len(files) == 0:
             self._showInfo("No files found.")
         else:
-            if isinstance(commands, Exception):
-                self._showError(str(commands))
-            else:
+            if isinstance(ruleset, Exception):
+                self._showError(str(ruleset))
+            elif ruleset.isEmpty():
                 self._showInfo("{0} files found.".format(len(files)))
+            else:
+                renamer = Renamer(ruleset)
+                filesRight = renamer.rename(filesLeft)
+                
+                self._showInfo("{0} files processed.".format(len(files)))
+        
+        self._showFiles(filesLeft, filesRight)
         
     def _scanFiles(self):
         try:
@@ -180,13 +194,17 @@ class MainWindow(wx.Frame):
     def _parseCommands(self):
         try:
             if self.text_commands.Value.strip() == "":
-                return []
+                return RuleSet()
             
             parser = RuleParser()
-            parser.parse(self.text_commands.Value)
+            ruleset = parser.parse(self.text_commands.Value)
+            ruleset.semanticCheck()
             
             self._highlightError(None)
-            return []
+            return ruleset
+        except RuleCheckException as e:
+            self._highlightError(0, 0)
+            return e
         except RuleParseException as e:
             self._highlightError(e.line, e.column)
             return e
