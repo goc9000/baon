@@ -1,4 +1,4 @@
-ANTLR_JAR=./antlr-3.1.3.jar
+ANTLR_JAR=./lib/antlr-3.1.3.jar
 
 parsers:
 	rm -f src/genparsers/*.pyc
