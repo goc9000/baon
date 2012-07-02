@@ -18,12 +18,13 @@ class RuleParser(object):
         parser = RulesParser(tokStream)
         
         try:
-            ruleset = parser.xruleset()
+            ruleset = parser.ruleset()
             
             return ruleset
         except antlr3.RecognitionException as e:
             raise RuleParseException("Syntax error", e.line-1, e.charPositionInLine)
-        
+
+
 class RuleParseException(Exception):
     line = None
     column = None

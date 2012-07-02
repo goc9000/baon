@@ -72,29 +72,28 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         ruleset = self._parseCommands()
         files = self._scanFiles()
-        
-        if files is None:
+
+        if (files is None) or isinstance(files, Exception):
             filesLeft = filesRight = []
         else:
             filesLeft = filesRight = files
-        
-        if files is None:
+
+        if isinstance(ruleset, Exception):
+                self._showError(str(ruleset))
+        elif files is None:
             self._showInfo("Enter the base path for the files that are to be renamed.")
         elif isinstance(files, Exception):
             self._showError(str(files))
         elif len(files) == 0:
             self._showInfo("No files found.")
+        elif ruleset.isEmpty():
+            self._showInfo("{0} files found.".format(len(files)))
         else:
-            if isinstance(ruleset, Exception):
-                self._showError(str(ruleset))
-            elif ruleset.isEmpty():
-                self._showInfo("{0} files found.".format(len(files)))
-            else:
-                renamer = Renamer(ruleset)
-                filesRight = renamer.rename(filesLeft)
-                
-                self._showInfo("{0} files processed.".format(len(files)))
-        
+            renamer = Renamer(ruleset)
+            filesRight = renamer.rename(filesLeft)
+            
+            self._showInfo("{0} files processed.".format(len(files)))
+    
         self.tblFiles.showFiles(filesLeft, filesRight)
     
     def _scanFiles(self):
