@@ -5,7 +5,26 @@ options {
 }
 
 @header {
-    from logic.RuleSet import *
+    from logic.RuleSet import RuleSet
+    from logic.Rule import Rule
+    from logic.MatchSequence import MatchSequence
+    from logic.BetweenMatch import BetweenMatch
+    from logic.SearchReplaceMatch import SearchReplaceMatch
+    from logic.SubRuleMatch import SubRuleMatch
+    from logic.RepeatMatch import RepeatMatch
+    from logic.DeleteAction import DeleteAction
+    from logic.SaveToAliasAction import SaveToAliasAction
+    from logic.ApplyRuleSetAction import ApplyRuleSetAction
+    from logic.ReplaceByLiteralAction import ReplaceByLiteralAction
+    from logic.ReformatAction import ReformatAction
+    from logic.ApplyFunctionAction import ApplyFunctionAction
+    from logic.InsertAliasMatch import InsertAliasMatch
+    from logic.InsertLiteralMatch import InsertLiteralMatch
+    from logic.FormatMatch import FormatMatch
+    from logic.LiteralMatch import LiteralMatch
+    from logic.RegexMatch import RegexMatch
+    from logic.StartAnchorMatch import StartAnchorMatch
+    from logic.EndAnchorMatch import EndAnchorMatch
     from logic.utils import *
 }
 

@@ -7,7 +7,7 @@ from logic.RuleParser import RuleParser
 from logic.RuleParser import RuleParseException
 from logic.Renamer import Renamer
 from logic.RuleSet import RuleSet
-from logic.RuleSet import RuleCheckException
+from logic.RuleCheckException import RuleCheckException
 
 class MySyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, document):

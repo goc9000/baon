@@ -1,5 +1,6 @@
 import antlr3
 
+from RuleParseException import RuleParseException
 from genparsers.RulesLexer import RulesLexer
 from genparsers.RulesParser import RulesParser
 
@@ -23,17 +24,3 @@ class RuleParser(object):
             return ruleset
         except antlr3.RecognitionException as e:
             raise RuleParseException("Syntax error", e.line-1, e.charPositionInLine)
-
-
-class RuleParseException(Exception):
-    line = None
-    column = None
-    message = None
-    
-    def __init__(self, message, line, col):
-        self.message = message
-        self.line = line
-        self.column = col
-        
-    def __str__(self):
-        return self.message
