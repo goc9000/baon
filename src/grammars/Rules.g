@@ -51,7 +51,6 @@ def recover(self, exc):
 
 OP_RULE_SEP          : ';';
 OP_OR                : '|';
-OP_HASH              : '#';
 OP_DELETE            : '!';
 OP_XFORM             : '->';
 OP_INSERT            : '<<';

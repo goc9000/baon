@@ -6,6 +6,9 @@ class RuleSet(object):
     def __init__(self):
         self.rules = []
 
+    def applyOn(self, text):
+        return "<todo>"
+
     def isEmpty(self):
         return len(self.rules) == 0
     
