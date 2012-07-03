@@ -60,7 +60,7 @@ STRING_LITERAL       : '"' (ESC_SEQ | ~('\\'|'"'))* '"'
                      | '\'' (ESC_SEQ | ~('\\'|'\''))* '\'';
 FORMAT_SPEC          : '%' ('0'..'9')* ('a'..'z'|'A'..'Z')+;
 fragment REGEX_DELIM : '/';
-REGEX                : REGEX_DELIM (~REGEX_DELIM)* REGEX_DELIM ('a'..'z'|'A'..'Z')*;
+REGEX                : REGEX_DELIM (~REGEX_DELIM|REGEX_DELIM REGEX_DELIM)* REGEX_DELIM ('a'..'z'|'A'..'Z')*;
 ID                   : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
 RULE_SEP             : (OP_RULE_SEP|LINE_SEP)+;
 
@@ -108,10 +108,12 @@ action        returns [ out_action ]
               );
 
 insert_match  returns [ out_match ]
-	      : OP_INSERT ( ID {  out_match=InsertAliasMatch($ID.text) }
-	                  | STRING_LITERAL { out_match=InsertLiteralMatch(decode_literal($STRING_LITERAL.text)) } );
-	                  
+              : OP_INSERT ( ID {  out_match=InsertAliasMatch($ID.text) }
+                          | STRING_LITERAL { out_match=InsertLiteralMatch(decode_literal($STRING_LITERAL.text)) } );
+
 elem_match    returns [ out_match ]
               : FORMAT_SPEC { out_match=FormatMatch($FORMAT_SPEC.text) }
               | STRING_LITERAL { out_match=LiteralMatch(decode_literal($STRING_LITERAL.text)) }
-              | REGEX { out_match=RegexMatch($REGEX.text) };
+              | REGEX { out_match=RegexMatch($REGEX.text) }
+              | ANCHOR_START { out_match=StartAnchorMatch() }
+              | ANCHOR_END { out_match=EndAnchorMatch() };
