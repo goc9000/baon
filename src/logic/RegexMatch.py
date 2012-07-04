@@ -18,4 +18,4 @@ class RegexMatch(ElementaryPatternMatch):
                 self._setError("Invalid regex flag '{0}'".format(c))
                 return
 
-        self._setPattern(patt_text[1:idx], flags)
+        self._setPattern("({0})".format(patt_text[1:idx]), flags)

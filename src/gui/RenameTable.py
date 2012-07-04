@@ -42,7 +42,7 @@ class RenameTable(QTableWidget):
                 editable = True
             
             itemTo = QTableWidgetItem(text)
-            itemTo.setFlags(Qt.ItemIsEnabled | (Qt.ItemIsEditable if editable else 0))
+            itemTo.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable if editable else Qt.ItemIsEnabled)
             itemTo.setIcon(icon)
             
             self.setItem(row, 0, itemFrom)
