@@ -12,12 +12,6 @@ options {
     from logic.SearchReplaceMatch import SearchReplaceMatch
     from logic.SubRuleMatch import SubRuleMatch
     from logic.RepeatMatch import RepeatMatch
-    from logic.DeleteAction import DeleteAction
-    from logic.SaveToAliasAction import SaveToAliasAction
-    from logic.ApplyRuleSetAction import ApplyRuleSetAction
-    from logic.ReplaceByLiteralAction import ReplaceByLiteralAction
-    from logic.ReformatAction import ReformatAction
-    from logic.ApplyFunctionAction import ApplyFunctionAction
     from logic.InsertAliasMatch import InsertAliasMatch
     from logic.InsertLiteralMatch import InsertLiteralMatch
     from logic.FormatMatch import FormatMatch
@@ -25,6 +19,12 @@ options {
     from logic.RegexMatch import RegexMatch
     from logic.StartAnchorMatch import StartAnchorMatch
     from logic.EndAnchorMatch import EndAnchorMatch
+    from logic.actions.ApplyFunctionAction import ApplyFunctionAction
+    from logic.actions.ApplyRuleSetAction import ApplyRuleSetAction
+    from logic.actions.DeleteAction import DeleteAction
+    from logic.actions.SaveToAliasAction import SaveToAliasAction
+    from logic.actions.ReformatAction import ReformatAction
+    from logic.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
     from logic.utils import *
 }
 

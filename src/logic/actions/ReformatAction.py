@@ -1,5 +1,5 @@
 from Action import Action
-from RuleCheckException import RuleCheckException
+from logic.RuleCheckException import RuleCheckException
 
 class ReformatAction(Action):
     error = None
