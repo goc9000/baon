@@ -8,5 +8,7 @@ class InsertLiteralMatch(InsertionMatch):
 
         self.text = text
     
-    def execute(self, context):
+    def _execute(self, context):
+        context.last_match_pos = None
+        
         return self.text

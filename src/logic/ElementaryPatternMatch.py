@@ -19,22 +19,20 @@ class ElementaryPatternMatch(Match):
     def _setError(self, message):
         self.error = message
         
-    def semanticCheck(self, scope):
+    def _semanticCheck(self, scope):
         if not self.error is None:
             raise RuleCheckException(self.error, scope)
 
-        Match.semanticCheck(self, scope)
-
-    def execute(self, context):
-        m = self.regex.match(context.text, context.position)
+    def _execute(self, context):
+        if context.next_unanchored:
+            m = self.regex.search(context.text, context.position)
+        else:
+            m = self.regex.match(context.text, context.position)
 
         if m == None:
             return False
 
-        result = self.runActions(m.group(1), context)
-        if result is False:
-            return False
-
         context.position += len(m.group(0))
+        context.last_match_pos = m.start(1)
 
-        return result
+        return m.group(1)

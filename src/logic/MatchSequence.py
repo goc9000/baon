@@ -5,8 +5,6 @@ class MatchSequence(object):
         self.terms = []
 
     def semanticCheck(self, scope):
-        #todo: check for consecutive '..' s etc.
-        
         for term in self.terms:
             term.semanticCheck(scope)
 
