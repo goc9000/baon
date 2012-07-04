@@ -29,6 +29,6 @@ class FormatMatch(ElementaryPatternMatch):
 
         m = re.match(r'%([0-9]*)s', fmt_spec)
         if m is not None:
-            return r'\s*(\S)' if len(m.group(1)) == 0 else r'\s*(\S{{{0}}})'.format(int(m.group(1)))
+            return r'\s*(\S+)' if len(m.group(1)) == 0 else r'\s*(\S{{{0}}})'.format(int(m.group(1)))
         
         return None

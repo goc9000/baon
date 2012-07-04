@@ -11,4 +11,7 @@ class ApplyRuleSetAction(Action):
     def semanticCheck(self, scope):
         Action.semanticCheck(self, scope)
         
-        self.ruleset.semanticCheck(self, scope)
+        self.ruleset.semanticCheck(scope)
+
+    def execute(self, text, context):
+        return self.ruleset.applyOn(text, context.aliases)

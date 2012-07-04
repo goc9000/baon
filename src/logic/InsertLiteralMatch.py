@@ -7,3 +7,6 @@ class InsertLiteralMatch(InsertionMatch):
         InsertionMatch.__init__(self)
 
         self.text = text
+    
+    def execute(self, context):
+        return self.text

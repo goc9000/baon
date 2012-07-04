@@ -19,7 +19,7 @@ class RuleParser(object):
         parser = RulesParser(tokStream)
         
         try:
-            ruleset = parser.ruleset()
+            ruleset = parser.main()
             
             return ruleset
         except antlr3.RecognitionException as e:

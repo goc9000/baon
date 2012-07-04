@@ -7,3 +7,6 @@ class ReplaceByLiteralAction(Action):
         Action.__init__(self)
 
         self.text = text
+
+    def execute(self, text, context):
+        return self.text

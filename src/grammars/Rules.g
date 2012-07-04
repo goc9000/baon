@@ -84,11 +84,13 @@ RULE_SEP             : (OP_RULE_SEP|LINE_SEP)+;
 
 // Parser rules
 
+main          returns [ out_rset ]
+              : ruleset EOF { out_rset = $ruleset.out_rset };
+
 ruleset       returns [ out_rset ]
               : { out_rset = RuleSet() }
                   r0=rule { out_rset.rules.append($r0.out_rule) }
-                  (RULE_SEP ru=rule { out_rset.rules.append($ru.out_rule) })*
-                  EOF;
+                  (RULE_SEP ru=rule { out_rset.rules.append($ru.out_rule) })*;
 
 rule          returns [ out_rule ]
               : { out_rule=Rule() }

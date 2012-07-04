@@ -24,3 +24,17 @@ class ElementaryPatternMatch(Match):
             raise RuleCheckException(self.error, scope)
 
         Match.semanticCheck(self, scope)
+
+    def execute(self, context):
+        m = self.regex.match(context.text, context.position)
+
+        if m == None:
+            return False
+
+        result = self.runActions(m.group(1), context)
+        if result is False:
+            return False
+
+        context.position += len(m.group(0))
+
+        return result

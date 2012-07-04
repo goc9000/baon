@@ -7,3 +7,7 @@ class SaveToAliasAction(Action):
         Action.__init__(self)
         
         self.alias = alias
+    
+    def execute(self, text, context):
+        context.aliases[self.alias] = text
+        return text

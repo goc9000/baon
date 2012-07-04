@@ -9,3 +9,18 @@ class MatchSequence(object):
         
         for term in self.terms:
             term.semanticCheck(scope)
+
+    def execute(self, context):
+        savept = context.save()
+        committed = []
+
+        for term in self.terms:
+            matched = term.execute(context)
+
+            if matched is False:
+                context.restore(savept)
+                return False
+
+            committed.append(matched)
+
+        return ''.join(committed)
