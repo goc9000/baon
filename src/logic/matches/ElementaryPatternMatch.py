@@ -1,7 +1,7 @@
 import re
 
 from Match import Match
-from RuleCheckException import RuleCheckException
+from logic.RuleCheckException import RuleCheckException
 
 class ElementaryPatternMatch(Match):
     regex = None

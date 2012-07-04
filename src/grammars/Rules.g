@@ -7,18 +7,18 @@ options {
 @header {
     from logic.RuleSet import RuleSet
     from logic.Rule import Rule
-    from logic.MatchSequence import MatchSequence
-    from logic.BetweenMatch import BetweenMatch
-    from logic.SearchReplaceMatch import SearchReplaceMatch
-    from logic.SubRuleMatch import SubRuleMatch
-    from logic.RepeatMatch import RepeatMatch
-    from logic.InsertAliasMatch import InsertAliasMatch
-    from logic.InsertLiteralMatch import InsertLiteralMatch
-    from logic.FormatMatch import FormatMatch
-    from logic.LiteralMatch import LiteralMatch
-    from logic.RegexMatch import RegexMatch
-    from logic.StartAnchorMatch import StartAnchorMatch
-    from logic.EndAnchorMatch import EndAnchorMatch
+    from logic.matches.special.MatchSequence import MatchSequence
+    from logic.matches.special.BetweenMatch import BetweenMatch
+    from logic.matches.special.SearchReplaceMatch import SearchReplaceMatch
+    from logic.matches.special.SubRuleMatch import SubRuleMatch
+    from logic.matches.special.RepeatMatch import RepeatMatch
+    from logic.matches.syn.InsertAliasMatch import InsertAliasMatch
+    from logic.matches.syn.InsertLiteralMatch import InsertLiteralMatch
+    from logic.matches.FormatMatch import FormatMatch
+    from logic.matches.LiteralMatch import LiteralMatch
+    from logic.matches.RegexMatch import RegexMatch
+    from logic.matches.StartAnchorMatch import StartAnchorMatch
+    from logic.matches.EndAnchorMatch import EndAnchorMatch
     from logic.actions.ApplyFunctionAction import ApplyFunctionAction
     from logic.actions.ApplyRuleSetAction import ApplyRuleSetAction
     from logic.actions.DeleteAction import DeleteAction

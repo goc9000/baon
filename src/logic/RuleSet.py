@@ -1,5 +1,5 @@
 from SemanticCheckScope import SemanticCheckScope
-from MatchContext import MatchContext
+from logic.matches.MatchContext import MatchContext
 
 class RuleSet(object):
     rules = None

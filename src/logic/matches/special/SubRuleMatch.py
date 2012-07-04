@@ -1,4 +1,4 @@
-from Match import Match
+from logic.matches.Match import Match
 
 class SubRuleMatch(Match):
     rule = None
