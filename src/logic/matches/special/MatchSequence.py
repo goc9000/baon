@@ -1,3 +1,5 @@
+from BetweenMatch import BetweenMatch
+
 class MatchSequence(object):
     terms = None
 
@@ -11,14 +13,50 @@ class MatchSequence(object):
     def execute(self, context):
         savept = context.save()
         committed = []
+        
+        match_pos = None
+        pending_betw_match_idx = None
+        pending_betw_match_pos = None
 
-        for term in self.terms:
+        for idx in xrange(len(self.terms)):
+            term = self.terms[idx]
             matched = term.execute(context)
 
             if matched is False:
                 context.restore(savept)
                 return False
+            
+            if context.last_match_pos is not None:
+                if pending_betw_match_idx is not None:
+                    late_match = self.terms[pending_betw_match_idx].executeDelayed(
+                        context.text[pending_betw_match_pos:context.last_match_pos],
+                        context)
+                    if late_match is False:
+                        context.restore(savept)
+                        return False
+                    committed[pending_betw_match_idx] = late_match
+                    pending_betw_match_idx = None
+                
+                if match_pos is None:
+                    match_pos = context.last_match_pos
+
+            if isinstance(term, BetweenMatch):
+                pending_betw_match_idx = idx
+                pending_betw_match_pos = context.position
 
             committed.append(matched)
+
+        if pending_betw_match_idx is not None:
+            # ".."s at the end will match all remaining text
+            late_match = self.terms[pending_betw_match_idx].executeDelayed(
+                context.text[pending_betw_match_pos:len(context.text)],
+                context)
+            if late_match is False:
+                context.restore(savept)
+                return False
+            context.position = len(context.text)
+            committed[pending_betw_match_idx] = late_match
+
+        context.last_match_pos = match_pos
 
         return ''.join(committed)
