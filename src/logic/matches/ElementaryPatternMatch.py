@@ -26,13 +26,14 @@ class ElementaryPatternMatch(Match):
     def _execute(self, context):
         if context.next_unanchored:
             m = self.regex.search(context.text, context.position)
+            context.next_unanchored = False
         else:
             m = self.regex.match(context.text, context.position)
 
-        if m == None:
+        if m is None:
             return False
 
-        context.position += len(m.group(0))
+        context.position = m.end(0)
         context.last_match_pos = m.start(1)
 
         return m.group(1)
