@@ -21,7 +21,7 @@ class MainWindow(QDialog, Ui_MainWindow):
     
     _gui = None
     
-    _changeTimer = None
+    _change_timer = None
     _highlighter = None
     
     def __init__(self, gui):
@@ -34,8 +34,8 @@ class MainWindow(QDialog, Ui_MainWindow):
     def initUi(self):
         self.setupUi(self)
         
-        self._changeTimer = QTimer(self)
-        self._changeTimer.timeout.connect(self._updateAll)
+        self._change_timer = QTimer(self)
+        self._change_timer.timeout.connect(self._updateAll)
         
         self.btnBrowse.clicked.connect(self._onBrowseClicked)
         
@@ -55,9 +55,15 @@ class MainWindow(QDialog, Ui_MainWindow):
         desktop = QDesktopWidget().screenGeometry()
         self.move((desktop.width() / 2) - (self.frameSize().width() / 2),
                   (desktop.height() / 2) - (self.frameSize().height() / 2))
+    
+    def accept(self):
+        if self._change_timer.isActive():
+            self._updateAll()
+        
+        QDialog.accept(self)
 
     def _onEditing(self):
-        self._changeTimer.start(self._CHANGE_DELAY_MS)
+        self._change_timer.start(self._CHANGE_DELAY_MS)
     
     def _onBrowseClicked(self):
         path = QFileDialog.getExistingDirectory(parent=self, caption='Browse for Base Directory')
@@ -68,18 +74,15 @@ class MainWindow(QDialog, Ui_MainWindow):
         self._updateAll()
 
     def _updateAll(self):
-        self._changeTimer.stop()
+        self._change_timer.stop()
         
         ruleset = self._parseCommands()
         files = self._scanFiles()
 
-        if (files is None) or isinstance(files, Exception):
-            filesLeft = filesRight = []
-        else:
-            filesLeft = filesRight = files
+        enable_accept = False
 
         if isinstance(ruleset, Exception):
-                self._showError(str(ruleset))
+            self._showError(str(ruleset))
         elif files is None:
             self._showInfo("Enter the base path for the files that are to be renamed.")
         elif isinstance(files, Exception):
@@ -89,12 +92,23 @@ class MainWindow(QDialog, Ui_MainWindow):
         elif ruleset.isEmpty():
             self._showInfo("{0} files found.".format(len(files)))
         else:
-            renamer = Renamer(ruleset)
-            filesRight = renamer.rename(filesLeft)
-            
             self._showInfo("{0} files processed.".format(len(files)))
+            enable_accept = True
     
-        self.tblFiles.showFiles(filesLeft, filesRight)
+        if (files is None) or isinstance(files, Exception):
+            files = []
+        if (ruleset is None) or isinstance(ruleset, Exception):
+            ruleset = RuleSet()
+        
+        renamer = Renamer(ruleset)
+        to_files = renamer.rename(files)
+    
+        self.tblFiles.showFiles(files, to_files)
+        
+        if any(rfref.error is not None for rfref in to_files):
+            enable_accept = False
+        
+        self.buttonBox.button(self.buttonBox.Ok).setEnabled(enable_accept)
     
     def _scanFiles(self):
         try:
