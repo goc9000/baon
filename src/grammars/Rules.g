@@ -49,7 +49,7 @@ def recover(self, exc):
 
 // Lexer rules
 
-OP_RULE_SEP          : ';';
+fragment OP_RULE_SEP : ';';
 OP_OR                : '|';
 OP_DELETE            : '!';
 OP_XFORM             : '->';
@@ -65,7 +65,7 @@ OP_BETWEEN           : '..';
 ANCHOR_START         : '^';
 ANCHOR_END           : '$';
 WS                   : (' '|'\t') {$channel=HIDDEN;};
-LINE_SEP             : ('\r'|'\n');
+fragment LINE_SEP    : ('\r'|'\n');
 fragment HEX_DIGIT   : ('0'..'9'|'a'..'f'|'A'..'F');
 fragment UNICODE_ESC : '\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT;
 fragment OCTAL_ESC   : '\\' ('0'..'3') ('0'..'7') ('0'..'7')
