@@ -13,7 +13,11 @@ def to_title_case(s):
         if word == '':
             continue
 
-        if first or not is_particle(word.lower()):
+        is_p = is_particle(word.lower())
+
+        if word.isupper() and not is_p:
+            pass
+        elif first or not is_p:
             words[i] = word.capitalize()
         else:
             words[i] = word.lower()
