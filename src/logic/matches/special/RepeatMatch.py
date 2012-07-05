@@ -21,6 +21,7 @@ class RepeatMatch(Match):
         match_pos = None
         
         while (self.at_most is None) or (len(committed) < self.at_most):
+            old_position = context.position
             matched = self.match.execute(context)
             if matched is False:
                 break
@@ -28,6 +29,9 @@ class RepeatMatch(Match):
                 match_pos = context.last_match_pos
             
             committed.append(matched)
+            
+            if context.position == old_position:
+                break
         
         if len(committed) < self.at_least:
             return False
