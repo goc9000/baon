@@ -1,6 +1,6 @@
 import antlr3
 
-from RuleParseException import RuleParseException
+from logic.errors.RuleParseException import RuleParseException
 from genparsers.RulesLexer import RulesLexer
 from genparsers.RulesParser import RulesParser
 

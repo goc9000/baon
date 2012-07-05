@@ -5,8 +5,8 @@ options {
 }
 
 @header {
-    from logic.RuleSet import RuleSet
-    from logic.Rule import Rule
+    from logic.rules.RuleSet import RuleSet
+    from logic.rules.Rule import Rule
     from logic.matches.special.MatchSequence import MatchSequence
     from logic.matches.special.BetweenMatch import BetweenMatch
     from logic.matches.special.SearchReplaceMatch import SearchReplaceMatch

@@ -1,5 +1,5 @@
 from Action import Action
-from logic.RuleCheckException import RuleCheckException
+from logic.errors.RuleCheckException import RuleCheckException
 
 def is_particle(word):
     return word in ['a','an','of','with','for','in','on']

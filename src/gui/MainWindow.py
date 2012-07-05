@@ -3,11 +3,11 @@ from PyQt4.QtGui import QDialog, QDesktopWidget, QFileDialog, QSyntaxHighlighter
 from gui.templates.Ui_MainWindow import Ui_MainWindow
 
 from logic.FileScanner import FileScanner
-from logic.RuleParser import RuleParser
-from logic.RuleParser import RuleParseException
 from logic.Renamer import Renamer
-from logic.RuleSet import RuleSet
-from logic.RuleCheckException import RuleCheckException
+from logic.rules.RuleSet import RuleSet
+from logic.rules.RuleParser import RuleParser
+from logic.errors.RuleParseException import RuleParseException
+from logic.errors.RuleCheckException import RuleCheckException
 
 class MySyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, document):

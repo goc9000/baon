@@ -1,6 +1,6 @@
 from Action import Action
-from logic.RuleCheckException import RuleCheckException
-from logic.RuleApplicationException import RuleApplicationException
+from logic.errors.RuleCheckException import RuleCheckException
+from logic.errors.RuleApplicationException import RuleApplicationException
 import re
 
 def strip_zeroes(s):
