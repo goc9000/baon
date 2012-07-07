@@ -44,7 +44,7 @@ class Renamer(object):
             if not self.use_ext:
                 fname += ext
             if not self.use_path:
-                fname = path + fname
+                fname = os.path.join(path, fname)
         except Exception as e:
             fname = None
             error = str(e)

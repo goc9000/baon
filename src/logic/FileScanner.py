@@ -12,11 +12,22 @@ class FileScanner(object):
         if not os.path.isdir(base_path):
             raise RuntimeError("'{0}' is not a directory".format(base_path))
         
-        if recursive:
-            raise RuntimeError("Recursive scan NIY")
+        return self._scan(base_path, '', recursive)
+
+    def _scan(self, base_path, rel_path, recursive):
+        files = []
         
-        raw_files = os.listdir(base_path)
-        files = sorted([ FileRef(os.path.join(base_path, name), name) for name in raw_files ])
+        path = os.path.join(base_path, rel_path)
+        
+        raw_files = os.listdir(path)
+        files_here = sorted([ FileRef(os.path.join(path, name), os.path.join(rel_path, name)) for name in raw_files ])
+        
+        for f in files_here:
+            if f.is_dir and recursive:
+                sub_files = self._scan(base_path, f.filename, recursive)
+                if len(sub_files) > 0:
+                    files.extend(sub_files)
+                    continue
+            files.append(f)
         
         return files
-        
