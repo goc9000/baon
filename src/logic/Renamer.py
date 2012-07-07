@@ -75,41 +75,56 @@ class Renamer(object):
                 rfref.warning = self._checkLocalWarning(rfref)
     
     def _checkLocalError(self, rfref):
-        fname = rfref.filename
+        path = rfref.filename
         
-        m = self.NON_PRINTABLE_REGEX.search(fname)
+        m = self.NON_PRINTABLE_REGEX.search(path)
         if m is not None:
             return "Non-printable character \\u{0:04x} present in filename".format(ord(m.group(0)))
         
+        base, fname = os.path.split(path)
+        
+        if fname == '':
+            return 'Filename is empty'
+        if fname == '.' or fname == '..':
+            return "File may not be named '.' or '..'"
+        
+        if base != '':
+            for comp in base.split(os.sep):
+                if comp == '':
+                    return 'Path has empty component'
+                if comp == '.' or comp == '..':
+                    return "'.' or '..' components not allowed in path"
+            
         if (rfref.filename != rfref.old_filename) and os.path.exists(rfref.full_path):
             return "File already exists"
         
         return None
     
     def _checkLocalWarning(self, rfref):
-        fname = rfref.filename
+        path = rfref.filename
         
-        for comp in fname.split(os.sep):
+        base, fname = os.path.split(path)
+        fname, _ = os.path.splitext(fname)
+        
+        for comp in path.split(os.sep):
             m = self.PROBLEM_CHARS_REGEX.search(comp)
             if m is not None:
-                return "Contains problematic character '{0}'".format(m.group(0))
-        
-        if fname.startswith(' '):
-            return 'Starts with spaces'
-        if fname.endswith(' '):
-            return 'Ends with spaces'
-        if '  ' in fname:
-            return 'Contains double spaces'
-
-        _, fname = os.path.split(fname)
-        fname, _ = os.path.splitext(fname)
+                return "Filename contains problematic character '{0}'".format(m.group(0))
         
         if fname.startswith(' '):
             return 'Filename starts with spaces'
         if fname.endswith(' '):
-            return 'Has spaces before extension'
-        if fname == '':
-            return 'Empty filename'
-
-        return None
+            return 'Filename has spaces before extension'
+        if '  ' in fname:
+            return 'Filename contains double spaces'
         
+        for comp in base.split(os.sep):
+            if comp.startswith(' '):
+                return 'Path component starts with spaces'
+            if comp.endswith(' '):
+                return 'Path component ends with spaces'
+            if '  ' in comp:
+                return 'Path component contains double spaces'
+            
+        return None
+    
