@@ -1,5 +1,5 @@
 from PyQt4.Qt import Qt, QFileInfo
-from PyQt4.QtGui import QColor, QBrush, QTableWidget, QTableWidgetItem, QHeaderView, QFileIconProvider, QStyle
+from PyQt4.QtGui import QColor, QTableWidget, QTableWidgetItem, QHeaderView, QFileIconProvider, QStyle
 from PyQt4 import QtGui
 
 class RenameTable(QTableWidget):

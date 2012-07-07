@@ -24,33 +24,69 @@ class MainWindow(QDialog, Ui_MainWindow):
     _change_timer = None
     _highlighter = None
     
+    _setup = None
+    _disable_autoupdate = False
+    
+    _files = None
+    _ruleset = None
+    _renamed = None
+    
     def __init__(self, gui):
         QDialog.__init__(self)
 
         self._gui = gui
         self.initUi()
         self.centerOnScreen()
+        
+        self._setup = self.getSetup()
     
     def initUi(self):
         self.setupUi(self)
         
         self._change_timer = QTimer(self)
-        self._change_timer.timeout.connect(self._updateAll)
+        self._change_timer.timeout.connect(self._onUpdate) 
+        trigger_change_timer = lambda: self._change_timer.start(self._CHANGE_DELAY_MS)
         
+        self.txtBasePath.textEdited.connect(trigger_change_timer)
+        self.txtBasePath.editingFinished.connect(self._onUpdate)
         self.btnBrowse.clicked.connect(self._onBrowseClicked)
         
-        self.txtBasePath.textEdited.connect(self._onEditing)
-        self.txtBasePath.editingFinished.connect(self._updateAll)
+        self.chkScanRecursive.stateChanged.connect(self._onUpdate)
+        self.chkUseExtension.stateChanged.connect(self._onUpdate)
+        self.chkUsePath.stateChanged.connect(self._onUpdate)
         
-        self.txtRules.textChanged.connect(self._onEditing)
+        self.txtRules.textChanged.connect(trigger_change_timer)
         
         self._highlighter = MySyntaxHighlighter(self.txtRules.document())
         
-    def setup(self, *args, **kwargs):
-        if 'basePath' in kwargs:
-            self.txtBasePath.setText(kwargs['basePath'])
-            self._updateAll()
-
+    def setup(self, setup):
+        self._disable_autoupdate = True
+        
+        if 'base_path' in setup:
+            self.txtBasePath.setText(setup['base_path'])
+        if 'scan_recursive' in setup:
+            self.chkScanRecursive.setChecked(setup['scan_recursive'])
+        if 'use_path' in setup:
+            self.chkUsePath.setChecked(setup['use_path'])
+        if 'use_extension' in setup:
+            self.chkUseExtension.setChecked(setup['use_extension'])
+        if 'rules' in setup:
+            self.txtRules.setPlainText(setup['rules'])
+        
+        self._disable_autoupdate = False
+        
+        self._onUpdate()
+    
+    def getSetup(self):
+        setup = {}
+        setup['base_path'] = str(self.txtBasePath.text())
+        setup['scan_recursive'] = self.chkScanRecursive.isChecked()
+        setup['use_path'] = self.chkUsePath.isChecked()
+        setup['use_extension'] = self.chkUseExtension.isChecked()
+        setup['rules'] = str(self.txtRules.document().toPlainText())
+        
+        return setup
+    
     def centerOnScreen(self):
         desktop = QDesktopWidget().screenGeometry()
         self.move((desktop.width() / 2) - (self.frameSize().width() / 2),
@@ -58,13 +94,60 @@ class MainWindow(QDialog, Ui_MainWindow):
     
     def accept(self):
         if self._change_timer.isActive():
-            self._updateAll()
+            self._onUpdate()
+        
+        if not self._allOk():
+            return
         
         QDialog.accept(self)
 
-    def _onEditing(self):
-        self._change_timer.start(self._CHANGE_DELAY_MS)
-    
+    def _allOk(self):
+        if self._files is None or isinstance(self._files, Exception) or len(self._files) == 0:
+            return False
+        if self._ruleset is None or isinstance(self._ruleset, Exception):
+            return False
+        if any(rfref.error is not None for rfref in self._renamed):
+            return False
+        
+        return True
+
+    def _onUpdate(self):
+        if self._disable_autoupdate:
+            return
+        
+        self._change_timer.stop()
+        
+        old_setup = self._setup
+        setup = self._setup = self.getSetup()
+        
+        changed = set(field for field in setup.keys() if setup[field] != old_setup[field])
+        files_updated = False
+        rules_updated = False
+        options_updated = False
+        renamed_updated = False
+        
+        if 'base_path' in changed or 'scan_recursive' in changed:
+            self._files = self._scanFiles(setup['base_path'], setup['scan_recursive'])
+            files_updated = True
+        
+        if 'rules' in changed:
+            self._ruleset = self._parseRules(setup['rules'])
+            rules_updated = True
+        
+        if 'use_path' in changed or 'use_extension' in changed:
+            options_updated = True
+        
+        if files_updated or rules_updated or options_updated:
+            self._renamed = self._renameFiles(self._files, self._ruleset, setup['use_path'], setup['use_extension'])
+            renamed_updated = True
+        
+        if files_updated or renamed_updated:
+            self._updateFilesDisplay()
+        
+        self._updateStatusMessage()
+        
+        self.buttonBox.button(self.buttonBox.Ok).setEnabled(self._allOk())
+
     def _onBrowseClicked(self):
         path = QFileDialog.getExistingDirectory(parent=self, caption='Browse for Base Directory')
         if path is None:
@@ -73,64 +156,22 @@ class MainWindow(QDialog, Ui_MainWindow):
         self.txtBasePath.setText(path)
         self._updateAll()
 
-    def _updateAll(self):
-        self._change_timer.stop()
+    def _scanFiles(self, base_path, recursive):
+        if base_path.strip() == "":
+            return None
         
-        ruleset = self._parseCommands()
-        files = self._scanFiles()
-
-        enable_accept = False
-
-        if isinstance(ruleset, Exception):
-            self._showError(str(ruleset))
-        elif files is None:
-            self._showInfo("Enter the base path for the files that are to be renamed.")
-        elif isinstance(files, Exception):
-            self._showError(str(files))
-        elif len(files) == 0:
-            self._showInfo("No files found.")
-        elif ruleset.isEmpty():
-            self._showInfo("{0} files found.".format(len(files)))
-        else:
-            self._showInfo("{0} files processed.".format(len(files)))
-            enable_accept = True
-    
-        if (files is None) or isinstance(files, Exception):
-            files = []
-        if (ruleset is None) or isinstance(ruleset, Exception):
-            ruleset = RuleSet()
-        
-        renamer = Renamer(ruleset)
-        to_files = renamer.rename(files)
-    
-        self.tblFiles.showFiles(files, to_files)
-        
-        if any(rfref.error is not None for rfref in to_files):
-            enable_accept = False
-        
-        self.buttonBox.button(self.buttonBox.Ok).setEnabled(enable_accept)
-    
-    def _scanFiles(self):
         try:
-            txt = str(self.txtBasePath.text())
-            if txt.strip() == "":
-                return None
-            
             scanner = FileScanner()
-            files = scanner.scan(txt)
+            files = scanner.scan(base_path, recursive)
             
             return files
         except Exception as e:
             return e
-    
-    def _parseCommands(self):
+
+    def _parseRules(self, text):
         try:
-            txt = str(self.txtRules.document().toPlainText())
-            if txt.strip() == "":
-                return RuleSet()
-            
             parser = RuleParser()
-            ruleset = parser.parse(txt)
+            ruleset = parser.parse(text)
             ruleset.semanticCheck()
             
             return ruleset
@@ -138,12 +179,45 @@ class MainWindow(QDialog, Ui_MainWindow):
             return e
         except RuleParseException as e:
             return e
+
+    def _renameFiles(self, files, ruleset, use_path, use_extension):
+        if files is None or isinstance(files, Exception):
+            return None
         
-    def _showInfo(self, message):
-        self.lblStatus.setText(message)
-        self.lblStatus.setStyleSheet("")
+        if ruleset is None or isinstance(ruleset, Exception):
+            ruleset = RuleSet()
+        
+        renamer = Renamer(ruleset, use_extension, use_path)
+        
+        return renamer.rename(files)
     
-    def _showError(self, message):
-        self.lblStatus.setText(message)
-        self.lblStatus.setStyleSheet("QLabel { color : red; }")
+    def _updateFilesDisplay(self):
+        if self._files is None or isinstance(self._files, Exception):
+            self.tblFiles.showFiles([], [])
+        else:
+            self.tblFiles.showFiles(self._files, self._renamed)
+    
+    def _updateStatusMessage(self):
+        is_error = False
         
+        if self._files is not None:
+            if not isinstance(self._files, Exception):
+                if not isinstance(self._ruleset, Exception):
+                    if len(self._files) > 0:
+                        if self._ruleset is not None:
+                            message = "{0} files processed.".format(len(self._files))
+                        else:
+                            message = "{0} files found.".format(len(self._files))
+                    else:
+                        message = "No files found."
+                else:
+                    message = str(self._ruleset)
+                    is_error = True
+            else:
+                message = str(self._files)
+                is_error = True
+        else:
+            message = 'Enter the base path for the files that are to be renamed.'
+        
+        self.lblStatus.setText(message)
+        self.lblStatus.setStyleSheet('QLabel { color : red; }' if is_error else '')

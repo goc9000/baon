@@ -5,7 +5,6 @@ class RenamedFileRef(FileRef):
     old_filename = None
     error = None
     warning = None
-    name_override = None
     
     def __init__(self, full_path, filename, is_dir, old_full_path, old_filename):
         FileRef.__init__(self, full_path, filename, is_dir)
