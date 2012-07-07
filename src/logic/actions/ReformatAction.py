@@ -44,7 +44,7 @@ class ReformatAction(Action):
         if fmt_spec == '%d':
             return lambda s, c: strip_zeroes(s)
         
-        m = re.match(r'%([0-9]*)d', fmt_spec)
+        m = re.match(r'%([0-9]*)d$', fmt_spec)
         if m is not None:
             digits = int(m.group(1))
             return lambda s, c: pad_with_zeroes(s, digits)

@@ -19,15 +19,15 @@ class FormatMatch(ElementaryPatternMatch):
         if fmt_spec == '%ws':
             return r'(\s*)'
         
-        m = re.match(r'%([0-9]*)d', fmt_spec)
+        m = re.match(r'%([0-9]*)d$', fmt_spec)
         if m is not None:
             return r'(\s*[0-9]+)' if len(m.group(1)) == 0 else r'(\s*[0-9]{{{0}}})'.format(int(m.group(1)))
 
-        m = re.match(r'%([0-9]*)c', fmt_spec)
+        m = re.match(r'%([0-9]*)c$', fmt_spec)
         if m is not None:
             return r'(.)' if len(m.group(1)) == 0 else r'(.{{{0}}})'.format(int(m.group(1)))
 
-        m = re.match(r'%([0-9]*)s', fmt_spec)
+        m = re.match(r'%([0-9]*)s$', fmt_spec)
         if m is not None:
             return r'(\s*\S+)' if len(m.group(1)) == 0 else r'(\s*\S{{{0}}})'.format(int(m.group(1)))
         
