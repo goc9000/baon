@@ -226,5 +226,138 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>chkScanRecursive</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_onDataEdited()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>109</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chkUsePath</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_onDataEdited()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>234</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chkUseExtension</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_onDataEdited()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>325</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>txtBasePath</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_onDataTyped()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>401</x>
+     <y>22</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>txtBasePath</sender>
+   <signal>editingFinished()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_onDataEdited()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>401</x>
+     <y>22</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>txtBasePath</sender>
+   <signal>returnPressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_onDataEdited()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>401</x>
+     <y>22</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnBrowse</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_onClickedBrowse()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>785</x>
+     <y>23</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>txtRules</sender>
+   <signal>textChanged()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_onDataTyped()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>422</x>
+     <y>168</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>_onDataEdited()</slot>
+  <slot>_onDataTyped()</slot>
+  <slot>_onClickedBrowse()</slot>
+ </slots>
 </ui>

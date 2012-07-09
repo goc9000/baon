@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Sat Jul  7 00:45:25 2012
+# Created: Tue Jul 10 02:17:21 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -109,6 +109,14 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), MainWindow.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), MainWindow.reject)
+        QtCore.QObject.connect(self.chkScanRecursive, QtCore.SIGNAL(_fromUtf8("stateChanged(int)")), MainWindow._onDataEdited)
+        QtCore.QObject.connect(self.chkUsePath, QtCore.SIGNAL(_fromUtf8("stateChanged(int)")), MainWindow._onDataEdited)
+        QtCore.QObject.connect(self.chkUseExtension, QtCore.SIGNAL(_fromUtf8("stateChanged(int)")), MainWindow._onDataEdited)
+        QtCore.QObject.connect(self.txtBasePath, QtCore.SIGNAL(_fromUtf8("textEdited(QString)")), MainWindow._onDataTyped)
+        QtCore.QObject.connect(self.txtBasePath, QtCore.SIGNAL(_fromUtf8("editingFinished()")), MainWindow._onDataEdited)
+        QtCore.QObject.connect(self.txtBasePath, QtCore.SIGNAL(_fromUtf8("returnPressed()")), MainWindow._onDataEdited)
+        QtCore.QObject.connect(self.btnBrowse, QtCore.SIGNAL(_fromUtf8("clicked()")), MainWindow._onClickedBrowse)
+        QtCore.QObject.connect(self.txtRules, QtCore.SIGNAL(_fromUtf8("textChanged()")), MainWindow._onDataTyped)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

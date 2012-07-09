@@ -46,18 +46,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         self.setupUi(self)
         
         self._change_timer = QTimer(self)
-        self._change_timer.timeout.connect(self._onUpdate) 
-        trigger_change_timer = lambda: self._change_timer.start(self._CHANGE_DELAY_MS)
-        
-        self.txtBasePath.textEdited.connect(trigger_change_timer)
-        self.txtBasePath.editingFinished.connect(self._onUpdate)
-        self.btnBrowse.clicked.connect(self._onBrowseClicked)
-        
-        self.chkScanRecursive.stateChanged.connect(self._onUpdate)
-        self.chkUseExtension.stateChanged.connect(self._onUpdate)
-        self.chkUsePath.stateChanged.connect(self._onUpdate)
-        
-        self.txtRules.textChanged.connect(trigger_change_timer)
+        self._change_timer.timeout.connect(self._onDataEdited)
         
         self._highlighter = MySyntaxHighlighter(self.txtRules.document())
         
@@ -77,7 +66,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         self._disable_autoupdate = False
         
-        self._onUpdate()
+        self._onDataEdited()
     
     def getSetup(self):
         setup = {}
@@ -96,15 +85,13 @@ class MainWindow(QDialog, Ui_MainWindow):
     
     def accept(self):
         if self._change_timer.isActive():
-            self._onUpdate()
+            self._onDataEdited()
         
         if not self._allOk():
             return
         
         try:
             plan = RenamePlan(self._base_path, self._renamed)
-            
-            QDialog.accept(self)
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
     
@@ -117,8 +104,11 @@ class MainWindow(QDialog, Ui_MainWindow):
             return False
         
         return True
+    
+    def _onDataTyped(self):
+        self._change_timer.start(self._CHANGE_DELAY_MS)
 
-    def _onUpdate(self):
+    def _onDataEdited(self):
         if self._disable_autoupdate:
             return
         
@@ -156,13 +146,13 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         self.buttonBox.button(self.buttonBox.Ok).setEnabled(self._allOk())
 
-    def _onBrowseClicked(self):
+    def _onClickedBrowse(self):
         path = QFileDialog.getExistingDirectory(parent=self, caption='Browse for Base Directory')
         if path is None:
             return
         
         self.txtBasePath.setText(path)
-        self._updateAll()
+        self._onDataEdited()
 
     def _scanFiles(self, base_path, recursive):
         if base_path.strip() == "":
