@@ -6,8 +6,16 @@ class RenamedFileRef(FileRef):
     error = None
     warning = None
     
-    def __init__(self, full_path, filename, is_dir, old_full_path, old_filename):
-        FileRef.__init__(self, full_path, filename, is_dir)
+    def __init__(self, old_file_ref, new_filename):
+        if new_filename is not None:
+            new_full_path = old_file_ref.full_path[0:(len(old_file_ref.full_path)-len(old_file_ref.filename))] + new_filename
+        else:
+            new_full_path = None
         
-        self.old_full_path = old_full_path
-        self.old_filename = old_filename
+        FileRef.__init__(self, new_full_path, new_filename, old_file_ref.is_dir)
+        
+        self.old_full_path = old_file_ref.full_path
+        self.old_filename = old_file_ref.filename
+
+    def changed(self):
+        return self.filename != self.old_filename

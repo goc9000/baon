@@ -1,6 +1,7 @@
 import re, os
 
 from FileRef import FileRef
+from RenamedFileRef import RenamedFileRef
 
 class Renamer(object):
     NON_PRINTABLE_REGEX = re.compile(ur'[\u0000-\u001f]')
@@ -49,7 +50,7 @@ class Renamer(object):
             fname = None
             error = str(e)
         
-        rfref = fref.renamed(fname)
+        rfref = RenamedFileRef(fref, fname)
         rfref.error = error
         
         return rfref

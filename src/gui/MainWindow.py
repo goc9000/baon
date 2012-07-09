@@ -1,9 +1,10 @@
 from PyQt4.QtCore import QTimer
-from PyQt4.QtGui import QDialog, QDesktopWidget, QFileDialog, QSyntaxHighlighter
+from PyQt4.QtGui import QDialog, QDesktopWidget, QFileDialog, QMessageBox, QSyntaxHighlighter
 from gui.templates.Ui_MainWindow import Ui_MainWindow
 
 from logic.FileScanner import FileScanner
 from logic.Renamer import Renamer
+from logic.RenamePlan import RenamePlan
 from logic.rules.RuleSet import RuleSet
 from logic.rules.RuleParser import RuleParser
 from logic.errors.RuleParseException import RuleParseException
@@ -26,7 +27,8 @@ class MainWindow(QDialog, Ui_MainWindow):
     
     _setup = None
     _disable_autoupdate = False
-    
+
+    _base_path = None
     _files = None
     _ruleset = None
     _renamed = None
@@ -99,8 +101,13 @@ class MainWindow(QDialog, Ui_MainWindow):
         if not self._allOk():
             return
         
-        QDialog.accept(self)
-
+        try:
+            plan = RenamePlan(self._base_path, self._renamed)
+            
+            QDialog.accept(self)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", str(e))
+    
     def _allOk(self):
         if self._files is None or isinstance(self._files, Exception) or len(self._files) == 0:
             return False
@@ -127,6 +134,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         renamed_updated = False
         
         if 'base_path' in changed or 'scan_recursive' in changed:
+            self._base_path = setup['base_path']
             self._files = self._scanFiles(setup['base_path'], setup['scan_recursive'])
             files_updated = True
         
@@ -192,10 +200,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         return renamer.rename(files)
     
     def _updateFilesDisplay(self):
-        if self._files is None or isinstance(self._files, Exception):
-            self.tblFiles.showFiles([], [])
-        else:
-            self.tblFiles.showFiles(self._files, self._renamed)
+        self.tblFiles.showFiles(self._renamed)
     
     def _updateStatusMessage(self):
         is_error = False

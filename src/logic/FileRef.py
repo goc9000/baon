@@ -20,13 +20,3 @@ class FileRef(object):
             return -1 if self.filename < other.filename else 1
         
         return 0
-    
-    def renamed(self, new_name):
-        if new_name is not None:
-            new_full = self.full_path[0:(len(self.full_path)-len(self.filename))] + new_name
-        else:
-            new_full = None
-        
-        return RenamedFileRef(new_full, new_name, self.is_dir, self.full_path, self.filename)
-
-from RenamedFileRef import RenamedFileRef

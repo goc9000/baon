@@ -9,8 +9,7 @@ class RenameTable(QTableWidget):
     
     error_icon = None
     qfip = None
-    files_from = None
-    files_to = None
+    files = None
     
     def __init__(self, parent):
         QTableWidget.__init__(self, parent)
@@ -28,20 +27,19 @@ class RenameTable(QTableWidget):
         self.verticalHeader().hide()
         self.verticalHeader().setDefaultSectionSize(20)
         
-    def showFiles(self, files_from, files_to):
-        self.files_from = files_from
-        self.files_to = files_to
+    def showFiles(self, files):
+        self.files = files if files is not None else []
         
-        self.setRowCount(len(files_from))
+        self.setRowCount(len(files))
         
-        for row in xrange(len(files_from)):
-            self.setItem(row, 0, self._formatFromItem(files_from[row]))
-            self.setItem(row, 1, self._formatToItem(files_to[row]))
+        for row in xrange(len(files)):
+            self.setItem(row, 0, self._formatFromItem(files[row]))
+            self.setItem(row, 1, self._formatToItem(files[row]))
     
     def _formatFromItem(self, fref):
-        item = QTableWidgetItem(fref.filename)
+        item = QTableWidgetItem(fref.old_filename)
         item.setFlags(Qt.ItemIsEnabled)
-        item.setIcon(self.qfip.icon(QFileInfo(fref.full_path)))
+        item.setIcon(self.qfip.icon(QFileInfo(fref.old_full_path)))
 
         return item
         
@@ -63,13 +61,15 @@ class RenameTable(QTableWidget):
             color = self.COLOR_ERROR
         elif fref.warning is not None:
             color = self.COLOR_WARNING
-        elif fref.filename != fref.old_filename:
+        elif fref.changed():
             color = self.COLOR_CHANGED
         else:
             color = None
         
         item = QTableWidgetItem(text)
-        item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable)
+        # TODO: user can edit the table cell and override the filename
+        # item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable)
+        item.setFlags(Qt.ItemIsEnabled)
         item.setIcon(icon)
         if color is not None:
             item.setTextColor(color)
