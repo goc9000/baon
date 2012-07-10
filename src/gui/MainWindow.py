@@ -6,7 +6,7 @@ from gui.templates.Ui_MainWindow import Ui_MainWindow
 
 from logic.FileScanner import FileScanner
 from logic.Renamer import Renamer
-from logic.RenamePlan import RenamePlan
+from logic.plan.RenamePlan import RenamePlan
 from logic.rules.RuleSet import RuleSet
 from logic.rules.RuleParser import RuleParser
 from logic.errors.RuleParseException import RuleParseException
@@ -127,8 +127,9 @@ class MainWindow(QDialog, Ui_MainWindow):
             QMessageBox.critical(self, "Error", str(e))
         finally:
             try:
-                if plan_file is not None:
-                    os.remove(plan_file)
+                pass
+                #if plan_file is not None:
+                #    os.remove(plan_file)
             except:
                 pass
     
