@@ -1,5 +1,13 @@
-import sys, argparse
+import os, sys, argparse
 
+# Hack: try to get ANTLR3 from adjacent lib directory if user does not have it installed
+try:
+    __import__('antlr3')
+except:
+    base, _ = os.path.split(sys.path[0])
+    lib_path = os.path.join(base, 'lib')
+    sys.path.append(lib_path)
+    
 from gui.Gui import Gui
 
 if __name__ == "__main__":
