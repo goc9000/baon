@@ -1,6 +1,6 @@
 import re, os
 
-from FileRef import FileRef
+from utils import enum_partial_paths
 from RenamedFileRef import RenamedFileRef
 
 class Renamer(object):
@@ -16,18 +16,9 @@ class Renamer(object):
         self.use_ext = use_ext
         self.use_path = use_path
         
-    def rename(self, what):
-        single = False
-        
-        if isinstance(what, FileRef):
-            what = [ what ]
-            single = True
-        
-        renamed = [self._renameFile(fref) for fref in what]
+    def rename(self, files):
+        renamed = [self._renameFile(fref) for fref in files]
         self._performVerifications(renamed)
-        
-        if single:
-            renamed = renamed[0]
         
         return renamed
     
@@ -56,26 +47,32 @@ class Renamer(object):
         return rfref
 
     def _performVerifications(self, renamed):
-        coll_dict = {}
+        """
+        Performs verifications.
+        
+        Note: by design, the renamer will only perform verifications that do
+        not require further accesses to the filesystem. Errors that can only be
+        detected by using such information will be caught in the planning phase.
+        """
+         
+        if self._checkForIntrinsicErrors(renamed):
+            return
+        if self._checkForCollisions(renamed):
+            return
+        
+    def _checkForIntrinsicErrors(self, renamed):
+        errors_found = False
         
         for rfref in renamed:
-            fname = rfref.filename
-            if fname is not None:
-                if fname not in coll_dict:
-                    coll_dict[fname] = 1
-                else:
-                    coll_dict[fname] += 1
-        
-        for rfref in renamed:
-            fname = rfref.filename
-            if (fname is not None) and (coll_dict[fname] > 1):
-                rfref.error = "Collides with {0} other filenames".format(coll_dict[fname]-1)
-            if rfref.error is None:
-                rfref.error = self._checkLocalError(rfref)
-            if rfref.error is None:
-                rfref.warning = self._checkLocalWarning(rfref)
+            rfref.error = self._checkForIntrinsicError(rfref)
+            if rfref.error is not None:
+                errors_found = True
+            else:
+                rfref.warning = self._checkForIntrinsicWarning(rfref)
+
+        return errors_found
     
-    def _checkLocalError(self, rfref):
+    def _checkForIntrinsicError(self, rfref):
         path = rfref.filename
         
         m = self.NON_PRINTABLE_REGEX.search(path)
@@ -95,13 +92,10 @@ class Renamer(object):
                     return 'Path has empty component'
                 if comp == '.' or comp == '..':
                     return "'.' or '..' components not allowed in path"
-            
-        if (rfref.filename != rfref.old_filename) and os.path.exists(rfref.full_path):
-            return "File already exists"
         
         return None
     
-    def _checkLocalWarning(self, rfref):
+    def _checkForIntrinsicWarning(self, rfref):
         path = rfref.filename
         
         base, fname = os.path.split(path)
@@ -129,3 +123,41 @@ class Renamer(object):
             
         return None
     
+    def _checkForCollisions(self, renamed):
+        errors_found = False
+        
+        dest_use_counts = dict()
+        partial_paths = set()
+        
+        for rfref in renamed:
+            if rfref.filename not in dest_use_counts:
+                dest_use_counts[rfref.filename] = list([0, 0])
+            
+            dest_use_counts[rfref.filename][1 if rfref.is_dir else 0] += 1
+            
+            for path in enum_partial_paths(rfref.filename):
+                partial_paths.add(path)
+        
+        for rfref in renamed:
+            uses = dest_use_counts[rfref.filename]
+            if rfref.is_dir:
+                if uses[0] > 0:
+                    rfref.error = "Collides with file"
+                elif uses[1] > 1:
+                    rfref.error = "Would merge implicitly with other folders"
+            else:
+                if uses[0] > 1:
+                    rfref.error = "Collides with other files"
+                elif uses[1] > 0:
+                    rfref.error = "Collides with directory"
+            
+            if rfref.filename in partial_paths:
+                if rfref.is_dir:
+                    rfref.error = "Would merge implicitly with other folders"
+                else:
+                    rfref.error = "Collides with directory in final structure"
+            
+            if rfref.error is not None:
+                errors_found = True
+        
+        return errors_found
