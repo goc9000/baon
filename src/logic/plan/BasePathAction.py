@@ -1,5 +1,7 @@
 from RenamePlanAction import RenamePlanAction
 
+import os
+
 class BasePathAction(RenamePlanAction):
     path = None
     
@@ -9,3 +11,10 @@ class BasePathAction(RenamePlanAction):
     
     def _getRepr(self):
         return ('BasePath', self.path)
+    
+    def execute(self):
+        if not os.path.exists(self.path):
+            raise RuntimeError("Base path '{0}' does not exist".format(self.path))
+    
+    def undo(self):
+        pass

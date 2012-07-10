@@ -91,16 +91,34 @@ class RenamePlan(object):
                 raise RuntimeError("Plan file is empty")
             if not isinstance(plan.steps[0], BasePathAction):
                 raise RuntimeError("Plan must begin with BasePath action")
+            
+            plan.base_path = plan.steps[0].path
         except Exception as e:
             raise RuntimeError("Error reading plan from '{0}': {1}".format(filename, str(e)))
         
         return plan
     
     def execute(self):
-        raise RuntimeError("RenamePlan.execute NIY")
+        done = []
+        error = None
+        
+        for step in self.steps:
+            try:
+                step.execute()
+            except Exception as e:
+                for s in reversed(done):
+                    s.undo()
+                error = e
+                break
+            
+            done.append(step)
+        
+        if error is not None:
+            raise error
         
     def undo(self):
-        raise RuntimeError("RenamePlan.undo NIY")
+        for step in reversed(self.steps):
+            step.undo()
     
     def _getBufferDirName(self):
         while True:

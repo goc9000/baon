@@ -127,9 +127,8 @@ class MainWindow(QDialog, Ui_MainWindow):
             QMessageBox.critical(self, "Error", str(e))
         finally:
             try:
-                pass
-                #if plan_file is not None:
-                #    os.remove(plan_file)
+                if plan_file is not None:
+                    os.remove(plan_file)
             except:
                 pass
     
