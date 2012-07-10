@@ -1,3 +1,5 @@
+import os
+
 from PyQt4.QtCore import QTimer
 from PyQt4.QtGui import QDialog, QDesktopWidget, QFileDialog, QMessageBox, QSyntaxHighlighter
 from gui.templates.Ui_MainWindow import Ui_MainWindow
@@ -83,6 +85,27 @@ class MainWindow(QDialog, Ui_MainWindow):
         self.move((desktop.width() / 2) - (self.frameSize().width() / 2),
                   (desktop.height() / 2) - (self.frameSize().height() / 2))
     
+    def show(self, *args, **kwargs):
+        try:
+            while True:
+                plan_file = RenamePlan.findBackups()
+                if plan_file is None:
+                    break
+                answer = QMessageBox.question(None, "Confirm",
+                                   "A backup plan file from an interrupted rename operation\nwas found at {0}.\n\nRoll back the operation? (recommended)".format(plan_file),
+                                   QMessageBox.Yes | QMessageBox.No,
+                                   QMessageBox.Yes)
+                if answer == QMessageBox.No:
+                    break
+                
+                plan = RenamePlan.loadFromFile(plan_file)
+                plan.undo()
+                os.remove(plan_file)
+        except Exception as e:
+            QMessageBox.critical(None, "Error", str(e))
+        
+        return QDialog.show(self, *args, **kwargs)
+    
     def accept(self):
         if self._change_timer.isActive():
             self._onDataEdited()
@@ -90,10 +113,24 @@ class MainWindow(QDialog, Ui_MainWindow):
         if not self._allOk():
             return
         
+        plan_file = None
         try:
             plan = RenamePlan(self._base_path, self._renamed)
+            plan_file = plan.getBackupFileName()
+            plan.saveToFile(plan_file)
+            try:
+                os.system('sync')
+            except:
+                pass
+            plan.execute()
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
+        finally:
+            try:
+                if plan_file is not None:
+                    os.remove(plan_file)
+            except:
+                pass
     
     def _allOk(self):
         if self._files is None or isinstance(self._files, Exception) or len(self._files) == 0:
