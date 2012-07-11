@@ -9,7 +9,6 @@ class RenameTable(QTableWidget):
     
     error_icon = None
     qfip = None
-    files = None
     
     def __init__(self, parent):
         QTableWidget.__init__(self, parent)
@@ -28,7 +27,8 @@ class RenameTable(QTableWidget):
         self.verticalHeader().setDefaultSectionSize(20)
         
     def showFiles(self, files):
-        self.files = files if files is not None else []
+        if files is None:
+            files = []
         
         self.setRowCount(len(files))
         

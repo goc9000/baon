@@ -64,11 +64,14 @@ class Renamer(object):
         errors_found = False
         
         for rfref in renamed:
-            rfref.error = self._checkForIntrinsicError(rfref)
-            if rfref.error is not None:
-                errors_found = True
+            if rfref.filename is not None:
+                rfref.error = self._checkForIntrinsicError(rfref)
+                if rfref.error is not None:
+                    errors_found = True
+                else:
+                    rfref.warning = self._checkForIntrinsicWarning(rfref)
             else:
-                rfref.warning = self._checkForIntrinsicWarning(rfref)
+                errors_found = True
 
         return errors_found
     
