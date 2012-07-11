@@ -1,5 +1,7 @@
 from RenamePlanAction import RenamePlanAction
 
+import os
+
 class MkDirAction(RenamePlanAction):
     directory = None
     
@@ -9,3 +11,24 @@ class MkDirAction(RenamePlanAction):
     
     def _getRepr(self):
         return ('MkDir', self.directory)
+    
+    def execute(self):
+        path = os.path.join(self.plan.base_path, self.directory)
+        
+        try:
+            if os.path.isfile(path):
+                raise RuntimeError("a file by that name already exists")
+            if os.path.exists(path):
+                raise RuntimeError("directory already exists")
+            
+            os.mkdir(path)
+        except Exception as e:
+            raise RuntimeError("Cannot create '{0}': {1}".format(path, str(e)))
+    
+    def undo(self):
+        path = os.path.join(self.plan.base_path, self.directory)
+        
+        try:
+            os.rmdir(path)
+        except:
+            pass
