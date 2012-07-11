@@ -11,6 +11,7 @@ from logic.rules.RuleSet import RuleSet
 from logic.rules.RuleParser import RuleParser
 from logic.errors.RuleParseException import RuleParseException
 from logic.errors.RuleCheckException import RuleCheckException
+from logic.utils import format_numerals
 
 class MySyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, document):
@@ -29,6 +30,7 @@ class MainWindow(QDialog, Ui_MainWindow):
     
     _setup = None
     _disable_autoupdate = False
+    _force_rescan = False
 
     _base_path = None
     _files = None
@@ -67,6 +69,7 @@ class MainWindow(QDialog, Ui_MainWindow):
             self.txtRules.setPlainText(setup['rules'])
         
         self._disable_autoupdate = False
+        self._force_rescan = 'rescan' in setup and setup['rescan'] == True
         
         self._onDataEdited()
     
@@ -107,11 +110,21 @@ class MainWindow(QDialog, Ui_MainWindow):
         return QDialog.show(self, *args, **kwargs)
     
     def accept(self):
+        stats = self._renameStats()
+        
         if self._change_timer.isActive():
             self._onDataEdited()
         
         if not self._allOk():
             return
+        
+        if stats['warnings'] > 0:
+            answer = QMessageBox.question(None, "Confirm",
+                 "There are warnings regarding some of the filenames. Continue?",
+                 QMessageBox.Yes | QMessageBox.No,
+                 QMessageBox.No)
+            if answer == QMessageBox.No:
+                return
         
         plan_file = None
         try:
@@ -123,6 +136,20 @@ class MainWindow(QDialog, Ui_MainWindow):
             except:
                 pass
             plan.execute()
+            
+            counts_txt = format_numerals([('file', stats['files_changed']),
+                                          ('directory', stats['dirs_changed'])])
+            
+            answer = QMessageBox.information(self,
+                "Success",
+                "{0} successfully renamed. Continue with another rename operation?".format(counts_txt),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No)
+            if answer == QMessageBox.Yes:
+                self.setup({'rules': '', 'rescan': True})
+                return
+            
+            QDialog.accept(self)
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
         finally:
@@ -131,16 +158,6 @@ class MainWindow(QDialog, Ui_MainWindow):
                     os.remove(plan_file)
             except:
                 pass
-    
-    def _allOk(self):
-        if self._files is None or isinstance(self._files, Exception) or len(self._files) == 0:
-            return False
-        if self._ruleset is None or isinstance(self._ruleset, Exception):
-            return False
-        if any(rfref.error is not None for rfref in self._renamed):
-            return False
-        
-        return True
     
     def _onDataTyped(self):
         self._change_timer.start(self._CHANGE_DELAY_MS)
@@ -160,10 +177,11 @@ class MainWindow(QDialog, Ui_MainWindow):
         options_updated = False
         renamed_updated = False
         
-        if 'base_path' in changed or 'scan_recursive' in changed:
+        if 'base_path' in changed or 'scan_recursive' in changed or self._force_rescan:
             self._base_path = setup['base_path']
             self._files = self._scanFiles(setup['base_path'], setup['scan_recursive'])
             files_updated = True
+            self._force_rescan = False
         
         if 'rules' in changed:
             self._ruleset = self._parseRules(setup['rules'])
@@ -173,10 +191,14 @@ class MainWindow(QDialog, Ui_MainWindow):
             options_updated = True
         
         if files_updated or rules_updated or options_updated:
-            self._renamed = self._renameFiles(self._files, self._ruleset, setup['use_path'], setup['use_extension'])
+            if (self._files is not None) and not isinstance(self._files, Exception):
+                self._renamed = self._renameFiles(self._files, self._ruleset, setup['use_path'], setup['use_extension'])
+            else:
+                self._renamed = None
+            
             renamed_updated = True
         
-        if files_updated or renamed_updated:
+        if renamed_updated:
             self._updateFilesDisplay()
         
         self._updateStatusMessage()
@@ -185,7 +207,8 @@ class MainWindow(QDialog, Ui_MainWindow):
 
     def _onClickedBrowse(self):
         path = QFileDialog.getExistingDirectory(parent=self, caption='Browse for Base Directory')
-        if path is None:
+        
+        if path == '':
             return
         
         self.txtBasePath.setText(path)
@@ -236,10 +259,22 @@ class MainWindow(QDialog, Ui_MainWindow):
             if not isinstance(self._files, Exception):
                 if not isinstance(self._ruleset, Exception):
                     if len(self._files) > 0:
+                        stats = self._renameStats()
+                        
                         if self._ruleset is not None:
-                            message = "{0} files processed.".format(len(self._files))
+                            err_txt = format_numerals([('error', stats['errors']),
+                                                       ('warning', stats['warnings'])], True, '')
+                            if err_txt != '':
+                                err_txt = " ({0})".format(err_txt)
+                                
+                            chg_txt = format_numerals([('file', stats['files_changed']),
+                                                       ('directory', stats['dirs_changed'])], True, 'No files')
+                            
+                            message = "{0} changed{1}.".format(chg_txt, err_txt)
                         else:
-                            message = "{0} files found.".format(len(self._files))
+                            message = "{0} found.".format(format_numerals([('file', stats['files']),
+                                                                           ('directory', stats['dirs'])]))
+                        
                     else:
                         message = "No files found."
                 else:
@@ -253,3 +288,40 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         self.lblStatus.setText(message)
         self.lblStatus.setStyleSheet('QLabel { color : red; }' if is_error else '')
+
+    def _renameStats(self):
+        stats = dict(files=0, dirs=0, files_changed=0, dirs_changed=0, errors=0, warnings=0)
+        
+        if (self._files is not None) and not isinstance(self._files, Exception):
+            for fref in self._files:
+                if fref.is_dir:
+                    stats['dirs'] += 1
+                else:
+                    stats['files'] += 1
+        
+        if self._renamed is not None:
+            for rfref in self._renamed:
+                if rfref.error is not None:
+                    stats['errors'] += 1
+                if rfref.warning is not None:
+                    stats['warnings'] += 1
+                if rfref.changed():
+                    if rfref.is_dir:
+                        stats['dirs_changed'] += 1
+                    else:
+                        stats['files_changed'] += 1
+        
+        return stats
+    
+    def _allOk(self):
+        if self._files is None or isinstance(self._files, Exception) or len(self._files) == 0:
+            return False
+        if self._ruleset is None or isinstance(self._ruleset, Exception):
+            return False
+        
+        stats = self._renameStats()
+        
+        if (stats['errors'] > 0) or (stats['files_changed'] + stats['dirs_changed'] == 0):
+            return False
+        
+        return True
