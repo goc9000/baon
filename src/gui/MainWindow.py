@@ -73,11 +73,11 @@ class MainWindow(QDialog, Ui_MainWindow):
     
     def getSetup(self):
         setup = {}
-        setup['base_path'] = str(self.txtBasePath.text())
+        setup['base_path'] = qstr_to_unicode(self.txtBasePath.text())
         setup['scan_recursive'] = self.chkScanRecursive.isChecked()
         setup['use_path'] = self.chkUsePath.isChecked()
         setup['use_extension'] = self.chkUseExtension.isChecked()
-        setup['rules'] = str(self.txtRules.document().toPlainText())
+        setup['rules'] = qstr_to_unicode(self.txtRules.document().toPlainText())
         
         return setup
     
