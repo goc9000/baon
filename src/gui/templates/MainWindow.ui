@@ -195,6 +195,16 @@
    <header>gui.RenameTable</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>txtBasePath</tabstop>
+  <tabstop>btnBrowse</tabstop>
+  <tabstop>chkScanRecursive</tabstop>
+  <tabstop>chkUsePath</tabstop>
+  <tabstop>chkUseExtension</tabstop>
+  <tabstop>txtRules</tabstop>
+  <tabstop>tblFiles</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

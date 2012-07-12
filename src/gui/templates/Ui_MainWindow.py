@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Thu Jul 12 01:54:44 2012
+# Created: Thu Jul 12 23:08:42 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -121,6 +121,13 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.btnBrowse, QtCore.SIGNAL(_fromUtf8("clicked()")), MainWindow._onClickedBrowse)
         QtCore.QObject.connect(self.txtRules, QtCore.SIGNAL(_fromUtf8("textChanged()")), MainWindow._onDataTyped)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        MainWindow.setTabOrder(self.txtBasePath, self.btnBrowse)
+        MainWindow.setTabOrder(self.btnBrowse, self.chkScanRecursive)
+        MainWindow.setTabOrder(self.chkScanRecursive, self.chkUsePath)
+        MainWindow.setTabOrder(self.chkUsePath, self.chkUseExtension)
+        MainWindow.setTabOrder(self.chkUseExtension, self.txtRules)
+        MainWindow.setTabOrder(self.txtRules, self.tblFiles)
+        MainWindow.setTabOrder(self.tblFiles, self.buttonBox)
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "BAON", None, QtGui.QApplication.UnicodeUTF8))
