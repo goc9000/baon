@@ -41,10 +41,14 @@ def recover(self, exc):
 }
 
 @lexer::members {
+errors = []
+lenient = False
+
 def reportError(self, exc):
-    raise exc
-def recover(self, exc):
-    raise exc
+    if self.lenient:
+        self.errors.append(exc)
+    else:
+        raise exc
 }
 
 // Lexer rules

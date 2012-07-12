@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Tue Jul 10 02:17:21 2012
+# Created: Thu Jul 12 01:54:44 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -62,6 +62,9 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.txtRules.sizePolicy().hasHeightForWidth())
         self.txtRules.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Monospace"))
+        self.txtRules.setFont(font)
         self.txtRules.setAcceptRichText(False)
         self.txtRules.setObjectName(_fromUtf8("txtRules"))
         self.horizontalLayout_4.addWidget(self.txtRules)

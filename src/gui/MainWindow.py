@@ -1,8 +1,11 @@
 import os
 
 from PyQt4.QtCore import QTimer
-from PyQt4.QtGui import QDialog, QDesktopWidget, QFileDialog, QMessageBox, QSyntaxHighlighter
+from PyQt4.QtGui import QDialog, QDesktopWidget, QFileDialog, QMessageBox
+
 from gui.templates.Ui_MainWindow import Ui_MainWindow
+
+from RuleSyntaxHighlighter import RuleSyntaxHighlighter
 
 from logic.FileScanner import FileScanner
 from logic.Renamer import Renamer
@@ -11,14 +14,7 @@ from logic.rules.RuleSet import RuleSet
 from logic.rules.RuleParser import RuleParser
 from logic.errors.RuleParseException import RuleParseException
 from logic.errors.RuleCheckException import RuleCheckException
-from logic.utils import format_numerals
-
-class MySyntaxHighlighter(QSyntaxHighlighter):
-    def __init__(self, document):
-        QSyntaxHighlighter.__init__(self, document)
-        
-    def highlightBlock(self, text):
-        pass
+from logic.utils import format_numerals, qstr_to_unicode
 
 class MainWindow(QDialog, Ui_MainWindow):
     _CHANGE_DELAY_MS = 1200
@@ -31,6 +27,7 @@ class MainWindow(QDialog, Ui_MainWindow):
     _setup = None
     _disable_autoupdate = False
     _force_rescan = False
+    _hold_rule_error = False
 
     _base_path = None
     _files = None
@@ -52,8 +49,9 @@ class MainWindow(QDialog, Ui_MainWindow):
         self._change_timer = QTimer(self)
         self._change_timer.timeout.connect(self._onDataEdited)
         
-        self._highlighter = MySyntaxHighlighter(self.txtRules.document())
-        
+        self.txtRules.textChanged.connect(self._clearRuleError)
+        self._highlighter = RuleSyntaxHighlighter(self.txtRules.document())
+    
     def setup(self, setup):
         self._disable_autoupdate = True
         
@@ -159,6 +157,11 @@ class MainWindow(QDialog, Ui_MainWindow):
             except:
                 pass
     
+    def _clearRuleError(self):
+        if not self._hold_rule_error:
+            self._highlighter.clearError()
+        self._hold_rule_error = False
+    
     def _onDataTyped(self):
         self._change_timer.start(self._CHANGE_DELAY_MS)
 
@@ -185,6 +188,13 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         if 'rules' in changed:
             self._ruleset = self._parseRules(setup['rules'])
+            
+            if isinstance(self._ruleset, RuleParseException):
+                self._hold_rule_error = True
+                self._highlighter.showError(self._ruleset.line, self._ruleset.column)
+            else:
+                self._highlighter.clearError()
+            
             rules_updated = True
         
         if 'use_path' in changed or 'use_extension' in changed:
