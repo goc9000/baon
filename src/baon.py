@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os, sys, argparse
 
 # Hack: try to get ANTLR3 from adjacent lib directory if user does not have it installed
