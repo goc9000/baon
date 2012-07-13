@@ -164,6 +164,7 @@ class MainWindow(QDialog, Ui_MainWindow):
             if self._base_path.strip() == "":
                 self._files = None
                 self._onDataEditedContinued(changed, True)
+                return
             
             base_path = self._setup['base_path']
             recursive = self._setup['scan_recursive']
