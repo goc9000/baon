@@ -1,7 +1,7 @@
 import os
 
-from PyQt4.QtCore import QTimer
-from PyQt4.QtGui import QDialog, QDesktopWidget, QFileDialog, QMessageBox
+from PyQt4.QtCore import QTimer, QThread, pyqtSignal
+from PyQt4.QtGui import QWidget, QDialog, QDesktopWidget, QFileDialog, QMessageBox
 
 from gui.templates.Ui_MainWindow import Ui_MainWindow
 
@@ -23,11 +23,15 @@ class MainWindow(QDialog, Ui_MainWindow):
     
     _change_timer = None
     _highlighter = None
+    _worker = None
+    _worker_on_finished = None
     
     _setup = None
     _disable_autoupdate = False
     _force_rescan = False
     _hold_rule_error = False
+    _controls_locked = False
+    _focused_control = None
 
     _base_path = None
     _files = None
@@ -45,13 +49,17 @@ class MainWindow(QDialog, Ui_MainWindow):
     
     def initUi(self):
         self.setupUi(self)
+        self.progressBar.hide()
         
         self._change_timer = QTimer(self)
         self._change_timer.timeout.connect(self._onDataEdited)
         
         self.txtRules.textChanged.connect(self._clearRuleError)
         self._highlighter = RuleSyntaxHighlighter(self.txtRules.document())
-    
+        self._worker = Worker()
+        self._worker.progress.connect(self._showProgress)
+        self._worker.finished.connect(self._onWorkerFinished)
+
     def setup(self, setup):
         self._disable_autoupdate = True
         
@@ -108,6 +116,9 @@ class MainWindow(QDialog, Ui_MainWindow):
         return QDialog.show(self, *args, **kwargs)
     
     def accept(self):
+        if self._controls_locked:
+            return
+        
         stats = self._renameStats()
         
         if self._change_timer.isActive():
@@ -156,6 +167,39 @@ class MainWindow(QDialog, Ui_MainWindow):
                     os.remove(plan_file)
             except:
                 pass
+            
+    def reject(self):
+        if self._controls_locked:
+            return
+        
+        QDialog.reject(self)
+    
+    def _lockControls(self):
+        self._focused_control = None
+        for ctrl in self.children():
+            if isinstance(ctrl, QWidget) and ctrl.hasFocus():
+                self._focused_control = ctrl
+        
+        self.txtBasePath.setReadOnly(True)
+        self.txtRules.setReadOnly(True)
+        self.chkScanRecursive.setDisabled(True)
+        self.chkUseExtension.setDisabled(True)
+        self.chkUsePath.setDisabled(True)
+        
+        self._controls_locked = True
+    
+    def _unlockControls(self):
+        self.txtBasePath.setReadOnly(False)
+        self.txtRules.setReadOnly(False)
+        self.chkScanRecursive.setDisabled(False)
+        self.chkUseExtension.setDisabled(False)
+        self.chkUsePath.setDisabled(False)
+        
+        self._controls_locked = False
+            
+        for ctrl in self.children():
+            if ctrl == self._focused_control:
+                ctrl.setFocus()
     
     def _clearRuleError(self):
         if not self._hold_rule_error:
@@ -175,18 +219,48 @@ class MainWindow(QDialog, Ui_MainWindow):
         setup = self._setup = self.getSetup()
         
         changed = set(field for field in setup.keys() if setup[field] != old_setup[field])
-        files_updated = False
-        rules_updated = False
-        options_updated = False
-        renamed_updated = False
         
         if 'base_path' in changed or 'scan_recursive' in changed or self._force_rescan:
-            self._base_path = setup['base_path']
-            self._files = self._scanFiles(setup['base_path'], setup['scan_recursive'])
-            files_updated = True
             self._force_rescan = False
+            self._base_path = setup['base_path']
+            
+            if self._base_path.strip() == "":
+                self._files = None
+                self._onDataEditedContinued(changed, True)
+            
+            base_path = self._setup['base_path']
+            recursive = self._setup['scan_recursive']
+            work = lambda on_progress: self._doScanFiles(base_path, recursive, on_progress)
+            on_finished = lambda files: self._onScanFilesFinished(files, changed)
+            self._lockControls()
+            self._startWorker(work, on_finished)
+        else:
+            self._onDataEditedContinued(changed, False)
+    
+    def _doScanFiles(self, base_path, recursive, on_progress):
+        # Executed in worker context
+        on_prog = lambda done, total: on_progress('Scanning for files...', done, total)
         
-        if 'rules' in changed:
+        try:
+            scanner = FileScanner()
+            files = scanner.scan(base_path, recursive, on_prog)
+            
+            return files
+        except Exception as e:
+            return e
+    
+    def _onScanFilesFinished(self, files, changed):
+        self._unlockControls()
+        
+        self._files = files
+        self._onDataEditedContinued(changed, True)
+    
+    def _onDataEditedContinued(self, changed, files_updated):
+        setup = self._setup
+        rules_updated = ('rules' in changed)
+        options_updated = ('use_path' in changed) or ('use_extension' in changed)
+        
+        if rules_updated:
             self._ruleset = self._parseRules(setup['rules'])
             
             if isinstance(self._ruleset, RuleParseException):
@@ -194,11 +268,6 @@ class MainWindow(QDialog, Ui_MainWindow):
                 self._highlighter.showError(self._ruleset.line, self._ruleset.column)
             else:
                 self._highlighter.clearError()
-            
-            rules_updated = True
-        
-        if 'use_path' in changed or 'use_extension' in changed:
-            options_updated = True
         
         if files_updated or rules_updated or options_updated:
             if (self._files is not None) and not isinstance(self._files, Exception):
@@ -206,9 +275,6 @@ class MainWindow(QDialog, Ui_MainWindow):
             else:
                 self._renamed = None
             
-            renamed_updated = True
-        
-        if renamed_updated:
             self._updateFilesDisplay()
         
         self._updateStatusMessage()
@@ -216,6 +282,9 @@ class MainWindow(QDialog, Ui_MainWindow):
         self.buttonBox.button(self.buttonBox.Ok).setEnabled(self._allOk())
 
     def _onClickedBrowse(self):
+        if self._controls_locked:
+            return
+        
         path = QFileDialog.getExistingDirectory(parent=self, caption='Browse for Base Directory')
         
         if path == '':
@@ -223,18 +292,6 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         self.txtBasePath.setText(path)
         self._onDataEdited()
-
-    def _scanFiles(self, base_path, recursive):
-        if base_path.strip() == "":
-            return None
-        
-        try:
-            scanner = FileScanner()
-            files = scanner.scan(base_path, recursive)
-            
-            return files
-        except Exception as e:
-            return e
 
     def _parseRules(self, text):
         try:
@@ -296,9 +353,20 @@ class MainWindow(QDialog, Ui_MainWindow):
         else:
             message = 'Enter the base path for the files that are to be renamed.'
         
+        self._showStatusMessage(message, is_error)
+    
+    def _showStatusMessage(self, message, is_error):
         self.lblStatus.setText(message)
         self.lblStatus.setStyleSheet('QLabel { color : red; }' if is_error else '')
-
+        self.progressBar.hide()
+    
+    def _showProgress(self, message, done, total):
+        self.lblStatus.setText(message)
+        self.lblStatus.setStyleSheet('')
+        self.progressBar.setValue(done)
+        self.progressBar.setMaximum(total)
+        self.progressBar.show()
+    
     def _renameStats(self):
         stats = dict(files=0, dirs=0, files_changed=0, dirs_changed=0, errors=0, warnings=0)
         
@@ -335,3 +403,28 @@ class MainWindow(QDialog, Ui_MainWindow):
             return False
         
         return True
+    
+    def _startWorker(self, work, on_finished):
+        self._worker_on_finished = on_finished
+        self._worker.start(work)
+        
+    def _onWorkerFinished(self, result):
+        self._worker_on_finished(result)
+
+class Worker(QThread):
+    progress = pyqtSignal(str,int,int)
+    finished = pyqtSignal(object)
+    
+    work = None 
+    
+    def __init__(self):
+        QThread.__init__(self)
+    
+    def start(self, work):
+        self.work = work
+        QThread.start(self)
+
+    def run(self):
+        result = self.work(lambda msg, done, total: self.progress.emit(msg, done, total))
+        
+        self.finished.emit(result)

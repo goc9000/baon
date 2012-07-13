@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Thu Jul 12 23:08:42 2012
+# Created: Sat Jul 14 00:23:30 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -98,8 +98,19 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2 = QtGui.QHBoxLayout(self.gbxStatus)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.lblStatus = QtGui.QLabel(self.gbxStatus)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lblStatus.sizePolicy().hasHeightForWidth())
+        self.lblStatus.setSizePolicy(sizePolicy)
+        self.lblStatus.setMinimumSize(QtCore.QSize(0, 21))
         self.lblStatus.setObjectName(_fromUtf8("lblStatus"))
         self.horizontalLayout_2.addWidget(self.lblStatus)
+        self.progressBar = QtGui.QProgressBar(self.gbxStatus)
+        self.progressBar.setProperty(_fromUtf8("value"), 24)
+        self.progressBar.setInvertedAppearance(False)
+        self.progressBar.setObjectName(_fromUtf8("progressBar"))
+        self.horizontalLayout_2.addWidget(self.progressBar)
         self.verticalLayout.addWidget(self.gbxStatus)
         self.buttonBox = QtGui.QDialogButtonBox(MainWindow)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
