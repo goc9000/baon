@@ -98,23 +98,18 @@ class RenamePlan(object):
         
         return plan
     
-    def execute(self):
-        done = []
-        error = None
+    def execute(self, on_progress=None):
+        n_steps = len(self.steps)
         
-        for step in self.steps:
+        for i in xrange(n_steps):
             try:
-                step.execute()
+                if on_progress is not None: on_progress(i, n_steps)
+                self.steps[i].execute()
             except Exception as e:
-                for s in reversed(done):
-                    s.undo()
-                error = e
-                break
-            
-            done.append(step)
-        
-        if error is not None:
-            raise error
+                for j in xrange(i-1, -1, -1):
+                    self.steps[j].undo()
+                    if on_progress is not None: on_progress(j, n_steps)
+                raise e
         
     def undo(self):
         for step in reversed(self.steps):

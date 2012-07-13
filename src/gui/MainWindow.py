@@ -95,23 +95,7 @@ class MainWindow(QDialog, Ui_MainWindow):
                   (desktop.height() / 2) - (self.frameSize().height() / 2))
     
     def show(self, *args, **kwargs):
-        try:
-            while True:
-                plan_file = RenamePlan.findBackups()
-                if plan_file is None:
-                    break
-                answer = QMessageBox.question(None, "Confirm",
-                                   "A backup plan file from an interrupted rename operation\nwas found at {0}.\n\nRoll back the operation? (recommended)".format(plan_file),
-                                   QMessageBox.Yes | QMessageBox.No,
-                                   QMessageBox.Yes)
-                if answer == QMessageBox.No:
-                    break
-                
-                plan = RenamePlan.loadFromFile(plan_file)
-                plan.undo()
-                os.remove(plan_file)
-        except Exception as e:
-            QMessageBox.critical(None, "Error", str(e))
+        self._handleBackups()
         
         return QDialog.show(self, *args, **kwargs)
     
@@ -119,55 +103,8 @@ class MainWindow(QDialog, Ui_MainWindow):
         if self._controls_locked:
             return
         
-        stats = self._renameStats()
-        
-        if self._change_timer.isActive():
-            self._onDataEdited()
-        
-        if not self._allOk():
-            return
-        
-        if stats['warnings'] > 0:
-            answer = QMessageBox.question(None, "Confirm",
-                 "There are warnings regarding some of the filenames. Continue?",
-                 QMessageBox.Yes | QMessageBox.No,
-                 QMessageBox.No)
-            if answer == QMessageBox.No:
-                return
-        
-        plan_file = None
-        try:
-            plan = RenamePlan(self._base_path, self._renamed)
-            plan_file = plan.getBackupFileName()
-            plan.saveToFile(plan_file)
-            try:
-                os.system('sync')
-            except:
-                pass
-            plan.execute()
-            
-            counts_txt = format_numerals([('file', stats['files_changed']),
-                                          ('directory', stats['dirs_changed'])])
-            
-            answer = QMessageBox.information(self,
-                "Success",
-                "{0} successfully renamed. Continue with another rename operation?".format(counts_txt),
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No)
-            if answer == QMessageBox.Yes:
-                self.setup({'rules': '', 'rescan': True})
-                return
-            
-            QDialog.accept(self)
-        except Exception as e:
-            QMessageBox.critical(self, "Error", str(e))
-        finally:
-            try:
-                if plan_file is not None:
-                    os.remove(plan_file)
-            except:
-                pass
-            
+        self._executeRename()
+    
     def reject(self):
         if self._controls_locked:
             return
@@ -316,44 +253,142 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         return renamer.rename(files)
     
+    def _executeRename(self):
+        if not self._doFinalChecks():
+            return
+        
+        work = lambda on_progress: self._doExecutePlan(on_progress)
+        on_finished = lambda result: self._onExecutePlanFinished(result)
+        self._lockControls()
+        self._startWorker(work, on_finished)
+        
+    def _doExecutePlan(self, on_progress):
+        # Executed in worker context
+        on_prog = lambda done, total: on_progress('Executing rename plan...', done, total)
+        
+        plan_file = None
+        try:
+            on_progress('Creating rename plan...', 0, 1)
+            
+            plan = RenamePlan(self._base_path, self._renamed)
+            plan_file = plan.getBackupFileName()
+            plan.saveToFile(plan_file)
+            try:
+                os.system('sync')
+            except:
+                pass
+            
+            plan.execute(on_prog)
+            
+            error = None
+        except Exception as e:
+            error = e
+        finally:
+            try:
+                if plan_file is not None:
+                    os.remove(plan_file)
+            except:
+                pass
+        
+        return error
+    
+    def _onExecutePlanFinished(self, error):
+        if error is not None:
+            self._showStatusMessage("Error during rename operation", True)
+            QMessageBox.critical(self, "Error", str(error))
+            return
+        
+        self._showStatusMessage("Done!", False)
+        
+        if not self._showSuccessMessage():
+            QDialog.accept(self)
+    
+    def _doFinalChecks(self):
+        stats = self._getStats()
+        
+        if self._change_timer.isActive():
+            self._onDataEdited()
+        
+        if not self._allOk():
+            return False
+        
+        if stats['warnings'] > 0:
+            answer = QMessageBox.question(None, "Confirm",
+                 "There are warnings regarding some of the filenames. Continue?",
+                 QMessageBox.Yes | QMessageBox.No,
+                 QMessageBox.No)
+            if answer == QMessageBox.No:
+                return False
+        
+        return True
+    
+    def _showSuccessMessage(self):
+        stats = self._getStats()
+        counts_txt = format_numerals([('file', stats['files_changed']),
+                                      ('directory', stats['dirs_changed'])])
+        
+        answer = QMessageBox.information(self,
+            "Success",
+            "{0} successfully renamed. Continue with another rename operation?".format(counts_txt),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No)
+        if answer == QMessageBox.Yes:
+            self.setup({'rules': '', 'rescan': True})
+            return True
+        
+        return False
+    
+    def _handleBackups(self):
+        try:
+            while True:
+                plan_file = RenamePlan.findBackups()
+                if plan_file is None:
+                    break
+                answer = QMessageBox.question(None, "Confirm",
+                    ("A backup plan file from an interrupted rename operation\n"
+                     "was found at {0}.\n\n"
+                     "Roll back the operation? (recommended)").format(plan_file),
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.Yes)
+                if answer == QMessageBox.No:
+                    break
+                
+                plan = RenamePlan.loadFromFile(plan_file)
+                plan.undo()
+                os.remove(plan_file)
+        except Exception as e:
+            QMessageBox.critical(None, "Error", str(e))
+    
     def _updateFilesDisplay(self):
         self.tblFiles.showFiles(self._renamed)
     
     def _updateStatusMessage(self):
-        is_error = False
-        
-        if self._files is not None:
-            if not isinstance(self._files, Exception):
-                if not isinstance(self._ruleset, Exception):
-                    if len(self._files) > 0:
-                        stats = self._renameStats()
-                        
-                        if self._ruleset is not None:
-                            err_txt = format_numerals([('error', stats['errors']),
-                                                       ('warning', stats['warnings'])], True, '')
-                            if err_txt != '':
-                                err_txt = " ({0})".format(err_txt)
-                                
-                            chg_txt = format_numerals([('file', stats['files_changed']),
-                                                       ('directory', stats['dirs_changed'])], True, 'No files')
-                            
-                            message = "{0} changed{1}.".format(chg_txt, err_txt)
-                        else:
-                            message = "{0} found.".format(format_numerals([('file', stats['files']),
-                                                                           ('directory', stats['dirs'])]))
-                        
-                    else:
-                        message = "No files found."
-                else:
-                    message = str(self._ruleset)
-                    is_error = True
-            else:
-                message = str(self._files)
-                is_error = True
-        else:
-            message = 'Enter the base path for the files that are to be renamed.'
-        
+        message, is_error = self._getStatusMessage()
         self._showStatusMessage(message, is_error)
+    
+    def _getStatusMessage(self):
+        if self._files is None:
+            return ('Enter the base path for the files that are to be renamed.', False)
+        if isinstance(self._files, Exception):
+            return (str(self._files), True)
+        if isinstance(self._ruleset, Exception):
+            return (str(self._ruleset), True)
+        if len(self._files) == 0:
+            return ("No files found.", False)
+        
+        stats = self._getStats()
+        
+        if self._ruleset is None:
+            found_txt = format_numerals([('file', stats['files']), ('directory', stats['dirs'])])
+            return ("{0} found.".format(found_txt), False)
+        
+        err_txt = format_numerals([('error', stats['errors']), ('warning', stats['warnings'])], True, '')
+        if err_txt != '':
+            err_txt = " ({0})".format(err_txt)
+            
+        chg_txt = format_numerals([('file', stats['files_changed']), ('directory', stats['dirs_changed'])], True, 'No files')
+        
+        return ("{0} changed{1}.".format(chg_txt, err_txt), (stats['errors'] > 0))
     
     def _showStatusMessage(self, message, is_error):
         self.lblStatus.setText(message)
@@ -367,7 +402,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         self.progressBar.setMaximum(total)
         self.progressBar.show()
     
-    def _renameStats(self):
+    def _getStats(self):
         stats = dict(files=0, dirs=0, files_changed=0, dirs_changed=0, errors=0, warnings=0)
         
         if (self._files is not None) and not isinstance(self._files, Exception):
@@ -397,7 +432,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         if self._ruleset is None or isinstance(self._ruleset, Exception):
             return False
         
-        stats = self._renameStats()
+        stats = self._getStats()
         
         if (stats['errors'] > 0) or (stats['files_changed'] + stats['dirs_changed'] == 0):
             return False
