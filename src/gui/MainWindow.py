@@ -36,6 +36,7 @@ class MainWindow(QDialog, Ui_MainWindow):
     _base_path = None
     _files = None
     _ruleset = None
+    _override_dict = None
     _renamed = None
     
     def __init__(self, gui):
@@ -45,6 +46,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         self.initUi()
         self.centerOnScreen()
         
+        self._override_dict = dict()
         self._setup = self.getSetup()
     
     def initUi(self):
@@ -56,6 +58,10 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         self.txtRules.textChanged.connect(self._clearRuleError)
         self._highlighter = RuleSyntaxHighlighter(self.txtRules.document())
+        
+        self.tblFiles.overrideAdded.connect(self._onOverrideAdded)
+        self.tblFiles.overrideRemoved.connect(self._onOverrideRemoved)
+        
         self._worker = Worker()
         self._worker.progress.connect(self._showProgress)
         self._worker.finished.connect(self._onWorkerFinished)
@@ -73,6 +79,8 @@ class MainWindow(QDialog, Ui_MainWindow):
             self.chkUseExtension.setChecked(setup['use_extension'])
         if 'rules' in setup:
             self.txtRules.setPlainText(setup['rules'])
+        if 'overrides' in setup:
+            self._override_dict = dict(setup['overrides'])
         
         self._disable_autoupdate = False
         self._force_rescan = 'rescan' in setup and setup['rescan'] == True
@@ -86,6 +94,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         setup['use_path'] = self.chkUsePath.isChecked()
         setup['use_extension'] = self.chkUseExtension.isChecked()
         setup['rules'] = qstr_to_unicode(self.txtRules.document().toPlainText())
+        setup['overrides'] = dict(self._override_dict)
         
         return setup
     
@@ -122,6 +131,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         self.chkScanRecursive.setDisabled(True)
         self.chkUseExtension.setDisabled(True)
         self.chkUsePath.setDisabled(True)
+        self.tblFiles.setReadOnly(True)
         
         self._controls_locked = True
     
@@ -131,6 +141,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         self.chkScanRecursive.setDisabled(False)
         self.chkUseExtension.setDisabled(False)
         self.chkUsePath.setDisabled(False)
+        self.tblFiles.setReadOnly(False)
         
         self._controls_locked = False
             
@@ -197,6 +208,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         setup = self._setup
         rules_updated = ('rules' in changed)
         options_updated = ('use_path' in changed) or ('use_extension' in changed)
+        overrides_updated = ('overrides' in changed)
         
         if rules_updated:
             self._ruleset = self._parseRules(setup['rules'])
@@ -207,9 +219,9 @@ class MainWindow(QDialog, Ui_MainWindow):
             else:
                 self._highlighter.clearError()
         
-        if files_updated or rules_updated or options_updated:
+        if files_updated or rules_updated or options_updated or overrides_updated:
             if (self._files is not None) and not isinstance(self._files, Exception):
-                self._renamed = self._renameFiles(self._files, self._ruleset, setup['use_path'], setup['use_extension'])
+                self._renamed = self._renameFiles(self._files, self._ruleset, setup['use_path'], setup['use_extension'], setup['overrides'])
             else:
                 self._renamed = None
             
@@ -231,6 +243,16 @@ class MainWindow(QDialog, Ui_MainWindow):
         self.txtBasePath.setText(path)
         self._onDataEdited()
 
+    def _onOverrideAdded(self, key, name):
+        self._override_dict[qstr_to_unicode(key)] = qstr_to_unicode(name)
+        self._onDataEdited()
+    
+    def _onOverrideRemoved(self, key):
+        key = qstr_to_unicode(key)
+        if key in self._override_dict:
+            del self._override_dict[key]
+            self._onDataEdited()
+    
     def _parseRules(self, text):
         try:
             parser = RuleParser()
@@ -243,7 +265,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         except RuleParseException as e:
             return e
 
-    def _renameFiles(self, files, ruleset, use_path, use_extension):
+    def _renameFiles(self, files, ruleset, use_path, use_extension, overrides):
         if files is None or isinstance(files, Exception):
             return None
         
@@ -252,7 +274,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         renamer = Renamer(ruleset, use_extension, use_path)
         
-        return renamer.rename(files)
+        return renamer.rename(files, overrides)
     
     def _executeRename(self):
         if not self._doFinalChecks():
@@ -334,7 +356,7 @@ class MainWindow(QDialog, Ui_MainWindow):
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No)
         if answer == QMessageBox.Yes:
-            self.setup({'rules': '', 'rescan': True})
+            self.setup({'rules': '', 'overrides': dict(), 'rescan': True})
             return True
         
         return False
@@ -379,7 +401,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         stats = self._getStats()
         
-        if self._ruleset is None:
+        if self._ruleset is None and (stats['files_changed']+stats['dirs_changed'] == 0):
             found_txt = format_numerals([('file', stats['files']), ('directory', stats['dirs'])])
             return ("{0} found.".format(found_txt), False)
         
@@ -430,7 +452,7 @@ class MainWindow(QDialog, Ui_MainWindow):
     def _allOk(self):
         if self._files is None or isinstance(self._files, Exception) or len(self._files) == 0:
             return False
-        if self._ruleset is None or isinstance(self._ruleset, Exception):
+        if isinstance(self._ruleset, Exception):
             return False
         
         stats = self._getStats()

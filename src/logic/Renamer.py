@@ -16,14 +16,17 @@ class Renamer(object):
         self.use_ext = use_ext
         self.use_path = use_path
         
-    def rename(self, files):
-        renamed = [self._renameFile(fref) for fref in files]
+    def rename(self, files, overrides=None):
+        renamed = [self._renameFile(fref, overrides) for fref in files]
         self._performVerifications(renamed)
         
         return renamed
     
-    def _renameFile(self, fref):
+    def _renameFile(self, fref, overrides):
         fname = fref.filename
+        
+        if (overrides is not None) and (fname in overrides):
+            return RenamedFileRef(fref, overrides[fname], True)
         
         if not self.use_path:
             path, fname = os.path.split(fname)
