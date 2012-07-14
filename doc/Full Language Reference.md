@@ -40,7 +40,7 @@ These are the most basic building blocks of any rule, being closest in behavior 
 
 * `%braces`, `%inbraces` : As above, but for straight braces, i.e. `[` and `]`.
 
-* `%curlies`, `incurlies` : As above, but for curly braces, i.e. `{` and `}`.
+* `%curlies`, `%incurlies` : As above, but for curly braces, i.e. `{` and `}`.
 
 ### Actions
 
@@ -63,6 +63,16 @@ Actions are introduced by the `!`, `->` or `>>` characters right after a match. 
     * `->lower` : Converts all letters in the matched text to lowercase.
 
     * `->title` : Applies title case to the matched text. This mainly involves setting the first letter in every word to uppercase, with some caveats (particle words such as "an", "on", etc., as well as all-uppercase words that probably represent acronyms, are left alone)
+    
+    * `->unbrace` : Removes all parantheses and braces from the matched text.
+    
+    * `->paras` : Adds parantheses around the matched text. Note that any leading or trailing whitespace will remain outside the parantheses, e.g. `'  test '->paras` produces `  (test) `.
+    
+    * `->inparas` : Returns the text between the first pair of matching parantheses in the matched text. Nested parantheses are not supported. An empty string will be returned if there are no matching parantheses in the text.
+    
+    * `->braces`, `->inbraces` : As above, but for straight braces, i.e. `[` and `]`.
+    
+    * `->curlies`, ->incurlies` : As above, but for curly braces, i.e. `{` and `}`.
 
 * `>>alias` : Saves the matched text to a location identified by the given alias, while performing no other modification. The text can subsequently be pasted in another place within the filename.
 
