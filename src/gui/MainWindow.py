@@ -22,7 +22,8 @@ from logic.rules.RuleSet import RuleSet
 from logic.rules.RuleParser import RuleParser
 from logic.errors.RuleParseException import RuleParseException
 from logic.errors.RuleCheckException import RuleCheckException
-from logic.utils import format_numerals, qstr_to_unicode
+from logic.utils import qstr_to_unicode
+from logic.grammar_utils import format_numerals
 
 class MainWindow(QDialog, Ui_MainWindow):
     _CHANGE_DELAY_MS = 1200
