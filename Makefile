@@ -9,4 +9,10 @@ parsers:
 	rm -f src/genparsers/*.pyc
 	java -jar $(ANTLR_JAR) -fo src/genparsers src/grammars/Rules.g
 
-.PHONY: parsers gui
+install:
+	sudo install/install.sh
+
+uninstall:
+	sudo install/uninstall.sh
+
+.PHONY: parsers gui install uninstall
