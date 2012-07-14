@@ -34,6 +34,14 @@ These are the most basic building blocks of any rule, being closest in behavior 
 
 * `$` : Matches the very end of the filename. No text is consumed.
 
+* `%paras` : Matches text enclosed within parantheses, including the parantheses themselves and any leading whitespace. Nested parantheses are not supported (such use is not common in filenames anyway).
+
+* `%inparas` : Similar to the above, but matches only the enclosed text itself. Mostly useful in search-and-replace matches; for instance, `@%inparas->lower` will make any text enclosed in parantheses lowercase.
+
+* `%braces`, `%inbraces` : As above, but for straight braces, i.e. `[` and `]`.
+
+* `%curlies`, `incurlies` : As above, but for curly braces, i.e. `{` and `}`.
+
 ### Actions
 
 Actions are introduced by the `!`, `->` or `>>` characters right after a match. Actions may be chained, so that the result of one is fed into another, e.g. `%s->action1->action2`. BAON supports the following actions:
