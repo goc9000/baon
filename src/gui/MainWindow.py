@@ -48,6 +48,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         self._override_dict = dict()
         self._setup = self.getSetup()
+        self._onDataEdited()
     
     def initUi(self):
         self.setupUi(self)
@@ -65,7 +66,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         self._worker = Worker()
         self._worker.progress.connect(self._showProgress)
         self._worker.finished.connect(self._onWorkerFinished)
-
+        
     def setup(self, setup):
         self._disable_autoupdate = True
         

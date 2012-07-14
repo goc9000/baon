@@ -17,7 +17,7 @@ if __name__ == "__main__":
     parser.add_argument('base_path', metavar='<base path>', nargs='?', help='A path to the files that are to be renamed')
     parser.add_argument('--rules', metavar='<rule text>', help='Rules to apply (separate using semicolons)')
     parser.add_argument('-r', '--scan-recursive', action='store_true', help='Scan subfolders recursively')
-    parser.add_argument('-x', '--use-ext', action='store_true', help='Include extension in renaming process')
+    parser.add_argument('-x', '--use-extension', action='store_true', help='Include extension in renaming process')
     parser.add_argument('-p', '--use-path', action='store_true', help='Include full path in renaming process')
     setup = vars(parser.parse_args(sys.argv[1:]))
     
