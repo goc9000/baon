@@ -27,7 +27,7 @@ class SearchReplaceMatch(object):
             ctx.next_unanchored = True
             ctx.last_match_pos = None
             matched = self.term.execute(ctx)
-            if not matched:
+            if matched is False:
                 break
             
             if ctx.last_match_pos is not None:
