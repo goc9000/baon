@@ -92,3 +92,13 @@ def enum_words_and_sep(phrase):
     if pos != len(phrase):
         yield (phrase[pos:], False)
 
+def aesthetic_warning(phrase):
+    if phrase.startswith(' '):
+        return 'starts with spaces'
+    if phrase.endswith(' '):
+        return 'ends with spaces'
+    if '  ' in phrase:
+        return 'contains double spaces'
+    
+    return None
+

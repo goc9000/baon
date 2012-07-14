@@ -9,6 +9,7 @@
 import re, os
 
 from utils import enum_partial_paths
+from grammar_utils import aesthetic_warning
 from RenamedFileRef import RenamedFileRef
 
 class Renamer(object):
@@ -113,28 +114,27 @@ class Renamer(object):
         path = rfref.filename
         
         base, fname = os.path.split(path)
-        fname, _ = os.path.splitext(fname)
+        fname, ext = os.path.splitext(fname)
         
         for comp in path.split(os.sep):
             m = self.PROBLEM_CHARS_REGEX.search(comp)
             if m is not None:
                 return "Filename contains problematic character '{0}'".format(m.group(0))
         
-        if fname.startswith(' '):
-            return 'Filename starts with spaces'
+        if ' ' in ext:
+            return 'Extension contains spaces'
         if fname.endswith(' '):
             return 'Filename has spaces before extension'
-        if '  ' in fname:
-            return 'Filename contains double spaces'
+        
+        warn = aesthetic_warning(fname)
+        if warn is not None:
+            return "Filename {0}".format(warn)
         
         for comp in base.split(os.sep):
-            if comp.startswith(' '):
-                return 'Path component starts with spaces'
-            if comp.endswith(' '):
-                return 'Path component ends with spaces'
-            if '  ' in comp:
-                return 'Path component contains double spaces'
-            
+            warn = aesthetic_warning(comp)
+            if warn is not None:
+                return "Component {0}".format(warn)
+        
         return None
     
     def _checkForCollisions(self, renamed):
