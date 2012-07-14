@@ -1,5 +1,13 @@
 #!/usr/bin/python
 
+# baon.py
+#
+# (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
+# 
+# This file is part of BAON.
+#
+# Licensed under the GPL-3
+
 import os, sys, argparse
 
 # Hack: try to get ANTLR3 from adjacent lib directory if user does not have it installed

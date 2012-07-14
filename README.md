@@ -1,6 +1,13 @@
 BAON
 ====
 
+(C) 2012 Cristian Dinu <goc9000@gmail.com>
+
+Licensed under the GPLv3.
+
+Overview
+--------
+
 BAON (By Any Other Name) is a mass file renamer designed to work with my personal rule syntax vaguely reminiscent of ANTLR rules.
 
 Usage Basics

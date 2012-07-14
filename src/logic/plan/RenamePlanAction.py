@@ -1,3 +1,11 @@
+# logic/plan/RenamePlanAction.py
+#
+# (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
+# 
+# This file is part of BAON.
+#
+# Licensed under the GPL-3
+
 import re
 
 PAT_FIRST_KW = re.compile(r'([\w]+)\s*')

@@ -1,8 +1,19 @@
+# gui/RuleSyntaxHighlighter.py
+#
+# (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
+# 
+# This file is part of BAON.
+#
+# Licensed under the GPL-3
+
 from PyQt4.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont, QBrush, QColor
 
-import antlr3, string
+import antlr3
 
-from genparsers.RulesLexer import *
+from genparsers.RulesLexer import STRING_LITERAL, FORMAT_SPEC, REGEX, ANCHOR_START, \
+    ANCHOR_END, OP_BETWEEN, ID, OP_OR, OP_XFORM, OP_INSERT, OP_DELETE, OP_SEARCH, \
+    OP_SAVE, OP_PLUS, OP_STAR, OP_OPTIONAL, RULE_SEP, OP_OPEN_PARA, OP_CLOSE_PARA, \
+    RulesLexer
 
 FMT_LITERAL = QTextCharFormat()
 FMT_LITERAL.setBackground(QBrush(QColor(232,232,240)))

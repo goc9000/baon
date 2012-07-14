@@ -1,3 +1,11 @@
+# gui/RenameTable.py
+#
+# (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
+# 
+# This file is part of BAON.
+#
+# Licensed under the GPL-3
+
 from PyQt4.Qt import Qt, QFileInfo, pyqtSignal
 from PyQt4.QtGui import QColor, QTableWidget, QTableWidgetItem, QHeaderView, QFileIconProvider, QStyle
 from PyQt4 import QtGui
