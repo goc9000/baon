@@ -6,21 +6,22 @@
 #
 # Licensed under the GPL-3
 
-import re
+import os, re
 
 from ElementaryPatternMatch import ElementaryPatternMatch
 
 FORMAT_DICT = {
-    '%ws':        r'(\s*)',
-    '%d':         r'(\s*[0-9]+)',
-    '%c':         r'(.)',
-    '%s':         r'(\s*\S+)',
-    '%paras':     r'(\s*\([^)]*\))',
-    '%inparas':   r'((?<=\()[^)]*(?=\)))',
-    '%braces':    r'(\s*\[[^\]]*\])',
-    '%inbraces':  r'((?<=\[[^\]]*(?=\]))',
-    '%curlies':   r'(\s*\{[^}]*\})',
-    '%incurlies': r'((?<=\{[^}]*(?=\}))'
+    '%ws'        : r'(\s*)',
+    '%d'         : r'(\s*[0-9]+)',
+    '%c'         : r'(.)',
+    '%s'         : r'(\s*\S+)',
+    '%paras'     : r'(\s*\([^)]*\))',
+    '%inparas'   : r'((?<=\()[^)]*(?=\)))',
+    '%braces'    : r'(\s*\[[^\]]*\])',
+    '%inbraces'  : r'((?<=\[[^\]]*(?=\]))',
+    '%curlies'   : r'(\s*\{[^}]*\})',
+    '%incurlies' : r'((?<=\{[^}]*(?=\}))',
+    '%path'      : r'(.*' + re.escape(os.sep) + r')'
 }
 
 class FormatMatch(ElementaryPatternMatch):

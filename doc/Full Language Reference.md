@@ -42,6 +42,8 @@ These are the most basic building blocks of any rule, being closest in behavior 
 
 * `%curlies`, `%incurlies` : As above, but for curly braces, i.e. `{` and `}`.
 
+* `%path` : Matches the path leading up to a file, i.e. everything up to the last `/` character, inclusive (or `\` on Windows). If there is no path, an empty string is returned.
+
 ### Actions
 
 Actions are introduced by the `!`, `->` or `>>` characters right after a match. Actions may be chained, so that the result of one is fed into another, e.g. `%s->action1->action2`. BAON supports the following actions:
