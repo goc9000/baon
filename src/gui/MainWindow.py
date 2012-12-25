@@ -326,6 +326,8 @@ class MainWindow(QDialog, Ui_MainWindow):
         return error
     
     def _onExecutePlanFinished(self, error):
+	self._unlockControls()
+
         if error is not None:
             self._showStatusMessage("Error during rename operation", True)
             QMessageBox.critical(self, "Error", str(error))
