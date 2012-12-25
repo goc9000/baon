@@ -16,7 +16,7 @@ from RmDirIfEmptyAction import RmDirIfEmptyAction
 
 from logic.utils import enum_partial_paths
 
-import os, re, random, string
+import os, re, random, string, codecs
 
 class RenamePlan(object):
     base_path = None
@@ -48,8 +48,8 @@ class RenamePlan(object):
     
     def saveToFile(self, filename):
         try:
-            with file(filename, "w+") as f:
-                f.writelines([repr(step)+os.linesep for step in self.steps])
+            with codecs.open(filename, 'w', 'utf-8') as f:
+                f.writelines([step.representation() + os.linesep for step in self.steps])
         except Exception as e:
             try:
                 os.remove(filename)
@@ -85,11 +85,11 @@ class RenamePlan(object):
         try:
             plan = RenamePlan()
             
-            with file(filename, "r") as f:
+            with codecs.open(filename, 'r', 'utf-8') as f:
                 line_no = 1
                 for line in f:
                     try:
-                        plan.steps.append(RenamePlanAction.fromRepr(line, plan))
+                        plan.steps.append(RenamePlanAction.fromRepresentation(line, plan))
                     except Exception as ex:
                         raise RuntimeError("Error in line {0}: {1}".format(line_no, str(ex)))
                     

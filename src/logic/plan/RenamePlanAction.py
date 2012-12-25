@@ -12,7 +12,7 @@ PAT_FIRST_KW = re.compile(r'([\w]+)\s*')
 PAT_QUOTED = re.compile(r'\s*("(\\"|[^"])*")\s*')
 
 def quote_str(text):
-    return '"{0}"'.format(text.replace("\\", "\\\\").replace('"', '\\"'))
+    return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 def unquote_str(text):
     return text[1:-1].replace('\\"', '"').replace("\\\\","\\")
@@ -23,7 +23,7 @@ class RenamePlanAction(object):
     def __init__(self, plan):
         self.plan = plan
     
-    def __repr__(self):
+    def representation(self):
         tup = self._getRepr()
         kw = tup[0]
         args = tup[1:]
@@ -31,7 +31,7 @@ class RenamePlanAction(object):
         if len(args) == 0:
             return kw
         else:
-            return "{0} {1}".format(kw, ' '.join(quote_str(arg) for arg in args))
+            return kw + ' ' + ' '.join(quote_str(arg) for arg in args)
     
     def _getRepr(self):
         raise RuntimeError('RenamePlanAction is abstract, has no _getRepr() implementation')
@@ -43,7 +43,7 @@ class RenamePlanAction(object):
         raise RuntimeError('RenamePlanAction is abstract, has no undo() implementation')
 
     @staticmethod
-    def fromRepr(text, plan):
+    def fromRepresentation(text, plan):
         m = PAT_FIRST_KW.match(text)
         if m is None:
             raise RuntimeError("Could not parse first keyword in line")
