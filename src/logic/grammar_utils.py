@@ -77,7 +77,12 @@ def to_title_case(phrase):
     }
 
     for i in xrange(1, len(parts), 2):
-        parts[i] = capitalize_word(parts[i], **params)
+        # Kludge to catch cases like "Name A. Surname"
+        is_initial = parts[i] == 'A' and parts[i + 1].startswith('.')
+
+        if not is_initial:
+            parts[i] = capitalize_word(parts[i], **params)
+
         params['is_first_word'] = False
 
     return ''.join(parts)
