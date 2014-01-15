@@ -65,6 +65,20 @@ def is_mac_name(word):
     return PAT_MAC_NAME.match(word) is not None
 
 
+def is_compound_name(word):
+    if len(word) == 0 or not word[0].isupper():
+        return False
+
+    any_dashes = False
+    for i in xrange(1, len(word) - 1):
+        if word[i] == '-':
+            any_dashes = True
+            if not word[i + 1].isupper():
+                return False
+
+    return any_dashes
+
+
 def is_dash_char(c):
     return c in {'-', u'\u2013', u'\u2014'}
 
@@ -76,7 +90,7 @@ def is_particle(word):
 def capitalize_word(word, is_first_word=True, may_be_acronym=True):
     is_acronym = may_be_acronym and len(word) > 1 and word.isupper()
 
-    if is_acronym or is_mac_name(word):
+    if is_acronym or is_mac_name(word) or is_compound_name(word):
         return word
 
     if is_particle(word) and not is_first_word:
