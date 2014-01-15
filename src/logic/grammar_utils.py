@@ -65,6 +65,10 @@ def is_mac_name(word):
     return PAT_MAC_NAME.match(word) is not None
 
 
+def is_dash_char(c):
+    return c in {'-', u'\u2013', u'\u2014'}
+
+
 def is_particle(word):
     return word.lower() in PARTICLE_WORDS
 
@@ -87,16 +91,21 @@ def to_title_case(phrase):
     is_first_word_stack = [True]
     expected_rpara_stack = ['']
 
-    parts = list(enum_words_and_sep(phrase))
-
-    for i in xrange(1, len(parts), 2):
-        for c in parts[i - 1]:
+    def handle_separator_chars(sep):
+        for c in sep:
             if c == expected_rpara_stack[-1]:
                 expected_rpara_stack.pop()
                 is_first_word_stack.pop()
             elif c in PARA_CHARS:
                 is_first_word_stack.append(True)
                 expected_rpara_stack.append(PARA_CHARS[c])
+            elif is_dash_char(c) or c == ',':
+                is_first_word_stack[-1] = True
+
+    parts = list(enum_words_and_sep(phrase))
+
+    for i in xrange(1, len(parts), 2):
+        handle_separator_chars(parts[i - 1])
 
         # Kludge to catch cases like "Name A. Surname"
         is_initial = parts[i] == 'A' and parts[i + 1].startswith('.')
