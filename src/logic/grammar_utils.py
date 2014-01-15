@@ -56,29 +56,31 @@ def is_particle(word):
     return word.lower() in PARTICLE_WORDS
 
 
-def to_title_case(phrase):
-    out = []
-    
-    first = True
-    
-    phrase_is_upper = phrase.isupper()
+def capitalize_word(word, is_first_word=True, may_be_acronym=True):
+    is_acronym = may_be_acronym and len(word) > 1 and word.isupper()
 
-    for text, is_word in enum_words_and_sep(phrase):
-        if is_word:
-            is_acronym = len(text) > 1 and text.isupper() and not phrase_is_upper
-            
-            if is_acronym:
-                out.append(text)
-            elif is_particle(text) and not first:
-                out.append(text.lower())
-            else:
-                out.append(text.capitalize())
-            
-            first = False
-        else:
-            out.append(text)
-    
-    return ''.join(out)
+    if is_acronym:
+        return word
+
+    if is_particle(word) and not is_first_word:
+        return word.lower()
+
+    return word.capitalize()
+
+
+def to_title_case(phrase):
+    parts = list(enum_words_and_sep(phrase))
+
+    params = {
+        'is_first_word': True,
+        'may_be_acronym': not phrase.isupper()
+    }
+
+    for i in xrange(1, len(parts), 2):
+        parts[i] = capitalize_word(parts[i], **params)
+        params['is_first_word'] = False
+
+    return ''.join(parts)
 
 
 def enum_words_and_sep(phrase):
@@ -88,14 +90,11 @@ def enum_words_and_sep(phrase):
         if m is None:
             break
     
-        if m.start() != pos:
-            yield (phrase[pos:m.start()], False)
-        
-        yield (m.group(0), True)
+        yield phrase[pos:m.start()]
+        yield m.group(0)
         pos = m.end()
         
-    if pos != len(phrase):
-        yield (phrase[pos:], False)
+    yield phrase[pos:]
 
 
 def aesthetic_warning(phrase):
