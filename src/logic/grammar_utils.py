@@ -13,25 +13,28 @@ import re
 
 PAT_WORD = re.compile(r"[a-z0-9'-]+", re.I)
 
-PARTICLE_WORDS = set(['a','an','and','as','at','by','of','with','for','in','on','to','the'])
+PARTICLE_WORDS = {'a', 'an', 'and', 'as', 'at', 'by', 'of', 'with', 'for', 'in', 'on', 'to', 'the'}
+
 
 def plural(word):
     # Incomplete and buggy, of course; word must be lowercase
     if len(word) == 1:
         return word + "'s"
-    if word[-1] == 'y' and word[-2] not in ('a','e','i','o','u'):
+    if word[-1] == 'y' and word[-2] not in {'a', 'e', 'i', 'o', 'u'}:
         return word[:-1] + "ies"
     if word[-2:] in ('sh', 'ch'):
         return word + "es"
     
     return word + "s"
 
+
 def format_numeral(item_name_singular, item_count):
     name = item_name_singular if item_count == 1 else plural(item_name_singular)
     
     return "{0} {1}".format(item_count, name)
 
-def format_numerals(counts, omit_zero_entries = True, value_if_nothing='nothing'):
+
+def format_numerals(counts, omit_zero_entries=True, value_if_nothing='nothing'):
     parts = []
     
     if omit_zero_entries:
@@ -48,8 +51,10 @@ def format_numerals(counts, omit_zero_entries = True, value_if_nothing='nothing'
     
     return ''.join(parts)
 
+
 def is_particle(word):
     return word.lower() in PARTICLE_WORDS
+
 
 def to_title_case(phrase):
     out = []
@@ -60,7 +65,7 @@ def to_title_case(phrase):
 
     for text, is_word in enum_words_and_sep(phrase):
         if is_word:
-            is_acronym = len(text)>1 and text.isupper() and not phrase_is_upper
+            is_acronym = len(text) > 1 and text.isupper() and not phrase_is_upper
             
             if is_acronym:
                 out.append(text)
@@ -75,6 +80,7 @@ def to_title_case(phrase):
     
     return ''.join(out)
 
+
 def enum_words_and_sep(phrase):
     pos = 0
     while pos < len(phrase):
@@ -84,13 +90,13 @@ def enum_words_and_sep(phrase):
     
         if m.start() != pos:
             yield (phrase[pos:m.start()], False)
-            pos = m.start()
         
         yield (m.group(0), True)
         pos = m.end()
         
     if pos != len(phrase):
         yield (phrase[pos:], False)
+
 
 def aesthetic_warning(phrase):
     if phrase.startswith(' '):
@@ -101,4 +107,3 @@ def aesthetic_warning(phrase):
         return 'contains double spaces'
     
     return None
-
