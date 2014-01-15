@@ -12,6 +12,7 @@
 import re
 
 PAT_WORD = re.compile(r"[^\W_]((['-]|[^\W_])*[^\W_])?", re.I | re.U)
+PAT_MAC_NAME = re.compile(r"Ma?c[A-Z]")
 
 PARTICLE_WORDS = {'a', 'an', 'and', 'as', 'at', 'by', 'but', 'of', 'with', 'for', 'in', 'on', 'to', 'the', 'vs'}
 
@@ -52,6 +53,10 @@ def format_numerals(counts, omit_zero_entries=True, value_if_nothing='nothing'):
     return ''.join(parts)
 
 
+def is_mac_name(word):
+    return PAT_MAC_NAME.match(word) is not None
+
+
 def is_particle(word):
     return word.lower() in PARTICLE_WORDS
 
@@ -59,7 +64,7 @@ def is_particle(word):
 def capitalize_word(word, is_first_word=True, may_be_acronym=True):
     is_acronym = may_be_acronym and len(word) > 1 and word.isupper()
 
-    if is_acronym:
+    if is_acronym or is_mac_name(word):
         return word
 
     if is_particle(word) and not is_first_word:
