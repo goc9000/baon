@@ -13,7 +13,7 @@ import re
 
 PAT_WORD = re.compile(r"[a-z0-9'-]+", re.I)
 
-PARTICLE_WORDS = {'a', 'an', 'and', 'as', 'at', 'by', 'of', 'with', 'for', 'in', 'on', 'to', 'the'}
+PARTICLE_WORDS = {'a', 'an', 'and', 'as', 'at', 'by', 'but', 'of', 'with', 'for', 'in', 'on', 'to', 'the', 'vs'}
 
 
 def plural(word):
