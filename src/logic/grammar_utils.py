@@ -11,7 +11,7 @@
 
 import re
 
-PAT_WORD = re.compile(r"[a-z0-9'-]+", re.I)
+PAT_WORD = re.compile(r"[^\W_]((['-]|[^\W_])*[^\W_])?", re.I | re.U)
 
 PARTICLE_WORDS = {'a', 'an', 'and', 'as', 'at', 'by', 'but', 'of', 'with', 'for', 'in', 'on', 'to', 'the', 'vs'}
 
