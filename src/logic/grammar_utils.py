@@ -16,6 +16,14 @@ PAT_MAC_NAME = re.compile(r"Ma?c[A-Z]")
 
 PARTICLE_WORDS = {'a', 'an', 'and', 'as', 'at', 'by', 'but', 'of', 'with', 'for', 'in', 'on', 'to', 'the', 'vs'}
 
+PARA_CHARS = {
+    '(': ')',
+    '[': ']',
+    '{': '}',
+    '"': '"',
+    "'": "'"
+}
+
 
 def plural(word):
     # Incomplete and buggy, of course; word must be lowercase
@@ -74,21 +82,31 @@ def capitalize_word(word, is_first_word=True, may_be_acronym=True):
 
 
 def to_title_case(phrase):
+    phrase_is_upper = phrase.isupper()
+
+    is_first_word_stack = [True]
+    expected_rpara_stack = ['']
+
     parts = list(enum_words_and_sep(phrase))
 
-    params = {
-        'is_first_word': True,
-        'may_be_acronym': not phrase.isupper()
-    }
-
     for i in xrange(1, len(parts), 2):
+        for c in parts[i - 1]:
+            if c == expected_rpara_stack[-1]:
+                expected_rpara_stack.pop()
+                is_first_word_stack.pop()
+            elif c in PARA_CHARS:
+                is_first_word_stack.append(True)
+                expected_rpara_stack.append(PARA_CHARS[c])
+
         # Kludge to catch cases like "Name A. Surname"
         is_initial = parts[i] == 'A' and parts[i + 1].startswith('.')
 
         if not is_initial:
-            parts[i] = capitalize_word(parts[i], **params)
+            parts[i] = capitalize_word(parts[i],
+                                       is_first_word=is_first_word_stack[-1],
+                                       may_be_acronym=not phrase_is_upper)
 
-        params['is_first_word'] = False
+        is_first_word_stack[-1] = False
 
     return ''.join(parts)
 
