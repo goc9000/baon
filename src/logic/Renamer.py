@@ -14,7 +14,7 @@ from RenamedFileRef import RenamedFileRef
 
 class Renamer(object):
     NON_PRINTABLE_REGEX = re.compile(ur'[\u0000-\u001f]')
-    PROBLEM_CHARS_REGEX = re.compile(r'["*:<>?\/]')
+    PROBLEM_CHARS_REGEX = re.compile(r'["*:<>?\\/]')
     
     ruleset = None
     use_ext = None
