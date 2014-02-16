@@ -1,4 +1,4 @@
-# logic/FileRef.py
+# logic/files/FileRef.py
 #
 # (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
 # 

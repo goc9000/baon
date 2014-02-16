@@ -1,4 +1,4 @@
-# logic/FileScanner.py
+# logic/files/FileScanner.py
 #
 # (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -8,7 +8,7 @@
 
 import os
 
-from FileRef import FileRef
+from logic.files.FileRef import FileRef
 
 
 class FileScanner(object):

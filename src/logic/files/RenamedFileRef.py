@@ -1,4 +1,4 @@
-# logic/RenamedFileRef.py
+# logic/files/RenamedFileRef.py
 #
 # (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -6,7 +6,7 @@
 #
 # Licensed under the GPL-3
 
-from FileRef import FileRef
+from logic.files.FileRef import FileRef
 
 
 class RenamedFileRef(FileRef):

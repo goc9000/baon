@@ -11,7 +11,7 @@ import os
 
 from utils import enum_partial_paths
 from grammar_utils import aesthetic_warning
-from RenamedFileRef import RenamedFileRef
+from logic.files.RenamedFileRef import RenamedFileRef
 
 
 class Renamer(object):

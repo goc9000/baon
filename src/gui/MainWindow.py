@@ -15,7 +15,7 @@ from gui.templates.Ui_MainWindow import Ui_MainWindow
 
 from RuleSyntaxHighlighter import RuleSyntaxHighlighter
 
-from logic.FileScanner import FileScanner
+from logic.files.FileScanner import FileScanner
 from logic.Renamer import Renamer
 from logic.plan.RenamePlan import RenamePlan
 from logic.rules.RuleSet import RuleSet
