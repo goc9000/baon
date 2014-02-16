@@ -6,6 +6,7 @@
 #
 # Licensed under the GPL-3
 
+
 class MatchContext(object):
     text = None
     position = None
@@ -34,9 +35,9 @@ class MatchContext(object):
                 self.next_unanchored)
 
     def restore(self, savepoint):
-        self.text,
-        self.position,
-        self.stop,
-        self.forward_aliases,
-        self.aliases,
-        self.next_unanchored = savepoint
+        self.text = savepoint[0]
+        self.position = savepoint[1]
+        self.stop = savepoint[2]
+        self.forward_aliases = savepoint[3].copy()
+        self.aliases = savepoint[4].copy()
+        self.next_unanchored = savepoint[5]

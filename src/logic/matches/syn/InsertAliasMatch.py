@@ -8,6 +8,7 @@
 
 from InsertionMatch import InsertionMatch
 
+
 class InsertAliasMatch(InsertionMatch):
     alias = None
     

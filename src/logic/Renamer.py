@@ -6,11 +6,13 @@
 #
 # Licensed under the GPL-3
 
-import re, os
+import re
+import os
 
 from utils import enum_partial_paths
 from grammar_utils import aesthetic_warning
 from RenamedFileRef import RenamedFileRef
+
 
 class Renamer(object):
     NON_PRINTABLE_REGEX = re.compile(ur'[\u0000-\u001f]')

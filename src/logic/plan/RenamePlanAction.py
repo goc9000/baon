@@ -11,11 +11,14 @@ import re
 PAT_FIRST_KW = re.compile(r'([\w]+)\s*')
 PAT_QUOTED = re.compile(r'\s*("(\\"|[^"])*")\s*')
 
+
 def quote_str(text):
     return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
+
 def unquote_str(text):
-    return text[1:-1].replace('\\"', '"').replace("\\\\","\\")
+    return text[1:-1].replace('\\"', '"').replace("\\\\", "\\")
+
 
 class RenamePlanAction(object):
     plan = None

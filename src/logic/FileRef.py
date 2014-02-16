@@ -8,12 +8,13 @@
 
 import os
 
+
 class FileRef(object):
     full_path = None
     filename = None
     is_dir = None
     
-    def __init__(self, full_path, filename, is_dir = None):
+    def __init__(self, full_path, filename, is_dir=None):
         self.full_path = full_path
         self.filename = filename
         if is_dir is None:

@@ -6,23 +6,25 @@
 #
 # Licensed under the GPL-3
 
-import os, re
+import os
+import re
 
 from ElementaryPatternMatch import ElementaryPatternMatch
 
 FORMAT_DICT = {
-    '%ws'        : r'(\s*)',
-    '%d'         : r'(\s*[0-9]+)',
-    '%c'         : r'(.)',
-    '%s'         : r'(\s*\S+)',
-    '%paras'     : r'(\s*\([^)]*\))',
-    '%inparas'   : r'((?<=\()[^)]*(?=\)))',
-    '%braces'    : r'(\s*\[[^\]]*\])',
-    '%inbraces'  : r'((?<=\[[^\]]*(?=\]))',
-    '%curlies'   : r'(\s*\{[^}]*\})',
-    '%incurlies' : r'((?<=\{[^}]*(?=\}))',
-    '%path'      : r'(.*' + re.escape(os.sep) + r')'
+    '%ws':         r'(\s*)',
+    '%d':          r'(\s*[0-9]+)',
+    '%c':          r'(.)',
+    '%s':          r'(\s*\S+)',
+    '%paras':      r'(\s*\([^)]*\))',
+    '%inparas':    r'((?<=\()[^)]*(?=\)))',
+    '%braces':     r'(\s*\[[^\]]*\])',
+    '%inbraces':   r'((?<=\[[^\]]*(?=\]))',
+    '%curlies':    r'(\s*\{[^}]*\})',
+    '%incurlies':  r'((?<=\{[^}]*(?=\}))',
+    '%path':       r'(.*' + re.escape(os.sep) + r')'
 }
+
 
 class FormatMatch(ElementaryPatternMatch):
     fmt_spec_error = None
@@ -42,12 +44,15 @@ class FormatMatch(ElementaryPatternMatch):
             return FORMAT_DICT[fmt_spec]
         
         m = re.match(r'%([0-9]+)d$', fmt_spec)
-        if m is not None: return r'(\s*[0-9]{{{0}}})'.format(int(m.group(1)))
+        if m is not None:
+            return r'(\s*[0-9]{{{0}}})'.format(int(m.group(1)))
 
         m = re.match(r'%([0-9]+)c$', fmt_spec)
-        if m is not None: return r'(.{{{0}}})'.format(int(m.group(1)))
+        if m is not None:
+            return r'(.{{{0}}})'.format(int(m.group(1)))
 
         m = re.match(r'%([0-9]+)s$', fmt_spec)
-        if m is not None: return r'(\s*\S{{{0}}})'.format(int(m.group(1)))
+        if m is not None:
+            return r'(\s*\S{{{0}}})'.format(int(m.group(1)))
         
         return None

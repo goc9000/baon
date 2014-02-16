@@ -12,10 +12,11 @@ from logic.errors.RuleParseException import RuleParseException
 from genparsers.RulesLexer import RulesLexer
 from genparsers.RulesParser import RulesParser
 
+
 class RuleParser(object):
-    '''
+    """
     Note: this is currently just a thin wrapper for the ANTLR3-generated class.
-    '''
+    """
 
     def __init__(self):
         pass

@@ -10,6 +10,7 @@ from RenamePlanAction import RenamePlanAction
 
 import os
 
+
 class BasePathAction(RenamePlanAction):
     path = None
     
@@ -18,7 +19,7 @@ class BasePathAction(RenamePlanAction):
         self.path = path
     
     def _getRepr(self):
-        return ('BasePath', self.path)
+        return 'BasePath', self.path
     
     def execute(self):
         if not os.path.exists(self.path):

@@ -6,6 +6,7 @@
 #
 # Licensed under the GPL-3
 
+
 class RuleApplicationException(Exception):
     message = None
     

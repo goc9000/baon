@@ -8,6 +8,7 @@
 
 from Action import Action
 
+
 class ApplyRuleSetAction(Action):
     ruleset = None
     

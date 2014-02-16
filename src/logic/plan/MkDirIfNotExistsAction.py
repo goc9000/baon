@@ -10,6 +10,7 @@ from RenamePlanAction import RenamePlanAction
 
 import os
 
+
 class MkDirIfNotExistsAction(RenamePlanAction):
     directory = None
     
@@ -18,7 +19,7 @@ class MkDirIfNotExistsAction(RenamePlanAction):
         self.directory = directory
     
     def _getRepr(self):
-        return ('MkDirIfNotExists', self.directory)
+        return 'MkDirIfNotExists', self.directory
 
     def execute(self):
         path = os.path.join(self.plan.base_path, self.directory)
@@ -39,5 +40,5 @@ class MkDirIfNotExistsAction(RenamePlanAction):
         try:
             if len(os.listdir(path)) == 0:
                 os.rmdir(path)
-        except:
+        except OSError:
             pass

@@ -11,6 +11,7 @@ import re
 from Match import Match
 from logic.errors.RuleCheckException import RuleCheckException
 
+
 class ElementaryPatternMatch(Match):
     regex = None
     error = None
@@ -21,8 +22,8 @@ class ElementaryPatternMatch(Match):
     def _setPattern(self, pattern, flags=0):
         try:
             self.regex = re.compile(pattern, flags)
-        except:
-            self._setError("Regex /{0}/ is not valid".format(pattern));
+        except re.error:
+            self._setError("Regex /{0}/ is not valid".format(pattern))
 
     def _setError(self, message):
         self.error = message

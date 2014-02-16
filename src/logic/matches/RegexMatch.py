@@ -10,6 +10,7 @@ import re
 
 from ElementaryPatternMatch import ElementaryPatternMatch
 
+
 class RegexMatch(ElementaryPatternMatch):
     def __init__(self, patt_text):
         ElementaryPatternMatch.__init__(self)
@@ -21,7 +22,7 @@ class RegexMatch(ElementaryPatternMatch):
 
         for c in patt_text[idx+1:]:
             if c == 'i':
-                flags |= re.I;
+                flags |= re.I
             else:
                 self._setError("Invalid regex flag '{0}'".format(c))
                 return

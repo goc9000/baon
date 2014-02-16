@@ -8,6 +8,7 @@
 
 from FileRef import FileRef
 
+
 class RenamedFileRef(FileRef):
     old_full_path = None
     old_filename = None
@@ -15,9 +16,10 @@ class RenamedFileRef(FileRef):
     warning = None
     override = False
     
-    def __init__(self, old_file_ref, new_filename, override = False):
+    def __init__(self, old_file_ref, new_filename, override=False):
         if new_filename is not None:
-            new_full_path = old_file_ref.full_path[0:(len(old_file_ref.full_path)-len(old_file_ref.filename))] + new_filename
+            path_length = len(old_file_ref.full_path) - len(old_file_ref.filename)
+            new_full_path = old_file_ref.full_path[:path_length] + new_filename
         else:
             new_full_path = None
         
@@ -29,4 +31,3 @@ class RenamedFileRef(FileRef):
 
     def changed(self):
         return self.filename != self.old_filename
-    

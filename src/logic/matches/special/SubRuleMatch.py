@@ -8,6 +8,7 @@
 
 from logic.matches.Match import Match
 
+
 class SubRuleMatch(Match):
     rule = None
     

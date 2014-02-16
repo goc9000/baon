@@ -25,6 +25,7 @@ from logic.errors.RuleCheckException import RuleCheckException
 from logic.utils import qstr_to_unicode
 from logic.grammar_utils import format_numerals
 
+
 class MainWindow(QDialog, Ui_MainWindow):
     _CHANGE_DELAY_MS = 1200
     
@@ -93,21 +94,20 @@ class MainWindow(QDialog, Ui_MainWindow):
             self._override_dict = dict(setup['overrides'])
         
         self._disable_autoupdate = False
-        self._force_rescan = 'rescan' in setup and setup['rescan'] == True
+        self._force_rescan = 'rescan' in setup and setup['rescan']
         
         self._onDataEdited()
     
     def getSetup(self):
-        setup = {}
-        setup['base_path'] = qstr_to_unicode(self.txtBasePath.text())
-        setup['scan_recursive'] = self.chkScanRecursive.isChecked()
-        setup['use_path'] = self.chkUsePath.isChecked()
-        setup['use_extension'] = self.chkUseExtension.isChecked()
-        setup['rules'] = qstr_to_unicode(self.txtRules.document().toPlainText())
-        setup['overrides'] = dict(self._override_dict)
-        
-        return setup
-    
+        return {
+            'base_path': qstr_to_unicode(self.txtBasePath.text()),
+            'scan_recursive': self.chkScanRecursive.isChecked(),
+            'use_path': self.chkUsePath.isChecked(),
+            'use_extension': self.chkUseExtension.isChecked(),
+            'rules': qstr_to_unicode(self.txtRules.document().toPlainText()),
+            'overrides': dict(self._override_dict)
+        }
+
     def centerOnScreen(self):
         desktop = QDesktopWidget().screenGeometry()
         self.move((desktop.width() / 2) - (self.frameSize().width() / 2),
@@ -231,7 +231,8 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         if files_updated or rules_updated or options_updated or overrides_updated:
             if (self._files is not None) and not isinstance(self._files, Exception):
-                self._renamed = self._renameFiles(self._files, self._ruleset, setup['use_path'], setup['use_extension'], setup['overrides'])
+                self._renamed = self._renameFiles(self._files, self._ruleset, setup['use_path'], setup['use_extension'],
+                                                  setup['overrides'])
             else:
                 self._renamed = None
             
@@ -300,6 +301,7 @@ class MainWindow(QDialog, Ui_MainWindow):
         on_prog = lambda done, total: on_progress('Executing rename plan...', done, total)
         
         plan_file = None
+        error = None
         try:
             on_progress('Creating rename plan...', 0, 1)
             
@@ -308,25 +310,23 @@ class MainWindow(QDialog, Ui_MainWindow):
             plan.saveToFile(plan_file)
             try:
                 os.system('sync')
-            except:
+            except OSError:
                 pass
             
             plan.execute(on_prog)
-            
-            error = None
         except Exception as e:
             error = e
         finally:
             try:
                 if plan_file is not None:
                     os.remove(plan_file)
-            except:
+            except OSError:
                 pass
         
         return error
     
     def _onExecutePlanFinished(self, error):
-	self._unlockControls()
+        self._unlockControls()
 
         if error is not None:
             self._showStatusMessage("Error during rename operation", True)
@@ -348,10 +348,11 @@ class MainWindow(QDialog, Ui_MainWindow):
             return False
         
         if stats['warnings'] > 0:
-            answer = QMessageBox.question(None, "Confirm",
-                 "There are warnings regarding some of the filenames. Continue?",
-                 QMessageBox.Yes | QMessageBox.No,
-                 QMessageBox.No)
+            answer = QMessageBox.question(
+                self, "Confirm",
+                "There are warnings regarding some of the filenames. Continue?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No)
             if answer == QMessageBox.No:
                 return False
         
@@ -362,8 +363,8 @@ class MainWindow(QDialog, Ui_MainWindow):
         counts_txt = format_numerals([('file', stats['files_changed']),
                                       ('directory', stats['dirs_changed'])])
         
-        answer = QMessageBox.information(self,
-            "Success",
+        answer = QMessageBox.information(
+            self, "Success",
             "{0} successfully renamed. Continue with another rename operation?".format(counts_txt),
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No)
@@ -379,7 +380,8 @@ class MainWindow(QDialog, Ui_MainWindow):
                 plan_file = RenamePlan.findBackups()
                 if plan_file is None:
                     break
-                answer = QMessageBox.question(None, "Confirm",
+                answer = QMessageBox.question(
+                    None, "Confirm",
                     ("A backup plan file from an interrupted rename operation\n"
                      "was found at {0}.\n\n"
                      "Roll back the operation? (recommended)").format(plan_file),
@@ -403,27 +405,29 @@ class MainWindow(QDialog, Ui_MainWindow):
     
     def _getStatusMessage(self):
         if self._files is None:
-            return ('Enter the base path for the files that are to be renamed.', False)
+            return 'Enter the base path for the files that are to be renamed.', False
         if isinstance(self._files, Exception):
-            return (str(self._files), True)
+            return str(self._files), True
         if isinstance(self._ruleset, Exception):
-            return (str(self._ruleset), True)
+            return str(self._ruleset), True
         if len(self._files) == 0:
-            return ("No files found.", False)
+            return "No files found.", False
         
         stats = self._getStats()
         
         if self._ruleset is None and (stats['files_changed']+stats['dirs_changed'] == 0):
             found_txt = format_numerals([('file', stats['files']), ('directory', stats['dirs'])])
-            return ("{0} found.".format(found_txt), False)
+            return "{0} found.".format(found_txt), False
         
         err_txt = format_numerals([('error', stats['errors']), ('warning', stats['warnings'])], True, '')
         if err_txt != '':
             err_txt = " ({0})".format(err_txt)
             
-        chg_txt = format_numerals([('file', stats['files_changed']), ('directory', stats['dirs_changed'])], True, 'No files')
+        chg_txt = format_numerals([('file', stats['files_changed']),
+                                   ('directory', stats['dirs_changed'])],
+                                  True, 'No files')
         
-        return ("{0} changed{1}.".format(chg_txt, err_txt), (stats['errors'] > 0))
+        return "{0} changed{1}.".format(chg_txt, err_txt), (stats['errors'] > 0)
     
     def _showStatusMessage(self, message, is_error):
         self.lblStatus.setText(message)
@@ -481,8 +485,9 @@ class MainWindow(QDialog, Ui_MainWindow):
     def _onWorkerFinished(self, result):
         self._worker_on_finished(result)
 
+
 class Worker(QThread):
-    progress = pyqtSignal(str,int,int)
+    progress = pyqtSignal(str, int, int)
     finished = pyqtSignal(object)
     
     work = None 

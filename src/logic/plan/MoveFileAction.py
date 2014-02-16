@@ -10,6 +10,7 @@ from RenamePlanAction import RenamePlanAction
 
 import os
 
+
 class MoveFileAction(RenamePlanAction):
     from_path = None
     to_path = None
@@ -20,7 +21,7 @@ class MoveFileAction(RenamePlanAction):
         self.to_path = to_path
     
     def _getRepr(self):
-        return ('MoveFile', self.from_path, self.to_path)
+        return 'MoveFile', self.from_path, self.to_path
 
     def execute(self):
         path1 = os.path.join(self.plan.base_path, self.from_path)
@@ -43,5 +44,5 @@ class MoveFileAction(RenamePlanAction):
         try:
             if os.path.exists(path2) and not os.path.exists(path1):
                 os.rename(path2, path1)
-        except:
+        except OSError:
             pass

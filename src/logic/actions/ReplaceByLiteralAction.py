@@ -8,6 +8,7 @@
 
 from Action import Action
 
+
 class ReplaceByLiteralAction(Action):
     text = None
     

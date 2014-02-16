@@ -8,6 +8,7 @@
 
 from logic.matches.MatchContext import MatchContext
 
+
 class SearchReplaceMatch(object):
     term = None
     
@@ -31,7 +32,7 @@ class SearchReplaceMatch(object):
                 break
             
             if ctx.last_match_pos is not None:
-                new_text.append(ctx.text[prev_pos : ctx.last_match_pos])
+                new_text.append(ctx.text[prev_pos:ctx.last_match_pos])
             new_text.append(matched)
             
             if ctx.last_match_pos is None:

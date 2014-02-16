@@ -6,6 +6,7 @@
 #
 # Licensed under the GPL-3
 
+
 class Action(object):
     def __init__(self):
         pass

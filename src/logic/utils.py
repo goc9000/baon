@@ -6,21 +6,25 @@
 #
 # Licensed under the GPL-3
 
-import os, string
+
+import os
+import string
 
 ESCAPES = {
-    'b'  : '\b',
-    't'  : '\t',
-    'n'  : '\n',
-    'f'  : '\f',
-    'r'  : '\r',
-    '"'  : '"',
-    "'"  : "'",
-    '\\' : '\\'
+    'b':  '\b',
+    't':  '\t',
+    'n':  '\n',
+    'f':  '\f',
+    'r':  '\r',
+    '"':  '"',
+    "'":  "'",
+    '\\': '\\'
 }
+
 
 def qstr_to_unicode(qstring):
     return unicode(qstring.toUtf8(), 'utf-8')
+
 
 def decode_literal(literal):
     literal = literal[1:-1]
@@ -38,13 +42,13 @@ def decode_literal(literal):
         esc_char = literal[nxpos+1]
         pos = nxpos + 2
         
-        if esc_char in ESCAPES: # simple escape
+        if esc_char in ESCAPES:  # simple escape
             out.append(ESCAPES[esc_char])
         elif esc_char == 'u' and pos < len(literal)-4 \
-            and all(literal[pos+i] in string.hexdigits for i in xrange(4)): # Unicode escape
+                and all(literal[pos+i] in string.hexdigits for i in xrange(4)):  # Unicode escape
             out.append(unichr(int(literal[pos:pos+4], 16)))
             pos += 4
-        elif esc_char in '01234567': # octal escape
+        elif esc_char in '01234567':  # octal escape
             code = int(esc_char)
             digits = 2 if code <= 3 else 1
             while (digits > 0) and (pos < len(literal)) and (literal[pos] in '01234567'):
@@ -53,12 +57,13 @@ def decode_literal(literal):
                 digits -= 1
             
             out.append(chr(code))
-        else: # unsupported escape
+        else:  # unsupported escape
             out.append(esc_char)
     
     out.append(literal[pos:])
     
     return ''.join(out)
+
 
 def enum_partial_paths(path):
     """

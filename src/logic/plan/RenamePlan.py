@@ -16,7 +16,12 @@ from RmDirIfEmptyAction import RmDirIfEmptyAction
 
 from logic.utils import enum_partial_paths
 
-import os, re, random, string, codecs
+import os
+import re
+import random
+import string
+import codecs
+
 
 class RenamePlan(object):
     base_path = None
@@ -29,7 +34,7 @@ class RenamePlan(object):
             return
         
         self.base_path = base_path
-        self.steps = [ BasePathAction(self, base_path) ]
+        self.steps = [BasePathAction(self, base_path)]
         
         if any(ren.error is not None for ren in files):
             raise RuntimeError("There are unresolved errors in the renamed files list")
@@ -53,7 +58,7 @@ class RenamePlan(object):
         except Exception as e:
             try:
                 os.remove(filename)
-            except:
+            except OSError:
                 pass
             
             raise RuntimeError("Error saving rename plan to file '{0}': {1}".format(filename, str(e)))
@@ -111,12 +116,14 @@ class RenamePlan(object):
         
         for i in xrange(n_steps):
             try:
-                if on_progress is not None: on_progress(i, n_steps)
+                if on_progress is not None:
+                    on_progress(i, n_steps)
                 self.steps[i].execute()
             except Exception as e:
                 for j in xrange(i-1, -1, -1):
                     self.steps[j].undo()
-                    if on_progress is not None: on_progress(j, n_steps)
+                    if on_progress is not None:
+                        on_progress(j, n_steps)
                 raise e
         
     def undo(self):

@@ -8,6 +8,7 @@
 
 from InsertionMatch import InsertionMatch
 
+
 class InsertLiteralMatch(InsertionMatch):
     text = None
     

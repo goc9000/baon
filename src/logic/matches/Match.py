@@ -6,6 +6,7 @@
 #
 # Licensed under the GPL-3
 
+
 class Match(object):
     actions = None
 
@@ -29,7 +30,7 @@ class Match(object):
         if text is not False:
             for action in self.actions:
                 text = action.execute(text, context)
-                if text == False:
+                if text is False:
                     break
         
         if text is False:

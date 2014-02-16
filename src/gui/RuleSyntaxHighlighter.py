@@ -16,14 +16,14 @@ from genparsers.RulesLexer import STRING_LITERAL, FORMAT_SPEC, REGEX, ANCHOR_STA
     RulesLexer
 
 FMT_LITERAL = QTextCharFormat()
-FMT_LITERAL.setBackground(QBrush(QColor(232,232,240)))
-FMT_LITERAL.setForeground(QBrush(QColor(0,0,240)))
+FMT_LITERAL.setBackground(QBrush(QColor(232, 232, 240)))
+FMT_LITERAL.setForeground(QBrush(QColor(0, 0, 240)))
 
 FMT_PATTERN = QTextCharFormat()
-FMT_PATTERN.setForeground(QBrush(QColor(0,174,0)))
+FMT_PATTERN.setForeground(QBrush(QColor(0, 174, 0)))
 
 FMT_BETWEEN = QTextCharFormat()
-FMT_BETWEEN.setForeground(QBrush(QColor(0,174,0)))
+FMT_BETWEEN.setForeground(QBrush(QColor(0, 174, 0)))
 FMT_BETWEEN.setFontWeight(QFont.Bold)
 
 FMT_OP = QTextCharFormat()
@@ -32,7 +32,7 @@ FMT_PARA = QTextCharFormat()
 FMT_PARA.setFontWeight(QFont.Bold)
 
 FMT_ID = QTextCharFormat()
-FMT_ID.setForeground(QBrush(QColor(96,96,128)))
+FMT_ID.setForeground(QBrush(QColor(96, 96, 128)))
 FMT_ID.setFontWeight(QFont.Bold)
 
 FORMAT_DICT = {
@@ -60,6 +60,7 @@ FORMAT_DICT = {
     OP_OPEN_PARA: FMT_PARA,
     OP_CLOSE_PARA: FMT_PARA
 }
+
 
 class RuleSyntaxHighlighter(QSyntaxHighlighter):
     _lexer = None
@@ -124,9 +125,9 @@ class RuleSyntaxHighlighter(QSyntaxHighlighter):
         
         for col in xrange(char_from, char_to+1):
             fmt = self.format(col)
-            fmt.setForeground(QBrush(QColor(255,0,0)))
+            fmt.setForeground(QBrush(QColor(255, 0, 0)))
             fmt.setFontWeight(QFont.Bold)
-            fmt.setUnderlineColor(QColor(255,0,0))
+            fmt.setUnderlineColor(QColor(255, 0, 0))
             fmt.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
             self.setFormat(col, 1, fmt)
     

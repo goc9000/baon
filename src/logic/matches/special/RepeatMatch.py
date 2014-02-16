@@ -8,6 +8,7 @@
 
 from logic.matches.Match import Match
 
+
 class RepeatMatch(Match):
     match = None
     at_least = None

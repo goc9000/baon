@@ -6,6 +6,7 @@
 #
 # Licensed under the GPL-3
 
+
 class Rule(object):
     alternatives = None
     

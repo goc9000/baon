@@ -14,18 +14,21 @@ from logic.grammar_utils import to_title_case
 
 PAT_BRACE = re.compile(r"[()\[\]{}]")
 
+
 def unbrace(text):
     return PAT_BRACE.sub('', text)
 
+
 def add_braces(text, braces):
     mid_text = text.lstrip()
-    left_space = text[0 : len(text) - len(mid_text)]
+    left_space = text[0:len(text) - len(mid_text)]
     mid_text = mid_text.rstrip()
-    right_space = text[len(left_space) + len(mid_text) :]
+    right_space = text[len(left_space) + len(mid_text):]
     
     return left_space + braces[0] + mid_text + braces[1] + right_space
 
-def extract_text_from_braces(text, braces, fail_value = None):
+
+def extract_text_from_braces(text, braces, fail_value=None):
     idx_from = text.find(braces[0])
     if idx_from == -1:
         return fail_value
@@ -33,23 +36,25 @@ def extract_text_from_braces(text, braces, fail_value = None):
     if idx_to == -1:
         return fail_value
     
-    return text[idx_from+1 : idx_to]
+    return text[idx_from + 1:idx_to]
+
 
 FUNC_DICT = {
-    'title'     : lambda s,c: to_title_case(s),
-    'trim'      : lambda s,c: s.strip(),
-    'upper'     : lambda s,c: s.upper(),
-    'toupper'   : lambda s,c: s.upper(),
-    'lower'     : lambda s,c: s.lower(),
-    'tolower'   : lambda s,c: s.lower(),
-    'unbrace'   : lambda s,c: unbrace(s),
-    'paras'     : lambda s,c: add_braces(s, '()'),
-    'braces'    : lambda s,c: add_braces(s, '[]'),
-    'curlies'   : lambda s,c: add_braces(s, '{}'),
-    'inparas'   : lambda s,c: extract_text_from_braces(s, '()', ''),
-    'inbraces'  : lambda s,c: extract_text_from_braces(s, '[]', ''),
-    'incurlies' : lambda s,c: extract_text_from_braces(s, '{}', '')
+    'title': lambda s, c: to_title_case(s),
+    'trim': lambda s, c: s.strip(),
+    'upper': lambda s, c: s.upper(),
+    'toupper': lambda s, c: s.upper(),
+    'lower': lambda s, c: s.lower(),
+    'tolower': lambda s, c: s.lower(),
+    'unbrace': lambda s, c: unbrace(s),
+    'paras': lambda s, c: add_braces(s, '()'),
+    'braces': lambda s, c: add_braces(s, '[]'),
+    'curlies': lambda s, c: add_braces(s, '{}'),
+    'inparas': lambda s, c: extract_text_from_braces(s, '()', ''),
+    'inbraces': lambda s, c: extract_text_from_braces(s, '[]', ''),
+    'incurlies': lambda s, c: extract_text_from_braces(s, '{}', '')
 }
+
 
 class ApplyFunctionAction(Action):
     fn = None

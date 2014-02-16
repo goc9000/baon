@@ -8,6 +8,7 @@
 
 from logic.matches.Match import Match
 
+
 class BetweenMatch(Match):
     def __init__(self):
         Match.__init__(self)
@@ -25,7 +26,7 @@ class BetweenMatch(Match):
     def executeDelayed(self, text, context):
         for action in self.actions:
             text = action.execute(text, context)
-            if text == False:
+            if text is False:
                 break
         
         return text

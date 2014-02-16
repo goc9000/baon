@@ -78,7 +78,7 @@ OP_SEARCH            : '@';
 OP_BETWEEN           : '..';
 ANCHOR_START         : '^';
 ANCHOR_END           : '$';
-WS                   : (' '|'\t') {$channel=HIDDEN;};
+WS                   : (' '|'\t') {$channel = HIDDEN};
 fragment LINE_SEP    : ('\r'|'\n');
 fragment HEX_DIGIT   : ('0'..'9'|'a'..'f'|'A'..'F');
 fragment UNICODE_ESC : '\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT;
@@ -116,38 +116,38 @@ match_seq     returns [ out_seq ]
                   (st=seq_term { out_seq.terms.append($st.out_term) })*;     
 
 seq_term      returns [ out_term ]
-              : OP_BETWEEN { out_term=BetweenMatch() } (a=action { out_term.actions.append($a.out_action) })*
-              | OP_SEARCH m=match_ { out_term=SearchReplaceMatch($m.out_match) }
-              | m=match_ { out_term=$m.out_match };
+              : OP_BETWEEN { out_term = BetweenMatch() } (a=action { out_term.actions.append($a.out_action) })*
+              | OP_SEARCH m=match_ { out_term = SearchReplaceMatch($m.out_match) }
+              | m=match_ { out_term = $m.out_match };
 
 match_        returns [ out_match ]
-              : ( em=elem_match { out_match=$em.out_match }
-                  | sm=insert_match { out_match=$sm.out_match }
-                  | OP_OPEN_PARA ru=rule OP_CLOSE_PARA { out_match=SubRuleMatch($ru.out_rule) })
+              : ( em=elem_match { out_match = $em.out_match }
+                  | sm=insert_match { out_match = $sm.out_match }
+                  | OP_OPEN_PARA ru=rule OP_CLOSE_PARA { out_match = SubRuleMatch($ru.out_rule) })
                 (a=action { out_match.actions.append($a.out_action) })*
                 (
-                  	(OP_OPTIONAL { out_match=RepeatMatch(out_match, 0, 1) }
-                  	|OP_STAR { out_match=RepeatMatch(out_match, 0, None) }
-                  	|OP_PLUS { out_match=RepeatMatch(out_match, 1, None) })
-                  	(a=action { out_match.actions.append($a.out_action) })*
+                    (OP_OPTIONAL { out_match = RepeatMatch(out_match, 0, 1) }
+                    |OP_STAR { out_match = RepeatMatch(out_match, 0, None) }
+                    |OP_PLUS { out_match = RepeatMatch(out_match, 1, None) })
+                    (a=action { out_match.actions.append($a.out_action) })*
                 )*;
 
 action        returns [ out_action ]
-              : OP_DELETE { out_action=DeleteAction() }
-              | OP_SAVE ID { out_action=SaveToAliasAction($ID.text) }
-              | OP_XFORM ( OP_OPEN_PARA rs=ruleset OP_CLOSE_PARA { out_action=ApplyRuleSetAction($rs.out_rset) }
-                         | STRING_LITERAL { out_action=ReplaceByLiteralAction(decode_literal($STRING_LITERAL.text)) }
-                         | FORMAT_SPEC { out_action=ReformatAction($FORMAT_SPEC.text) }
-                         | ID { out_action=ApplyFunctionAction($ID.text) }
+              : OP_DELETE { out_action = DeleteAction() }
+              | OP_SAVE ID { out_action = SaveToAliasAction($ID.text) }
+              | OP_XFORM ( OP_OPEN_PARA rs=ruleset OP_CLOSE_PARA { out_action = ApplyRuleSetAction($rs.out_rset) }
+                         | STRING_LITERAL { out_action = ReplaceByLiteralAction(decode_literal($STRING_LITERAL.text)) }
+                         | FORMAT_SPEC { out_action = ReformatAction($FORMAT_SPEC.text) }
+                         | ID { out_action = ApplyFunctionAction($ID.text) }
               );
 
 insert_match  returns [ out_match ]
-              : OP_INSERT ( ID {  out_match=InsertAliasMatch($ID.text) }
-                          | STRING_LITERAL { out_match=InsertLiteralMatch(decode_literal($STRING_LITERAL.text)) } );
+              : OP_INSERT ( ID {  out_match = InsertAliasMatch($ID.text) }
+                          | STRING_LITERAL { out_match = InsertLiteralMatch(decode_literal($STRING_LITERAL.text)) } );
 
 elem_match    returns [ out_match ]
-              : FORMAT_SPEC { out_match=FormatMatch($FORMAT_SPEC.text) }
-              | STRING_LITERAL { out_match=LiteralMatch(decode_literal($STRING_LITERAL.text)) }
-              | REGEX { out_match=RegexMatch($REGEX.text) }
-              | ANCHOR_START { out_match=StartAnchorMatch() }
-              | ANCHOR_END { out_match=EndAnchorMatch() };
+              : FORMAT_SPEC { out_match = FormatMatch($FORMAT_SPEC.text) }
+              | STRING_LITERAL { out_match = LiteralMatch(decode_literal($STRING_LITERAL.text)) }
+              | REGEX { out_match = RegexMatch($REGEX.text) }
+              | ANCHOR_START { out_match = StartAnchorMatch() }
+              | ANCHOR_END { out_match = EndAnchorMatch() };

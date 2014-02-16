@@ -10,10 +10,11 @@ from PyQt4.Qt import Qt, QFileInfo, pyqtSignal
 from PyQt4.QtGui import QColor, QTableWidget, QTableWidgetItem, QHeaderView, QFileIconProvider, QStyle
 from PyQt4 import QtGui
 
+
 class RenameTable(QTableWidget):
-    COLOR_ERROR = QColor(255,0,0)
-    COLOR_WARNING = QColor(192,128,0)
-    COLOR_CHANGED = QColor(0,64,224)
+    COLOR_ERROR = QColor(255, 0, 0)
+    COLOR_WARNING = QColor(192, 128, 0)
+    COLOR_CHANGED = QColor(0, 64, 224)
     
     _edit_index = None
     _read_only = False
@@ -27,7 +28,7 @@ class RenameTable(QTableWidget):
         self.setShowGrid(False)
         
         self.setColumnCount(2)
-        self.setHorizontalHeaderLabels(['From','To'])
+        self.setHorizontalHeaderLabels(['From', 'To'])
         
         self.horizontalHeader().setResizeMode(QHeaderView.Stretch)
         
@@ -51,7 +52,7 @@ class RenameTable(QTableWidget):
         if self._read_only:
             return False
         
-        self._edit_index =  index.row()
+        self._edit_index = index.row()
         
         return QTableWidget.edit(self, index, trigger, event)
     
@@ -71,12 +72,14 @@ class RenameTable(QTableWidget):
         else:
             self.overrideAdded.emit(item.ed_key, new_data)
 
+
 class FromFileItem(QTableWidgetItem):
     def __init__(self, fref):
         QTableWidgetItem.__init__(self, fref.old_filename)
         
         self.setFlags(Qt.ItemIsEnabled)
         self.setIcon(QFileIconProvider().icon(QFileInfo(fref.old_full_path)))
+
 
 class ToFileItem(QTableWidgetItem):
     ed_data = None
@@ -132,4 +135,3 @@ class ToFileItem(QTableWidgetItem):
             return self.ed_data
         
         return QTableWidgetItem.data(self, role)
-        

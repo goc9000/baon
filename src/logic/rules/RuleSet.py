@@ -9,13 +9,14 @@
 from SemanticCheckScope import SemanticCheckScope
 from logic.matches.MatchContext import MatchContext
 
+
 class RuleSet(object):
     rules = None
     
     def __init__(self):
         self.rules = []
 
-    def applyOn(self, text, initial_aliases = None):
+    def applyOn(self, text, initial_aliases=None):
         for rule in self.rules:
             context = MatchContext(text, initial_aliases)
             matched = rule.execute(context)

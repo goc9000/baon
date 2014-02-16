@@ -6,6 +6,7 @@
 #
 # Licensed under the GPL-3
 
+
 class SemanticCheckScope(object):
     def __init__(self):
         pass

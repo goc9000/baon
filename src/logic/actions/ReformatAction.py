@@ -11,6 +11,7 @@ from logic.errors.RuleCheckException import RuleCheckException
 from logic.errors.RuleApplicationException import RuleApplicationException
 import re
 
+
 def strip_zeroes(s):
     m = re.match(r'(\s*)([0-9]+)(\s*)', s)
     
@@ -21,7 +22,8 @@ def strip_zeroes(s):
     if mid == '':
         mid = '0'
     
-    return m.group(1)+mid+m.group(3)
+    return m.group(1) + mid + m.group(3)
+
 
 def pad_with_zeroes(s, digits):
     m = re.match(r'(\s*)([0-9]+)(\s*)', s)
@@ -35,7 +37,8 @@ def pad_with_zeroes(s, digits):
 
     mid = mid.zfill(digits)
 
-    return m.group(1)+mid+m.group(3)
+    return m.group(1) + mid + m.group(3)
+
 
 class ReformatAction(Action):
     error = None
@@ -46,7 +49,7 @@ class ReformatAction(Action):
         
         self.fn = self._selectFunction(fmt_spec)
         if self.fn is None:
-            self.error="Unrecognized format specifier '{0}'".format(fmt_spec)
+            self.error = "Unrecognized format specifier '{0}'".format(fmt_spec)
  
     def _selectFunction(self, fmt_spec):
         if fmt_spec == '%d':
@@ -66,5 +69,5 @@ class ReformatAction(Action):
             raise RuleCheckException(self.error, scope)
 
     def execute(self, text, context):
-        return self.fn(text, context)
-    
+        if self.fn is not None:
+            return self.fn(text, context)

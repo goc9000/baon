@@ -10,6 +10,7 @@ import os
 
 from FileRef import FileRef
 
+
 class FileScanner(object):
     def __init__(self):
         pass
@@ -30,7 +31,7 @@ class FileScanner(object):
         path = os.path.join(base_path, rel_path)
         
         raw_files = os.listdir(path)
-        files_here = sorted([ FileRef(os.path.join(path, name), os.path.join(rel_path, name)) for name in raw_files ])
+        files_here = sorted([FileRef(os.path.join(path, name), os.path.join(rel_path, name)) for name in raw_files])
         
         stats['done'] += 1
         stats['total'] += len(files_here)

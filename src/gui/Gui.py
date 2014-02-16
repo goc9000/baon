@@ -10,6 +10,7 @@ import sys
 from gui.MainWindow import MainWindow
 from PyQt4.QtGui import QApplication
 
+
 class Gui(object):
     _app = None
     _mainWindow = None

@@ -8,6 +8,7 @@
 
 from BetweenMatch import BetweenMatch
 
+
 class MatchSequence(object):
     terms = None
 
