@@ -10,7 +10,8 @@
 import os
 import string
 
-ESCAPES = {
+
+SIMPLE_ESCAPES = {
     'b':  '\b',
     't':  '\t',
     'n':  '\n',
@@ -26,43 +27,50 @@ def qstr_to_unicode(qstring):
     return unicode(qstring.toUtf8(), 'utf-8')
 
 
+def is_quoted_string(s):
+    return (len(s) >= 2) and (s[0] == s[-1]) and (s[0] in ['"', "'"])
+
+
 def decode_literal(literal):
-    literal = literal[1:-1]
+    if not is_quoted_string(literal):
+        raise RuntimeError("{0} is not a valid string literal".format(literal))
+
+    literal = literal[1:-1] # strip quotes
     
-    out = []
+    output_parts = []
     pos = 0
     
     while pos < len(literal):
-        nxpos = literal.find('\\', pos)
-        if (nxpos == -1) or (nxpos == len(literal)-1):
+        next_escape_pos = literal.find('\\', pos)
+        if (next_escape_pos == -1) or (next_escape_pos == len(literal)-1):
             break
         
-        out.append(literal[pos:nxpos])
+        output_parts.append(literal[pos:next_escape_pos])
         
-        esc_char = literal[nxpos+1]
-        pos = nxpos + 2
+        char_after_escape = literal[next_escape_pos+1]
+        pos = next_escape_pos + 2
         
-        if esc_char in ESCAPES:  # simple escape
-            out.append(ESCAPES[esc_char])
-        elif esc_char == 'u' and pos < len(literal)-4 \
+        if char_after_escape in SIMPLE_ESCAPES:  # simple escape
+            output_parts.append(SIMPLE_ESCAPES[char_after_escape])
+        elif char_after_escape == 'u' and pos < len(literal)-4 \
                 and all(literal[pos+i] in string.hexdigits for i in xrange(4)):  # Unicode escape
-            out.append(unichr(int(literal[pos:pos+4], 16)))
+            output_parts.append(unichr(int(literal[pos:pos+4], 16)))
             pos += 4
-        elif esc_char in '01234567':  # octal escape
-            code = int(esc_char)
+        elif char_after_escape in '01234567':  # octal escape
+            code = int(char_after_escape)
             digits = 2 if code <= 3 else 1
             while (digits > 0) and (pos < len(literal)) and (literal[pos] in '01234567'):
-                code = code*8 + int(literal[pos])
+                code = code * 8 + int(literal[pos])
                 pos += 1
                 digits -= 1
             
-            out.append(chr(code))
+            output_parts.append(chr(code))
         else:  # unsupported escape
-            out.append(esc_char)
+            output_parts.append(char_after_escape)
     
-    out.append(literal[pos:])
+    output_parts.append(literal[pos:])
     
-    return ''.join(out)
+    return ''.join(output_parts)
 
 
 def enum_partial_paths(path):
