@@ -31,7 +31,7 @@ def is_quoted_string(s):
     return (len(s) >= 2) and (s[0] == s[-1]) and (s[0] in ['"', "'"])
 
 
-def decode_literal(literal):
+def decode_baon_string_literal(literal):
     if not is_quoted_string(literal):
         raise RuntimeError("{0} is not a valid string literal".format(literal))
 

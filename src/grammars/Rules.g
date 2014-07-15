@@ -136,18 +136,18 @@ action        returns [ out_action ]
               : OP_DELETE { out_action = DeleteAction() }
               | OP_SAVE ID { out_action = SaveToAliasAction($ID.text) }
               | OP_XFORM ( OP_OPEN_PARA rs=ruleset OP_CLOSE_PARA { out_action = ApplyRuleSetAction($rs.out_rset) }
-                         | STRING_LITERAL { out_action = ReplaceByLiteralAction(decode_literal($STRING_LITERAL.text)) }
+                         | STRING_LITERAL { out_action = ReplaceByLiteralAction(decode_baon_string_literal($STRING_LITERAL.text)) }
                          | FORMAT_SPEC { out_action = ReformatAction($FORMAT_SPEC.text) }
                          | ID { out_action = ApplyFunctionAction($ID.text) }
               );
 
 insert_match  returns [ out_match ]
               : OP_INSERT ( ID {  out_match = InsertAliasMatch($ID.text) }
-                          | STRING_LITERAL { out_match = InsertLiteralMatch(decode_literal($STRING_LITERAL.text)) } );
+                          | STRING_LITERAL { out_match = InsertLiteralMatch(decode_baon_string_literal($STRING_LITERAL.text)) } );
 
 elem_match    returns [ out_match ]
               : FORMAT_SPEC { out_match = FormatMatch($FORMAT_SPEC.text) }
-              | STRING_LITERAL { out_match = LiteralMatch(decode_literal($STRING_LITERAL.text)) }
+              | STRING_LITERAL { out_match = LiteralMatch(decode_baon_string_literal($STRING_LITERAL.text)) }
               | REGEX { out_match = RegexMatch($REGEX.text) }
               | ANCHOR_START { out_match = StartAnchorMatch() }
               | ANCHOR_END { out_match = EndAnchorMatch() };
