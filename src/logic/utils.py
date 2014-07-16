@@ -11,6 +11,9 @@ import os
 import string
 
 
+from logic.str_utils import is_quoted_string
+
+
 SIMPLE_ESCAPES = {
     'b':  '\b',
     't':  '\t',
@@ -25,10 +28,6 @@ SIMPLE_ESCAPES = {
 
 def qstr_to_unicode(qstring):
     return unicode(qstring.toUtf8(), 'utf-8')
-
-
-def is_quoted_string(s):
-    return (len(s) >= 2) and (s[0] == s[-1]) and (s[0] in ['"', "'"])
 
 
 def decode_baon_string_literal(literal):
