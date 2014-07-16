@@ -6,7 +6,7 @@
 #
 # Licensed under the GPL-3
 
-from PyQt4.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont, QBrush, QColor
+from PyQt4.QtGui import QSyntaxHighlighter
 
 import antlr3
 
@@ -15,25 +15,17 @@ from genparsers.RulesLexer import STRING_LITERAL, FORMAT_SPEC, REGEX, ANCHOR_STA
     OP_SAVE, OP_PLUS, OP_STAR, OP_OPTIONAL, RULE_SEP, OP_OPEN_PARA, OP_CLOSE_PARA, \
     RulesLexer
 
-FMT_LITERAL = QTextCharFormat()
-FMT_LITERAL.setBackground(QBrush(QColor(232, 232, 240)))
-FMT_LITERAL.setForeground(QBrush(QColor(0, 0, 240)))
+from gui.qt_utils import mk_txt_fmt
 
-FMT_PATTERN = QTextCharFormat()
-FMT_PATTERN.setForeground(QBrush(QColor(0, 174, 0)))
 
-FMT_BETWEEN = QTextCharFormat()
-FMT_BETWEEN.setForeground(QBrush(QColor(0, 174, 0)))
-FMT_BETWEEN.setFontWeight(QFont.Bold)
+FMT_LITERAL = mk_txt_fmt(fg=(0, 0, 240), bg=(232, 232, 240))
+FMT_PATTERN = mk_txt_fmt(fg=(0, 174, 0))
+FMT_BETWEEN = mk_txt_fmt(fg=(0, 174, 0), bold=True)
+FMT_OP = mk_txt_fmt()
+FMT_PARA = mk_txt_fmt(bold=True)
+FMT_ID = mk_txt_fmt(fg=(96, 96, 128), bold=True)
+FMT_ERROR = mk_txt_fmt(fg=(255, 0, 0), bold=True, ul='spellcheck', ul_color=(255, 0, 0))
 
-FMT_OP = QTextCharFormat()
-
-FMT_PARA = QTextCharFormat()
-FMT_PARA.setFontWeight(QFont.Bold)
-
-FMT_ID = QTextCharFormat()
-FMT_ID.setForeground(QBrush(QColor(96, 96, 128)))
-FMT_ID.setFontWeight(QFont.Bold)
 
 FORMAT_DICT = {
     STRING_LITERAL: FMT_LITERAL,
@@ -124,12 +116,7 @@ class RuleSyntaxHighlighter(QSyntaxHighlighter):
             char_to += 1
         
         for col in xrange(char_from, char_to+1):
-            fmt = self.format(col)
-            fmt.setForeground(QBrush(QColor(255, 0, 0)))
-            fmt.setFontWeight(QFont.Bold)
-            fmt.setUnderlineColor(QColor(255, 0, 0))
-            fmt.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
-            self.setFormat(col, 1, fmt)
+            self.setFormat(col, 1, FMT_ERROR)
     
     def tokenizeText(self, text):
         tokens = []
