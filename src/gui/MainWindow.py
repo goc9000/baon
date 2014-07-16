@@ -12,6 +12,7 @@ from PyQt4.QtCore import QTimer, QThread, pyqtSignal
 from PyQt4.QtGui import QWidget, QDialog, QDesktopWidget, QFileDialog, QMessageBox
 
 from gui.templates.Ui_MainWindow import Ui_MainWindow
+from gui.qt_utils import qstr_to_unicode
 
 from RuleSyntaxHighlighter import RuleSyntaxHighlighter
 
@@ -22,7 +23,6 @@ from logic.rules.RuleSet import RuleSet
 from logic.rules.RuleParser import RuleParser
 from logic.errors.RuleParseException import RuleParseException
 from logic.errors.RuleCheckException import RuleCheckException
-from logic.baon_utils import qstr_to_unicode
 from logic.grammar_utils import format_numerals
 
 

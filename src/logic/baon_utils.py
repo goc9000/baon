@@ -26,10 +26,6 @@ SIMPLE_ESCAPES = {
 }
 
 
-def qstr_to_unicode(qstring):
-    return unicode(qstring.toUtf8(), 'utf-8')
-
-
 def decode_baon_string_literal(literal):
     if not is_quoted_string(literal):
         raise RuntimeError("{0} is not a valid string literal".format(literal))
