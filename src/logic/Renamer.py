@@ -9,7 +9,7 @@
 import re
 import os
 
-from utils import enum_partial_paths
+from logic.baon_utils import enum_partial_paths
 from grammar_utils import aesthetic_warning
 from logic.files.RenamedFileRef import RenamedFileRef
 

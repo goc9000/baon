@@ -1,4 +1,4 @@
-# logic/utils.py
+# logic/baon_utils.py
 #
 # (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
 # 

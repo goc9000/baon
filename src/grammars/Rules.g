@@ -35,7 +35,7 @@ options {
     from logic.actions.SaveToAliasAction import SaveToAliasAction
     from logic.actions.ReformatAction import ReformatAction
     from logic.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
-    from logic.utils import *
+    from logic.baon_utils import *
 }
 
 @rulecatch {

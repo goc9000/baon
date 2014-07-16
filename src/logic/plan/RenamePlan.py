@@ -14,7 +14,7 @@ from MoveFileAction import MoveFileAction
 from RmDirAction import RmDirAction
 from RmDirIfEmptyAction import RmDirIfEmptyAction
 
-from logic.utils import enum_partial_paths
+from logic.baon_utils import enum_partial_paths
 
 import os
 import re
