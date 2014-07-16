@@ -35,7 +35,7 @@ def decode_baon_string_literal(literal):
     if not is_quoted_string(literal):
         raise RuntimeError("{0} is not a valid string literal".format(literal))
 
-    literal = literal[1:-1] # strip quotes
+    literal = literal[1:-1]  # strip quotes
     
     output_parts = []
     pos = 0
@@ -64,13 +64,14 @@ def decode_baon_string_literal(literal):
                 pos += 1
                 digits -= 1
             
-            output_parts.append(chr(code))
+            output_parts.append(unichr(code))
         else:  # unsupported escape
+            output_parts.append(u'\\')
             output_parts.append(char_after_escape)
     
     output_parts.append(literal[pos:])
     
-    return ''.join(output_parts)
+    return u''.join(output_parts)
 
 
 def enum_partial_paths(path):
