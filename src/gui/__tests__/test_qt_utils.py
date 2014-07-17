@@ -1,9 +1,13 @@
+# gui/__tests__/test_qt_utils.py
+#
+# (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
+#
+# This file is part of BAON.
+#
+# Licensed under the GPL-3
+
+
 from unittest import TestCase
-
-__author__ = 'Cristian Dinu <goc9000@gmail.com>'
-
-
-from PyQt4.QtGui import QColor
 
 from gui.qt_utils import parse_qcolor
 

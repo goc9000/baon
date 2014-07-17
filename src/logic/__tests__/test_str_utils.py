@@ -1,7 +1,13 @@
+# logic/__tests__/test_str_utils.py
+#
+# (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
+#
+# This file is part of BAON.
+#
+# Licensed under the GPL-3
+
+
 from unittest import TestCase
-
-__author__ = 'Cristian Dinu <goc9000@gmail.com>'
-
 
 from logic.str_utils import is_quoted_string
 
