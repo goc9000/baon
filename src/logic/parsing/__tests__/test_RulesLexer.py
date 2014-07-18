@@ -224,7 +224,7 @@ class TestRulesLexer(TestCase):
     @staticmethod
     def token_repr(token):
         base_tuple = (
-            token.offset,
+            token.start,
             token.type,
             token.text,
             token.line,

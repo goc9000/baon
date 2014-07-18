@@ -67,9 +67,9 @@ class RulesLexer(object):
             token = RulesToken()
             token.type = lex_token.type
             token.text = lex_token.value
-            token.offset = lex_token.lexpos
+            token.start = lex_token.lexpos
             token.line = curr_line
-            token.column = 1 + token.offset - start_of_line
+            token.column = 1 + token.start - start_of_line
 
             if is_dictish(lex_token.value):
                 for k, v in lex_token.value.items():
@@ -85,7 +85,7 @@ class RulesLexer(object):
 
             if token.text == "\n":
                 curr_line += 1
-                start_of_line = token.offset + 1
+                start_of_line = token.start + 1
 
             yield lex_token
 

@@ -10,10 +10,15 @@
 class RulesToken(object):
     type = None
     text = None
-    offset = None
+    start = None
     line = None
     column = None
     extra = None
 
-    def length(self):
-        return len(self.text)
+    def __getattribute__(self, item):
+        if item == 'length':
+            return len(self.text)
+        elif item == 'end':
+            return self.start + len(self.text)
+
+        return object.__getattribute__(self, item)
