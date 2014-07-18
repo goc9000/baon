@@ -6,16 +6,11 @@
 #
 # Licensed under the GPL-3
 
+
 from PyQt4.QtGui import QSyntaxHighlighter
 
-import antlr3
-
-from genparsers.RulesLexer import STRING_LITERAL, FORMAT_SPEC, REGEX, ANCHOR_START, \
-    ANCHOR_END, OP_BETWEEN, ID, OP_OR, OP_XFORM, OP_INSERT, OP_DELETE, OP_SEARCH, \
-    OP_SAVE, OP_PLUS, OP_STAR, OP_OPTIONAL, RULE_SEP, OP_OPEN_PARA, OP_CLOSE_PARA, \
-    RulesLexer
-
-from gui.qt_utils import mk_txt_fmt
+from gui.qt_utils import mk_txt_fmt, qstr_to_unicode
+from logic.parsing.RulesLexer import RulesLexer
 
 
 FMT_LITERAL = mk_txt_fmt(fg=(0, 0, 240), bg=(232, 232, 240))
@@ -28,29 +23,27 @@ FMT_ERROR = mk_txt_fmt(fg=(255, 0, 0), bold=True, ul='spellcheck', ul_color=(255
 
 
 FORMAT_DICT = {
-    STRING_LITERAL: FMT_LITERAL,
+    'STRING_LITERAL': FMT_LITERAL,
     
-    FORMAT_SPEC: FMT_PATTERN,
-    REGEX: FMT_PATTERN,
-    ANCHOR_START: FMT_PATTERN,
-    ANCHOR_END: FMT_PATTERN,
-    OP_BETWEEN: FMT_BETWEEN,
+    'FORMAT_SPEC': FMT_PATTERN,
+    'REGEX': FMT_PATTERN,
+    'ANCHOR_START': FMT_PATTERN,
+    'ANCHOR_END': FMT_PATTERN,
+    'BETWEEN': FMT_BETWEEN,
     
-    ID: FMT_ID,
+    'ID': FMT_ID,
     
-    OP_OR: FMT_OP,
-    OP_XFORM: FMT_OP,
-    OP_INSERT: FMT_OP,
-    OP_DELETE: FMT_OP,
-    OP_SEARCH: FMT_OP,
-    OP_SAVE: FMT_OP,
-    OP_PLUS: FMT_OP,
-    OP_STAR: FMT_OP,
-    OP_OPTIONAL: FMT_OP,
-    RULE_SEP: FMT_OP,
+    'OP_OR': FMT_OP,
+    'OP_XFORM': FMT_OP,
+    'OP_INSERT': FMT_OP,
+    'OP_DELETE': FMT_OP,
+    'OP_SEARCH': FMT_OP,
+    'OP_SAVE': FMT_OP,
+    'OP_REPEAT': FMT_OP,
+    'RULE_SEP': FMT_OP,
     
-    OP_OPEN_PARA: FMT_PARA,
-    OP_CLOSE_PARA: FMT_PARA
+    'PARA_OPEN': FMT_PARA,
+    'PARA_CLOSE': FMT_PARA,
 }
 
 
@@ -62,7 +55,6 @@ class RuleSyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, document):
         QSyntaxHighlighter.__init__(self, document)
         self._lexer = RulesLexer()
-        self._lexer.lenient = True
     
     def showError(self, line, col):
         self._err_line = line
@@ -76,15 +68,16 @@ class RuleSyntaxHighlighter(QSyntaxHighlighter):
             self.rehighlight()
     
     def highlightBlock(self, text):
-        tokens = self.tokenizeText(text)
-            
-        for tok in tokens:
+        text = qstr_to_unicode(text)
+
+        tokens = list(self._lexer.parse(text))
+        for token in tokens:
             fmt = None
-            if tok.type in FORMAT_DICT:
-                fmt = FORMAT_DICT[tok.type]
+            if token.type in FORMAT_DICT:
+                fmt = FORMAT_DICT[token.type]
 
             if fmt is not None:
-                self.setFormat(tok.start, 1 + tok.stop - tok.start, fmt)
+                self.setFormat(token.start, token.length, fmt)
         
         if self._err_line is not None:
             if self.currentBlock().firstLineNumber() == self._err_line:
@@ -92,7 +85,7 @@ class RuleSyntaxHighlighter(QSyntaxHighlighter):
 
     def markErrorAtChar(self, char, text, tokens):
         token_starts = set([tok.start for tok in tokens])
-        token_ends = set([tok.stop for tok in tokens])
+        token_ends = set([tok.end for tok in tokens])
         
         if len(text) == 0:
             return
@@ -117,23 +110,3 @@ class RuleSyntaxHighlighter(QSyntaxHighlighter):
         
         for col in xrange(char_from, char_to+1):
             self.setFormat(col, 1, FMT_ERROR)
-    
-    def tokenizeText(self, text):
-        tokens = []
-        
-        try:
-            chrStream = antlr3.ANTLRStringStream(text)
-            self._lexer.setCharStream(chrStream)
-            self._lexer.errors = []
-            
-            while True:
-                tok = self._lexer.nextToken()
-                if tok.channel != antlr3.DEFAULT_CHANNEL:
-                    continue
-                if tok.type == antlr3.EOF:
-                    break
-                tokens.append(tok)
-        except:
-            pass
-        
-        return tokens
