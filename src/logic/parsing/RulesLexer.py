@@ -32,6 +32,7 @@ class RulesLexer(object):
 
     def parse_lex_tokens(self, rules_text):
         self._lexer.input(rules_text)
+        self._lexer.lineno = (1, 0)
         return self.augment_lex_tokens(self.merge_error_tokens(self._lexer))
 
     @staticmethod
@@ -60,16 +61,13 @@ class RulesLexer(object):
 
     @staticmethod
     def augment_lex_tokens(lex_tokens_stream):
-        curr_line = 1
-        start_of_line = 0
-
         for lex_token in lex_tokens_stream:
             token = RulesToken()
             token.type = lex_token.type
             token.text = lex_token.value
             token.lexpos = lex_token.lexpos
-            token.lineno = curr_line
-            token.colno = 1 + lex_token.lexpos - start_of_line
+            token.lineno = lex_token.lineno[0]
+            token.colno = 1 + lex_token.lexpos - lex_token.lineno[1]
 
             if is_dictish(lex_token.value):
                 for k, v in lex_token.value.items():
@@ -82,10 +80,6 @@ class RulesLexer(object):
                         token.value[k] = v
 
             lex_token.value = token
-
-            if token.text == "\n":
-                curr_line += 1
-                start_of_line = token.start + 1
 
             yield lex_token
 
@@ -112,7 +106,7 @@ class RulesLexer(object):
     t_PARA_OPEN = r'\('
     t_PARA_CLOSE = r'\)'
 
-    t_RULE_SEP = r';|\n'
+    t_RULE_SEP = r';'  # Also newline, but this is handled separately
 
     t_OP_OR = r'\|'
 
@@ -188,6 +182,12 @@ class RulesLexer(object):
             'max': 1 if t.value == '?' else None,
         }
 
+        return t
+
+    @TOKEN('\\n')
+    def t_newline(self, t):
+        t.type = 'RULE_SEP'
+        t.lexer.lineno = t.lexer.lineno[0] + 1, t.lexpos + 1
         return t
 
     def t_error(self, t):
