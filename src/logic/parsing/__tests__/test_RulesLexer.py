@@ -227,8 +227,8 @@ class TestRulesLexer(TestCase):
             token.start,
             token.type,
             token.text,
-            token.line,
-            token.column,
+            token.lineno,
+            token.colno,
         )
 
-        return base_tuple if token.extra is None else base_tuple + (token.extra,)
+        return base_tuple if token.value is None else base_tuple + (token.value,)

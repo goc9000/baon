@@ -67,19 +67,19 @@ class RulesLexer(object):
             token = RulesToken()
             token.type = lex_token.type
             token.text = lex_token.value
-            token.start = lex_token.lexpos
-            token.line = curr_line
-            token.column = 1 + token.start - start_of_line
+            token.lexpos = lex_token.lexpos
+            token.lineno = curr_line
+            token.colno = 1 + lex_token.lexpos - start_of_line
 
             if is_dictish(lex_token.value):
                 for k, v in lex_token.value.items():
                     if k == 'text':
                         token.text = v
                     else:
-                        if token.extra is None:
-                            token.extra = {}
+                        if token.value is None:
+                            token.value = {}
 
-                        token.extra[k] = v
+                        token.value[k] = v
 
             lex_token.value = token
 
