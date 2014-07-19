@@ -39,3 +39,6 @@ class Match(object):
         
         return text
 
+    def test_repr(self):
+        """The representation of this AST item in tests"""
+        return self._test_repr_impl() + tuple(action.test_repr() for action in self.actions)

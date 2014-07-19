@@ -21,3 +21,6 @@ class EndAnchorMatch(Match):
             return ''
         else:
             return False
+
+    def _test_repr_impl(self):
+        return 'END_ANCHOR_MATCH',

@@ -12,6 +12,8 @@ from ply import yacc
 from logic.rules.RuleSet import RuleSet
 from logic.rules.Rule import Rule
 from logic.matches.special.MatchSequence import MatchSequence
+from logic.matches.StartAnchorMatch import StartAnchorMatch
+from logic.matches.EndAnchorMatch import EndAnchorMatch
 
 from logic.parsing.RulesLexer import RulesLexer, tokens
 
@@ -43,9 +45,25 @@ def p_rule_base(p):
     p[0].alternatives.append(p[1])
 
 
+def p_sequence_match_add_match(p):
+    """sequence_match : sequence_match match"""
+    p[0] = p[1]
+    p[0].terms.append(p[2])
+
+
 def p_sequence_match_empty(p):
     """sequence_match : """
     p[0] = MatchSequence()
+
+
+def p_match_anchor_start(p):
+    """match : ANCHOR_START"""
+    p[0] = StartAnchorMatch()
+
+
+def p_match_anchor_end(p):
+    """match : ANCHOR_END"""
+    p[0] = EndAnchorMatch()
 
 
 start = 'rule_set'
