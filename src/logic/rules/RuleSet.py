@@ -42,3 +42,8 @@ class RuleSet(object):
         
         for rule in self.rules:
             rule.semanticCheck(scope)
+
+    def test_repr(self):
+        """The representation of this AST item in tests"""
+        return ('RULE_SET',
+                tuple([rule.test_repr() for rule in self.rules]))
