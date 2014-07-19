@@ -8,12 +8,14 @@
 
 
 from ply import yacc
+from ply.yacc import NullLogger
 
 from logic.rules.RuleSet import RuleSet
 from logic.rules.Rule import Rule
 from logic.matches.special.MatchSequence import MatchSequence
 from logic.matches.StartAnchorMatch import StartAnchorMatch
 from logic.matches.EndAnchorMatch import EndAnchorMatch
+from logic.matches.LiteralMatch import LiteralMatch
 
 from logic.parsing.RulesLexer import RulesLexer, tokens
 
@@ -75,6 +77,11 @@ class RulesParser(object):
     @staticmethod
     def parse(rules_text):
         return parser_template.parse(rules_text, RulesLexerForYACC())
+
+    @staticmethod
+    def debug_parse(rules_text, start_rule):
+        parser = yacc.yacc(start=start_rule, debug=0, errorlog=NullLogger())
+        return parser.parse(rules_text, RulesLexerForYACC())
 
 
 class RulesLexerForYACC(object):
