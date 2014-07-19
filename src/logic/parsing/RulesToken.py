@@ -13,7 +13,7 @@ class RulesToken(object):
     lexpos = None
     lineno = None
     colno = None
-    value = None
+    extras = None
 
     def __init__(self, lex_token=None, **extras):
         if lex_token is not None:
@@ -22,11 +22,13 @@ class RulesToken(object):
             self.lexpos = lex_token.lexpos
             self.lineno = lex_token.lineno[0]
             self.colno = 1 + lex_token.lexpos - lex_token.lineno[1]
-            self.value = extras if len(extras) > 0 else None
+            self.extras = extras if len(extras) > 0 else None
 
     def __getattribute__(self, item):
         if item == 'length':
             return len(self.text)
+        elif item == 'value':
+            return self
         elif item == 'start':
             return self.lexpos
         elif item == 'end':
@@ -44,4 +46,4 @@ class RulesToken(object):
             self.colno,
         )
 
-        return base_tuple if self.value is None else base_tuple + (self.value,)
+        return base_tuple if self.extras is None else base_tuple + (self.extras,)
