@@ -13,10 +13,6 @@ from logic.parsing.RulesLexer import RulesLexer
 
 
 class TestRulesLexer(TestCase):
-    _lexer = None
-
-    def setUp(self):
-        self._lexer = RulesLexer()
 
     def test_parse_id(self):
         self.assertEqual(self.parse_result(u'ident'),
@@ -219,4 +215,4 @@ class TestRulesLexer(TestCase):
                           (79, 'ANCHOR_END', u'$', 2, 3)])
 
     def parse_result(self, text_input):
-        return [token.test_repr() for token in self._lexer.parse(text_input)]
+        return [token.test_repr() for token in RulesLexer.tokenize(text_input)]

@@ -54,7 +54,6 @@ class RuleSyntaxHighlighter(QSyntaxHighlighter):
     
     def __init__(self, document):
         QSyntaxHighlighter.__init__(self, document)
-        self._lexer = RulesLexer()
     
     def showError(self, line, col):
         self._err_line = line
@@ -70,7 +69,7 @@ class RuleSyntaxHighlighter(QSyntaxHighlighter):
     def highlightBlock(self, text):
         text = qstr_to_unicode(text)
 
-        tokens = list(self._lexer.parse(text))
+        tokens = list(RulesLexer.tokenize(text))
         for token in tokens:
             fmt = None
             if token.type in FORMAT_DICT:
