@@ -15,6 +15,15 @@ class RulesToken(object):
     colno = None
     value = None
 
+    def __init__(self, lex_token=None, **extras):
+        if lex_token is not None:
+            self.type = lex_token.type
+            self.text = lex_token.value
+            self.lexpos = lex_token.lexpos
+            self.lineno = lex_token.lineno[0]
+            self.colno = 1 + lex_token.lexpos - lex_token.lineno[1]
+            self.value = extras if len(extras) > 0 else None
+
     def __getattribute__(self, item):
         if item == 'length':
             return len(self.text)
@@ -24,3 +33,15 @@ class RulesToken(object):
             return self.lexpos + len(self.text)
 
         return object.__getattribute__(self, item)
+
+    def test_repr(self):
+        """The representation of this token in tests"""
+        base_tuple = (
+            self.start,
+            self.type,
+            self.text,
+            self.lineno,
+            self.colno,
+        )
+
+        return base_tuple if self.value is None else base_tuple + (self.value,)

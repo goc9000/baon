@@ -219,16 +219,4 @@ class TestRulesLexer(TestCase):
                           (79, 'ANCHOR_END', u'$', 2, 3)])
 
     def parse_result(self, text_input):
-        return [self.token_repr(token) for token in self._lexer.parse(text_input)]
-
-    @staticmethod
-    def token_repr(token):
-        base_tuple = (
-            token.start,
-            token.type,
-            token.text,
-            token.lineno,
-            token.colno,
-        )
-
-        return base_tuple if token.value is None else base_tuple + (token.value,)
+        return [token.test_repr() for token in self._lexer.parse(text_input)]
