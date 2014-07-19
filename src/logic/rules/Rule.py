@@ -13,6 +13,9 @@ class Rule(object):
     def __init__(self):
         self.alternatives = []
 
+    def isEmpty(self):
+        return (len(self.alternatives) == 0) or all(alt.isEmpty() for alt in self.alternatives)
+
     def semanticCheck(self, scope):
         for alt in self.alternatives:
             alt.semanticCheck(scope)
@@ -25,3 +28,8 @@ class Rule(object):
                 return matched
         
         return False
+
+    def test_repr(self):
+        """The representation of this AST item in tests"""
+        return ('RULE',
+                tuple([alt.test_repr() for alt in self.alternatives]))

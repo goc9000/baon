@@ -23,6 +23,13 @@ class TestRulesLexer(TestCase):
                          ('RULE_SET', ()))
         self.assertEqual(self.parse_result(u'  ;  \n ;;\n  \n\n'),
                          ('RULE_SET', ()))
+        self.assertEqual(self.parse_result(u'|'),
+                         ('RULE_SET', ()))
+        self.assertEqual(self.parse_result(u'|;|'),
+                         ('RULE_SET', ()))
+        self.assertEqual(self.parse_result(u'|||;;||;|;|'),
+                         ('RULE_SET', ()))
+
 
     def parse_result(self, rules_text):
         return RulesParser.parse(rules_text).test_repr()

@@ -15,6 +15,9 @@ class MatchSequence(object):
     def __init__(self):
         self.terms = []
 
+    def isEmpty(self):
+        return len(self.terms) == 0
+
     def semanticCheck(self, scope):
         for term in self.terms:
             term.semanticCheck(scope)
@@ -69,3 +72,8 @@ class MatchSequence(object):
         context.last_match_pos = match_pos
 
         return ''.join(committed)
+
+    def test_repr(self):
+        """The representation of this AST item in tests"""
+        return ('MATCH_SEQ',
+                tuple([term.test_repr() for term in self.terms]))

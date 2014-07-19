@@ -10,6 +10,8 @@
 from ply import yacc
 
 from logic.rules.RuleSet import RuleSet
+from logic.rules.Rule import Rule
+from logic.matches.special.MatchSequence import MatchSequence
 
 from logic.parsing.RulesLexer import RulesLexer, tokens
 
@@ -17,21 +19,33 @@ from logic.parsing.RulesLexer import RulesLexer, tokens
 def p_rule_set_add_rule(p):
     """rule_set : rule_set RULE_SEP rule"""
     p[0] = p[1]
-    if p[2] is not None:
-        p[0].rules.append(p[2])
+    if not p[3].isEmpty():
+        p[0].rules.append(p[3])
 
 
 def p_rule_set_base(p):
     """rule_set : rule"""
     p[0] = RuleSet()
 
-    if p[1] is not None:
+    if not p[1].isEmpty():
         p[0].rules.append(p[1])
 
 
-def p_rule_empty(p):
-    """rule : """
-    pass
+def p_rule_add_sequence_match(p):
+    """rule : rule OP_OR sequence_match"""
+    p[0] = p[1]
+    p[0].alternatives.append(p[3])
+
+
+def p_rule_base(p):
+    """rule : sequence_match"""
+    p[0] = Rule()
+    p[0].alternatives.append(p[1])
+
+
+def p_sequence_match_empty(p):
+    """sequence_match : """
+    p[0] = MatchSequence()
 
 
 start = 'rule_set'
