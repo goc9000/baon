@@ -71,6 +71,12 @@ def p_sequence_match_empty(p):
     p[0] = MatchSequence()
 
 
+def p_match_add_actions(p):
+    """match : match action"""
+    p[0] = p[1]
+    p[0].actions.append(p[2])
+
+
 def p_match_anchor_start(p):
     """match : ANCHOR_START"""
     p[0] = StartAnchorMatch()

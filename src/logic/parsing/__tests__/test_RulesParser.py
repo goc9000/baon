@@ -117,5 +117,14 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('action', u'->%bogus'),
                          ('REFORMAT_ACTION', u'bogus'))
 
+    def test_parse_match_with_actions(self):
+        self.assertEqual(self.parse_result('match', u'"abc"!'),
+                         ('LITERAL_MATCH', u'abc',
+                          ('DELETE_ACTION',)))
+        self.assertEqual(self.parse_result('match', u'%d>>ghi->"def"'),
+                         ('FORMAT_MATCH', u'd',
+                          ('SAVE_ACTION', u'ghi'),
+                          ('REPLACE_ACTION', u'def')))
+
     def parse_result(self, start_rule, rules_text):
         return RulesParser.debug_parse(rules_text, start_rule).test_repr()
