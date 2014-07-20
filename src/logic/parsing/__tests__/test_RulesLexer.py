@@ -140,15 +140,15 @@ class TestRulesLexer(TestCase):
 
     def test_parse_regex(self):
         self.assertEqual(self.parse_result(u'/normal regex/'),
-                         [(0, 'REGEX', u'/normal regex/', 1, 1, {'pattern': u'normal regex', 'flags': set()})])
+                         [(0, 'REGEX', u'/normal regex/', 1, 1, {'pattern': u'normal regex'})])
         self.assertEqual(self.parse_result(u"/regex w flags/igm"),
                          [(0, 'REGEX', u'/regex w flags/igm', 1, 1, {'pattern': u'regex w flags',
                                                                      'flags': {u'i', u'g', u'm'}})])
         self.assertEqual(self.parse_result(u'/two/i/regexes/'),
                          [(0, 'REGEX', u'/two/i', 1, 1, {'pattern': u'two', 'flags': {u'i'}}),
-                          (6, 'REGEX', u'/regexes/', 1, 7, {'pattern': u'regexes', 'flags': set()})])
+                          (6, 'REGEX', u'/regexes/', 1, 7, {'pattern': u'regexes'})])
         self.assertEqual(self.parse_result(u'/with//escape/'),
-                         [(0, 'REGEX', u'/with//escape/', 1, 1, {'pattern': u'with/escape', 'flags': set()})])
+                         [(0, 'REGEX', u'/with//escape/', 1, 1, {'pattern': u'with/escape'})])
         self.assertEqual(self.parse_result(u'/unterminated'),
                          [(0, 'REGEX', u'/unterminated', 1, 1, {'unterminated': True})])
         self.assertEqual(self.parse_result(u'/unterminated\nnext line'),

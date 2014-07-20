@@ -96,11 +96,16 @@ def t_REGEX(t):
     if t.lexer.lexmatch.group('end_regex') == '':
         return RulesToken(t, unterminated=True)
 
-    return RulesToken(t,
-                      pattern=t.lexer.lexmatch.group('regex_body').replace(u'//', u'/'),
-                      flags=set(t.lexer.lexmatch.group('end_regex')[1:]),
-                      )
+    extras = {
+        'pattern': t.lexer.lexmatch.group('regex_body').replace(u'//', u'/'),
+    }
 
+
+    flags = set(t.lexer.lexmatch.group('end_regex')[1:])
+    if len(flags) > 0:
+        extras['flags'] = flags
+
+    return RulesToken(t, **extras)
 
 @TOKEN('\?|\*|\+')
 def t_OP_REPEAT(t):
