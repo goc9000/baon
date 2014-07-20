@@ -126,5 +126,30 @@ class TestRulesLexer(TestCase):
                           ('SAVE_ACTION', u'ghi'),
                           ('REPLACE_ACTION', u'def')))
 
+    def test_parse_match_with_repeats(self):
+        self.assertEqual(self.parse_result('match', u'"abc"?'),
+                         ('REPEAT_MATCH', ('LITERAL_MATCH', u'abc'), 0, 1))
+        self.assertEqual(self.parse_result('match', u'%d+'),
+                         ('REPEAT_MATCH', ('FORMAT_MATCH', u'd'), 1, None))
+
+    def test_parse_match_with_actions_and_repeats(self):
+        self.assertEqual(self.parse_result('match', u'"abc"!*'),
+                         ('REPEAT_MATCH',
+                          ('LITERAL_MATCH', u'abc', ('DELETE_ACTION',)),
+                          0, None))
+        self.assertEqual(self.parse_result('match', u'"abc"+->"def"'),
+                         ('REPEAT_MATCH',
+                          ('LITERAL_MATCH', u'abc'),
+                          1, None,
+                          ('REPLACE_ACTION', u'def')))
+        self.assertEqual(self.parse_result('match', u'"abc"+->"def"*!'),
+                         ('REPEAT_MATCH',
+                          ('REPEAT_MATCH',
+                           ('LITERAL_MATCH', u'abc'),
+                           1, None,
+                           ('REPLACE_ACTION', u'def')),
+                          0, None,
+                          ('DELETE_ACTION',)))
+
     def parse_result(self, start_rule, rules_text):
         return RulesParser.debug_parse(rules_text, start_rule).test_repr()

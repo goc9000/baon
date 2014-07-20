@@ -48,3 +48,6 @@ class RepeatMatch(Match):
         context.last_match_pos = match_pos
         
         return ''.join(committed)
+
+    def _test_repr_impl(self):
+        return 'REPEAT_MATCH', self.match.test_repr(), self.at_least, self.at_most

@@ -14,11 +14,15 @@ from logic.rules.RuleSet import RuleSet
 from logic.rules.Rule import Rule
 
 from logic.matches.special.MatchSequence import MatchSequence
+from logic.matches.special.RepeatMatch import RepeatMatch
+
 from logic.matches.StartAnchorMatch import StartAnchorMatch
 from logic.matches.EndAnchorMatch import EndAnchorMatch
+
 from logic.matches.pattern.LiteralMatch import LiteralMatch
 from logic.matches.pattern.RegexMatch import RegexMatch
 from logic.matches.pattern.FormatMatch import FormatMatch
+
 from logic.matches.syn.InsertLiteralMatch import InsertLiteralMatch
 from logic.matches.syn.InsertAliasMatch import InsertAliasMatch
 
@@ -75,6 +79,11 @@ def p_match_add_actions(p):
     """match : match action"""
     p[0] = p[1]
     p[0].actions.append(p[2])
+
+
+def p_match_add_repeat(p):
+    """match : match OP_REPEAT"""
+    p[0] = RepeatMatch(p[1], p[2].extras['min'], p[2].extras['max'])
 
 
 def p_match_anchor_start(p):
