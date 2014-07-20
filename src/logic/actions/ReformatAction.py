@@ -6,7 +6,7 @@
 #
 # Licensed under the GPL-3
 
-from Action import Action
+from CompiledAction import CompiledAction
 from logic.errors.RuleCheckException import RuleCheckException
 from logic.errors.RuleApplicationException import RuleApplicationException
 import re
@@ -40,34 +40,37 @@ def pad_with_zeroes(s, digits):
     return m.group(1) + mid + m.group(3)
 
 
-class ReformatAction(Action):
-    error = None
-    fn = None
-    
-    def __init__(self, fmt_spec):
-        Action.__init__(self)
-        
-        self.fn = self._selectFunction(fmt_spec)
-        if self.fn is None:
-            self.error = "Unrecognized format specifier '{0}'".format(fmt_spec)
- 
-    def _selectFunction(self, fmt_spec):
-        if fmt_spec == '%d':
-            return lambda s, c: strip_zeroes(s)
-        
-        m = re.match(r'%([0-9]*)d$', fmt_spec)
-        if m is not None:
-            digits = int(m.group(1))
-            return lambda s, c: pad_with_zeroes(s, digits)
-        
-        return None
-        
-    def semanticCheck(self, scope):
-        Action.semanticCheck(self, scope)
-        
-        if not self.error is None:
-            raise RuleCheckException(self.error, scope)
+class ReformatAction(CompiledAction):
+    specifier = None
+    width = None
+    leading_zeros = None
 
-    def execute(self, text, context):
-        if self.fn is not None:
-            return self.fn(text, context)
+    def __init__(self, specifier, width=None, leading_zeros=False):
+        CompiledAction.__init__(self)
+
+        self.specifier = specifier
+        self.width = width
+        self.leading_zeros = leading_zeros
+
+    def _compile_function(self):
+        if self.specifier == 'd':
+            if self.width is None:
+                return lambda s, c: strip_zeroes(s)
+
+            if self.width <= 0:
+                raise RuleCheckException("Width must be >0 for specifier %d")
+
+            return lambda s, c: pad_with_zeroes(s, self.width)
+
+        raise RuleCheckException("Unrecognized format specifier '{0}'".format(self.specifier))
+
+    def test_repr(self):
+        base_tuple = 'REFORMAT_ACTION', self.specifier
+
+        if self.width is not None:
+            base_tuple += self.width,
+
+        if self.leading_zeros is True:
+            base_tuple += 'leading',
+
+        return base_tuple

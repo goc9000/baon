@@ -8,7 +8,7 @@
 
 import re
 
-from Action import Action
+from CompiledAction import CompiledAction
 from logic.errors.RuleCheckException import RuleCheckException
 from logic.grammar_utils import to_title_case
 
@@ -56,23 +56,19 @@ FUNC_DICT = {
 }
 
 
-class ApplyFunctionAction(Action):
-    fn = None
-    error = None
-    
-    def __init__(self, fn_name):
-        Action.__init__(self)
-        
-        if fn_name in FUNC_DICT:
-            self.fn = FUNC_DICT[fn_name]
-        else:
-            self.error = "Unsupported function '{0}'".format(fn_name)
-    
-    def semanticCheck(self, scope):
-        Action.semanticCheck(self, scope)
-        
-        if not self.error is None:
-            raise RuleCheckException(self.error, scope)
+class ApplyFunctionAction(CompiledAction):
+    function_name = None
 
-    def execute(self, text, context):
-        return self.fn(text, context)
+    def __init__(self, fn_name):
+        CompiledAction.__init__(self)
+
+        self.function_name = fn_name
+
+    def _compile_function(self):
+        if self.function_name in FUNC_DICT:
+            return FUNC_DICT[self.function_name]
+        else:
+            raise RuleCheckException("Unsupported function '{0}'".format(self.function_name))
+
+    def test_repr(self):
+        return 'APPLY_FN_ACTION', self.function_name

@@ -13,3 +13,6 @@ class Action(object):
 
     def semanticCheck(self, scope):
         pass
+
+    def execute(self, text, context):
+        raise RuntimeError("execute() not implemented in subclass")

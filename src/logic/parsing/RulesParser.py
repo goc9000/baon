@@ -25,6 +25,8 @@ from logic.matches.syn.InsertAliasMatch import InsertAliasMatch
 from logic.actions.DeleteAction import DeleteAction
 from logic.actions.SaveToAliasAction import SaveToAliasAction
 from logic.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
+from logic.actions.ApplyFunctionAction import ApplyFunctionAction
+from logic.actions.ReformatAction import ReformatAction
 
 from logic.errors.RuleParseException import RuleParseException
 
@@ -96,13 +98,7 @@ def p_match_regex(p):
 
 def p_match_format(p):
     """match : FORMAT_SPEC"""
-    spec_info = p[1].extras
-    specifier = spec_info['specifier'] if 'specifier' in spec_info else None
-    width = spec_info['width'] if 'width' in spec_info else None
-    leading_zeros = spec_info['leading_zeros'] if 'leading_zeros' in spec_info else None
-
-    if specifier is None:
-        raise RuleParseException.from_token(p[1], "Missing format specifier")
+    specifier, width, leading_zeros = _handle_format_token(p[1])
 
     p[0] = FormatMatch(specifier, width, leading_zeros)
 
@@ -132,6 +128,17 @@ def p_action_replace_by_literal(p):
     p[0] = ReplaceByLiteralAction(_handle_literal_token(p[2]))
 
 
+def p_action_apply_function(p):
+    """action : OP_XFORM ID"""
+    p[0] = ApplyFunctionAction(p[2].text)
+
+
+def p_action_reformat(p):
+    """action : OP_XFORM FORMAT_SPEC"""
+    specifier, width, leading_zeros = _handle_format_token(p[2])
+    p[0] = ReformatAction(specifier, width, leading_zeros)
+
+
 def _handle_literal_token(token):
     literal_info = token.extras
     if 'unterminated' in literal_info and literal_info['unterminated']:
@@ -140,6 +147,18 @@ def _handle_literal_token(token):
         raise RuleParseException.from_token(token, literal_info['error'])
 
     return literal_info['value']
+
+
+def _handle_format_token(token):
+    spec_info = token.extras
+    specifier = spec_info['specifier'] if 'specifier' in spec_info else None
+    width = spec_info['width'] if 'width' in spec_info else None
+    leading_zeros = spec_info['leading_zeros'] if 'leading_zeros' in spec_info else None
+
+    if specifier is None:
+        raise RuleParseException.from_token(token, "Missing format specifier")
+
+    return specifier, width, leading_zeros
 
 
 start = 'rule_set'

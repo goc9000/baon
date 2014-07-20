@@ -98,5 +98,24 @@ class TestRulesLexer(TestCase):
         with self.assertRaisesRegexp(RuleParseException, '(?i)unterminated'):
             self.parse_result('action', u'->"abc')
 
+    def test_parse_apply_function_action(self):
+        self.assertEqual(self.parse_result('action', u'->title'),
+                         ('APPLY_FN_ACTION', u'title'))
+
+    def test_parse_reformat_action(self):
+        self.assertEqual(self.parse_result('action', u'->%c'),
+                         ('REFORMAT_ACTION', u'c'))
+        self.assertEqual(self.parse_result('action', u'->%4s'),
+                         ('REFORMAT_ACTION', u's', 4))
+        self.assertEqual(self.parse_result('action', u'->%04d'),
+                         ('REFORMAT_ACTION', u'd', 4, 'leading'))
+
+        with self.assertRaisesRegexp(RuleParseException, '(?i)missing'):
+            self.parse_result('action', u'->%')
+
+        # Erroneous specifiers do NOT raise a RuleParseException. This is caught in the semantic check phase.
+        self.assertEqual(self.parse_result('action', u'->%bogus'),
+                         ('REFORMAT_ACTION', u'bogus'))
+
     def parse_result(self, start_rule, rules_text):
         return RulesParser.debug_parse(rules_text, start_rule).test_repr()
