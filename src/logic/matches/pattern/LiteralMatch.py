@@ -12,13 +12,15 @@ from ElementaryPatternMatch import ElementaryPatternMatch
 
 
 class LiteralMatch(ElementaryPatternMatch):
-    _original_text = None
+    text = None
 
     def __init__(self, text):
         ElementaryPatternMatch.__init__(self)
-        
-        self._setPattern("({0})".format(re.escape(text)))
-        self._original_text = text
+
+        self.text = text
+
+    def _get_pattern_impl(self):
+        return re.escape(self.text)
 
     def _test_repr_impl(self):
-        return 'LITERAL_MATCH', self._original_text
+        return 'LITERAL_MATCH', self.text

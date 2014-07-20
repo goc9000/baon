@@ -11,7 +11,7 @@ class RuleCheckException(Exception):
     message = None
     scope = None
     
-    def __init__(self, message, scope):
+    def __init__(self, message, scope=None):
         self.message = message
         self.scope = scope
     

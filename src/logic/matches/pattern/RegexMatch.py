@@ -8,33 +8,38 @@
 
 import re
 
+from logic.errors.RuleCheckException import RuleCheckException
+
 from ElementaryPatternMatch import ElementaryPatternMatch
 
 
 class RegexMatch(ElementaryPatternMatch):
-    _original_pattern = None
-    _original_flags = None
+    pattern = None
+    flags = None
 
     def __init__(self, pattern, flags):
         ElementaryPatternMatch.__init__(self)
 
-        self._original_pattern = pattern
-        self._original_flags = flags
+        self.pattern = pattern
+        self.flags = flags
 
+    def _get_pattern_impl(self):
+        return "({0})".format(self.pattern)
+
+    def _get_flags_impl(self):
         flags_enum = 0
-        for c in flags:
-            if c == 'i':
+        for flag in self.flags:
+            if flag == 'i':
                 flags_enum |= re.I
             else:
-                self._setError("Invalid regex flag '{0}'".format(c))
-                return
+                raise RuleCheckException("Invalid regex flag '{0}'".format(flag))
 
-        self._setPattern("({0})".format(pattern), flags_enum)
+        return flags_enum
 
     def _test_repr_impl(self):
-        base_tuple = 'REGEX_MATCH', self._original_pattern
+        base_tuple = 'REGEX_MATCH', self.pattern
 
-        if len(self._original_flags) > 0:
-            base_tuple += self._original_flags,
+        if len(self.flags) > 0:
+            base_tuple += self.flags,
 
         return base_tuple
