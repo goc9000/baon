@@ -16,6 +16,7 @@ from logic.matches.special.MatchSequence import MatchSequence
 from logic.matches.StartAnchorMatch import StartAnchorMatch
 from logic.matches.EndAnchorMatch import EndAnchorMatch
 from logic.matches.LiteralMatch import LiteralMatch
+from logic.matches.RegexMatch import RegexMatch
 
 from logic.errors.RuleParseException import RuleParseException
 
@@ -79,6 +80,16 @@ def p_match_literal(p):
         raise RuleParseException.from_token(p[1], literal_info['error'])
 
     p[0] = LiteralMatch(p[1].extras['value'])
+
+
+def p_match_regex(p):
+    """match : REGEX"""
+    regex_info = p[1].extras
+    if 'unterminated' in regex_info and regex_info['unterminated']:
+        raise RuleParseException.from_token(p[1], "Unterminated regex")
+
+    flags = regex_info['flags'] if 'flags' in regex_info else set()
+    p[0] = RegexMatch(regex_info['pattern'], flags)
 
 
 start = 'rule_set'
