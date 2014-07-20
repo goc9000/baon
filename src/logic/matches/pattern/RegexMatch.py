@@ -1,4 +1,4 @@
-# logic/matches/RegexMatch.py
+# logic/matches/pattern/RegexMatch.py
 #
 # (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
 # 

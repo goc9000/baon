@@ -1,4 +1,4 @@
-# logic/matches/LiteralMatch.py
+# logic/matches/pattern/LiteralMatch.py
 #
 # (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
 # 

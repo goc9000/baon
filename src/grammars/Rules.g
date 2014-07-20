@@ -24,9 +24,9 @@ options {
     from logic.matches.special.RepeatMatch import RepeatMatch
     from logic.matches.syn.InsertAliasMatch import InsertAliasMatch
     from logic.matches.syn.InsertLiteralMatch import InsertLiteralMatch
-    from logic.matches.FormatMatch import FormatMatch
-    from logic.matches.LiteralMatch import LiteralMatch
-    from logic.matches.RegexMatch import RegexMatch
+    from logic.matches.pattern.FormatMatch import FormatMatch
+    from logic.matches.pattern.LiteralMatch import LiteralMatch
+    from logic.matches.pattern.RegexMatch import RegexMatch
     from logic.matches.StartAnchorMatch import StartAnchorMatch
     from logic.matches.EndAnchorMatch import EndAnchorMatch
     from logic.actions.ApplyFunctionAction import ApplyFunctionAction
@@ -113,7 +113,7 @@ rule          returns [ out_rule ]
 
 match_seq     returns [ out_seq ]
               : { out_seq=MatchSequence() }
-                  (st=seq_term { out_seq.terms.append($st.out_term) })*;     
+                  (st=seq_term { out_seq.terms.append($st.out_term) })*;
 
 seq_term      returns [ out_term ]
               : OP_BETWEEN { out_term = BetweenMatch() } (a=action { out_term.actions.append($a.out_action) })*

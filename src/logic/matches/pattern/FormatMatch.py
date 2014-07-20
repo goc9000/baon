@@ -1,4 +1,4 @@
-# logic/matches/FormatMatch.py
+# logic/matches/pattern/FormatMatch.py
 #
 # (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
 # 

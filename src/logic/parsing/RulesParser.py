@@ -15,9 +15,9 @@ from logic.rules.Rule import Rule
 from logic.matches.special.MatchSequence import MatchSequence
 from logic.matches.StartAnchorMatch import StartAnchorMatch
 from logic.matches.EndAnchorMatch import EndAnchorMatch
-from logic.matches.LiteralMatch import LiteralMatch
-from logic.matches.RegexMatch import RegexMatch
-from logic.matches.FormatMatch import FormatMatch
+from logic.matches.pattern.LiteralMatch import LiteralMatch
+from logic.matches.pattern.RegexMatch import RegexMatch
+from logic.matches.pattern.FormatMatch import FormatMatch
 
 from logic.errors.RuleParseException import RuleParseException
 

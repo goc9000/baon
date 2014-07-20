@@ -1,4 +1,4 @@
-# logic/matches/ElementaryPatternMatch.py
+# logic/matches/pattern/ElementaryPatternMatch.py
 #
 # (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -8,7 +8,7 @@
 
 import re
 
-from Match import Match
+from logic.matches.Match import Match
 from logic.errors.RuleCheckException import RuleCheckException
 
 
