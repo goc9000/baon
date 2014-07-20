@@ -27,6 +27,7 @@ class ElementaryPatternMatch(Match):
 
         try:
             self._cached_regex = re.compile(pattern, flags)
+            return self._cached_regex
         except re.error:
             raise RuleCheckException('Invalid regex')
 
