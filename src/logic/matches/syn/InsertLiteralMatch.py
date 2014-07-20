@@ -21,3 +21,6 @@ class InsertLiteralMatch(InsertionMatch):
         context.last_match_pos = None
         
         return self.text
+
+    def test_repr(self):
+        return 'INSERT_LITERAL_MATCH', self.text

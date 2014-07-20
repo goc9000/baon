@@ -25,3 +25,6 @@ class InsertAliasMatch(InsertionMatch):
         else:
             context.forward_aliases.add(self.alias)
             return ''
+
+    def test_repr(self):
+        return 'INSERT_ALIAS_MATCH', self.alias

@@ -74,5 +74,15 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('match', u'%bogus'),
                          ('FORMAT_MATCH', u'bogus'))
 
+    def test_parse_insert_alias_match(self):
+        self.assertEqual(self.parse_result('match', u'<<abc'),
+                         ('INSERT_ALIAS_MATCH', u'abc'))
+
+    def test_parse_insert_literal_match(self):
+        self.assertEqual(self.parse_result('match', u'<<"abc"'),
+                         ('INSERT_LITERAL_MATCH', u'abc'))
+        with self.assertRaisesRegexp(RuleParseException, '(?i)unterminated'):
+            self.parse_result('match', u'<<"abc')
+
     def parse_result(self, start_rule, rules_text):
         return RulesParser.debug_parse(rules_text, start_rule).test_repr()

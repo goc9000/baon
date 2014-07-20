@@ -18,6 +18,8 @@ from logic.matches.EndAnchorMatch import EndAnchorMatch
 from logic.matches.pattern.LiteralMatch import LiteralMatch
 from logic.matches.pattern.RegexMatch import RegexMatch
 from logic.matches.pattern.FormatMatch import FormatMatch
+from logic.matches.syn.InsertLiteralMatch import InsertLiteralMatch
+from logic.matches.syn.InsertAliasMatch import InsertAliasMatch
 
 from logic.errors.RuleParseException import RuleParseException
 
@@ -104,6 +106,22 @@ def p_match_format(p):
         raise RuleParseException.from_token(p[1], "Missing format specifier")
 
     p[0] = FormatMatch(specifier, width, leading_zeros)
+
+
+def p_match_insert_id(p):
+    """match : OP_INSERT ID"""
+    p[0] = InsertAliasMatch(p[2].text)
+
+
+def p_match_insert_literal(p):
+    """match : OP_INSERT STRING_LITERAL"""
+    literal_info = p[2].extras
+    if 'unterminated' in literal_info and literal_info['unterminated']:
+        raise RuleParseException.from_token(p[2], "Unterminated string")
+    if 'error' in literal_info:
+        raise RuleParseException.from_token(p[2], literal_info['error'])
+
+    p[0] = InsertLiteralMatch(p[2].extras['value'])
 
 
 start = 'rule_set'
