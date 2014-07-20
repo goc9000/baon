@@ -20,3 +20,6 @@ class SaveToAliasAction(Action):
     def execute(self, text, context):
         context.aliases[self.alias] = text
         return text
+
+    def test_repr(self):
+        return 'SAVE_ACTION', self.alias

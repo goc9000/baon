@@ -12,6 +12,7 @@ from ply.yacc import NullLogger
 
 from logic.rules.RuleSet import RuleSet
 from logic.rules.Rule import Rule
+
 from logic.matches.special.MatchSequence import MatchSequence
 from logic.matches.StartAnchorMatch import StartAnchorMatch
 from logic.matches.EndAnchorMatch import EndAnchorMatch
@@ -20,6 +21,10 @@ from logic.matches.pattern.RegexMatch import RegexMatch
 from logic.matches.pattern.FormatMatch import FormatMatch
 from logic.matches.syn.InsertLiteralMatch import InsertLiteralMatch
 from logic.matches.syn.InsertAliasMatch import InsertAliasMatch
+
+from logic.actions.DeleteAction import DeleteAction
+from logic.actions.SaveToAliasAction import SaveToAliasAction
+from logic.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
 
 from logic.errors.RuleParseException import RuleParseException
 
@@ -76,13 +81,7 @@ def p_match_anchor_end(p):
 
 def p_match_literal(p):
     """match : STRING_LITERAL"""
-    literal_info = p[1].extras
-    if 'unterminated' in literal_info and literal_info['unterminated']:
-        raise RuleParseException.from_token(p[1], "Unterminated string")
-    if 'error' in literal_info:
-        raise RuleParseException.from_token(p[1], literal_info['error'])
-
-    p[0] = LiteralMatch(p[1].extras['value'])
+    p[0] = LiteralMatch(_handle_literal_token(p[1]))
 
 
 def p_match_regex(p):
@@ -115,13 +114,32 @@ def p_match_insert_id(p):
 
 def p_match_insert_literal(p):
     """match : OP_INSERT STRING_LITERAL"""
-    literal_info = p[2].extras
-    if 'unterminated' in literal_info and literal_info['unterminated']:
-        raise RuleParseException.from_token(p[2], "Unterminated string")
-    if 'error' in literal_info:
-        raise RuleParseException.from_token(p[2], literal_info['error'])
+    p[0] = InsertLiteralMatch(_handle_literal_token(p[2]))
 
-    p[0] = InsertLiteralMatch(p[2].extras['value'])
+
+def p_action_delete(p):
+    """action : OP_DELETE"""
+    p[0] = DeleteAction()
+
+
+def p_action_save_to_alias(p):
+    """action : OP_SAVE ID"""
+    p[0] = SaveToAliasAction(p[2].text)
+
+
+def p_action_replace_by_literal(p):
+    """action : OP_XFORM STRING_LITERAL"""
+    p[0] = ReplaceByLiteralAction(_handle_literal_token(p[2]))
+
+
+def _handle_literal_token(token):
+    literal_info = token.extras
+    if 'unterminated' in literal_info and literal_info['unterminated']:
+        raise RuleParseException.from_token(token, "Unterminated string")
+    if 'error' in literal_info:
+        raise RuleParseException.from_token(token, literal_info['error'])
+
+    return literal_info['value']
 
 
 start = 'rule_set'

@@ -84,5 +84,19 @@ class TestRulesLexer(TestCase):
         with self.assertRaisesRegexp(RuleParseException, '(?i)unterminated'):
             self.parse_result('match', u'<<"abc')
 
+    def test_parse_delete_action(self):
+        self.assertEqual(self.parse_result('action', u'!'),
+                         ('DELETE_ACTION',))
+
+    def test_parse_save_to_alias_action(self):
+        self.assertEqual(self.parse_result('action', u'>>abc'),
+                         ('SAVE_ACTION', u'abc'))
+
+    def test_parse_replace_by_literal_action(self):
+        self.assertEqual(self.parse_result('action', u'->"abc"'),
+                         ('REPLACE_ACTION', u'abc'))
+        with self.assertRaisesRegexp(RuleParseException, '(?i)unterminated'):
+            self.parse_result('action', u'->"abc')
+
     def parse_result(self, start_rule, rules_text):
         return RulesParser.debug_parse(rules_text, start_rule).test_repr()
