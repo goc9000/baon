@@ -12,47 +12,67 @@ import re
 from ElementaryPatternMatch import ElementaryPatternMatch
 
 FORMAT_DICT = {
-    '%ws':         r'(\s*)',
-    '%d':          r'(\s*[0-9]+)',
-    '%c':          r'(.)',
-    '%s':          r'(\s*\S+)',
-    '%paras':      r'(\s*\([^)]*\))',
-    '%inparas':    r'((?<=\()[^)]*(?=\)))',
-    '%braces':     r'(\s*\[[^\]]*\])',
-    '%inbraces':   r'((?<=\[[^\]]*(?=\]))',
-    '%curlies':    r'(\s*\{[^}]*\})',
-    '%incurlies':  r'((?<=\{[^}]*(?=\}))',
-    '%path':       r'(.*' + re.escape(os.sep) + r')'
+    '%ws':         (r'(\s##)', '*'),
+    '%d':          (r'(\s*[0-9]##)', '+'),
+    '%c':          (r'(.##)', '{1}'),
+    '%s':          (r'(\s*\S##)', '+'),
+    '%paras':      (r'(\s*\([^)]##\))', '*'),
+    '%inparas':    (r'((?<=\()[^)]##(?=\)))', '*'),
+    '%braces':     (r'(\s*\[[^\]]##\])', '*'),
+    '%inbraces':   (r'((?<=\[[^\]]##(?=\]))', '*'),
+    '%curlies':    (r'(\s*\{[^}]##\})', '*'),
+    '%incurlies':  (r'((?<=\{[^}]##(?=\}))', '*'),
+    '%path':       (r'(.*' + re.escape(os.sep) + r')', None),
 }
 
 
 class FormatMatch(ElementaryPatternMatch):
-    fmt_spec_error = None
-    
-    def __init__(self, fmt_spec):
+    _original_specifier = None
+    _original_width = None
+    _original_leading = None
+
+    def __init__(self, specifier, width=None, leading_zeros=False):
         ElementaryPatternMatch.__init__(self)
-        
-        pattern = self._makePattern(fmt_spec)
 
-        if pattern is not None:
-            self._setPattern(pattern)
-        else:
-            self._setError("Unrecognized format specifier '{0}'".format(fmt_spec))
+        self._original_specifier = specifier
+        self._original_width = width
+        self._original_leading = leading_zeros
 
-    def _makePattern(self, fmt_spec):
-        if fmt_spec in FORMAT_DICT:
-            return FORMAT_DICT[fmt_spec]
-        
-        m = re.match(r'%([0-9]+)d$', fmt_spec)
-        if m is not None:
-            return r'(\s*[0-9]{{{0}}})'.format(int(m.group(1)))
+        try:
+            self._setPattern(self._make_pattern(specifier, width, leading_zeros))
+        except RuntimeError as e:
+            self._setError(e.message)
 
-        m = re.match(r'%([0-9]+)c$', fmt_spec)
-        if m is not None:
-            return r'(.{{{0}}})'.format(int(m.group(1)))
+    def _test_repr_impl(self):
+        base_tuple = 'FORMAT_MATCH', self._original_specifier
 
-        m = re.match(r'%([0-9]+)s$', fmt_spec)
-        if m is not None:
-            return r'(\s*\S{{{0}}})'.format(int(m.group(1)))
-        
-        return None
+        if self._original_width is not None:
+            base_tuple += self._original_width,
+
+        if self._original_leading is True:
+            base_tuple += 'leading',
+
+        return base_tuple
+
+    @staticmethod
+    def _make_pattern(specifier, width, leading_zeros):
+        if specifier not in FORMAT_DICT:
+            raise RuntimeError("Unrecognized format specifier '{0}'".format(specifier))
+
+        pattern, repeat = FORMAT_DICT[specifier]
+
+        if leading_zeros is not None:
+            raise RuntimeError("Leading 0s inapplicable to specifier '{0}'".format(specifier))
+
+        if width is not None:
+            if '##' not in pattern:
+                raise RuntimeError("Width inapplicable to specifier '{0}'".format(specifier))
+
+            if width < 0:
+                raise RuntimeError("Invalid width")
+            if width == 0 and repeat == '+':
+                raise  RuntimeError("Width must be at least 1 for specifier '{0}'".format(specifier))
+
+            repeat = '{' + str(width) + '}'
+
+        return pattern.replace('##', repeat)

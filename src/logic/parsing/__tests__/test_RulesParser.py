@@ -59,5 +59,20 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('match', u'/abc/QXYZ'),
                          ('REGEX_MATCH', u'abc', {'Q', 'X', 'Y', 'Z'}))
 
+    def test_parse_format_match(self):
+        self.assertEqual(self.parse_result('match', u'%c'),
+                         ('FORMAT_MATCH', u'c'))
+        self.assertEqual(self.parse_result('match', u'%4s'),
+                         ('FORMAT_MATCH', u's', 4))
+        self.assertEqual(self.parse_result('match', u'%04d'),
+                         ('FORMAT_MATCH', u'd', 4, 'leading'))
+
+        with self.assertRaisesRegexp(RuleParseException, '(?i)missing'):
+            self.parse_result('match', u'%')
+
+        # Erroneous specifiers do NOT raise a RuleParseException. This is caught in the semantic check phase.
+        self.assertEqual(self.parse_result('match', u'%bogus'),
+                         ('FORMAT_MATCH', u'bogus'))
+
     def parse_result(self, start_rule, rules_text):
         return RulesParser.debug_parse(rules_text, start_rule).test_repr()

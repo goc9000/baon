@@ -17,6 +17,7 @@ from logic.matches.StartAnchorMatch import StartAnchorMatch
 from logic.matches.EndAnchorMatch import EndAnchorMatch
 from logic.matches.LiteralMatch import LiteralMatch
 from logic.matches.RegexMatch import RegexMatch
+from logic.matches.FormatMatch import FormatMatch
 
 from logic.errors.RuleParseException import RuleParseException
 
@@ -90,6 +91,19 @@ def p_match_regex(p):
 
     flags = regex_info['flags'] if 'flags' in regex_info else set()
     p[0] = RegexMatch(regex_info['pattern'], flags)
+
+
+def p_match_format(p):
+    """match : FORMAT_SPEC"""
+    spec_info = p[1].extras
+    specifier = spec_info['specifier'] if 'specifier' in spec_info else None
+    width = spec_info['width'] if 'width' in spec_info else None
+    leading_zeros = spec_info['leading_zeros'] if 'leading_zeros' in spec_info else None
+
+    if specifier is None:
+        raise RuleParseException.from_token(p[1], "Missing format specifier")
+
+    p[0] = FormatMatch(specifier, width, leading_zeros)
 
 
 start = 'rule_set'
