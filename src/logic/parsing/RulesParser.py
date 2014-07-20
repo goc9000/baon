@@ -17,6 +17,8 @@ from logic.matches.StartAnchorMatch import StartAnchorMatch
 from logic.matches.EndAnchorMatch import EndAnchorMatch
 from logic.matches.LiteralMatch import LiteralMatch
 
+from logic.errors.RuleParseException import RuleParseException
+
 from logic.parsing.RulesLexer import RulesLexer, tokens
 
 
@@ -66,6 +68,17 @@ def p_match_anchor_start(p):
 def p_match_anchor_end(p):
     """match : ANCHOR_END"""
     p[0] = EndAnchorMatch()
+
+
+def p_match_literal(p):
+    """match : STRING_LITERAL"""
+    literal_info = p[1].extras
+    if 'unterminated' in literal_info and literal_info['unterminated']:
+        raise RuleParseException.from_token(p[1], "Unterminated string")
+    if 'error' in literal_info:
+        raise RuleParseException.from_token(p[1], literal_info['error'])
+
+    p[0] = LiteralMatch(p[1].extras['value'])
 
 
 start = 'rule_set'
