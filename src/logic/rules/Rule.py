@@ -31,5 +31,4 @@ class Rule(object):
 
     def test_repr(self):
         """The representation of this AST item in tests"""
-        return ('RULE',
-                tuple([alt.test_repr() for alt in self.alternatives]))
+        return ('RULE',) + tuple(alt.test_repr() for alt in self.alternatives)

@@ -166,5 +166,39 @@ class TestRulesLexer(TestCase):
                            ('SAVE_ACTION', u'etc'),
                            ('DELETE_ACTION',))))
 
+    def test_parse_match_sequence(self):
+        self.assertEqual(self.parse_result('sequence_match', u'.. $'),
+                         ('MATCH_SEQ',
+                          ('BETWEEN_MATCH',),
+                          ('END_ANCHOR_MATCH',)))
+        self.assertEqual(self.parse_result('sequence_match', u'^->"abc"..>>def$'),
+                         ('MATCH_SEQ',
+                          ('START_ANCHOR_MATCH', ('REPLACE_ACTION', u'abc')),
+                          ('BETWEEN_MATCH', ('SAVE_ACTION', u'def')),
+                          ('END_ANCHOR_MATCH',)))
+
+    def test_parse_rule(self):
+        self.assertEqual(self.parse_result('rule', u'..'),
+                         ('RULE',
+                          ('MATCH_SEQ',
+                           ('BETWEEN_MATCH',))))
+        self.assertEqual(self.parse_result('rule', u'^|"a"'),
+                         ('RULE',
+                          ('MATCH_SEQ',
+                           ('START_ANCHOR_MATCH',)),
+                          ('MATCH_SEQ',
+                           ('LITERAL_MATCH', u'a'))))
+        self.assertEqual(self.parse_result('rule', u'%d->"a"|..!$|<<abc'),
+                         ('RULE',
+                          ('MATCH_SEQ',
+                           ('FORMAT_MATCH', u'd',
+                            ('REPLACE_ACTION', u'a'))),
+                          ('MATCH_SEQ',
+                           ('BETWEEN_MATCH',
+                            ('DELETE_ACTION',)),
+                           ('END_ANCHOR_MATCH',)),
+                          ('MATCH_SEQ',
+                           ('INSERT_ALIAS_MATCH', u'abc'))))
+
     def parse_result(self, start_rule, rules_text):
         return RulesParser.debug_parse(rules_text, start_rule).test_repr()

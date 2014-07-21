@@ -75,5 +75,4 @@ class MatchSequence(object):
 
     def test_repr(self):
         """The representation of this AST item in tests"""
-        return ('MATCH_SEQ',
-                tuple([term.test_repr() for term in self.terms]))
+        return ('MATCH_SEQ',) + tuple(term.test_repr() for term in self.terms)
