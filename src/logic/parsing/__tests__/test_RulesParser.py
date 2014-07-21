@@ -18,19 +18,19 @@ class TestRulesLexer(TestCase):
 
     def test_parse_empty(self):
         self.assertEqual(self.parse_result('rule_set', u''),
-                         ('RULE_SET', ()))
+                         ('RULE_SET',))
         self.assertEqual(self.parse_result('rule_set', u';'),
-                         ('RULE_SET', ()))
+                         ('RULE_SET',))
         self.assertEqual(self.parse_result('rule_set', u'\n'),
-                         ('RULE_SET', ()))
+                         ('RULE_SET',))
         self.assertEqual(self.parse_result('rule_set', u'  ;  \n ;;\n  \n\n'),
-                         ('RULE_SET', ()))
+                         ('RULE_SET',))
         self.assertEqual(self.parse_result('rule_set', u'|'),
-                         ('RULE_SET', ()))
+                         ('RULE_SET',))
         self.assertEqual(self.parse_result('rule_set', u'|;|'),
-                         ('RULE_SET', ()))
+                         ('RULE_SET',))
         self.assertEqual(self.parse_result('rule_set', u'|||;;||;|;|'),
-                         ('RULE_SET', ()))
+                         ('RULE_SET',))
 
     def test_parse_anchor_matches(self):
         self.assertEqual(self.parse_result('match', u'^'),
@@ -88,6 +88,23 @@ class TestRulesLexer(TestCase):
         with self.assertRaisesRegexp(RuleParseException, '(?i)unterminated'):
             self.parse_result('match', u'<<"abc')
 
+    def test_parse_subrule_match(self):
+        self.assertEqual(self.parse_result('match', u'("abc")'),
+                         ('SUBRULE_MATCH',
+                          ('RULE',
+                           ('MATCH_SEQ',
+                            ('LITERAL_MATCH', u'abc')))))
+        self.assertEqual(self.parse_result('match', u'($|..*)!'),
+                         ('SUBRULE_MATCH',
+                          ('RULE',
+                           ('MATCH_SEQ',
+                            ('END_ANCHOR_MATCH',)),
+                           ('MATCH_SEQ',
+                            ('REPEAT_MATCH',
+                             ('BETWEEN_MATCH',),
+                             0, None))),
+                          ('DELETE_ACTION',)))
+
     def test_parse_delete_action(self):
         self.assertEqual(self.parse_result('action', u'!'),
                          ('DELETE_ACTION',))
@@ -120,6 +137,24 @@ class TestRulesLexer(TestCase):
         # Erroneous specifiers do NOT raise a RuleParseException. This is caught in the semantic check phase.
         self.assertEqual(self.parse_result('action', u'->%bogus'),
                          ('REFORMAT_ACTION', u'bogus'))
+
+    def test_parse_apply_rule_set_action(self):
+        self.assertEqual(self.parse_result('action', u'->()'),
+                         ('RULE_SET_ACTION',
+                          ('RULE_SET',)))
+        self.assertEqual(self.parse_result('action', u'->(..|%d $\n"abc"!)'),
+                         ('RULE_SET_ACTION',
+                          ('RULE_SET',
+                           ('RULE',
+                            ('MATCH_SEQ',
+                             ('BETWEEN_MATCH',)),
+                            ('MATCH_SEQ',
+                             ('FORMAT_MATCH', u'd'),
+                             ('END_ANCHOR_MATCH',))),
+                           ('RULE',
+                            ('MATCH_SEQ',
+                             ('LITERAL_MATCH', u'abc',
+                              ('DELETE_ACTION',)))))))
 
     def test_parse_match_with_actions(self):
         self.assertEqual(self.parse_result('match', u'"abc"!'),
@@ -199,6 +234,20 @@ class TestRulesLexer(TestCase):
                            ('END_ANCHOR_MATCH',)),
                           ('MATCH_SEQ',
                            ('INSERT_ALIAS_MATCH', u'abc'))))
+
+    def test_parse_rule_set(self):
+        self.assertEqual(self.parse_result('rule_set', u'..->title;^|"a"!'),
+                         ('RULE_SET',
+                          ('RULE',
+                           ('MATCH_SEQ',
+                            ('BETWEEN_MATCH',
+                             ('APPLY_FN_ACTION', u'title')))),
+                          ('RULE',
+                           ('MATCH_SEQ',
+                            ('START_ANCHOR_MATCH',)),
+                           ('MATCH_SEQ',
+                            ('LITERAL_MATCH', u'a',
+                             ('DELETE_ACTION',))))))
 
     def parse_result(self, start_rule, rules_text):
         return RulesParser.debug_parse(rules_text, start_rule).test_repr()

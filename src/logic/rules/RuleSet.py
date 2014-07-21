@@ -45,5 +45,4 @@ class RuleSet(object):
 
     def test_repr(self):
         """The representation of this AST item in tests"""
-        return ('RULE_SET',
-                tuple([rule.test_repr() for rule in self.rules]))
+        return ('RULE_SET',) + tuple(rule.test_repr() for rule in self.rules)

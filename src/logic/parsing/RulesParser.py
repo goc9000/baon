@@ -20,6 +20,7 @@ from logic.matches.StartAnchorMatch import StartAnchorMatch
 from logic.matches.EndAnchorMatch import EndAnchorMatch
 from logic.matches.special.BetweenMatch import BetweenMatch
 from logic.matches.special.SearchReplaceMatch import SearchReplaceMatch
+from logic.matches.special.SubRuleMatch import SubRuleMatch
 
 from logic.matches.pattern.LiteralMatch import LiteralMatch
 from logic.matches.pattern.RegexMatch import RegexMatch
@@ -33,6 +34,7 @@ from logic.actions.SaveToAliasAction import SaveToAliasAction
 from logic.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
 from logic.actions.ApplyFunctionAction import ApplyFunctionAction
 from logic.actions.ReformatAction import ReformatAction
+from logic.actions.ApplyRuleSetAction import ApplyRuleSetAction
 
 from logic.errors.RuleParseException import RuleParseException
 
@@ -140,6 +142,11 @@ def p_match_insert_id(p):
     p[0] = InsertAliasMatch(p[2].text)
 
 
+def p_match_subrule(p):
+    """match : PARA_OPEN rule PARA_CLOSE"""
+    p[0] = SubRuleMatch(p[2])
+
+
 def p_match_insert_literal(p):
     """match : OP_INSERT STRING_LITERAL"""
     p[0] = InsertLiteralMatch(_handle_literal_token(p[2]))
@@ -169,6 +176,11 @@ def p_action_reformat(p):
     """action : OP_XFORM FORMAT_SPEC"""
     specifier, width, leading_zeros = _handle_format_token(p[2])
     p[0] = ReformatAction(specifier, width, leading_zeros)
+
+
+def p_action_apply_sub_rule(p):
+    """action : OP_XFORM PARA_OPEN rule_set PARA_CLOSE"""
+    p[0] = ApplyRuleSetAction(p[3])
 
 
 def _handle_literal_token(token):
