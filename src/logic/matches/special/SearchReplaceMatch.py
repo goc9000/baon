@@ -47,3 +47,7 @@ class SearchReplaceMatch(object):
         context.text = context.text[:context.position] + ''.join(new_text)
         
         return ''
+
+    def test_repr(self):
+        """The representation of this AST item in tests"""
+        return 'SEARCH_MATCH', self.term.test_repr()

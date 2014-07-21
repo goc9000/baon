@@ -155,5 +155,16 @@ class TestRulesLexer(TestCase):
                           0, None,
                           ('DELETE_ACTION',)))
 
+    def test_parse_search_match(self):
+        self.assertEqual(self.parse_result('sequence_match_term', u'@"abc"!'),
+                         ('SEARCH_MATCH',
+                          ('LITERAL_MATCH', u'abc',
+                           ('DELETE_ACTION',))))
+        self.assertEqual(self.parse_result('sequence_match_term', u'@..>>etc!'),
+                         ('SEARCH_MATCH',
+                          ('BETWEEN_MATCH',
+                           ('SAVE_ACTION', u'etc'),
+                           ('DELETE_ACTION',))))
+
     def parse_result(self, start_rule, rules_text):
         return RulesParser.debug_parse(rules_text, start_rule).test_repr()

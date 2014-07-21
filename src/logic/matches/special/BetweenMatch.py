@@ -30,3 +30,6 @@ class BetweenMatch(Match):
                 break
         
         return text
+
+    def _test_repr_impl(self):
+        return 'BETWEEN_MATCH',

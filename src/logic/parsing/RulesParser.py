@@ -19,6 +19,7 @@ from logic.matches.special.RepeatMatch import RepeatMatch
 from logic.matches.StartAnchorMatch import StartAnchorMatch
 from logic.matches.EndAnchorMatch import EndAnchorMatch
 from logic.matches.special.BetweenMatch import BetweenMatch
+from logic.matches.special.SearchReplaceMatch import SearchReplaceMatch
 
 from logic.matches.pattern.LiteralMatch import LiteralMatch
 from logic.matches.pattern.RegexMatch import RegexMatch
@@ -65,8 +66,8 @@ def p_rule_base(p):
     p[0].alternatives.append(p[1])
 
 
-def p_sequence_match_add_match(p):
-    """sequence_match : sequence_match match"""
+def p_sequence_match_add_term(p):
+    """sequence_match : sequence_match sequence_match_term"""
     p[0] = p[1]
     p[0].terms.append(p[2])
 
@@ -74,6 +75,16 @@ def p_sequence_match_add_match(p):
 def p_sequence_match_empty(p):
     """sequence_match : """
     p[0] = MatchSequence()
+
+
+def p_match_term_match(p):
+    """sequence_match_term : match"""
+    p[0] = p[1]
+
+
+def p_match_term_search(p):
+    """sequence_match_term : OP_SEARCH match"""
+    p[0] = SearchReplaceMatch(p[2])
 
 
 def p_match_add_actions(p):
