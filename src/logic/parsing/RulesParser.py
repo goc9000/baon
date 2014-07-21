@@ -18,6 +18,7 @@ from logic.matches.special.RepeatMatch import RepeatMatch
 
 from logic.matches.StartAnchorMatch import StartAnchorMatch
 from logic.matches.EndAnchorMatch import EndAnchorMatch
+from logic.matches.special.BetweenMatch import BetweenMatch
 
 from logic.matches.pattern.LiteralMatch import LiteralMatch
 from logic.matches.pattern.RegexMatch import RegexMatch
@@ -94,6 +95,11 @@ def p_match_anchor_start(p):
 def p_match_anchor_end(p):
     """match : ANCHOR_END"""
     p[0] = EndAnchorMatch()
+
+
+def p_match_between(p):
+    """match : BETWEEN"""
+    p[0] = BetweenMatch()
 
 
 def p_match_literal(p):

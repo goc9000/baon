@@ -38,6 +38,10 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('match', u'$'),
                          ('END_ANCHOR_MATCH',))
 
+    def test_parse_between_match(self):
+        self.assertEqual(self.parse_result('match', u'..'),
+                         ('BETWEEN_MATCH',))
+
     def test_parse_literal_match(self):
         self.assertEqual(self.parse_result('match', u'"abc"'),
                          ('LITERAL_MATCH', u'abc'))
