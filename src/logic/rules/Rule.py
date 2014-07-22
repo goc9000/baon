@@ -32,5 +32,8 @@ class Rule(RulesASTNode):
         
         return False
 
-    def test_repr(self):
-        return ('RULE',) + tuple(alt.test_repr() for alt in self.alternatives)
+    def _test_repr_node_name(self):
+        return 'RULE'
+
+    def _test_repr_children(self):
+        return self.alternatives

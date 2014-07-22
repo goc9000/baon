@@ -100,9 +100,8 @@ class TestRulesLexer(TestCase):
                            ('MATCH_SEQ',
                             ('END_ANCHOR_MATCH',)),
                            ('MATCH_SEQ',
-                            ('REPEAT_MATCH',
-                             ('BETWEEN_MATCH',),
-                             0, None))),
+                            ('REPEAT_MATCH', 0, None,
+                             ('BETWEEN_MATCH',)))),
                           ('DELETE_ACTION',)))
 
     def test_parse_delete_action(self):
@@ -167,27 +166,26 @@ class TestRulesLexer(TestCase):
 
     def test_parse_match_with_repeats(self):
         self.assertEqual(self.parse_result('match', u'"abc"?'),
-                         ('REPEAT_MATCH', ('LITERAL_MATCH', u'abc'), 0, 1))
+                         ('REPEAT_MATCH', 0, 1,
+                          ('LITERAL_MATCH', u'abc')))
         self.assertEqual(self.parse_result('match', u'%d+'),
-                         ('REPEAT_MATCH', ('FORMAT_MATCH', u'd'), 1, None))
+                         ('REPEAT_MATCH', 1, None,
+                          ('FORMAT_MATCH', u'd')))
 
     def test_parse_match_with_actions_and_repeats(self):
         self.assertEqual(self.parse_result('match', u'"abc"!*'),
-                         ('REPEAT_MATCH',
-                          ('LITERAL_MATCH', u'abc', ('DELETE_ACTION',)),
-                          0, None))
+                         ('REPEAT_MATCH', 0, None,
+                          ('LITERAL_MATCH', u'abc',
+                           ('DELETE_ACTION',))))
         self.assertEqual(self.parse_result('match', u'"abc"+->"def"'),
-                         ('REPEAT_MATCH',
+                         ('REPEAT_MATCH', 1, None,
                           ('LITERAL_MATCH', u'abc'),
-                          1, None,
                           ('REPLACE_ACTION', u'def')))
         self.assertEqual(self.parse_result('match', u'"abc"+->"def"*!'),
-                         ('REPEAT_MATCH',
-                          ('REPEAT_MATCH',
+                         ('REPEAT_MATCH', 0, None,
+                          ('REPEAT_MATCH', 1, None,
                            ('LITERAL_MATCH', u'abc'),
-                           1, None,
                            ('REPLACE_ACTION', u'def')),
-                          0, None,
                           ('DELETE_ACTION',)))
 
     def test_parse_search_match(self):

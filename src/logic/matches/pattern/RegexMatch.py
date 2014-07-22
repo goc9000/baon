@@ -36,8 +36,11 @@ class RegexMatch(ElementaryPatternMatch):
 
         return flags_enum
 
-    def _test_repr_impl(self):
-        base_tuple = 'REGEX_MATCH', self.pattern
+    def _test_repr_node_name(self):
+        return 'REGEX_MATCH'
+
+    def _test_repr_params(self):
+        base_tuple = self.pattern,
 
         if len(self.flags) > 0:
             base_tuple += self.flags,

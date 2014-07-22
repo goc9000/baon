@@ -70,5 +70,8 @@ class ApplyFunctionAction(CompiledAction):
         else:
             raise RuleCheckException("Unsupported function '{0}'".format(self.function_name))
 
-    def test_repr(self):
-        return 'APPLY_FN_ACTION', self.function_name
+    def _test_repr_node_name(self):
+        return 'APPLY_FN_ACTION'
+
+    def _test_repr_params(self):
+        return self.function_name,

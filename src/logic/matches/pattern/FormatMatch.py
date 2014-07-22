@@ -60,8 +60,11 @@ class FormatMatch(ElementaryPatternMatch):
 
         return pattern.replace('##', repeat)
 
-    def _test_repr_impl(self):
-        base_tuple = 'FORMAT_MATCH', self.specifier
+    def _test_repr_node_name(self):
+        return 'FORMAT_MATCH'
+
+    def _test_repr_params(self):
+        base_tuple = self.specifier,
 
         if self.width is not None:
             base_tuple += self.width,

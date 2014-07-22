@@ -20,5 +20,8 @@ class ReplaceByLiteralAction(Action):
     def execute(self, text, context):
         return self.text
 
-    def test_repr(self):
-        return 'REPLACE_ACTION', self.text
+    def _test_repr_node_name(self):
+        return 'REPLACE_ACTION'
+
+    def _test_repr_params(self):
+        return self.text,

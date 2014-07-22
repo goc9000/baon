@@ -22,5 +22,8 @@ class InsertLiteralMatch(InsertionMatch):
         
         return self.text
 
-    def _test_repr_impl(self):
-        return 'INSERT_LITERAL_MATCH', self.text
+    def _test_repr_node_name(self):
+        return 'INSERT_LITERAL_MATCH'
+
+    def _test_repr_params(self):
+        return self.text,

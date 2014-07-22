@@ -23,5 +23,8 @@ class SubRuleMatch(Match):
     def _execute(self, context):
         return self.rule.execute(context)
 
-    def _test_repr_impl(self):
-        return 'SUBRULE_MATCH', self.rule.test_repr()
+    def _test_repr_node_name(self):
+        return 'SUBRULE_MATCH'
+
+    def _test_repr_children_impl(self):
+        return self.rule,

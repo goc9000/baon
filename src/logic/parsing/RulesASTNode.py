@@ -15,4 +15,16 @@ class RulesASTNode(ItemWithPositionInSource):
 
     def test_repr(self):
         """The representation of this AST item in tests"""
-        raise RuntimeError("test_repr() is not implemented in subclass")
+        return\
+            (self._test_repr_node_name(),) +\
+            self._test_repr_params() +\
+            tuple(child.test_repr() for child in self._test_repr_children())
+
+    def _test_repr_node_name(self):
+        raise RuntimeError("_test_repr_node_name() is not implemented in subclass")
+
+    def _test_repr_params(self):
+        return ()
+
+    def _test_repr_children(self):
+        return ()

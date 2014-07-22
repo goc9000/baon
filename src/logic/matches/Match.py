@@ -45,8 +45,8 @@ class Match(RulesASTNode):
     def _execute(self, context):
         raise RuntimeError("_test_repr_impl() not implemented in subclass")
 
-    def test_repr(self):
-        return self._test_repr_impl() + tuple(action.test_repr() for action in self.actions)
+    def _test_repr_children(self):
+        return self._test_repr_children_impl() + tuple(self.actions)
 
-    def _test_repr_impl(self):
-        raise RuntimeError("_test_repr_impl() not implemented in subclass")
+    def _test_repr_children_impl(self):
+        return ()

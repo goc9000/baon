@@ -64,8 +64,11 @@ class ReformatAction(CompiledAction):
 
         raise RuleCheckException("Unrecognized format specifier '{0}'".format(self.specifier))
 
-    def test_repr(self):
-        base_tuple = 'REFORMAT_ACTION', self.specifier
+    def _test_repr_node_name(self):
+        return 'REFORMAT_ACTION'
+
+    def _test_repr_params(self):
+        base_tuple = self.specifier,
 
         if self.width is not None:
             base_tuple += self.width,
