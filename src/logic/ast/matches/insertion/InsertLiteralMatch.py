@@ -7,10 +7,11 @@
 # Licensed under the GPL-3
 
 from logic.ast.matches.insertion.InsertionMatch import InsertionMatch
+from logic.ast.RulesASTNode import ast_node_field
 
 
 class InsertLiteralMatch(InsertionMatch):
-    text = None
+    text = ast_node_field()
     
     def __init__(self, text):
         InsertionMatch.__init__(self)
@@ -21,6 +22,3 @@ class InsertLiteralMatch(InsertionMatch):
         context.last_match_pos = None
         
         return self.text
-
-    def _test_repr_params(self):
-        return self.text,

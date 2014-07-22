@@ -9,6 +9,7 @@
 import re
 
 from logic.ast.actions.CompiledAction import CompiledAction
+from logic.ast.RulesASTNode import ast_node_field
 
 from logic.errors.RuleCheckException import RuleCheckException
 
@@ -60,7 +61,7 @@ FUNC_DICT = {
 
 
 class ApplyFunctionAction(CompiledAction):
-    function_name = None
+    function_name = ast_node_field()
 
     def __init__(self, fn_name):
         CompiledAction.__init__(self)
@@ -72,6 +73,3 @@ class ApplyFunctionAction(CompiledAction):
             return FUNC_DICT[self.function_name]
         else:
             raise RuleCheckException("Unsupported function '{0}'".format(self.function_name))
-
-    def _test_repr_params(self):
-        return self.function_name,

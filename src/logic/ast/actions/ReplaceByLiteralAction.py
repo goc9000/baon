@@ -7,10 +7,11 @@
 # Licensed under the GPL-3
 
 from logic.ast.actions.Action import Action
+from logic.ast.RulesASTNode import ast_node_field
 
 
 class ReplaceByLiteralAction(Action):
-    text = None
+    text = ast_node_field()
     
     def __init__(self, text):
         Action.__init__(self)
@@ -19,6 +20,3 @@ class ReplaceByLiteralAction(Action):
 
     def execute(self, text, context):
         return self.text
-
-    def _test_repr_params(self):
-        return self.text,

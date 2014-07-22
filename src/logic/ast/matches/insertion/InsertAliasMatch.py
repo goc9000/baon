@@ -7,10 +7,11 @@
 # Licensed under the GPL-3
 
 from logic.ast.matches.insertion.InsertionMatch import InsertionMatch
+from logic.ast.RulesASTNode import ast_node_field
 
 
 class InsertAliasMatch(InsertionMatch):
-    alias = None
+    alias = ast_node_field()
     
     def __init__(self, alias):
         InsertionMatch.__init__(self)
@@ -25,6 +26,3 @@ class InsertAliasMatch(InsertionMatch):
         else:
             context.forward_aliases.add(self.alias)
             return ''
-
-    def _test_repr_params(self):
-        return self.alias,

@@ -11,6 +11,8 @@ import re
 
 from logic.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
 
+from logic.ast.RulesASTNode import ast_node_field
+
 
 FORMAT_DICT = {
     '%ws':         (r'(\s##)', '*'),
@@ -28,9 +30,9 @@ FORMAT_DICT = {
 
 
 class FormatMatch(ElementaryPatternMatch):
-    specifier = None
-    width = None
-    leading_zeros = None
+    specifier = ast_node_field()
+    width = ast_node_field()
+    leading_zeros = ast_node_field(test_repr='leading')
 
     def __init__(self, specifier, width=None, leading_zeros=False):
         ElementaryPatternMatch.__init__(self)
@@ -60,14 +62,3 @@ class FormatMatch(ElementaryPatternMatch):
             repeat = '{' + str(self.width) + '}'
 
         return pattern.replace('##', repeat)
-
-    def _test_repr_params(self):
-        base_tuple = self.specifier,
-
-        if self.width is not None:
-            base_tuple += self.width,
-
-        if self.leading_zeros is True:
-            base_tuple += 'leading',
-
-        return base_tuple

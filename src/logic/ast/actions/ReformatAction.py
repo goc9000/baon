@@ -9,6 +9,8 @@
 import re
 
 from logic.ast.actions.CompiledAction import CompiledAction
+from logic.ast.RulesASTNode import ast_node_field
+
 from logic.errors.RuleCheckException import RuleCheckException
 from logic.errors.RuleApplicationException import RuleApplicationException
 
@@ -42,9 +44,9 @@ def pad_with_zeroes(s, digits):
 
 
 class ReformatAction(CompiledAction):
-    specifier = None
-    width = None
-    leading_zeros = None
+    specifier = ast_node_field()
+    width = ast_node_field()
+    leading_zeros = ast_node_field(test_repr='leading')
 
     def __init__(self, specifier, width=None, leading_zeros=False):
         CompiledAction.__init__(self)
@@ -64,14 +66,3 @@ class ReformatAction(CompiledAction):
             return lambda s, c: pad_with_zeroes(s, self.width)
 
         raise RuleCheckException("Unrecognized format specifier '{0}'".format(self.specifier))
-
-    def _test_repr_params(self):
-        base_tuple = self.specifier,
-
-        if self.width is not None:
-            base_tuple += self.width,
-
-        if self.leading_zeros is True:
-            base_tuple += 'leading',
-
-        return base_tuple

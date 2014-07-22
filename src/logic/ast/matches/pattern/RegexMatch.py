@@ -10,12 +10,13 @@ import re
 
 from logic.errors.RuleCheckException import RuleCheckException
 
+from logic.ast.RulesASTNode import ast_node_field
 from logic.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
 
 
 class RegexMatch(ElementaryPatternMatch):
-    pattern = None
-    flags = None
+    pattern = ast_node_field()
+    flags = ast_node_field(hide_for_value=set())
 
     def __init__(self, pattern, flags):
         ElementaryPatternMatch.__init__(self)
@@ -35,11 +36,3 @@ class RegexMatch(ElementaryPatternMatch):
                 raise RuleCheckException("Invalid regex flag '{0}'".format(flag))
 
         return flags_enum
-
-    def _test_repr_params(self):
-        base_tuple = self.pattern,
-
-        if len(self.flags) > 0:
-            base_tuple += self.flags,
-
-        return base_tuple

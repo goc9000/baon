@@ -10,9 +10,11 @@ import re
 
 from logic.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
 
+from logic.ast.RulesASTNode import ast_node_field
+
 
 class LiteralMatch(ElementaryPatternMatch):
-    text = None
+    text = ast_node_field()
 
     def __init__(self, text):
         ElementaryPatternMatch.__init__(self)
@@ -21,6 +23,3 @@ class LiteralMatch(ElementaryPatternMatch):
 
     def _get_pattern_impl(self):
         return re.escape(self.text)
-
-    def _test_repr_params(self):
-        return self.text,

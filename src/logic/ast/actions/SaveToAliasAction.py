@@ -7,10 +7,11 @@
 # Licensed under the GPL-3
 
 from logic.ast.actions.Action import Action
+from logic.ast.RulesASTNode import ast_node_field
 
 
 class SaveToAliasAction(Action):
-    alias = None
+    alias = ast_node_field()
     
     def __init__(self, alias):
         Action.__init__(self)
@@ -20,6 +21,3 @@ class SaveToAliasAction(Action):
     def execute(self, text, context):
         context.aliases[self.alias] = text
         return text
-
-    def _test_repr_params(self):
-        return self.alias,
