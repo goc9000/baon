@@ -203,8 +203,10 @@ class TestRulesLexer(TestCase):
                           ('END_ANCHOR_MATCH',)))
         self.assertEqual(self.parse_result('sequence_match', u'^->"abc"..>>def$'),
                          ('MATCH_SEQ',
-                          ('START_ANCHOR_MATCH', ('REPLACE_ACTION', u'abc')),
-                          ('BETWEEN_MATCH', ('SAVE_ACTION', u'def')),
+                          ('START_ANCHOR_MATCH',
+                           ('REPLACE_ACTION', u'abc')),
+                          ('BETWEEN_MATCH',
+                           ('SAVE_ACTION', u'def')),
                           ('END_ANCHOR_MATCH',)))
 
     def test_parse_rule(self):
