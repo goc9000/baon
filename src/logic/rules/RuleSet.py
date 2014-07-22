@@ -6,14 +6,18 @@
 #
 # Licensed under the GPL-3
 
-from SemanticCheckScope import SemanticCheckScope
+from logic.parsing.RulesASTNode import RulesASTNode
+
 from logic.matches.MatchContext import MatchContext
 
+from SemanticCheckScope import SemanticCheckScope
 
-class RuleSet(object):
+
+class RuleSet(RulesASTNode):
     rules = None
     
     def __init__(self):
+        RulesASTNode.__init__(self)
         self.rules = []
 
     def applyOn(self, text, initial_aliases=None):
@@ -44,5 +48,4 @@ class RuleSet(object):
             rule.semanticCheck(scope)
 
     def test_repr(self):
-        """The representation of this AST item in tests"""
         return ('RULE_SET',) + tuple(rule.test_repr() for rule in self.rules)

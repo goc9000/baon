@@ -6,11 +6,14 @@
 #
 # Licensed under the GPL-3
 
+from logic.parsing.RulesASTNode import RulesASTNode
 
-class Rule(object):
+
+class Rule(RulesASTNode):
     alternatives = None
     
     def __init__(self):
+        RulesASTNode.__init__(self)
         self.alternatives = []
 
     def isEmpty(self):
@@ -30,5 +33,4 @@ class Rule(object):
         return False
 
     def test_repr(self):
-        """The representation of this AST item in tests"""
         return ('RULE',) + tuple(alt.test_repr() for alt in self.alternatives)

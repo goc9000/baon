@@ -6,13 +6,16 @@
 #
 # Licensed under the GPL-3
 
+from logic.parsing.RulesASTNode import RulesASTNode
+
 from BetweenMatch import BetweenMatch
 
 
-class MatchSequence(object):
+class MatchSequence(RulesASTNode):
     terms = None
 
     def __init__(self):
+        RulesASTNode.__init__(self)
         self.terms = []
 
     def isEmpty(self):
@@ -74,5 +77,4 @@ class MatchSequence(object):
         return ''.join(committed)
 
     def test_repr(self):
-        """The representation of this AST item in tests"""
         return ('MATCH_SEQ',) + tuple(term.test_repr() for term in self.terms)

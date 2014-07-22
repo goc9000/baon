@@ -6,11 +6,14 @@
 #
 # Licensed under the GPL-3
 
+from logic.parsing.RulesASTNode import RulesASTNode
 
-class Match(object):
+
+class Match(RulesASTNode):
     actions = None
 
     def __init__(self):
+        RulesASTNode.__init__(self)
         self.actions = []
 
     def semanticCheck(self, scope):
@@ -39,6 +42,11 @@ class Match(object):
         
         return text
 
+    def _execute(self, context):
+        raise RuntimeError("_test_repr_impl() not implemented in subclass")
+
     def test_repr(self):
-        """The representation of this AST item in tests"""
         return self._test_repr_impl() + tuple(action.test_repr() for action in self.actions)
+
+    def _test_repr_impl(self):
+        raise RuntimeError("_test_repr_impl() not implemented in subclass")

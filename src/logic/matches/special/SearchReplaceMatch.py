@@ -6,13 +6,16 @@
 #
 # Licensed under the GPL-3
 
+from logic.parsing.RulesASTNode import RulesASTNode
+
 from logic.matches.MatchContext import MatchContext
 
 
-class SearchReplaceMatch(object):
+class SearchReplaceMatch(RulesASTNode):
     term = None
     
     def __init__(self, term):
+        RulesASTNode.__init__(self)
         self.term = term
     
     def semanticCheck(self, scope):
@@ -49,5 +52,4 @@ class SearchReplaceMatch(object):
         return ''
 
     def test_repr(self):
-        """The representation of this AST item in tests"""
         return 'SEARCH_MATCH', self.term.test_repr()
