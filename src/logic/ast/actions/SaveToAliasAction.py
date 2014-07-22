@@ -21,8 +21,5 @@ class SaveToAliasAction(Action):
         context.aliases[self.alias] = text
         return text
 
-    def _test_repr_node_name(self):
-        return 'SAVE_ACTION'
-
     def _test_repr_params(self):
         return self.alias,

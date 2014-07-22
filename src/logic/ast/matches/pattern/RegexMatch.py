@@ -36,9 +36,6 @@ class RegexMatch(ElementaryPatternMatch):
 
         return flags_enum
 
-    def _test_repr_node_name(self):
-        return 'REGEX_MATCH'
-
     def _test_repr_params(self):
         base_tuple = self.pattern,
 

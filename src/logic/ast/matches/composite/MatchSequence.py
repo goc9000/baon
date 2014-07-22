@@ -76,8 +76,5 @@ class MatchSequence(RulesASTNode):
 
         return ''.join(committed)
 
-    def _test_repr_node_name(self):
-        return 'MATCH_SEQ'
-
     def _test_repr_children(self):
         return self.terms

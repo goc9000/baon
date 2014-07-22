@@ -15,6 +15,3 @@ class DeleteAction(Action):
 
     def execute(self, text, context):
         return ''
-
-    def _test_repr_node_name(self):
-        return 'DELETE_ACTION'

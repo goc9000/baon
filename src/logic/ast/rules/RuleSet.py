@@ -46,8 +46,5 @@ class RuleSet(RulesASTNode):
         for rule in self.rules:
             rule.semanticCheck(scope)
 
-    def _test_repr_node_name(self):
-        return 'RULE_SET'
-
     def _test_repr_children(self):
         return self.rules

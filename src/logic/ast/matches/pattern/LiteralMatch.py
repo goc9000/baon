@@ -22,8 +22,5 @@ class LiteralMatch(ElementaryPatternMatch):
     def _get_pattern_impl(self):
         return re.escape(self.text)
 
-    def _test_repr_node_name(self):
-        return 'LITERAL_MATCH'
-
     def _test_repr_params(self):
         return self.text,

@@ -49,9 +49,6 @@ class RepeatMatch(Match):
         
         return ''.join(committed)
 
-    def _test_repr_node_name(self):
-        return 'REPEAT_MATCH'
-
     def _test_repr_params(self):
         return self.at_least, self.at_most
 

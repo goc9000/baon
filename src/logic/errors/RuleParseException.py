@@ -18,7 +18,7 @@ class RuleParseException(Exception, ItemWithPositionInSource):
 
     def test_repr(self):
         return (
-            'PARSE_EXCEPTION',
+            self.__class__.__name__,
             self.message,
             self.source_start_lineno,
             self.source_start_colno,

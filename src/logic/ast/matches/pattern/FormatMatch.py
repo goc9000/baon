@@ -61,9 +61,6 @@ class FormatMatch(ElementaryPatternMatch):
 
         return pattern.replace('##', repeat)
 
-    def _test_repr_node_name(self):
-        return 'FORMAT_MATCH'
-
     def _test_repr_params(self):
         base_tuple = self.specifier,
 

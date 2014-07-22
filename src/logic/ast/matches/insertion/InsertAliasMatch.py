@@ -26,8 +26,5 @@ class InsertAliasMatch(InsertionMatch):
             context.forward_aliases.add(self.alias)
             return ''
 
-    def _test_repr_node_name(self):
-        return 'INSERT_ALIAS_MATCH'
-
     def _test_repr_params(self):
         return self.alias,

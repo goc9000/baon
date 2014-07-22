@@ -20,6 +20,3 @@ class StartAnchorMatch(Match):
             return ''
         else:
             return False
-
-    def _test_repr_node_name(self):
-        return 'START_ANCHOR_MATCH'

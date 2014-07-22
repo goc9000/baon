@@ -51,8 +51,5 @@ class SearchReplaceMatch(RulesASTNode):
         
         return ''
 
-    def _test_repr_node_name(self):
-        return 'SEARCH_MATCH'
-
     def _test_repr_children(self):
         return self.term,

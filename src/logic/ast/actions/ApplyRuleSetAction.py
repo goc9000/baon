@@ -25,8 +25,5 @@ class ApplyRuleSetAction(Action):
     def execute(self, text, context):
         return self.ruleset.applyOn(text, context.aliases)
 
-    def _test_repr_node_name(self):
-        return 'RULE_SET_ACTION'
-
     def _test_repr_children(self):
         return self.ruleset,
