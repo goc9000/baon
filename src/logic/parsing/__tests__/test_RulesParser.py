@@ -249,5 +249,15 @@ class TestRulesLexer(TestCase):
                             ('LITERAL_MATCH', u'a',
                              ('DELETE_ACTION',))))))
 
+    def test_syntax_errors(self):
+        with self.assertRaisesRegexp(RuleParseException, '(?i)syntax'):
+            self.parse_result('rule_set', u'#')
+        with self.assertRaisesRegexp(RuleParseException, '(?i)syntax'):
+            self.parse_result('rule_set', u'..->#')
+        with self.assertRaisesRegexp(RuleParseException, '(?i)syntax'):
+            self.parse_result('rule_set', u'..->')
+        with self.assertRaisesRegexp(RuleParseException, '(?i)syntax'):
+            self.parse_result('rule_set', u'())')
+
     def parse_result(self, start_rule, rules_text):
         return RulesParser.debug_parse(rules_text, start_rule).test_repr()

@@ -41,6 +41,11 @@ from logic.errors.RuleParseException import RuleParseException
 from logic.parsing.RulesLexer import RulesLexer, tokens
 
 
+class EOFRuleParseException:
+    def __init__(self):
+        pass
+
+
 def p_rule_set_add_rule(p):
     """rule_set : rule_set RULE_SEP rule"""
     p[0] = p[1]
@@ -183,6 +188,13 @@ def p_action_apply_sub_rule(p):
     p[0] = ApplyRuleSetAction(p[3])
 
 
+def p_error(token):
+    if token is None:
+        raise EOFRuleParseException
+
+    raise RuleParseException.from_token(token, "Syntax error")
+
+
 def _handle_literal_token(token):
     literal_info = token.extras
     if 'unterminated' in literal_info and literal_info['unterminated']:
@@ -213,12 +225,21 @@ parser_template = yacc.yacc()
 class RulesParser(object):
     @staticmethod
     def parse(rules_text):
-        return parser_template.parse(rules_text, RulesLexerForYACC())
+        return RulesParser._run_parser(parser_template, rules_text)
 
     @staticmethod
     def debug_parse(rules_text, start_rule):
         parser = yacc.yacc(start=start_rule, debug=0, errorlog=NullLogger())
-        return parser.parse(rules_text, RulesLexerForYACC())
+        return RulesParser._run_parser(parser, rules_text)
+
+    @staticmethod
+    def _run_parser(parser, rules_text):
+        try:
+            return parser.parse(rules_text, RulesLexerForYACC())
+        except EOFRuleParseException as e:
+            last_line_no = 1 + rules_text.count(u'\n')
+            last_col_no = len(rules_text) - rules_text.rfind(u'\n')
+            raise RuleParseException('Syntax error', last_line_no, last_col_no, 0)
 
 
 class RulesLexerForYACC(object):
