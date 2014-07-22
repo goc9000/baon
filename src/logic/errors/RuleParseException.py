@@ -6,22 +6,18 @@
 #
 # Licensed under the GPL-3
 
+from logic.parsing.ItemWithPositionInSource import ItemWithPositionInSource
 
-class RuleParseException(Exception):
-    line = None
-    column = None
-    length = None
-    message = None
-    
-    def __init__(self, message, line, column, length=None):
-        self.message = message
-        self.line = line
-        self.column = column
-        self.length = length
-        
+
+class RuleParseException(Exception, ItemWithPositionInSource):
+    def __init__(self, message):
+        Exception.__init__(self, message)
+
     def __str__(self):
         return self.message
 
     @staticmethod
     def from_token(token, message):
-        return RuleParseException(message, token.lineno, token.colno, token.length)
+        exception = RuleParseException(message)
+        exception.set_span_from_item(token)
+        return exception

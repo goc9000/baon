@@ -273,9 +273,9 @@ class RulesParser(object):
         try:
             return parser.parse(rules_text, RulesLexerForYACC())
         except EOFRuleParseException:
-            last_line_no = 1 + rules_text.count(u'\n')
-            last_col_no = len(rules_text) - rules_text.rfind(u'\n')
-            raise RuleParseException('Syntax error', last_line_no, last_col_no, 0)
+            exception = RuleParseException('Syntax error')
+            exception.set_span_at_end_of_source(rules_text)
+            raise exception
 
 
 class RulesLexerForYACC(object):
