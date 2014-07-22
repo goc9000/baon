@@ -18,7 +18,7 @@ class MatchSequence(RulesASTNode):
         RulesASTNode.__init__(self)
         self.terms = []
 
-    def isEmpty(self):
+    def is_empty(self):
         return len(self.terms) == 0
 
     def semanticCheck(self, scope):

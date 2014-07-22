@@ -49,7 +49,7 @@ class EOFRuleParseException:
 def p_rule_set_add_rule(p):
     """rule_set : rule_set RULE_SEP rule"""
     p[0] = p[1]
-    if not p[3].isEmpty():
+    if not p[3].is_empty():
         p[0].rules.append(p[3])
 
     p[0].set_span_from_items(p[1], p[3])
@@ -58,7 +58,7 @@ def p_rule_set_add_rule(p):
 def p_rule_set_base(p):
     """rule_set : rule"""
     p[0] = RuleSet()
-    if not p[1].isEmpty():
+    if not p[1].is_empty():
         p[0].rules.append(p[1])
 
     p[0].set_span_from_item(p[1])

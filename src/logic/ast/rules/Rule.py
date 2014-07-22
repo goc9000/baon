@@ -16,8 +16,8 @@ class Rule(RulesASTNode):
         RulesASTNode.__init__(self)
         self.alternatives = []
 
-    def isEmpty(self):
-        return (len(self.alternatives) == 0) or all(alt.isEmpty() for alt in self.alternatives)
+    def is_empty(self):
+        return (len(self.alternatives) == 0) or all(alt.is_empty() for alt in self.alternatives)
 
     def semanticCheck(self, scope):
         for alt in self.alternatives:

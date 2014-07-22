@@ -36,7 +36,7 @@ class RuleSet(RulesASTNode):
             
         return text
 
-    def isEmpty(self):
+    def is_empty(self):
         return len(self.rules) == 0
     
     def semanticCheck(self, scope=None):
