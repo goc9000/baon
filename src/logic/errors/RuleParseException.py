@@ -16,6 +16,16 @@ class RuleParseException(Exception, ItemWithPositionInSource):
     def __str__(self):
         return self.message
 
+    def test_repr(self):
+        return (
+            'PARSE_EXCEPTION',
+            self.message,
+            self.source_start_lineno,
+            self.source_start_colno,
+            self.source_end_lineno,
+            self.source_end_colno,
+        )
+
     @staticmethod
     def from_token(token, message):
         exception = RuleParseException(message)
