@@ -10,31 +10,31 @@
 from ply import yacc
 from ply.yacc import NullLogger
 
-from logic.rules.RuleSet import RuleSet
-from logic.rules.Rule import Rule
+from logic.ast.rules.RuleSet import RuleSet
+from logic.ast.rules.Rule import Rule
 
-from logic.matches.special.MatchSequence import MatchSequence
-from logic.matches.special.RepeatMatch import RepeatMatch
+from logic.ast.matches.composite.MatchSequence import MatchSequence
+from logic.ast.matches.composite.RepeatMatch import RepeatMatch
+from logic.ast.matches.composite.SearchReplaceMatch import SearchReplaceMatch
+from logic.ast.matches.composite.SubRuleMatch import SubRuleMatch
 
-from logic.matches.StartAnchorMatch import StartAnchorMatch
-from logic.matches.EndAnchorMatch import EndAnchorMatch
-from logic.matches.special.BetweenMatch import BetweenMatch
-from logic.matches.special.SearchReplaceMatch import SearchReplaceMatch
-from logic.matches.special.SubRuleMatch import SubRuleMatch
+from logic.ast.matches.special.StartAnchorMatch import StartAnchorMatch
+from logic.ast.matches.special.EndAnchorMatch import EndAnchorMatch
+from logic.ast.matches.special.BetweenMatch import BetweenMatch
 
-from logic.matches.pattern.LiteralMatch import LiteralMatch
-from logic.matches.pattern.RegexMatch import RegexMatch
-from logic.matches.pattern.FormatMatch import FormatMatch
+from logic.ast.matches.pattern.LiteralMatch import LiteralMatch
+from logic.ast.matches.pattern.RegexMatch import RegexMatch
+from logic.ast.matches.pattern.FormatMatch import FormatMatch
 
-from logic.matches.syn.InsertLiteralMatch import InsertLiteralMatch
-from logic.matches.syn.InsertAliasMatch import InsertAliasMatch
+from logic.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMatch
+from logic.ast.matches.insertion.InsertAliasMatch import InsertAliasMatch
 
-from logic.actions.DeleteAction import DeleteAction
-from logic.actions.SaveToAliasAction import SaveToAliasAction
-from logic.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
-from logic.actions.ApplyFunctionAction import ApplyFunctionAction
-from logic.actions.ReformatAction import ReformatAction
-from logic.actions.ApplyRuleSetAction import ApplyRuleSetAction
+from logic.ast.actions.DeleteAction import DeleteAction
+from logic.ast.actions.SaveToAliasAction import SaveToAliasAction
+from logic.ast.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
+from logic.ast.actions.ApplyFunctionAction import ApplyFunctionAction
+from logic.ast.actions.ReformatAction import ReformatAction
+from logic.ast.actions.ApplyRuleSetAction import ApplyRuleSetAction
 
 from logic.errors.RuleParseException import RuleParseException
 
