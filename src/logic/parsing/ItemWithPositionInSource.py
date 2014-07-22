@@ -31,7 +31,7 @@ class ItemWithPositionInSource(object):
 
     def set_span_at_end_of_source(self, source):
         last_line_no = 1 + source.count(u'\n')
-        last_col_no = len(source) - source.rfind(u'\n')
+        last_col_no = len(source) - source.rfind(u'\n') - 1
 
         self.source_start_lineno = last_line_no
         self.source_start_colno = last_col_no + 1
