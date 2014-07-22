@@ -52,36 +52,55 @@ def p_rule_set_add_rule(p):
     if not p[3].isEmpty():
         p[0].rules.append(p[3])
 
+    p[0].set_span_from_items(p[1], p[3])
+
 
 def p_rule_set_base(p):
     """rule_set : rule"""
     p[0] = RuleSet()
-
     if not p[1].isEmpty():
         p[0].rules.append(p[1])
+
+    p[0].set_span_from_item(p[1])
 
 
 def p_rule_add_sequence_match(p):
     """rule : rule OP_OR sequence_match"""
     p[0] = p[1]
     p[0].alternatives.append(p[3])
+    p[0].set_span_from_items(p[1], p[3])
 
 
 def p_rule_base(p):
     """rule : sequence_match"""
     p[0] = Rule()
     p[0].alternatives.append(p[1])
+    p[0].set_span_from_item(p[1])
 
 
 def p_sequence_match_add_term(p):
     """sequence_match : sequence_match sequence_match_term"""
     p[0] = p[1]
     p[0].terms.append(p[2])
+    p[0].set_span_from_items(p[1], p[2])
 
 
 def p_sequence_match_empty(p):
     """sequence_match : """
     p[0] = MatchSequence()
+
+    try:
+        p[0].source_start_lineno = p[-1].source_end_lineno
+        p[0].source_start_colno = p[-1].source_end_colno + 1
+        p[0].source_start_pos = p[-1].source_end_pos + 1
+    except AttributeError:
+        p[0].source_start_lineno = 1
+        p[0].source_start_colno = 1
+        p[0].source_start_pos = 0
+
+    p[0].source_end_lineno = p[0].source_start_lineno
+    p[0].source_end_colno = p[0].source_start_colno - 1
+    p[0].source_end_pos = p[0].source_start_pos - 1
 
 
 def p_match_term_match(p):
@@ -92,37 +111,44 @@ def p_match_term_match(p):
 def p_match_term_search(p):
     """sequence_match_term : OP_SEARCH match"""
     p[0] = SearchReplaceMatch(p[2])
+    p[0].set_span_from_items(p[1], p[2])
 
 
 def p_match_add_actions(p):
     """match : match action"""
     p[0] = p[1]
     p[0].actions.append(p[2])
+    p[0].set_span_from_items(p[1], p[2])
 
 
 def p_match_add_repeat(p):
     """match : match OP_REPEAT"""
     p[0] = RepeatMatch(p[1], p[2].extras['min'], p[2].extras['max'])
+    p[0].set_span_from_items(p[1], p[2])
 
 
 def p_match_anchor_start(p):
     """match : ANCHOR_START"""
     p[0] = StartAnchorMatch()
+    p[0].set_span_from_item(p[1])
 
 
 def p_match_anchor_end(p):
     """match : ANCHOR_END"""
     p[0] = EndAnchorMatch()
+    p[0].set_span_from_item(p[1])
 
 
 def p_match_between(p):
     """match : BETWEEN"""
     p[0] = BetweenMatch()
+    p[0].set_span_from_item(p[1])
 
 
 def p_match_literal(p):
     """match : STRING_LITERAL"""
     p[0] = LiteralMatch(_handle_literal_token(p[1]))
+    p[0].set_span_from_item(p[1])
 
 
 def p_match_regex(p):
@@ -133,6 +159,7 @@ def p_match_regex(p):
 
     flags = regex_info['flags'] if 'flags' in regex_info else set()
     p[0] = RegexMatch(regex_info['pattern'], flags)
+    p[0].set_span_from_item(p[1])
 
 
 def p_match_format(p):
@@ -140,52 +167,61 @@ def p_match_format(p):
     specifier, width, leading_zeros = _handle_format_token(p[1])
 
     p[0] = FormatMatch(specifier, width, leading_zeros)
+    p[0].set_span_from_item(p[1])
 
 
 def p_match_insert_id(p):
     """match : OP_INSERT ID"""
     p[0] = InsertAliasMatch(p[2].text)
+    p[0].set_span_from_items(p[1], p[2])
 
 
 def p_match_subrule(p):
     """match : PARA_OPEN rule PARA_CLOSE"""
     p[0] = SubRuleMatch(p[2])
+    p[0].set_span_from_items(p[1], p[3])
 
 
 def p_match_insert_literal(p):
     """match : OP_INSERT STRING_LITERAL"""
     p[0] = InsertLiteralMatch(_handle_literal_token(p[2]))
+    p[0].set_span_from_items(p[1], p[2])
 
 
 def p_action_delete(p):
     """action : OP_DELETE"""
     p[0] = DeleteAction()
+    p[0].set_span_from_item(p[1])
 
 
 def p_action_save_to_alias(p):
     """action : OP_SAVE ID"""
     p[0] = SaveToAliasAction(p[2].text)
+    p[0].set_span_from_items(p[1], p[2])
 
 
 def p_action_replace_by_literal(p):
     """action : OP_XFORM STRING_LITERAL"""
     p[0] = ReplaceByLiteralAction(_handle_literal_token(p[2]))
+    p[0].set_span_from_items(p[1], p[2])
 
 
 def p_action_apply_function(p):
     """action : OP_XFORM ID"""
     p[0] = ApplyFunctionAction(p[2].text)
-
+    p[0].set_span_from_items(p[1], p[2])
 
 def p_action_reformat(p):
     """action : OP_XFORM FORMAT_SPEC"""
     specifier, width, leading_zeros = _handle_format_token(p[2])
     p[0] = ReformatAction(specifier, width, leading_zeros)
+    p[0].set_span_from_items(p[1], p[2])
 
 
 def p_action_apply_sub_rule(p):
     """action : OP_XFORM PARA_OPEN rule_set PARA_CLOSE"""
     p[0] = ApplyRuleSetAction(p[3])
+    p[0].set_span_from_items(p[1], p[4])
 
 
 def p_error(token):
@@ -236,7 +272,7 @@ class RulesParser(object):
     def _run_parser(parser, rules_text):
         try:
             return parser.parse(rules_text, RulesLexerForYACC())
-        except EOFRuleParseException as e:
+        except EOFRuleParseException:
             last_line_no = 1 + rules_text.count(u'\n')
             last_col_no = len(rules_text) - rules_text.rfind(u'\n')
             raise RuleParseException('Syntax error', last_line_no, last_col_no, 0)

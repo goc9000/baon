@@ -6,10 +6,12 @@
 #
 # Licensed under the GPL-3
 
+from logic.parsing.ItemWithPositionInSource import ItemWithPositionInSource
 
-class RulesASTNode(object):
+
+class RulesASTNode(ItemWithPositionInSource):
     def __init__(self):
-        pass
+        ItemWithPositionInSource.__init__(self)
 
     def test_repr(self):
         """The representation of this AST item in tests"""

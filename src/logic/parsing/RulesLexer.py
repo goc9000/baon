@@ -107,6 +107,7 @@ def t_REGEX(t):
 
     return RulesToken(t, **extras)
 
+
 @TOKEN('\?|\*|\+')
 def t_OP_REPEAT(t):
     return RulesToken(t,
@@ -148,6 +149,7 @@ def merge_error_tokens(tokens_stream):
             if last_err_token is not None:
                 if last_err_token.start + last_err_token.length == token.start:
                     last_err_token.text += token.text
+                    last_err_token.set_span_from_items(last_err_token, token)
                     continue
 
                 yield last_err_token
