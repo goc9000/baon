@@ -17,9 +17,6 @@ class SearchReplaceMatch(ASTNode):
     def __init__(self, term):
         ASTNode.__init__(self)
         self.term = term
-    
-    def semanticCheck(self, scope):
-        self.term.semanticCheck(scope)
 
     def execute(self, context):
         ctx = MatchContext(context.text, context.aliases)

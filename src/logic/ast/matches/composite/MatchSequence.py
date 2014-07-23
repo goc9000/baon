@@ -21,10 +21,6 @@ class MatchSequence(ASTNode):
     def is_empty(self):
         return len(self.terms) == 0
 
-    def semanticCheck(self, scope):
-        for term in self.terms:
-            term.semanticCheck(scope)
-
     def execute(self, context):
         savept = context.save()
         committed = []

@@ -18,8 +18,5 @@ class SubRuleMatch(Match):
         
         self.rule = rule
 
-    def _semanticCheck(self, scope):
-        self.rule.semanticCheck(scope)
-
     def _execute(self, context):
         return self.rule.execute(context)

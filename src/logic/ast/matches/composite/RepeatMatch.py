@@ -23,9 +23,6 @@ class RepeatMatch(Match):
         self.at_least = at_least
         self.at_most = at_most
 
-    def _semanticCheck(self, scope):
-        self.match.semanticCheck(scope)
-
     def _execute(self, context):
         committed = []
         

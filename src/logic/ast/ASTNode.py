@@ -38,6 +38,21 @@ class ASTNode(ItemWithPositionInSource):
         self._init_ast_node_child_refs()
         self._init_ast_node_child_lists()
 
+    def semantic_check(self, scope):
+        self._semantic_check_before_children(scope)
+        for child in self.iter_ast_children():
+            child.semantic_check(scope)
+        self._semantic_check_after_children(scope)
+
+    def iter_ast_children(self):
+        for child in [self.__getattribute__(child_ref.name) for child_ref in self._ast_node_child_refs]:
+            if child is not None:
+                yield child
+
+        for child_list in self._ast_node_child_lists:
+            for child in self.__getattribute__(child_list.name):
+                yield child
+
     def test_repr(self):
         """The representation of this AST item in tests"""
         return\
@@ -82,6 +97,12 @@ class ASTNode(ItemWithPositionInSource):
                 self.__setattr__(child_list_name, [])
 
         self._ast_node_child_lists.sort(key=lambda child_list: child_list.order)
+
+    def _semantic_check_before_children(self, scope):
+        pass
+
+    def _semantic_check_after_children(self, scope):
+        pass
 
     def _test_repr_params(self):
         values = []

@@ -29,7 +29,7 @@ class ElementaryPatternMatch(Match):
             self._cached_regex = re.compile(pattern, flags)
             return self._cached_regex
         except re.error:
-            raise RuleCheckException('Invalid regex')
+            raise RuleCheckException('Error in regular expression')
 
     def _get_pattern_impl(self):
         raise RuntimeError('_get_pattern_impl() unimplemented in subclass')
@@ -37,12 +37,13 @@ class ElementaryPatternMatch(Match):
     def _get_flags_impl(self):
         return 0
 
-    def _semanticCheck(self, scope):
+    def _semantic_check_before_children(self, scope):
         try:
             self._cached_regex = None
             self._get_regex()
         except RuleCheckException as e:
             e.scope = scope
+            e.set_span_from_item(self)
             raise e
 
     def _execute(self, context):

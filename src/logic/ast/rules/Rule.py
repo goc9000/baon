@@ -19,10 +19,6 @@ class Rule(ASTNode):
     def is_empty(self):
         return (len(self.alternatives) == 0) or all(alt.is_empty() for alt in self.alternatives)
 
-    def semanticCheck(self, scope):
-        for alt in self.alternatives:
-            alt.semanticCheck(scope)
-
     def execute(self, context):
         for alt in self.alternatives:
             matched = alt.execute(context)

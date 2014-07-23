@@ -16,15 +16,6 @@ class Match(ASTNode):
         ASTNode.__init__(self)
         self.actions = []
 
-    def semanticCheck(self, scope):
-        self._semanticCheck(scope)
-        
-        for action in self.actions:
-            action.semanticCheck(scope)
-    
-    def _semanticCheck(self, scope):
-        pass
-
     def execute(self, context):
         savept = context.save()
             
