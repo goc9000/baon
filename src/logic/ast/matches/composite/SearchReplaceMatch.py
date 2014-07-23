@@ -6,13 +6,13 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.RulesASTNode import RulesASTNode
+from logic.ast.RulesASTNode import RulesASTNode, ast_node_child
 
 from logic.rules.MatchContext import MatchContext
 
 
 class SearchReplaceMatch(RulesASTNode):
-    term = None
+    term = ast_node_child()
     
     def __init__(self, term):
         RulesASTNode.__init__(self)
@@ -50,6 +50,3 @@ class SearchReplaceMatch(RulesASTNode):
         context.text = context.text[:context.position] + ''.join(new_text)
         
         return ''
-
-    def _test_repr_children(self):
-        return self.term,

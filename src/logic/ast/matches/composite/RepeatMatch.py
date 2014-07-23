@@ -8,11 +8,11 @@
 
 from logic.ast.matches.Match import Match
 
-from logic.ast.RulesASTNode import ast_node_field
+from logic.ast.RulesASTNode import ast_node_field, ast_node_child
 
 
 class RepeatMatch(Match):
-    match = None
+    match = ast_node_child()
     at_least = ast_node_field(never_hide=True)
     at_most = ast_node_field(never_hide=True)
     
@@ -50,6 +50,3 @@ class RepeatMatch(Match):
         context.last_match_pos = match_pos
         
         return ''.join(committed)
-
-    def _test_repr_children_impl(self):
-        return self.match,

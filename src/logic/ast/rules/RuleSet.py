@@ -6,14 +6,14 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.RulesASTNode import RulesASTNode
+from logic.ast.RulesASTNode import RulesASTNode, ast_node_children
 
 from logic.rules.MatchContext import MatchContext
 from logic.rules.SemanticCheckScope import SemanticCheckScope
 
 
 class RuleSet(RulesASTNode):
-    rules = None
+    rules = ast_node_children()
     
     def __init__(self):
         RulesASTNode.__init__(self)
@@ -45,6 +45,3 @@ class RuleSet(RulesASTNode):
         
         for rule in self.rules:
             rule.semanticCheck(scope)
-
-    def _test_repr_children(self):
-        return self.rules

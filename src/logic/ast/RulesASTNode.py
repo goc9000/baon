@@ -6,22 +6,37 @@
 #
 # Licensed under the GPL-3
 
+import inspect
+
 from logic.parsing.ItemWithPositionInSource import ItemWithPositionInSource
 
 from logic.ast.RulesASTNodeField import RulesASTNodeField
+from logic.ast.RulesASTNodeChildRef import RulesASTNodeChildRef
+from logic.ast.RulesASTNodeChildList import RulesASTNodeChildList
 
-import inspect
 
 def ast_node_field(*args, **kwargs):
     return RulesASTNodeField(*args, **kwargs)
 
 
+def ast_node_child(*args, **kwargs):
+    return RulesASTNodeChildRef(*args, **kwargs)
+
+
+def ast_node_children(*args, **kwargs):
+    return RulesASTNodeChildList(*args, **kwargs)
+
+
 class RulesASTNode(ItemWithPositionInSource):
     _ast_node_fields = None
+    _ast_node_child_refs = None
+    _ast_node_child_lists = None
 
     def __init__(self):
         ItemWithPositionInSource.__init__(self)
         self._init_ast_node_fields()
+        self._init_ast_node_child_refs()
+        self._init_ast_node_child_lists()
 
     def test_repr(self):
         """The representation of this AST item in tests"""
@@ -48,6 +63,26 @@ class RulesASTNode(ItemWithPositionInSource):
 
         self._ast_node_fields.sort(key=lambda field: field.order)
 
+    def _init_ast_node_child_refs(self):
+        self._ast_node_child_refs = []
+        for child_ref_name, value in inspect.getmembers(self):
+            if isinstance(value, RulesASTNodeChildRef):
+                value.name = child_ref_name
+                self._ast_node_child_refs.append(value)
+                self.__setattr__(child_ref_name, None)
+
+        self._ast_node_child_refs.sort(key=lambda child_ref: child_ref.order)
+
+    def _init_ast_node_child_lists(self):
+        self._ast_node_child_lists = []
+        for child_list_name, value in inspect.getmembers(self):
+            if isinstance(value, RulesASTNodeChildList):
+                value.name = child_list_name
+                self._ast_node_child_lists.append(value)
+                self.__setattr__(child_list_name, [])
+
+        self._ast_node_child_lists.sort(key=lambda child_list: child_list.order)
+
     def _test_repr_params(self):
         values = []
         num_valid = 0
@@ -69,4 +104,9 @@ class RulesASTNode(ItemWithPositionInSource):
         return tuple(values[0:num_valid+1])
 
     def _test_repr_children(self):
-        return ()
+        children = [self.__getattribute__(child_ref.name) for child_ref in self._ast_node_child_refs]
+
+        for child_list in self._ast_node_child_lists:
+            children.extend(self.__getattribute__(child_list.name))
+
+        return tuple(children)

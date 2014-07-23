@@ -16,9 +16,13 @@ class RulesASTNodeField(object):
     default_value = None
     hide_for_value = None
 
-    def __init__(self, default_value=None, test_repr=None, hide_for_value=None, never_hide=False):
+    def __init__(self, default_value=None, test_repr=None, hide_for_value=None, never_hide=False, order=None):
         global next_field_order
-        self.order = next_field_order
+
+        if order is not None:
+            self.order = order
+        else:
+            self.order = next_field_order
         next_field_order += 1
 
         self.default_value = default_value

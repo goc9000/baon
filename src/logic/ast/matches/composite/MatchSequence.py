@@ -6,13 +6,13 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.RulesASTNode import RulesASTNode
+from logic.ast.RulesASTNode import RulesASTNode, ast_node_children
 
 from logic.ast.matches.special.BetweenMatch import BetweenMatch
 
 
 class MatchSequence(RulesASTNode):
-    terms = None
+    terms = ast_node_children()
 
     def __init__(self):
         RulesASTNode.__init__(self)
@@ -75,6 +75,3 @@ class MatchSequence(RulesASTNode):
         context.last_match_pos = match_pos
 
         return ''.join(committed)
-
-    def _test_repr_children(self):
-        return self.terms

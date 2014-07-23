@@ -7,10 +7,11 @@
 # Licensed under the GPL-3
 
 from logic.ast.matches.Match import Match
+from logic.ast.RulesASTNode import ast_node_child
 
 
 class SubRuleMatch(Match):
-    rule = None
+    rule = ast_node_child()
     
     def __init__(self, rule):
         Match.__init__(self)
@@ -22,6 +23,3 @@ class SubRuleMatch(Match):
 
     def _execute(self, context):
         return self.rule.execute(context)
-
-    def _test_repr_children_impl(self):
-        return self.rule,

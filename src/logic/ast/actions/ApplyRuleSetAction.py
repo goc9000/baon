@@ -7,10 +7,11 @@
 # Licensed under the GPL-3
 
 from logic.ast.actions.Action import Action
+from logic.ast.RulesASTNode import ast_node_child
 
 
 class ApplyRuleSetAction(Action):
-    ruleset = None
+    ruleset = ast_node_child()
     
     def __init__(self, ruleset):
         Action.__init__(self)
@@ -24,6 +25,3 @@ class ApplyRuleSetAction(Action):
 
     def execute(self, text, context):
         return self.ruleset.applyOn(text, context.aliases)
-
-    def _test_repr_children(self):
-        return self.ruleset,

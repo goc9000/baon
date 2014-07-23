@@ -6,11 +6,11 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.RulesASTNode import RulesASTNode
+from logic.ast.RulesASTNode import RulesASTNode, ast_node_children
 
 
 class Match(RulesASTNode):
-    actions = None
+    actions = ast_node_children()
 
     def __init__(self):
         RulesASTNode.__init__(self)
@@ -44,9 +44,3 @@ class Match(RulesASTNode):
 
     def _execute(self, context):
         raise RuntimeError("_test_repr_impl() not implemented in subclass")
-
-    def _test_repr_children(self):
-        return self._test_repr_children_impl() + tuple(self.actions)
-
-    def _test_repr_children_impl(self):
-        return ()
