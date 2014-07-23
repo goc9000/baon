@@ -1,4 +1,4 @@
-# logic/ast/RulesASTNodeChildList.py
+# logic/ast/ASTNodeChildList.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -10,7 +10,7 @@
 next_list_order = 0
 
 
-class RulesASTNodeChildList(object):
+class ASTNodeChildList(object):
     name = None
     order = None
 

@@ -1,4 +1,4 @@
-# logic/ast/RulesASTNodeChildRef.py
+# logic/ast/ASTNodeChildRef.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -10,7 +10,7 @@
 next_child_order = 0
 
 
-class RulesASTNodeChildRef(object):
+class ASTNodeChildRef(object):
     name = None
     order = None
 

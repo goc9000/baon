@@ -8,7 +8,7 @@
 
 from logic.ast.matches.Match import Match
 
-from logic.ast.RulesASTNode import ast_node_field, ast_node_child
+from logic.ast.ASTNode import ast_node_field, ast_node_child
 
 
 class RepeatMatch(Match):

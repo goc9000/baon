@@ -1,4 +1,4 @@
-# logic/ast/RulesASTNode.py
+# logic/ast/ASTNode.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -10,24 +10,24 @@ import inspect
 
 from logic.parsing.ItemWithPositionInSource import ItemWithPositionInSource
 
-from logic.ast.RulesASTNodeField import RulesASTNodeField
-from logic.ast.RulesASTNodeChildRef import RulesASTNodeChildRef
-from logic.ast.RulesASTNodeChildList import RulesASTNodeChildList
+from logic.ast.ASTNodeField import ASTNodeField
+from logic.ast.ASTNodeChildRef import ASTNodeChildRef
+from logic.ast.ASTNodeChildList import ASTNodeChildList
 
 
 def ast_node_field(*args, **kwargs):
-    return RulesASTNodeField(*args, **kwargs)
+    return ASTNodeField(*args, **kwargs)
 
 
 def ast_node_child(*args, **kwargs):
-    return RulesASTNodeChildRef(*args, **kwargs)
+    return ASTNodeChildRef(*args, **kwargs)
 
 
 def ast_node_children(*args, **kwargs):
-    return RulesASTNodeChildList(*args, **kwargs)
+    return ASTNodeChildList(*args, **kwargs)
 
 
-class RulesASTNode(ItemWithPositionInSource):
+class ASTNode(ItemWithPositionInSource):
     _ast_node_fields = None
     _ast_node_child_refs = None
     _ast_node_child_lists = None
@@ -56,7 +56,7 @@ class RulesASTNode(ItemWithPositionInSource):
     def _init_ast_node_fields(self):
         self._ast_node_fields = []
         for field_name, value in inspect.getmembers(self):
-            if isinstance(value, RulesASTNodeField):
+            if isinstance(value, ASTNodeField):
                 value.name = field_name
                 self._ast_node_fields.append(value)
                 self.__setattr__(field_name, value.default_value)
@@ -66,7 +66,7 @@ class RulesASTNode(ItemWithPositionInSource):
     def _init_ast_node_child_refs(self):
         self._ast_node_child_refs = []
         for child_ref_name, value in inspect.getmembers(self):
-            if isinstance(value, RulesASTNodeChildRef):
+            if isinstance(value, ASTNodeChildRef):
                 value.name = child_ref_name
                 self._ast_node_child_refs.append(value)
                 self.__setattr__(child_ref_name, None)
@@ -76,7 +76,7 @@ class RulesASTNode(ItemWithPositionInSource):
     def _init_ast_node_child_lists(self):
         self._ast_node_child_lists = []
         for child_list_name, value in inspect.getmembers(self):
-            if isinstance(value, RulesASTNodeChildList):
+            if isinstance(value, ASTNodeChildList):
                 value.name = child_list_name
                 self._ast_node_child_lists.append(value)
                 self.__setattr__(child_list_name, [])

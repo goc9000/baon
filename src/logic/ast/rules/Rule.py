@@ -6,14 +6,14 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.RulesASTNode import RulesASTNode, ast_node_children
+from logic.ast.ASTNode import ASTNode, ast_node_children
 
 
-class Rule(RulesASTNode):
+class Rule(ASTNode):
     alternatives = ast_node_children()
     
     def __init__(self):
-        RulesASTNode.__init__(self)
+        ASTNode.__init__(self)
         self.alternatives = []
 
     def is_empty(self):

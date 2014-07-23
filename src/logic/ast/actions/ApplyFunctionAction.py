@@ -9,7 +9,7 @@
 import re
 
 from logic.ast.actions.CompiledAction import CompiledAction
-from logic.ast.RulesASTNode import ast_node_field
+from logic.ast.ASTNode import ast_node_field
 
 from logic.errors.RuleCheckException import RuleCheckException
 

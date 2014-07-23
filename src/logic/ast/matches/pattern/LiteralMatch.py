@@ -10,7 +10,7 @@ import re
 
 from logic.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
 
-from logic.ast.RulesASTNode import ast_node_field
+from logic.ast.ASTNode import ast_node_field
 
 
 class LiteralMatch(ElementaryPatternMatch):

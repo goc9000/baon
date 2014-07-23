@@ -10,7 +10,7 @@ import re
 
 from logic.errors.RuleCheckException import RuleCheckException
 
-from logic.ast.RulesASTNode import ast_node_field
+from logic.ast.ASTNode import ast_node_field
 from logic.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
 
 

@@ -1,4 +1,4 @@
-# logic/ast/RulesASTNodeField.py
+# logic/ast/ASTNodeField.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -10,7 +10,7 @@
 next_field_order = 0
 
 
-class RulesASTNodeField(object):
+class ASTNodeField(object):
     name = None
     order = None
     default_value = None

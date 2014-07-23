@@ -7,7 +7,7 @@
 # Licensed under the GPL-3
 
 from logic.ast.matches.insertion.InsertionMatch import InsertionMatch
-from logic.ast.RulesASTNode import ast_node_field
+from logic.ast.ASTNode import ast_node_field
 
 
 class InsertLiteralMatch(InsertionMatch):

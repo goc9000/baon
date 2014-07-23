@@ -7,7 +7,7 @@
 # Licensed under the GPL-3
 
 from logic.ast.actions.Action import Action
-from logic.ast.RulesASTNode import ast_node_field
+from logic.ast.ASTNode import ast_node_field
 
 
 class ReplaceByLiteralAction(Action):

@@ -6,16 +6,16 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.RulesASTNode import RulesASTNode, ast_node_child
+from logic.ast.ASTNode import ASTNode, ast_node_child
 
 from logic.rules.MatchContext import MatchContext
 
 
-class SearchReplaceMatch(RulesASTNode):
+class SearchReplaceMatch(ASTNode):
     term = ast_node_child()
     
     def __init__(self, term):
-        RulesASTNode.__init__(self)
+        ASTNode.__init__(self)
         self.term = term
     
     def semanticCheck(self, scope):

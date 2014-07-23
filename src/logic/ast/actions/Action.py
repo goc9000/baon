@@ -6,12 +6,12 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.RulesASTNode import RulesASTNode
+from logic.ast.ASTNode import ASTNode
 
 
-class Action(RulesASTNode):
+class Action(ASTNode):
     def __init__(self):
-        RulesASTNode.__init__(self)
+        ASTNode.__init__(self)
 
     def semanticCheck(self, scope):
         pass
