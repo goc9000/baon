@@ -61,7 +61,7 @@ class ReformatAction(CompiledAction):
                 return lambda s, c: strip_zeroes(s)
 
             if self.width <= 0:
-                raise RuleCheckException("Width must be >0 for specifier %d")
+                raise RuleCheckException("Width must be at least 1 for specifier 'd'")
 
             return lambda s, c: pad_with_zeroes(s, self.width)
 

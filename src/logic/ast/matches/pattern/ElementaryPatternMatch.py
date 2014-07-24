@@ -18,33 +18,30 @@ class ElementaryPatternMatch(Match):
     def __init__(self):
         Match.__init__(self)
 
-    def _get_regex(self):
-        if self._cached_regex is not None:
-            return self._cached_regex
-
-        pattern = self._get_pattern_impl()
-        flags = self._get_flags_impl()
-
-        try:
-            self._cached_regex = re.compile(pattern, flags)
-            return self._cached_regex
-        except re.error:
-            raise RuleCheckException('Error in regular expression')
-
     def _get_pattern_impl(self):
         raise RuntimeError('_get_pattern_impl() unimplemented in subclass')
 
     def _get_flags_impl(self):
         return 0
 
-    def _semantic_check_before_children(self, scope):
+    def _compile_regex(self):
+        pattern = self._get_pattern_impl()
+        flags = self._get_flags_impl()
+
         try:
-            self._cached_regex = None
-            self._get_regex()
-        except RuleCheckException as e:
-            e.scope = scope
-            e.set_span_from_item(self)
-            raise e
+            return re.compile(pattern, flags)
+        except re.error:
+            raise RuleCheckException('Error in regular expression')
+
+    def _semantic_check_before_children(self, scope):
+        self._compile_regex()
+
+    def _get_regex(self):
+        if self._cached_regex is not None:
+            return self._cached_regex
+
+        self._cached_regex = self._compile_regex()
+        return self._cached_regex
 
     def _execute(self, context):
         regex = self._get_regex()

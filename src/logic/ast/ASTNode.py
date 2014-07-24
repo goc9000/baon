@@ -8,6 +8,8 @@
 
 import inspect
 
+from logic.errors.RuleCheckException import RuleCheckException
+
 from logic.parsing.ItemWithPositionInSource import ItemWithPositionInSource
 
 from logic.ast.ASTNodeField import ASTNodeField
@@ -39,10 +41,17 @@ class ASTNode(ItemWithPositionInSource):
         self._init_ast_node_child_lists()
 
     def semantic_check(self, scope):
-        self._semantic_check_before_children(scope)
-        for child in self.iter_ast_children():
-            child.semantic_check(scope)
-        self._semantic_check_after_children(scope)
+        try:
+            self._semantic_check_before_children(scope)
+            for child in self.iter_ast_children():
+                child.semantic_check(scope)
+            self._semantic_check_after_children(scope)
+        except RuleCheckException as e:
+            if e.scope is None:
+                e.scope = scope
+            if e.source_start_lineno is None:
+                e.set_span_from_item(self)
+            raise e
 
     def iter_ast_children(self):
         for child in [self.__getattribute__(child_ref.name) for child_ref in self._ast_node_child_refs]:

@@ -6,8 +6,9 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.matches.Match import Match
+from logic.errors.RuleCheckException import RuleCheckException
 
+from logic.ast.matches.Match import Match
 from logic.ast.ASTNode import ast_node_field, ast_node_child
 
 
@@ -22,6 +23,18 @@ class RepeatMatch(Match):
         self.match = match
         self.at_least = at_least
         self.at_most = at_most
+
+    def _semantic_check_before_children(self, scope):
+        if self.at_least is None:
+            raise RuleCheckException("Minimum number of matches must be specified")
+        if self.at_least < 0:
+            raise RuleCheckException("Minimum number of matches must be >= 0")
+
+        if self.at_most is not None:
+            if self.at_most < 1:
+                raise RuleCheckException("Maximum number of matches must be >= 1")
+            if self.at_least > self.at_most:
+                raise RuleCheckException("Minimum number of matches must be >= the minimum")
 
     def _execute(self, context):
         committed = []

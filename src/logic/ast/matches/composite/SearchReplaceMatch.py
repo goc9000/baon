@@ -6,16 +6,19 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.ASTNode import ASTNode, ast_node_child
+from logic.ast.ASTNode import ast_node_child
+from logic.ast.matches.Match import Match
+
+from logic.errors.RuleCheckException import RuleCheckException
 
 from logic.rules.MatchContext import MatchContext
 
 
-class SearchReplaceMatch(ASTNode):
+class SearchReplaceMatch(Match):
     term = ast_node_child()
     
     def __init__(self, term):
-        ASTNode.__init__(self)
+        Match.__init__(self)
         self.term = term
 
     def execute(self, context):
@@ -47,3 +50,7 @@ class SearchReplaceMatch(ASTNode):
         context.text = context.text[:context.position] + ''.join(new_text)
         
         return ''
+
+    def _semantic_check_before_children(self, scope):
+        if len(self.actions) > 0:
+            raise RuleCheckException('Search/replace matches do not allow actions directly on them')

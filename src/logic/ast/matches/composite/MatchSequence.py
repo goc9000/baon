@@ -6,16 +6,17 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.ASTNode import ASTNode, ast_node_children
+from logic.ast.ASTNode import ast_node_children
 
+from logic.ast.matches.Match import Match
 from logic.ast.matches.special.BetweenMatch import BetweenMatch
 
 
-class MatchSequence(ASTNode):
+class MatchSequence(Match):
     terms = ast_node_children()
 
     def __init__(self):
-        ASTNode.__init__(self)
+        Match.__init__(self)
         self.terms = []
 
     def is_empty(self):

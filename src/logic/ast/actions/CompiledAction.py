@@ -27,14 +27,8 @@ class CompiledAction(Action):
     def _compile_function(self):
         raise RuntimeError("_compile_function() not implemented in subclass")
 
-    def SEMANTIC_CHECK(self, scope):
-        Action.semanticCheck(self, scope)
-        
-        try:
-            self._compile_function()
-        except RuleCheckException as e:
-            e.scope = scope
-            raise e
+    def _semantic_check_before_children(self, scope):
+        self._compile_function()
 
     def execute(self, text, context):
         return self._get_function()(text, context)
