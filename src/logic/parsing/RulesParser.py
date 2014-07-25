@@ -255,7 +255,7 @@ def _handle_format_token(token):
 
 start = 'rule_set'
 
-parser_template = yacc.yacc()
+parser_template = yacc.yacc(write_tables=False, debug=False, errorlog=NullLogger())
 
 
 class RulesParser(object):
@@ -265,7 +265,7 @@ class RulesParser(object):
 
     @staticmethod
     def debug_parse(rules_text, start_rule):
-        parser = yacc.yacc(start=start_rule, debug=0, errorlog=NullLogger())
+        parser = yacc.yacc(start=start_rule, debug=False, write_tables=False, errorlog=NullLogger())
         return RulesParser._run_parser(parser, rules_text)
 
     @staticmethod
