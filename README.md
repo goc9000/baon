@@ -1,7 +1,7 @@
 BAON
 ====
 
-(C) Copyright 2012 Cristian Dinu (<goc9000@gmail.com>); Licensed under the GPLv3.
+(C) Copyright 2012-2014 Cristian Dinu (<goc9000@gmail.com>); Licensed under the GPLv3.
 
 Overview
 --------
@@ -11,7 +11,7 @@ BAON (By Any Other Name) is a mass file renamer designed to work with my persona
 Setup
 -----
 
-BAON requires Python, Qt4 with Python bindings, and an ANTLR v3.1.3 library (included here). To compile everything, simply use `make`. To install BAON in `/usr/local`, use `make install`.
+BAON requires Python, Qt4 with Python bindings, and the PLY Python package. To compile everything, simply use `make`. To install BAON in `/usr/local`, use `make install`.
 
 Usage Basics
 ------------
