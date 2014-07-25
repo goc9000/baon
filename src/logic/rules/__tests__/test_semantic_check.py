@@ -11,7 +11,7 @@ from unittest import TestCase
 
 from logic.errors.RuleCheckException import RuleCheckException
 
-from logic.rules.RulesCompiler import RulesCompiler
+from logic.rules.RuleSet import RuleSet
 
 
 class TestSemanticCheck(TestCase):
@@ -86,7 +86,7 @@ class TestSemanticCheck(TestCase):
 
     def check_result(self, text_input):
         try:
-            RulesCompiler.check_rules(text_input)
+            RuleSet.from_source(text_input)
         except RuleCheckException as e:
             return e.test_repr()
 

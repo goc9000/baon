@@ -9,7 +9,6 @@
 from logic.ast.ASTNode import ASTNode, ast_node_children
 
 from logic.rules.MatchContext import MatchContext
-from logic.rules.SemanticCheckScope import SemanticCheckScope
 
 
 class RuleSet(ASTNode):
