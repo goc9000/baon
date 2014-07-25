@@ -20,7 +20,6 @@ from logic.files.FileScanner import FileScanner
 from logic.Renamer import Renamer
 from logic.plan.RenamePlan import RenamePlan
 from logic.rules.RuleSet import RuleSet
-from logic.rules.RuleParser import RuleParser
 from logic.errors.RuleParseException import RuleParseException
 from logic.errors.RuleCheckException import RuleCheckException
 from logic.grammar_utils import format_numerals
@@ -161,7 +160,7 @@ class MainWindow(QDialog, Ui_MainWindow):
     
     def _clearRuleError(self):
         if not self._hold_rule_error:
-            self._highlighter.clearError()
+            self._highlighter.clear_error()
         self._hold_rule_error = False
     
     def _onDataTyped(self):
@@ -222,12 +221,11 @@ class MainWindow(QDialog, Ui_MainWindow):
         
         if rules_updated:
             self._ruleset = self._parseRules(setup['rules'])
-            
-            if isinstance(self._ruleset, RuleParseException):
+            if isinstance(self._ruleset, Exception) and hasattr(self._ruleset, 'source_span'):
                 self._hold_rule_error = True
-                self._highlighter.showError(self._ruleset.line, self._ruleset.column)
+                self._highlighter.show_error(self._ruleset.source_span)
             else:
-                self._highlighter.clearError()
+                self._highlighter.clear_error()
         
         if files_updated or rules_updated or options_updated or overrides_updated:
             if (self._files is not None) and not isinstance(self._files, Exception):
@@ -266,11 +264,7 @@ class MainWindow(QDialog, Ui_MainWindow):
     
     def _parseRules(self, text):
         try:
-            parser = RuleParser()
-            ruleset = parser.parse(text)
-            ruleset.semanticCheck()
-            
-            return ruleset
+            return RuleSet.from_source(text)
         except RuleCheckException as e:
             return e
         except RuleParseException as e:
@@ -404,12 +398,12 @@ class MainWindow(QDialog, Ui_MainWindow):
         self._showStatusMessage(message, is_error)
     
     def _getStatusMessage(self):
+        if isinstance(self._ruleset, Exception):
+            return str(self._ruleset), True
         if self._files is None:
             return 'Enter the base path for the files that are to be renamed.', False
         if isinstance(self._files, Exception):
             return str(self._files), True
-        if isinstance(self._ruleset, Exception):
-            return str(self._ruleset), True
         if len(self._files) == 0:
             return "No files found.", False
         
