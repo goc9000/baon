@@ -8,9 +8,9 @@
 
 import inspect
 
-from logic.errors.RuleCheckException import RuleCheckException
+from logic.parsing.SourceSpan import SourceSpan
 
-from logic.parsing.ItemWithPositionInSource import ItemWithPositionInSource
+from logic.errors.RuleCheckException import RuleCheckException
 
 from logic.ast.ASTNodeField import ASTNodeField
 from logic.ast.ASTNodeChildRef import ASTNodeChildRef
@@ -29,13 +29,14 @@ def ast_node_children(*args, **kwargs):
     return ASTNodeChildList(*args, **kwargs)
 
 
-class ASTNode(ItemWithPositionInSource):
+class ASTNode(object):
+    source_span = None
+
     _ast_node_fields = None
     _ast_node_child_refs = None
     _ast_node_child_lists = None
 
     def __init__(self):
-        ItemWithPositionInSource.__init__(self)
         self._init_ast_node_fields()
         self._init_ast_node_child_refs()
         self._init_ast_node_child_lists()
@@ -49,8 +50,8 @@ class ASTNode(ItemWithPositionInSource):
         except RuleCheckException as e:
             if e.scope is None:
                 e.scope = scope
-            if e.source_start_lineno is None:
-                e.set_span_from_item(self)
+            if e.source_span is None:
+                e.source_span = SourceSpan.copy(self.source_span)
             raise e
 
     def iter_ast_children(self):
@@ -71,11 +72,14 @@ class ASTNode(ItemWithPositionInSource):
 
     def test_repr_with_source_spans(self):
         """The representation of this AST item in tests"""
-        return\
-            (self.source_start_lineno, self.source_start_colno, self.source_end_lineno, self.source_end_colno) +\
-            (self.__class__.__name__,) +\
-            self._test_repr_params() +\
-            tuple(child.test_repr_with_source_spans() for child in self._test_repr_children())
+        return (
+            self.source_span.start_line,
+            self.source_span.start_column,
+            self.source_span.end_line,
+            self.source_span.end_column,
+            self.__class__.__name__,
+        ) + self._test_repr_params() +\
+               tuple(child.test_repr_with_source_spans() for child in self._test_repr_children())
 
     def _init_ast_node_fields(self):
         self._ast_node_fields = []

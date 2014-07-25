@@ -6,17 +6,16 @@
 #
 # Licensed under the GPL-3
 
-from logic.parsing.ItemWithPositionInSource import ItemWithPositionInSource
+from logic.parsing.SourceSpan import SourceSpan
 
 
-class RulesToken(ItemWithPositionInSource):
+class RulesToken(object):
     type = None
     text = None
     extras = None
+    source_span = None
 
     def __init__(self, lex_token=None, **extras):
-        ItemWithPositionInSource.__init__(self)
-
         if lex_token is not None:
             self.type = lex_token.type
             self.text = lex_token.value
@@ -24,44 +23,37 @@ class RulesToken(ItemWithPositionInSource):
 
             line, curr_line_start_pos = lex_token.lineno
             start_pos = lex_token.lexpos
+            column = 1 + start_pos - curr_line_start_pos
             length = len(lex_token.value)
 
-            self.source_start_lineno = line
-            self.source_start_colno = 1 + start_pos - curr_line_start_pos
-            self.source_start_pos = start_pos
-            self.source_end_lineno = self.source_start_lineno
-            self.source_end_colno = self.source_start_colno + length - 1
-            self.source_end_pos = self.source_start_pos + length - 1
-
-            self.lexpos = lex_token.lexpos
-            self.lineno = lex_token.lineno[0]
-            self.colno = 1 + lex_token.lexpos - lex_token.lineno[1]
-
+            self.source_span = SourceSpan(
+                start_pos,
+                start_pos + length - 1,
+                line,
+                column,
+                line,
+                column + length - 1,
+            )
 
     def __getattribute__(self, item):
         if item == 'value':
             return self
         elif item == 'lineno':
-            return self.source_start_lineno
-        elif item == 'colno':
-            return self.source_start_colno
-        elif item == 'start' or item == 'lexpos':
-            return self.source_start_pos
-        elif item == 'end':
-            return self.source_end_pos
-        elif item == 'length':
-            return 1 + self.source_end_pos - self.source_start_pos
+            return self.source_span.start_line
+        elif item == 'lexpos':
+            return self.source_span.start_pos
 
-        return ItemWithPositionInSource.__getattribute__(self, item)
+        return object.__getattribute__(self, item)
 
     def test_repr(self):
         """The representation of this token in tests"""
         base_tuple = (
-            self.start,
+            self.lexpos,
             self.type,
             self.text,
-            self.lineno,
-            self.colno,
         )
+
+        if self.source_span is not None:
+            base_tuple += (self.source_span.start_line, self.source_span.start_column)
 
         return base_tuple if self.extras is None else base_tuple + (self.extras,)

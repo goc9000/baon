@@ -11,7 +11,9 @@ from ply import lex
 from ply.lex import TOKEN
 
 from logic.baon_utils import decode_baon_string_literal
+
 from logic.parsing.RulesToken import RulesToken
+from logic.parsing.SourceSpan import SourceSpan
 
 
 tokens = (
@@ -147,9 +149,9 @@ def merge_error_tokens(tokens_stream):
     for token in tokens_stream:
         if token.type == 'error':
             if last_err_token is not None:
-                if last_err_token.start + last_err_token.length == token.start:
+                if last_err_token.lexpos + len(last_err_token.text) == token.lexpos:
                     last_err_token.text += token.text
-                    last_err_token.set_span_from_items(last_err_token, token)
+                    last_err_token.source_span = SourceSpan.from_to(last_err_token.source_span, token.source_span)
                     continue
 
                 yield last_err_token

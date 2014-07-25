@@ -6,31 +6,30 @@
 #
 # Licensed under the GPL-3
 
-from logic.parsing.ItemWithPositionInSource import ItemWithPositionInSource
+from logic.parsing.SourceSpan import SourceSpan
 
 
-class RuleCheckException(Exception, ItemWithPositionInSource):
+class RuleCheckException(Exception):
     scope = None
+    source_span = None
     
-    def __init__(self, message, scope=None):
+    def __init__(self, message, scope=None, source_span=None):
         Exception.__init__(self, message)
         self.scope = scope
+        self.source_span = SourceSpan.copy(source_span)
     
     def __str__(self):
         return self.message
 
     def test_repr(self):
-        return (
-            self.__class__.__name__,
-            self.message,
-            self.source_start_lineno,
-            self.source_start_colno,
-            self.source_end_lineno,
-            self.source_end_colno,
-        )
+        base_tuple = (self.__class__.__name__, self.message)
 
-    @staticmethod
-    def from_node(node, message, scope=None):
-        exception = RuleCheckException(message, scope)
-        exception.set_span_from_item(node)
-        return exception
+        if self.source_span is not None:
+            base_tuple += (
+                self.source_span.start_line,
+                self.source_span.start_column,
+                self.source_span.end_line,
+                self.source_span.end_column,
+            )
+
+        return base_tuple
