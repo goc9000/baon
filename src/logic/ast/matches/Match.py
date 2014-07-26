@@ -10,7 +10,7 @@ from logic.ast.ASTNode import ASTNode, ast_node_children
 
 
 class Match(ASTNode):
-    actions = ast_node_children()
+    actions = ast_node_children(order=100)
 
     def __init__(self):
         ASTNode.__init__(self)

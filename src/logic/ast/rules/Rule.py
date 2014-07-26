@@ -6,24 +6,18 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.ASTNode import ASTNode, ast_node_children
+from logic.ast.ASTNode import ASTNode, ast_node_child
 
 
 class Rule(ASTNode):
-    alternatives = ast_node_children()
+    content = ast_node_child()
     
-    def __init__(self):
+    def __init__(self, content):
         ASTNode.__init__(self)
-        self.alternatives = []
+        self.content = content
 
     def is_empty(self):
-        return (len(self.alternatives) == 0) or all(alt.is_empty() for alt in self.alternatives)
+        return self.content.is_empty()
 
     def execute(self, context):
-        for alt in self.alternatives:
-            matched = alt.execute(context)
-
-            if matched is not False:
-                return matched
-        
-        return False
+        return self.content.execute(context)

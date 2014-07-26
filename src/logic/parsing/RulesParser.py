@@ -13,6 +13,7 @@ from ply.yacc import NullLogger
 from logic.ast.rules.RuleSet import RuleSet
 from logic.ast.rules.Rule import Rule
 
+from logic.ast.matches.composite.AlternativesMatch import AlternativesMatch
 from logic.ast.matches.composite.SequenceMatch import SequenceMatch
 from logic.ast.matches.composite.RepeatMatch import RepeatMatch
 from logic.ast.matches.composite.SearchReplaceMatch import SearchReplaceMatch
@@ -65,16 +66,22 @@ def p_rule_set_base(p):
     _set_source_span(p[0], p[1])
 
 
-def p_rule_add_sequence_match(p):
-    """rule : rule OP_OR sequence_match"""
+def p_rule(p):
+    """rule : alternatives_match"""
+    p[0] = Rule(p[1])
+    _set_source_span(p[0], p[1])
+
+
+def p_alternatives_match_add_sequence_match(p):
+    """alternatives_match : alternatives_match OP_OR sequence_match"""
     p[0] = p[1]
     p[0].alternatives.append(p[3])
     _set_source_span(p[0], p[1], p[3])
 
 
-def p_rule_base(p):
-    """rule : sequence_match"""
-    p[0] = Rule()
+def p_alternatives_match_base(p):
+    """alternatives_match : sequence_match"""
+    p[0] = AlternativesMatch()
     p[0].alternatives.append(p[1])
     _set_source_span(p[0], p[1])
 
