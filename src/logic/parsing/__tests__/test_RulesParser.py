@@ -88,20 +88,16 @@ class TestRulesLexer(TestCase):
 
     def test_parse_subrule_match(self):
         self.assertEqual(self.parse_result('match', u'("abc")'),
-                         ('SubRuleMatch',
-                          ('Rule',
-                           ('AlternativesMatch',
-                            ('SequenceMatch',
-                             ('LiteralMatch', u'abc'))))))
+                         ('AlternativesMatch',
+                          ('SequenceMatch',
+                           ('LiteralMatch', u'abc'))))
         self.assertEqual(self.parse_result('match', u'($|..*)!'),
-                         ('SubRuleMatch',
-                          ('Rule',
-                           ('AlternativesMatch',
-                            ('SequenceMatch',
-                             ('EndAnchorMatch',)),
-                            ('SequenceMatch',
-                             ('RepeatMatch', 0, None,
-                              ('BetweenMatch',))))),
+                         ('AlternativesMatch',
+                          ('SequenceMatch',
+                           ('EndAnchorMatch',)),
+                          ('SequenceMatch',
+                           ('RepeatMatch', 0, None,
+                            ('BetweenMatch',))),
                           ('DeleteAction',)))
 
     def test_parse_delete_action(self):

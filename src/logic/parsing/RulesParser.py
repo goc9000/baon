@@ -17,7 +17,6 @@ from logic.ast.matches.composite.AlternativesMatch import AlternativesMatch
 from logic.ast.matches.composite.SequenceMatch import SequenceMatch
 from logic.ast.matches.composite.RepeatMatch import RepeatMatch
 from logic.ast.matches.composite.SearchReplaceMatch import SearchReplaceMatch
-from logic.ast.matches.composite.SubRuleMatch import SubRuleMatch
 
 from logic.ast.matches.special.StartAnchorMatch import StartAnchorMatch
 from logic.ast.matches.special.EndAnchorMatch import EndAnchorMatch
@@ -177,8 +176,8 @@ def p_match_insert_id(p):
 
 
 def p_match_subrule(p):
-    """match : PARA_OPEN rule PARA_CLOSE"""
-    p[0] = SubRuleMatch(p[2])
+    """match : PARA_OPEN alternatives_match PARA_CLOSE"""
+    p[0] = p[2]
     _set_source_span(p[0], p[1], p[3])
 
 
