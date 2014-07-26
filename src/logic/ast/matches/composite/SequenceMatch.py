@@ -1,4 +1,4 @@
-# logic/ast/matches/composite/MatchSequence.py
+# logic/ast/matches/composite/SequenceMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -12,7 +12,7 @@ from logic.ast.matches.Match import Match
 from logic.ast.matches.special.BetweenMatch import BetweenMatch
 
 
-class MatchSequence(Match):
+class SequenceMatch(Match):
     terms = ast_node_children()
 
     def __init__(self):
@@ -22,7 +22,7 @@ class MatchSequence(Match):
     def is_empty(self):
         return len(self.terms) == 0
 
-    def execute(self, context):
+    def _execute(self, context):
         savept = context.save()
         committed = []
         

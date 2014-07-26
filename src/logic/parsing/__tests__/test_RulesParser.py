@@ -90,14 +90,14 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('match', u'("abc")'),
                          ('SubRuleMatch',
                           ('Rule',
-                           ('MatchSequence',
+                           ('SequenceMatch',
                             ('LiteralMatch', u'abc')))))
         self.assertEqual(self.parse_result('match', u'($|..*)!'),
                          ('SubRuleMatch',
                           ('Rule',
-                           ('MatchSequence',
+                           ('SequenceMatch',
                             ('EndAnchorMatch',)),
-                           ('MatchSequence',
+                           ('SequenceMatch',
                             ('RepeatMatch', 0, None,
                              ('BetweenMatch',)))),
                           ('DeleteAction',)))
@@ -142,13 +142,13 @@ class TestRulesLexer(TestCase):
                          ('ApplyRuleSetAction',
                           ('RuleSet',
                            ('Rule',
-                            ('MatchSequence',
+                            ('SequenceMatch',
                              ('BetweenMatch',)),
-                            ('MatchSequence',
+                            ('SequenceMatch',
                              ('FormatMatch', u'd'),
                              ('EndAnchorMatch',))),
                            ('Rule',
-                            ('MatchSequence',
+                            ('SequenceMatch',
                              ('LiteralMatch', u'abc',
                               ('DeleteAction',)))))))
 
@@ -198,11 +198,11 @@ class TestRulesLexer(TestCase):
 
     def test_parse_match_sequence(self):
         self.assertEqual(self.parse_result('sequence_match', u'.. $'),
-                         ('MatchSequence',
+                         ('SequenceMatch',
                           ('BetweenMatch',),
                           ('EndAnchorMatch',)))
         self.assertEqual(self.parse_result('sequence_match', u'^->"abc"..>>def$'),
-                         ('MatchSequence',
+                         ('SequenceMatch',
                           ('StartAnchorMatch',
                            ('ReplaceByLiteralAction', u'abc')),
                           ('BetweenMatch',
@@ -212,37 +212,37 @@ class TestRulesLexer(TestCase):
     def test_parse_rule(self):
         self.assertEqual(self.parse_result('rule', u'..'),
                          ('Rule',
-                          ('MatchSequence',
+                          ('SequenceMatch',
                            ('BetweenMatch',))))
         self.assertEqual(self.parse_result('rule', u'^|"a"'),
                          ('Rule',
-                          ('MatchSequence',
+                          ('SequenceMatch',
                            ('StartAnchorMatch',)),
-                          ('MatchSequence',
+                          ('SequenceMatch',
                            ('LiteralMatch', u'a'))))
         self.assertEqual(self.parse_result('rule', u'%d->"a"|..!$|<<abc'),
                          ('Rule',
-                          ('MatchSequence',
+                          ('SequenceMatch',
                            ('FormatMatch', u'd',
                             ('ReplaceByLiteralAction', u'a'))),
-                          ('MatchSequence',
+                          ('SequenceMatch',
                            ('BetweenMatch',
                             ('DeleteAction',)),
                            ('EndAnchorMatch',)),
-                          ('MatchSequence',
+                          ('SequenceMatch',
                            ('InsertAliasMatch', u'abc'))))
 
     def test_parse_rule_set(self):
         self.assertEqual(self.parse_result('rule_set', u'..->title;^|"a"!'),
                          ('RuleSet',
                           ('Rule',
-                           ('MatchSequence',
+                           ('SequenceMatch',
                             ('BetweenMatch',
                              ('ApplyFunctionAction', u'title')))),
                           ('Rule',
-                           ('MatchSequence',
+                           ('SequenceMatch',
                             ('StartAnchorMatch',)),
-                           ('MatchSequence',
+                           ('SequenceMatch',
                             ('LiteralMatch', u'a',
                              ('DeleteAction',))))))
 

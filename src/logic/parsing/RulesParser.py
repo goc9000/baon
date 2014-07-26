@@ -13,7 +13,7 @@ from ply.yacc import NullLogger
 from logic.ast.rules.RuleSet import RuleSet
 from logic.ast.rules.Rule import Rule
 
-from logic.ast.matches.composite.MatchSequence import MatchSequence
+from logic.ast.matches.composite.SequenceMatch import SequenceMatch
 from logic.ast.matches.composite.RepeatMatch import RepeatMatch
 from logic.ast.matches.composite.SearchReplaceMatch import SearchReplaceMatch
 from logic.ast.matches.composite.SubRuleMatch import SubRuleMatch
@@ -88,7 +88,7 @@ def p_sequence_match_add_term(p):
 
 def p_sequence_match_empty(p):
     """sequence_match : """
-    p[0] = MatchSequence()
+    p[0] = SequenceMatch()
 
     try:
         p[0].source_span = SourceSpan.right_after(p[-1].source_span)
