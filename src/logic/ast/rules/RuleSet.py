@@ -32,10 +32,7 @@ class RuleSet(ASTNode):
             if matched is not False:
                 text = matched + context.text[context.position:]
                 aliases = dict(context.aliases)
-                
-            if context.stop:
-                break
-            
+
         return text, aliases
 
     def is_empty(self):
