@@ -20,9 +20,4 @@ class InsertAliasMatch(InsertionMatch):
     
     def _execute(self, context):
         context.last_match_pos = None
-        
-        if self.alias in context.aliases:
-            return context.aliases[self.alias]
-        else:
-            context.forward_aliases.add(self.alias)
-            return ''
+        return context.aliases[self.alias]

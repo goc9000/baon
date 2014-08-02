@@ -19,11 +19,14 @@ class RuleSet(ASTNode):
         self.rules = []
 
     def applyOn(self, text, initial_aliases=None):
+        if initial_aliases is None:
+            initial_aliases = dict()
+
         for rule in self.rules:
             context = MatchContext(text, initial_aliases)
             matched = rule.execute(context)
-            
-            if (matched is not False) and (len(context.forward_aliases) > 0):
+
+            if matched is not False and context.aliases != initial_aliases:
                 context = MatchContext(text, context.aliases)
                 matched = rule.execute(context)
             

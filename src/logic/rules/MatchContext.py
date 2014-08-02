@@ -7,21 +7,24 @@
 # Licensed under the GPL-3
 
 
+from collections import defaultdict
+
+
 class MatchContext(object):
     text = None
     position = None
     stop = None
     aliases = None
-    forward_aliases = None
     next_unanchored = None
     last_match_pos = None
-    
+
     def __init__(self, text, initial_aliases=None):
         self.text = text
         self.position = 0
         self.stop = False
-        self.forward_aliases = set()
-        self.aliases = initial_aliases.copy() if not initial_aliases is None else dict()
+        self.aliases = defaultdict(str)
+        if initial_aliases is not None:
+            self.aliases.update(initial_aliases)
         self.next_unanchored = False
         self.last_match_pos = None
 
@@ -30,7 +33,6 @@ class MatchContext(object):
         return (self.text,
                 self.position,
                 self.stop,
-                self.forward_aliases.copy(),
                 self.aliases.copy(),
                 self.next_unanchored)
 
@@ -38,6 +40,5 @@ class MatchContext(object):
         self.text = savepoint[0]
         self.position = savepoint[1]
         self.stop = savepoint[2]
-        self.forward_aliases = savepoint[3].copy()
-        self.aliases = savepoint[4].copy()
-        self.next_unanchored = savepoint[5]
+        self.aliases = savepoint[3].copy()
+        self.next_unanchored = savepoint[4]
