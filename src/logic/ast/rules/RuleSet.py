@@ -18,25 +18,25 @@ class RuleSet(ASTNode):
         ASTNode.__init__(self)
         self.rules = []
 
-    def applyOn(self, text, initial_aliases=None):
-        if initial_aliases is None:
-            initial_aliases = dict()
+    def apply_on(self, text, initial_aliases=None):
+        aliases = initial_aliases.copy() if initial_aliases is not None else dict()
 
         for rule in self.rules:
-            context = MatchContext(text, initial_aliases)
+            context = MatchContext(text, aliases)
             matched = rule.execute(context)
 
-            if matched is not False and context.aliases != initial_aliases:
+            if matched is not False and context.aliases != aliases:
                 context = MatchContext(text, context.aliases)
                 matched = rule.execute(context)
             
             if matched is not False:
                 text = matched + context.text[context.position:]
+                aliases = dict(context.aliases)
                 
             if context.stop:
                 break
             
-        return text
+        return text, aliases
 
     def is_empty(self):
         return len(self.rules) == 0

@@ -23,7 +23,7 @@ class RuleSet(object):
         self._rule_set_node.semantic_check(SemanticCheckScope())
 
     def apply_on(self, text, initial_aliases=None):
-        return self._rule_set_node.applyOn(text, initial_aliases)
+        return self._rule_set_node.apply_on(text, initial_aliases)
 
     @staticmethod
     def from_source(rules_text):

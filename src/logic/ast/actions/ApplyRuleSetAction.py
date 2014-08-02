@@ -19,4 +19,6 @@ class ApplyRuleSetAction(Action):
         self.ruleset = ruleset
 
     def execute(self, text, context):
-        return self.ruleset.applyOn(text, context.aliases)
+        text, new_aliases = self.ruleset.apply_on(text, context.aliases)
+        context.aliases.update(new_aliases)
+        return text
