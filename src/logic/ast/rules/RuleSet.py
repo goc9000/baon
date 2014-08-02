@@ -8,8 +8,6 @@
 
 from logic.ast.ASTNode import ASTNode, ast_node_children
 
-from logic.rules.MatchContext import MatchContext
-
 
 class RuleSet(ASTNode):
     rules = ast_node_children()
@@ -18,20 +16,12 @@ class RuleSet(ASTNode):
         ASTNode.__init__(self)
         self.rules = []
 
-    def apply_on(self, text, initial_aliases=None):
-        aliases = initial_aliases.copy() if initial_aliases is not None else dict()
+    def apply_on(self, text, aliases=None):
+        if aliases is None:
+            aliases = dict()
 
         for rule in self.rules:
-            context = MatchContext(text, aliases)
-            matched = rule.execute(context)
-
-            if matched is not False and context.aliases != aliases:
-                context = MatchContext(text, context.aliases)
-                matched = rule.execute(context)
-            
-            if matched is not False:
-                text = matched + context.text[context.position:]
-                aliases = dict(context.aliases)
+            text, aliases = rule.apply_on(text, aliases)
 
         return text, aliases
 

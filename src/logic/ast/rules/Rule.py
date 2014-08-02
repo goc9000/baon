@@ -7,6 +7,11 @@
 # Licensed under the GPL-3
 
 from logic.ast.ASTNode import ASTNode, ast_node_child
+from logic.errors.RuleApplicationException import RuleApplicationException
+from logic.rules.MatchContext import MatchContext
+
+
+MAX_ITERATIONS = 10
 
 
 class Rule(ASTNode):
@@ -19,5 +24,22 @@ class Rule(ASTNode):
     def is_empty(self):
         return self.content.is_empty()
 
-    def execute(self, context):
-        return self.content.execute(context)
+    def apply_on(self, text, aliases=None):
+        initial_aliases = dict(aliases) if aliases is not None else dict()
+
+        aliases = initial_aliases
+
+        for _ in xrange(MAX_ITERATIONS):
+            context = MatchContext(text, aliases)
+            matched = self.content.execute(context)
+
+            if context.aliases != aliases:
+                aliases = dict(context.aliases)
+                continue
+
+            if matched is not False:
+                text = matched + context.text[context.position:]
+
+            return text, aliases
+
+        raise RuleApplicationException("Dependencies of aliases are too complex")

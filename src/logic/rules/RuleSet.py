@@ -22,8 +22,8 @@ class RuleSet(object):
         self._rule_set_node = rule_set_node
         self._rule_set_node.semantic_check(SemanticCheckScope())
 
-    def apply_on(self, text, initial_aliases=None):
-        return self._rule_set_node.apply_on(text, initial_aliases)
+    def apply_on(self, text, aliases=None):
+        return self._rule_set_node.apply_on(text, aliases)
 
     @staticmethod
     def from_source(rules_text):
