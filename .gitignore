@@ -2,6 +2,7 @@
 .project
 .pydevproject
 .settings
+.DS_Store
 *.pyc
 *~
 src/gui/baon.py
