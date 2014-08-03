@@ -46,7 +46,7 @@ class Renamer(object):
         
         error = None
         try:
-            fname, _ = self.ruleset.apply_on(fname)
+            fname = self.ruleset.apply_on(fname).text
             if not self.use_ext:
                 fname += ext
             if not self.use_path:

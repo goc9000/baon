@@ -7,6 +7,7 @@
 # Licensed under the GPL-3
 
 from logic.ast.ASTNode import ASTNode, ast_node_children
+from logic.rules.ApplyRuleResult import ApplyRuleResult
 
 
 class RuleSet(ASTNode):
@@ -17,13 +18,12 @@ class RuleSet(ASTNode):
         self.rules = []
 
     def apply_on(self, text, aliases=None):
-        if aliases is None:
-            aliases = dict()
+        result = ApplyRuleResult(text=text, aliases=aliases if aliases is None else dict())
 
         for rule in self.rules:
-            text, aliases = rule.apply_on(text, aliases)
+            result = rule.apply_on(result.text, result.aliases)
 
-        return text, aliases
+        return result
 
     def is_empty(self):
         return len(self.rules) == 0

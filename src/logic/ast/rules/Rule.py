@@ -7,8 +7,11 @@
 # Licensed under the GPL-3
 
 from logic.ast.ASTNode import ASTNode, ast_node_child
+
 from logic.errors.RuleApplicationException import RuleApplicationException
+
 from logic.rules.MatchContext import MatchContext
+from logic.rules.ApplyRuleResult import ApplyRuleResult
 
 
 MAX_ITERATIONS = 10
@@ -40,6 +43,6 @@ class Rule(ASTNode):
             if matched is not False:
                 text = matched + context.text[context.position:]
 
-            return text, aliases
+            return ApplyRuleResult(text=text, aliases=aliases)
 
         raise RuleApplicationException("Dependencies of aliases are too complex")
