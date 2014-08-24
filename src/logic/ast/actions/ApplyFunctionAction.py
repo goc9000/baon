@@ -8,7 +8,7 @@
 
 import re
 
-from logic.ast.actions.CompiledAction import CompiledAction
+from logic.ast.actions.CompiledAction import CompiledAction, wrap_simple_text_function
 from logic.ast.ASTNode import ast_node_field
 
 from logic.errors.RuleCheckException import RuleCheckException
@@ -43,20 +43,23 @@ def extract_text_from_braces(text, braces, fail_value=None):
     return text[idx_from + 1:idx_to]
 
 
+SIMPLE_FUNC_DICT = {
+    'title': to_title_case,
+    'trim': lambda s: s.strip(),
+    'upper': lambda s: s.upper(),
+    'toupper': lambda s: s.upper(),
+    'lower': lambda s: s.lower(),
+    'tolower': lambda s: s.lower(),
+    'unbrace': unbrace,
+    'paras': lambda s: add_braces(s, u'()'),
+    'braces': lambda s: add_braces(s, u'[]'),
+    'curlies': lambda s: add_braces(s, u'{}'),
+    'inparas': lambda s: extract_text_from_braces(s, u'()', u''),
+    'inbraces': lambda s: extract_text_from_braces(s, u'[]', u''),
+    'incurlies': lambda s: extract_text_from_braces(s, u'{}', u''),
+}
+
 FUNC_DICT = {
-    'title': lambda s, c: to_title_case(s),
-    'trim': lambda s, c: s.strip(),
-    'upper': lambda s, c: s.upper(),
-    'toupper': lambda s, c: s.upper(),
-    'lower': lambda s, c: s.lower(),
-    'tolower': lambda s, c: s.lower(),
-    'unbrace': lambda s, c: unbrace(s),
-    'paras': lambda s, c: add_braces(s, '()'),
-    'braces': lambda s, c: add_braces(s, '[]'),
-    'curlies': lambda s, c: add_braces(s, '{}'),
-    'inparas': lambda s, c: extract_text_from_braces(s, '()', ''),
-    'inbraces': lambda s, c: extract_text_from_braces(s, '[]', ''),
-    'incurlies': lambda s, c: extract_text_from_braces(s, '{}', '')
 }
 
 
@@ -69,7 +72,9 @@ class ApplyFunctionAction(CompiledAction):
         self.function_name = fn_name
 
     def _compile_function(self):
-        if self.function_name in FUNC_DICT:
+        if self.function_name in SIMPLE_FUNC_DICT:
+            return wrap_simple_text_function(SIMPLE_FUNC_DICT[self.function_name])
+        elif self.function_name in FUNC_DICT:
             return FUNC_DICT[self.function_name]
         else:
             raise RuleCheckException("Unsupported function '{0}'".format(self.function_name))

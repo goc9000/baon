@@ -8,7 +8,7 @@
 
 import re
 
-from logic.ast.actions.CompiledAction import CompiledAction
+from logic.ast.actions.CompiledAction import CompiledAction, wrap_simple_text_function
 from logic.ast.ASTNode import ast_node_field
 
 from logic.errors.RuleCheckException import RuleCheckException
@@ -58,11 +58,10 @@ class ReformatAction(CompiledAction):
     def _compile_function(self):
         if self.specifier == 'd':
             if self.width is None:
-                return lambda s, c: strip_zeroes(s)
-
+                return wrap_simple_text_function(strip_zeroes)
             if self.width <= 0:
                 raise RuleCheckException("Width must be at least 1 for specifier 'd'")
 
-            return lambda s, c: pad_with_zeroes(s, self.width)
+            return wrap_simple_text_function(lambda text: pad_with_zeroes(text, self.width))
 
         raise RuleCheckException("Unrecognized format specifier '{0}'".format(self.specifier))

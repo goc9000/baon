@@ -6,9 +6,17 @@
 #
 # Licensed under the GPL-3
 
-from logic.errors.RuleCheckException import RuleCheckException
-
 from logic.ast.actions.Action import Action
+
+
+def wrap_simple_text_function(function):
+    def wrapper(context):
+        new_text = function(context.matched_text)
+        if new_text is False:
+            return False
+        return context._replace(matched_text=new_text)
+
+    return wrapper
 
 
 class CompiledAction(Action):
@@ -30,5 +38,5 @@ class CompiledAction(Action):
     def _semantic_check_before_children(self, scope):
         self._compile_function()
 
-    def execute(self, text, context):
-        return self._get_function()(text, context)
+    def execute(self, context):
+        return self._get_function()(context)

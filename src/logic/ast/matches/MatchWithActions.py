@@ -10,6 +10,8 @@ from logic.ast.ASTNode import ast_node_children
 
 from logic.ast.matches.Match import Match
 
+from logic.rules.MatchContext import MatchContext
+
 
 class MatchWithActions(Match):
     actions = ast_node_children(order=100)
@@ -21,12 +23,26 @@ class MatchWithActions(Match):
     def _execute_match_impl(self, context):
         text = self._execute_match_with_actions_impl(context)
 
-        if text is not False:
-            for action in self.actions:
-                text = action.execute(text, context)
-                if text is False:
-                    break
-        return text
+        if text is False:
+            return
+
+        action_context = MatchContext(
+            text=context.text,
+            position=context.position,
+            aliases=context.aliases,
+            matched_text=text
+        )
+
+        for action in self.actions:
+            action_context = action.execute(action_context)
+            if action_context is False:
+                return False
+
+        context.text = action_context.text
+        context.position = action_context.position
+        context.aliases = action_context.aliases
+
+        return action_context.matched_text
 
     def _execute_match_with_actions_impl(self, context):
         raise RuntimeError("_execute_match_with_actions_impl() not implemented in subclass")

@@ -18,7 +18,10 @@ class ApplyRuleSetAction(Action):
         
         self.ruleset = ruleset
 
-    def execute(self, text, context):
-        text, new_aliases = self.ruleset.apply_on(text, context.aliases)
-        context.aliases.update(new_aliases)
-        return text
+    def execute(self, context):
+        new_text, new_aliases = self.ruleset.apply_on(context.matched_text, context.aliases)
+
+        return context._replace(
+            matched_text=new_text,
+            aliases=new_aliases,
+        )

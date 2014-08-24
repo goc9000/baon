@@ -13,5 +13,5 @@ class Action(ASTNode):
     def __init__(self):
         ASTNode.__init__(self)
 
-    def execute(self, text, context):
+    def execute(self, context):
         raise RuntimeError("execute() not implemented in subclass")
