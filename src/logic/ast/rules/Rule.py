@@ -10,7 +10,7 @@ from logic.ast.ASTNode import ASTNode, ast_node_child
 
 from logic.errors.RuleApplicationException import RuleApplicationException
 
-from logic.rules.MatchContext import MatchContext
+from logic.rules.MatchContextOld import MatchContextOld
 from logic.rules.ApplyRuleResult import ApplyRuleResult
 
 
@@ -33,7 +33,7 @@ class Rule(ASTNode):
         aliases = initial_aliases
 
         for _ in xrange(MAX_ITERATIONS):
-            context = MatchContext(text, aliases)
+            context = MatchContextOld(text, aliases)
             matched = self.content.execute(context)
 
             if context.aliases != aliases:

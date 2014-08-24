@@ -10,7 +10,7 @@
 from collections import defaultdict
 
 
-class MatchContext(object):
+class MatchContextOld(object):
     text = None
     position = None
     aliases = None

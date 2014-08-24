@@ -9,9 +9,7 @@
 from logic.ast.ASTNode import ast_node_child
 from logic.ast.matches.Match import Match
 
-from logic.errors.RuleCheckException import RuleCheckException
-
-from logic.rules.MatchContext import MatchContext
+from logic.rules.MatchContextOld import MatchContextOld
 
 
 class SearchReplaceMatch(Match):
@@ -22,7 +20,7 @@ class SearchReplaceMatch(Match):
         self.term = term
 
     def execute(self, context):
-        ctx = MatchContext(context.text, context.aliases)
+        ctx = MatchContextOld(context.text, context.aliases)
         ctx.position = context.position
         
         new_text = []
