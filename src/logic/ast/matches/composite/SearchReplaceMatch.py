@@ -50,7 +50,3 @@ class SearchReplaceMatch(Match):
         context.text = context.text[:context.position] + ''.join(new_text)
         
         return ''
-
-    def _semantic_check_before_children(self, scope):
-        if len(self.actions) > 0:
-            raise RuleCheckException('Search/replace matches do not allow actions directly on them')

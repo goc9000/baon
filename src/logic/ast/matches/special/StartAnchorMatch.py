@@ -6,14 +6,14 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.matches.Match import Match
+from logic.ast.matches.MatchWithActions import MatchWithActions
 
 
-class StartAnchorMatch(Match):
+class StartAnchorMatch(MatchWithActions):
     def __init__(self):
-        Match.__init__(self)
+        MatchWithActions.__init__(self)
     
-    def _execute(self, context):
+    def _execute_match_with_actions_impl(self, context):
         if context.position == 0:
             context.last_match_pos = context.position
             context.next_unanchored = False

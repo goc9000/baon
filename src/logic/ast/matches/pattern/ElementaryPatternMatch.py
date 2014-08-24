@@ -8,15 +8,15 @@
 
 import re
 
-from logic.ast.matches.Match import Match
+from logic.ast.matches.MatchWithActions import MatchWithActions
 from logic.errors.RuleCheckException import RuleCheckException
 
 
-class ElementaryPatternMatch(Match):
+class ElementaryPatternMatch(MatchWithActions):
     _cached_regex = None
 
     def __init__(self):
-        Match.__init__(self)
+        MatchWithActions.__init__(self)
 
     def _get_pattern_impl(self):
         raise RuntimeError('_get_pattern_impl() unimplemented in subclass')
@@ -43,7 +43,7 @@ class ElementaryPatternMatch(Match):
         self._cached_regex = self._compile_regex()
         return self._cached_regex
 
-    def _execute(self, context):
+    def _execute_match_with_actions_impl(self, context):
         regex = self._get_regex()
 
         if context.next_unanchored:

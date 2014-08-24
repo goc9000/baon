@@ -8,17 +8,17 @@
 
 from logic.errors.RuleCheckException import RuleCheckException
 
-from logic.ast.matches.Match import Match
+from logic.ast.matches.MatchWithActions import MatchWithActions
 from logic.ast.ASTNode import ast_node_field, ast_node_child
 
 
-class RepeatMatch(Match):
+class RepeatMatch(MatchWithActions):
     match = ast_node_child()
     at_least = ast_node_field(never_hide=True)
     at_most = ast_node_field(never_hide=True)
     
     def __init__(self, match, at_least, at_most):
-        Match.__init__(self)
+        MatchWithActions.__init__(self)
         
         self.match = match
         self.at_least = at_least
@@ -36,7 +36,7 @@ class RepeatMatch(Match):
             if self.at_least > self.at_most:
                 raise RuleCheckException("Minimum number of matches must be >= the minimum")
 
-    def _execute(self, context):
+    def _execute_match_with_actions_impl(self, context):
         committed = []
         
         match_pos = None

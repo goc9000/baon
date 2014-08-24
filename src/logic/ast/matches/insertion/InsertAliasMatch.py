@@ -18,6 +18,6 @@ class InsertAliasMatch(InsertionMatch):
 
         self.alias = alias
     
-    def _execute(self, context):
+    def _execute_match_with_actions_impl(self, context):
         context.last_match_pos = None
         return context.aliases[self.alias]

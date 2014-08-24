@@ -8,22 +8,21 @@
 
 from logic.ast.ASTNode import ast_node_children
 
-from logic.ast.matches.Match import Match
+from logic.ast.matches.MatchWithActions import MatchWithActions
 from logic.ast.matches.special.BetweenMatch import BetweenMatch
 
 
-class SequenceMatch(Match):
+class SequenceMatch(MatchWithActions):
     terms = ast_node_children()
 
     def __init__(self):
-        Match.__init__(self)
+        MatchWithActions.__init__(self)
         self.terms = []
 
     def is_empty(self):
         return len(self.terms) == 0
 
-    def _execute(self, context):
-        savept = context.save()
+    def _execute_match_with_actions_impl(self, context):
         committed = []
         
         match_pos = None
@@ -35,7 +34,6 @@ class SequenceMatch(Match):
             matched = term.execute(context)
 
             if matched is False:
-                context.restore(savept)
                 return False
             
             if context.last_match_pos is not None:
@@ -44,7 +42,6 @@ class SequenceMatch(Match):
                         context.text[pending_betw_match_pos:context.last_match_pos],
                         context)
                     if late_match is False:
-                        context.restore(savept)
                         return False
                     committed[pending_betw_match_idx] = late_match
                     pending_betw_match_idx = None
@@ -64,7 +61,6 @@ class SequenceMatch(Match):
                 context.text[pending_betw_match_pos:len(context.text)],
                 context)
             if late_match is False:
-                context.restore(savept)
                 return False
             context.position = len(context.text)
             committed[pending_betw_match_idx] = late_match

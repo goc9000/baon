@@ -6,26 +6,18 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.ASTNode import ASTNode, ast_node_children
+from logic.ast.ASTNode import ASTNode
 
 
 class Match(ASTNode):
-    actions = ast_node_children(order=100)
 
     def __init__(self):
         ASTNode.__init__(self)
-        self.actions = []
 
     def execute(self, context):
         savept = context.save()
             
-        text = self._execute(context)
-
-        if text is not False:
-            for action in self.actions:
-                text = action.execute(text, context)
-                if text is False:
-                    break
+        text = self._execute_match_impl(context)
         
         if text is False:
             context.restore(savept)
@@ -33,5 +25,5 @@ class Match(ASTNode):
         
         return text
 
-    def _execute(self, context):
-        raise RuntimeError("_test_repr_impl() not implemented in subclass")
+    def _execute_match_impl(self, context):
+        raise RuntimeError("_execute_match_impl() not implemented in subclass")

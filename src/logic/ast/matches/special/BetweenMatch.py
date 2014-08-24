@@ -6,12 +6,12 @@
 #
 # Licensed under the GPL-3
 
-from logic.ast.matches.Match import Match
+from logic.ast.matches.MatchWithActions import MatchWithActions
 
 
-class BetweenMatch(Match):
+class BetweenMatch(MatchWithActions):
     def __init__(self):
-        Match.__init__(self)
+        MatchWithActions.__init__(self)
     
     def execute(self, context):
         if context.next_unanchored:
