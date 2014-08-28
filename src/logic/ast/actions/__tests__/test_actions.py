@@ -23,6 +23,8 @@ from logic.errors.RuleApplicationException import RuleApplicationException
 class TestActions(TestCase):
 
     def test_apply_function_action(self):
+        # TODO: Add dedicated unit tests for every function in separate unit
+
         # Note: these are only superficial tests of each function, mainly to verify that each is supported.
         # Complex functions and their special cases are tested in their dedicated unittests.
         self._test_simple_text_action(u'acE oF bAsE', ApplyFunctionAction('title'), u'Ace of Base')
@@ -38,6 +40,8 @@ class TestActions(TestCase):
         self._test_simple_text_action(u'ab(cde)f', ApplyFunctionAction('inparas'), u'cde')
         self._test_simple_text_action(u'ab[cde]f', ApplyFunctionAction('inbraces'), u'cde')
         self._test_simple_text_action(u'ab{cde}f', ApplyFunctionAction('incurlies'), u'cde')
+
+    # TODO: Add test_apply_rule_set_action (when RuleSet support is solid)
 
     def test_delete_action(self):
         self._test_simple_text_action(u'Some text', DeleteAction(), u'')
