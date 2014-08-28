@@ -16,7 +16,7 @@ from logic.errors.RuleApplicationException import RuleApplicationException
 
 
 def strip_zeroes(s):
-    m = re.match(r'(\s*)([0-9]+)(\s*)', s)
+    m = re.match(r'^(\s*)([0-9]+)(\s*)$', s)
     
     if m is None:
         raise RuleApplicationException("%d applied to non-number")
@@ -29,7 +29,7 @@ def strip_zeroes(s):
 
 
 def pad_with_zeroes(s, digits):
-    m = re.match(r'(\s*)([0-9]+)(\s*)', s)
+    m = re.match(r'^(\s*)([0-9]+)(\s*)$', s)
     
     if m is None:
         raise RuleApplicationException("%Nd applied to non-number")
