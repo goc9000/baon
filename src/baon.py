@@ -2,24 +2,15 @@
 
 # baon.py
 #
-# (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
+# (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
 # This file is part of BAON.
 #
 # Licensed under the GPL-3
 
-import os
 import sys
 import argparse
 
-# Hack: try to get ANTLR3 from adjacent lib directory if user does not have it installed
-try:
-    __import__('antlr3')
-except ImportError:
-    base, _ = os.path.split(sys.path[0])
-    lib_path = os.path.join(base, 'lib')
-    sys.path.append(lib_path)
-    
 from gui.Gui import Gui
 
 if __name__ == "__main__":
