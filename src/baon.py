@@ -8,10 +8,12 @@
 #
 # Licensed under the GPL-3
 
+
 import sys
 import argparse
 
-from gui.Gui import Gui
+from baon.gui.Gui import Gui
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Mass file renamer.', argument_default=argparse.SUPPRESS)
