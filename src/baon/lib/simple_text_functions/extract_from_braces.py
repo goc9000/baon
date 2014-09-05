@@ -7,6 +7,9 @@
 # Licensed under the GPL-3
 
 
+import re
+
+
 def inparas(text):
     return _extract_text_from_braces(text, u'(', u')', u'')
 
@@ -20,13 +23,8 @@ def incurlies(text):
 
 
 def _extract_text_from_braces(text, left_brace, right_brace, fail_value=None):
-    idx_from = text.find(left_brace)
-    if idx_from == -1:
-        return fail_value
-    idx_from += len(left_brace)
+    pattern = re.escape(left_brace) + u'([^' + re.escape(left_brace + right_brace) + u']+)' + re.escape(right_brace)
 
-    idx_to = text.find(right_brace, idx_from)
-    if idx_to == -1:
-        return fail_value
+    match = re.search(pattern, text)
 
-    return text[idx_from:idx_to]
+    return match.group(1) if match is not None else fail_value
