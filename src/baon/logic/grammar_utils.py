@@ -9,7 +9,14 @@
 # Note: I have not expended much effort in making these functions complete,
 # correct in all situations, or portable to languages other than English. Beware.
 
+
 import re
+
+from collections import namedtuple
+
+
+SimplePhrasePart = namedtuple('SimplePhrasePart', ['is_word', 'content', 'ws_before', 'ws_after'])
+
 
 PAT_WORD = re.compile(r"[^\W_]((['-]|[^\W_])*[^\W_])?", re.I | re.U)
 PAT_MAC_NAME = re.compile(r"Ma?c[A-Z]")
@@ -87,6 +94,10 @@ def is_particle(word):
     return word.lower() in PARTICLE_WORDS
 
 
+def is_abbreviation(word):
+    return word.lower() in {u'vs'}
+
+
 def capitalize_word(word, is_first_word=True, may_be_acronym=True):
     is_acronym = may_be_acronym and len(word) > 1 and word.isupper()
 
@@ -102,50 +113,68 @@ def capitalize_word(word, is_first_word=True, may_be_acronym=True):
 def to_title_case(phrase):
     phrase_is_upper = phrase.isupper()
 
-    is_first_word_stack = [True]
-    expected_rpara_stack = ['']
+    parts = find_words_and_separators(phrase, detect_abbreviations=True)
+    if len(parts) == 0:
+        return phrase
 
-    def handle_separator_chars(sep):
-        for c in sep:
-            if c == expected_rpara_stack[-1]:
-                expected_rpara_stack.pop()
-                is_first_word_stack.pop()
-            elif c in PARA_CHARS:
-                is_first_word_stack.append(True)
-                expected_rpara_stack.append(PARA_CHARS[c])
-            elif is_dash_char(c) or c == ',':
-                is_first_word_stack[-1] = True
+    for index, part in enumerate(parts):
+        if not part.is_word:
+            continue
 
-    parts = list(enum_words_and_sep(phrase))
+        word = part.content
 
-    for i in xrange(1, len(parts), 2):
-        handle_separator_chars(parts[i - 1])
+        is_acronym = word.isupper() and len(word) > 1 and not phrase_is_upper
 
-        # Kludge to catch cases like "Name A. Surname"
-        is_initial = parts[i] == 'A' and parts[i + 1].startswith('.')
+        has_break_before = (index == 0) or (not parts[index-1].is_word and parts[index-1].content != u',')
+        has_break_after = (index >= len(parts) - 1) or (not parts[index+1].is_word and parts[index+1].content != u',')
 
-        if not is_initial:
-            parts[i] = capitalize_word(parts[i],
-                                       is_first_word=is_first_word_stack[-1],
-                                       may_be_acronym=not phrase_is_upper)
+        if is_acronym or is_mac_name(word) or is_compound_name(word):
+            pass # leave unchanged
+        elif is_particle(word) and not has_break_before and not has_break_after:
+            word = word.lower()
+        else:
+            word = word.capitalize()
 
-        is_first_word_stack[-1] = False
+        parts[index] = parts[index]._replace(content=word)
 
-    return ''.join(parts)
+    return parts[0].ws_before + u''.join([part.content + part.ws_after for part in parts])
 
 
-def enum_words_and_sep(phrase):
-    pos = 0
-    while pos < len(phrase):
-        m = PAT_WORD.search(phrase, pos)
-        if m is None:
-            break
-    
-        yield phrase[pos:m.start()]
-        yield m.group(0)
-        pos = m.end()
-        
-    yield phrase[pos:]
+def find_words_and_separators(phrase, detect_abbreviations=True):
+    pat_alphanum = u'[^\W_]'  # any Unicode alphanumeric except underscore
+
+    pat_word_or_punctuation = u'|'.join([
+        u"(?P<word>{0}((['-]|{0})*{0})?)".format(pat_alphanum),
+        u'(?P<fullstop_and_ellipsis>[.]+)',
+        u'(?P<q_and_e_marks>[!?]+)',
+        u"(?P<dashes>[\u2013\u2014-]+)",
+        u'(?P<other>\S)',
+    ])
+
+    matches = list(re.finditer(pat_word_or_punctuation, phrase, re.I + re.U))
+
+    parts = []
+    for index, match in enumerate(matches):
+        prev_match_end = matches[index - 1].end() if index > 0 else 0
+        next_match_start = matches[index + 1].start() if index < len(matches) - 1 else len(phrase)
+
+        if detect_abbreviations:
+            if match.group(0) == u'.' and len(parts) > 0 and is_abbreviation(parts[-1].content) \
+                    and parts[-1].ws_after == u'':
+                parts[-1] = parts[-1]._replace(
+                    content=parts[-1].content + u'.',
+                    ws_after=phrase[match.end():next_match_start]
+                )
+                continue
+
+        parts.append(SimplePhrasePart(
+            is_word=match.group('word') is not None,
+            content=match.group(0),
+            ws_before=phrase[prev_match_end:match.start()],
+            ws_after=phrase[match.end():next_match_start]
+        ))
+
+    return parts
 
 
 def aesthetic_warning(phrase):

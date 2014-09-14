@@ -31,4 +31,7 @@ class TestCaseFunctions(TestCase):
 
     def test_title(self):
         f_u_t = baon.lib.simple_text_functions.case.title
-        # TODO: test title
+
+        # Note: This just checks that the function is callable under that name. The function is tested comprehensively
+        # in the unit test for grammar_utils, where it is defined.
+        self.assertEqual(f_u_t(u'a ticket to ride'), u'A Ticket to Ride')
