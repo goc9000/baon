@@ -16,15 +16,4 @@ class Match(ASTNode):
         ASTNode.__init__(self)
 
     def execute(self, context):
-        savept = context.save()
-            
-        text = self._execute_match_impl(context)
-        
-        if text is False:
-            context.restore(savept)
-            context.last_match_pos = None
-        
-        return text
-
-    def _execute_match_impl(self, context):
-        raise RuntimeError("_execute_match_impl() not implemented in subclass")
+        raise RuntimeError("execute() not implemented in subclass")
