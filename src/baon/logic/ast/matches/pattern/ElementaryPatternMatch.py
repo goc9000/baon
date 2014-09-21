@@ -47,16 +47,9 @@ class ElementaryPatternMatch(MatchWithActions):
     def _execute_match_with_actions_impl(self, context):
         regex = self._get_regex()
 
-        if context.next_unanchored:
-            m = regex.search(context.text, context.position)
-            context.next_unanchored = False
-        else:
-            m = regex.match(context.text, context.position)
-
-        if m is None:
-            return False
-
-        context.position = m.end(0)
-        context.last_match_pos = m.start(1)
-
-        return m.group(1)
+        regex_match = regex.match(context.text, context.position)
+        if regex_match is not None:
+            yield context._replace(
+                position=regex_match.end(0),
+                matched_text=regex_match.group(1)
+            )
