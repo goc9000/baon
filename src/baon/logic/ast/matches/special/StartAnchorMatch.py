@@ -16,8 +16,4 @@ class StartAnchorMatch(MatchWithActions):
     
     def _execute_match_with_actions_impl(self, context):
         if context.position == 0:
-            context.last_match_pos = context.position
-            context.next_unanchored = False
-            return ''
-        else:
-            return False
+            yield context._replace(matched_text=u'')
