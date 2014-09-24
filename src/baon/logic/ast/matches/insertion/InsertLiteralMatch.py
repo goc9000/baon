@@ -18,8 +18,6 @@ class InsertLiteralMatch(InsertionMatch):
         InsertionMatch.__init__(self)
 
         self.text = text
-    
-    def _execute_match_with_actions_impl(self, context):
-        context.last_match_pos = None
-        
+
+    def _get_inserted_text_impl(self, context):
         return self.text

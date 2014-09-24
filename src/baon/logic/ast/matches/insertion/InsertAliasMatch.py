@@ -18,7 +18,6 @@ class InsertAliasMatch(InsertionMatch):
         InsertionMatch.__init__(self)
 
         self.alias = alias
-    
-    def _execute_match_with_actions_impl(self, context):
-        context.last_match_pos = None
-        return context.aliases[self.alias]
+
+    def _get_inserted_text_impl(self, context):
+        return context.aliases.get(self.alias, u'')
