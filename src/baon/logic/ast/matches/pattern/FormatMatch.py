@@ -22,11 +22,11 @@ FORMAT_DICT = {
     'c':          (r'(.##)', '{1}'),
     's':          (r'(\s*\S##)', '+'),
     'paras':      (r'(\s*\([^)]##\))', '*'),
-    'inparas':    (r'((?<=\()[^)]##(?=\)))', '*'),
     'braces':     (r'(\s*\[[^\]]##\])', '*'),
-    'inbraces':   (r'((?<=\[[^\]]##(?=\]))', '*'),
     'curlies':    (r'(\s*\{[^}]##\})', '*'),
-    'incurlies':  (r'((?<=\{[^}]##(?=\}))', '*'),
+    'inparas':    (r'((?<=\()[^)]##(?=\)))', '*'),
+    'inbraces':   (r'((?<=\[)[^\]]##(?=\]))', '*'),
+    'incurlies':  (r'((?<=\{)[^}]##(?=\}))', '*'),
     'path':       (r'(.*' + re.escape(os.sep) + r')', None),
 }
 
@@ -49,7 +49,7 @@ class FormatMatch(ElementaryPatternMatch):
 
         pattern, repeat = FORMAT_DICT[self.specifier]
 
-        if self.leading_zeros is not None:
+        if self.leading_zeros is True:
             raise RuleCheckException("Leading 0s inapplicable to specifier '{0}'".format(self.specifier))
 
         if self.width is not None:
@@ -63,4 +63,7 @@ class FormatMatch(ElementaryPatternMatch):
 
             repeat = '{' + str(self.width) + '}'
 
-        return pattern.replace('##', repeat)
+        if repeat is not None:
+            pattern = pattern.replace(u'##', repeat)
+
+        return pattern
