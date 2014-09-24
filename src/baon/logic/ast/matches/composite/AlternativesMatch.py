@@ -14,18 +14,14 @@ from baon.logic.ast.matches.MatchWithActions import MatchWithActions
 class AlternativesMatch(MatchWithActions):
     alternatives = ast_node_children()
     
-    def __init__(self):
+    def __init__(self, alternatives=None):
         MatchWithActions.__init__(self)
-        self.alternatives = []
+        self.alternatives = alternatives if alternatives is not None else []
 
     def is_empty(self):
         return (len(self.alternatives) == 0) or all(alt.is_empty() for alt in self.alternatives)
 
     def _execute_match_with_actions_impl(self, context):
-        for alt in self.alternatives:
-            matched = alt.execute(context)
-
-            if matched is not False:
-                return matched
-        
-        return False
+        for alternative in self.alternatives:
+            for solution in alternative.execute(context):
+                yield solution
