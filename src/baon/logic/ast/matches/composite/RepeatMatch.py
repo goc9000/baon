@@ -38,26 +38,25 @@ class RepeatMatch(MatchWithActions):
                 raise RuleCheckException("Minimum number of matches must be >= the minimum")
 
     def _execute_match_with_actions_impl(self, context):
-        committed = []
-        
-        match_pos = None
-        
-        while (self.at_most is None) or (len(committed) < self.at_most):
-            old_position = context.position
-            matched = self.match.execute(context)
-            if matched is False:
-                break
-            if (match_pos is None) and (context.last_match_pos is not None):
-                match_pos = context.last_match_pos
-            
-            committed.append(matched)
-            
-            if context.position == old_position:
-                break
-        
-        if len(committed) < self.at_least:
-            return False
-        
-        context.last_match_pos = match_pos
-        
-        return ''.join(committed)
+        for solution in self._generate_solutions_rec(context, [], False):
+            yield solution
+
+    def _generate_solutions_rec(self, context, matches_so_far, must_advance_position):
+        continuations_found = False
+
+        if self.at_most is None or len(matches_so_far) < self.at_most:
+            for solution in self.match.execute(context):
+                if solution.position == context.position and must_advance_position:
+                    continue
+
+                continuations_found = True
+
+                for item in self._generate_solutions_rec(
+                        solution,
+                        matches_so_far + [solution.matched_text],
+                        self.at_most is None and solution.position == context.position
+                ):
+                    yield item
+
+        if not continuations_found and len(matches_so_far) >= self.at_least:
+            yield context._replace(matched_text=u''.join(matches_so_far))
