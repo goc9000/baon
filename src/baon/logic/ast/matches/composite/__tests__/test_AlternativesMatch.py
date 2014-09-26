@@ -16,7 +16,7 @@ from baon.logic.ast.matches.special.EndAnchorMatch import EndAnchorMatch
 
 class TestAlternativesMatch(MatchTestCase):
 
-    def test_alternatives_match(self):
+    def test_basic(self):
         self._test_match(
             text=u'  123abc',
             match=AlternativesMatch([
@@ -31,6 +31,16 @@ class TestAlternativesMatch(MatchTestCase):
                 {'matched_text': u'  ', 'position': 2},
                 {'matched_text': u'  123abc', 'position': 8},
             ))
+
+    def test_no_alternatives_match(self):
+        self._test_no_match(
+            text=u'  123abc',
+            match=AlternativesMatch([
+                EndAnchorMatch(),
+                LiteralMatch(u'efgh'),
+            ]))
+
+    def test_no_match_on_empty_alternatives(self):
         self._test_no_match(
             text=u'  123abc',
             match=AlternativesMatch())
