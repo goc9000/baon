@@ -13,13 +13,15 @@ from baon.logic.ast.matches.insertion.InsertAliasMatch import InsertAliasMatch
 
 class TestInsertAliasMatch(MatchTestCase):
 
-    def test_insert_alias_match(self):
+    def test_existing_alias(self):
         self._test_unique_match(
             text=u'abcdef',
             position=3,
             aliases={u'alias1': u'content1', u'alias2': u'content2'},
             match=InsertAliasMatch(u'alias1'),
             expected_solution={'matched_text': u'content1'})
+
+    def test_nonexisting_alias(self):
         self._test_unique_match(
             text=u'abcdef',
             position=3,

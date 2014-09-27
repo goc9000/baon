@@ -13,12 +13,14 @@ from baon.logic.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMat
 
 class TestInsertLiteralMatch(MatchTestCase):
 
-    def test_insert_literal_match(self):
+    def test_basic(self):
         self._test_unique_match(
             text=u'abcdef',
             position=3,
             match=InsertLiteralMatch(u'inserted text'),
             expected_solution={'matched_text': u'inserted text'})
+
+    def test_insert_empty(self):
         self._test_unique_match(
             text=u'abcdef',
             match=InsertLiteralMatch(u''),
