@@ -13,16 +13,20 @@ from baon.logic.ast.matches.special.EndAnchorMatch import EndAnchorMatch
 
 class TestEndAnchorMatch(MatchTestCase):
 
-    def test_end_anchor_match(self):
+    def test_matches_at_end(self):
         self._test_unique_match(
             text=u'abc def',
             match=EndAnchorMatch(),
             position=7,
             expected_solution={'matched_text': u''})
+
+    def test_no_match_if_not_at_end(self):
         self._test_no_match(
             text=u'abc def',
             position=2,
             match=EndAnchorMatch())
+
+    def test_empty(self):
         self._test_unique_match(
             text=u'',
             match=EndAnchorMatch(),
