@@ -13,7 +13,11 @@ from baon.logic.ast.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
 
 class TestReplaceByLiteralAction(ActionTestCase):
 
-    def test_replace_by_literal_action(self):
+    def test_basic(self):
         self._test_simple_text_action(u'Some text', ReplaceByLiteralAction(u'Other text'), u'Other text')
+
+    def test_replace_empty(self):
         self._test_simple_text_action(u'', ReplaceByLiteralAction(u'Some text'), u'Some text')
+
+    def test_replace_empty_with_empty(self):
         self._test_simple_text_action(u'', ReplaceByLiteralAction(u''), u'')

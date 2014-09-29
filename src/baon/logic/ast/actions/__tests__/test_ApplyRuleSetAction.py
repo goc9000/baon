@@ -13,6 +13,6 @@ from baon.logic.ast.actions.ApplyRuleSetAction import ApplyRuleSetAction
 
 class TestApplyRuleSetAction(ActionTestCase):
 
-    def test_apply_rule_set_action(self):
+    def test_basic(self):
         # TODO: Implement this when RuleSet support is solid
         pass

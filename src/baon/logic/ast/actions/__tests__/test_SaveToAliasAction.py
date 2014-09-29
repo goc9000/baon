@@ -13,17 +13,21 @@ from baon.logic.ast.actions.SaveToAliasAction import SaveToAliasAction
 
 class TestSaveToAliasAction(ActionTestCase):
 
-    def test_save_to_alias_action(self):
+    def test_save_first_time(self):
         self._test_aliases_action(
             dict(),
             SaveToAliasAction(u'alias'),
             {u'alias': u'Matched text'}
         )
+
+    def test_save_overwrite(self):
         self._test_aliases_action(
             {u'alias': u'Previous text'},
             SaveToAliasAction(u'alias'),
             {u'alias': u'Matched text'}
         )
+
+    def test_preserve_other_aliases(self):
         self._test_aliases_action(
             {u'alias': u'Previous text'},
             SaveToAliasAction(u'new_alias'),

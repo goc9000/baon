@@ -13,6 +13,8 @@ from baon.logic.ast.actions.DeleteAction import DeleteAction
 
 class TestDeleteAction(ActionTestCase):
 
-    def test_delete_action(self):
+    def test_basic(self):
         self._test_simple_text_action(u'Some text', DeleteAction(), u'')
+
+    def test_delete_empty(self):
         self._test_simple_text_action(u'', DeleteAction(), u'')
