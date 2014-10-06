@@ -20,6 +20,7 @@ class ActionTestCase(TestCase):
             position=0,
             aliases=dict(),
             matched_text=text,
+            anchored=True,
         )
 
         result_context = action.execute(test_context)
@@ -35,6 +36,7 @@ class ActionTestCase(TestCase):
             position=0,
             aliases=aliases,
             matched_text=u'Matched text',
+            anchored=True,
         )
 
         result_context = action.execute(test_context)

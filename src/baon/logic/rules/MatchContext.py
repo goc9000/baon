@@ -10,4 +10,12 @@
 from collections import namedtuple
 
 
-MatchContext = namedtuple('MatchContext', ['text', 'position', 'aliases', 'matched_text'])
+MatchContext = namedtuple(
+    'MatchContext',
+    [
+        'text',
+        'position',
+        'aliases',
+        'matched_text',
+        'anchored',
+    ])

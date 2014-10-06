@@ -51,5 +51,6 @@ class ElementaryPatternMatch(MatchWithActions):
         if regex_match is not None:
             yield context._replace(
                 position=regex_match.end(0),
-                matched_text=regex_match.group(1)
+                matched_text=regex_match.group(1),
+                anchored=True,
             )

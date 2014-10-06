@@ -16,4 +16,4 @@ class StartAnchorMatch(MatchWithActions):
     
     def _execute_match_with_actions_impl(self, context):
         if context.position == 0:
-            yield context._replace(matched_text=u'')
+            yield context._replace(matched_text=u'', anchored=True)
