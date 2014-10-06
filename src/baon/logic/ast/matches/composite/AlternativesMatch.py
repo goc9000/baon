@@ -21,6 +21,10 @@ class AlternativesMatch(MatchWithActions):
     def is_empty(self):
         return (len(self.alternatives) == 0) or all(alt.is_empty() for alt in self.alternatives)
 
+    def add_alternative(self, alternative):
+        self.alternatives.append(alternative)
+        return self
+
     def _execute_match_with_actions_impl(self, context):
         for alternative in self.alternatives:
             for solution in alternative.execute(context):

@@ -18,6 +18,13 @@ class RuleSet(ASTNode):
         ASTNode.__init__(self)
         self.rules = []
 
+    def is_empty(self):
+        return len(self.rules) == 0
+
+    def add_rule(self, rule):
+        self.rules.append(rule)
+        return self
+
     def apply_on(self, text, aliases=None):
         result = ApplyRuleResult(text=text, aliases=aliases if aliases is None else dict())
 
@@ -25,6 +32,3 @@ class RuleSet(ASTNode):
             result = rule.apply_on(result.text, result.aliases)
 
         return result
-
-    def is_empty(self):
-        return len(self.rules) == 0

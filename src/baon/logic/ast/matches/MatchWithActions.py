@@ -21,6 +21,10 @@ class MatchWithActions(Match):
         Match.__init__(self)
         self.actions = []
 
+    def add_action(self, action):
+        self.actions.append(action)
+        return self
+
     def execute(self, context):
         for solution in self._execute_match_with_actions_impl(context):
             for action in self.actions:

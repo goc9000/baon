@@ -51,7 +51,7 @@ def p_rule_set_add_rule(p):
     """rule_set : rule_set RULE_SEP rule"""
     p[0] = p[1]
     if not p[3].is_empty():
-        p[0].rules.append(p[3])
+        p[0].add_rule(p[3])
 
     _set_source_span(p[0], p[1], p[3])
 
@@ -60,7 +60,7 @@ def p_rule_set_base(p):
     """rule_set : rule"""
     p[0] = RuleSet()
     if not p[1].is_empty():
-        p[0].rules.append(p[1])
+        p[0].add_rule(p[1])
 
     _set_source_span(p[0], p[1])
 
@@ -74,14 +74,14 @@ def p_rule(p):
 def p_alternatives_match_add_sequence_match(p):
     """alternatives_match : alternatives_match OP_OR sequence_match"""
     p[0] = p[1]
-    p[0].alternatives.append(p[3])
+    p[0].add_alternative(p[3])
     _set_source_span(p[0], p[1], p[3])
 
 
 def p_alternatives_match_base(p):
     """alternatives_match : sequence_match"""
     p[0] = AlternativesMatch()
-    p[0].alternatives.append(p[1])
+    p[0].add_alternative(p[1])
     _set_source_span(p[0], p[1])
 
 
@@ -116,7 +116,7 @@ def p_match_term_search(p):
 def p_match_add_actions(p):
     """match : match action"""
     p[0] = p[1]
-    p[0].actions.append(p[2])
+    p[0].add_action(p[2])
     _set_source_span(p[0], p[1], p[2])
 
 
