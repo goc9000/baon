@@ -13,21 +13,14 @@ from baon.logic.ast.matches.MatchWithActions import MatchWithActions
 class BetweenMatch(MatchWithActions):
     def __init__(self):
         MatchWithActions.__init__(self)
-    
-    def execute(self, context):
-        if context.next_unanchored:
-            context.last_match_pos = context.position
-        else:
-            context.last_match_pos = None
-            
-        context.next_unanchored = True
-        
-        return ''
 
-    def executeDelayed(self, text, context):
-        for action in self.actions:
-            text = action.execute(text, context)
-            if text is False:
-                break
-        
-        return text
+    def _execute_match_with_actions_impl(self, context):
+        if context.anchored:
+            for end in xrange(context.position, len(context.text) + 1):
+                yield context._replace(
+                    position=end,
+                    matched_text=context.text[context.position:end],
+                    anchored=False,
+                )
+        else:
+            yield context._replace(matched_text=u'')
