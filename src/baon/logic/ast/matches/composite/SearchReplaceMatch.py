@@ -9,8 +9,11 @@
 
 from baon.logic.ast.ASTNode import ast_node_child
 from baon.logic.ast.matches.Match import Match
-
-from baon.logic.rules.MatchContextOld import MatchContextOld
+from baon.logic.ast.matches.composite.AlternativesMatch import AlternativesMatch
+from baon.logic.ast.matches.composite.SequenceMatch import SequenceMatch
+from baon.logic.ast.matches.composite.RepeatMatch import RepeatMatch
+from baon.logic.ast.matches.special.BetweenMatch import BetweenMatch
+from baon.logic.ast.matches.special.EndAnchorMatch import EndAnchorMatch
 
 
 class SearchReplaceMatch(Match):
@@ -21,31 +24,25 @@ class SearchReplaceMatch(Match):
         self.term = term
 
     def execute(self, context):
-        ctx = MatchContextOld(context.text, context.aliases)
-        ctx.position = context.position
-        
-        new_text = []
-        while ctx.position <= len(ctx.text):
-            prev_pos = ctx.position
-            ctx.next_unanchored = True
-            ctx.last_match_pos = None
-            matched = self.term.execute(ctx)
-            if matched is False:
-                break
-            
-            if ctx.last_match_pos is not None:
-                new_text.append(ctx.text[prev_pos:ctx.last_match_pos])
-            new_text.append(matched)
-            
-            if ctx.last_match_pos is None:
-                break
-            
-            if ctx.position == prev_pos:
-                ctx.position += 1
-        
-        if ctx.position < len(ctx.text):
-            new_text.append(ctx.text[ctx.position:])
-        
-        context.text = context.text[:context.position] + ''.join(new_text)
-        
-        return ''
+        temp_match = SequenceMatch(
+            RepeatMatch(
+                AlternativesMatch(
+                    self.term,
+                    BetweenMatch(),
+                ),
+                0,
+                None,
+            ),
+            BetweenMatch(),
+            EndAnchorMatch(),
+        )
+
+        solution = next(temp_match.execute(context), None)
+
+        if solution is not None:
+            yield context._replace(
+                text=context.text[:context.position]+solution.matched_text,
+                matched_text=u'',
+            )
+        else:
+            yield context
