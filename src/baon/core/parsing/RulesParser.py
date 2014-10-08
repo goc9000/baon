@@ -35,6 +35,10 @@ from baon.core.parsing.RulesLexer import RulesLexer, tokens
 from baon.core.parsing.SourceSpan import SourceSpan
 
 
+# Ensure tokens is not seen as unused and removed by the IDE
+assert len(tokens) > 0
+
+
 class EOFRuleParseException:
     def __init__(self):
         pass
