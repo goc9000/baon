@@ -14,9 +14,9 @@ from baon.core.rules.ApplyRuleResult import ApplyRuleResult
 class RuleSet(ASTNode):
     rules = ast_node_children()
     
-    def __init__(self):
+    def __init__(self, *rules):
         ASTNode.__init__(self)
-        self.rules = []
+        self.rules = list(rules)
 
     def is_empty(self):
         return len(self.rules) == 0
@@ -26,7 +26,7 @@ class RuleSet(ASTNode):
         return self
 
     def apply_on(self, text, aliases=None):
-        result = ApplyRuleResult(text=text, aliases=aliases if aliases is None else dict())
+        result = ApplyRuleResult(text=text, aliases=aliases or dict())
 
         for rule in self.rules:
             result = rule.apply_on(result.text, result.aliases)
