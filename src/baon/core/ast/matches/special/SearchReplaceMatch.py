@@ -43,6 +43,7 @@ class SearchReplaceMatch(Match):
             yield context._replace(
                 text=context.text[:context.position]+solution.matched_text,
                 matched_text=u'',
+                aliases=solution.aliases,
             )
         else:
             yield context

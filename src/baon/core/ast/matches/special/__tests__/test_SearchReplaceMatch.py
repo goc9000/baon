@@ -11,6 +11,7 @@ from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
 from baon.core.ast.actions.DeleteAction import DeleteAction
 from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
 from baon.core.ast.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
+from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
 from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.matches.special.SearchReplaceMatch import SearchReplaceMatch
@@ -78,3 +79,11 @@ class TestSearchReplaceMatch(MatchTestCase):
                 )
             ),
             expected_solution={'text': u'abicidibi', 'matched_text': u'', 'position': 0})
+
+    def test_captures_aliases(self):
+        self._test_unique_match(
+            text=u'abracadabra',
+            match=SearchReplaceMatch(
+                LiteralMatch(u'r').add_action(SaveToAliasAction(u'alias')),
+            ),
+            expected_solution={'text': u'abracadabra', 'matched_text': u'', 'position': 0, 'aliases': {u'alias': u'r'}})
