@@ -7,7 +7,7 @@
 # Licensed under the GPL-3
 
 
-from baon.logic.grammar_utils import to_title_case
+from baon.core.grammar_utils import to_title_case
 
 
 def title(text):

@@ -17,13 +17,13 @@ from baon.gui.qt_utils import qstr_to_unicode
 
 from RuleSyntaxHighlighter import RuleSyntaxHighlighter
 
-from baon.logic.files.FileScanner import FileScanner
-from baon.logic.Renamer import Renamer
-from baon.logic.plan.RenamePlan import RenamePlan
-from baon.logic.rules.RuleSet import RuleSet
-from baon.logic.errors.RuleParseException import RuleParseException
-from baon.logic.errors.RuleCheckException import RuleCheckException
-from baon.logic.grammar_utils import format_numerals
+from baon.core.files.FileScanner import FileScanner
+from baon.core.Renamer import Renamer
+from baon.core.plan.RenamePlan import RenamePlan
+from baon.core.rules.RuleSet import RuleSet
+from baon.core.errors.RuleParseException import RuleParseException
+from baon.core.errors.RuleCheckException import RuleCheckException
+from baon.core.grammar_utils import format_numerals
 
 
 class MainWindow(QDialog, Ui_MainWindow):

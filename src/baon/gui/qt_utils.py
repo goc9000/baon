@@ -11,7 +11,7 @@ import re
 
 from PyQt4.QtGui import QTextCharFormat, QFont, QBrush, QColor
 
-from baon.logic.lang_utils import is_string, is_arrayish, is_dictish
+from baon.core.lang_utils import is_string, is_arrayish, is_dictish
 
 
 def qstr_to_unicode(qstring):

@@ -11,10 +11,10 @@ from PyQt4.QtGui import QSyntaxHighlighter
 
 from baon.gui.qt_utils import mk_txt_fmt, qstr_to_unicode
 
-from baon.logic.parsing.RulesLexer import RulesLexer
-from baon.logic.parsing.SourceSpan import SourceSpan
+from baon.core.parsing.RulesLexer import RulesLexer
+from baon.core.parsing.SourceSpan import SourceSpan
 
-from baon.logic.math_utils import clamp
+from baon.core.math_utils import clamp
 
 
 FMT_LITERAL = mk_txt_fmt(fg=(0, 0, 240), bg=(232, 232, 240))
