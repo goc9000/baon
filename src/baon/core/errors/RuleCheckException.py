@@ -1,6 +1,6 @@
 # baon/core/errors/RuleCheckException.py
 #
-# (C) Copyright 2012  Cristian Dinu <goc9000@gmail.com>
+# (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
 # This file is part of BAON.
 #
