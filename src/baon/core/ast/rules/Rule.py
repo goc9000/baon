@@ -11,7 +11,11 @@ from baon.core.ast.ASTNode import ASTNode, ast_node_child
 
 from baon.core.errors.RuleApplicationException import RuleApplicationException
 
-from baon.core.rules.MatchContextOld import MatchContextOld
+from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
+from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
+from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
+
+from baon.core.rules.MatchContext import MatchContext
 from baon.core.rules.ApplyRuleResult import ApplyRuleResult
 
 
@@ -31,20 +35,28 @@ class Rule(ASTNode):
     def apply_on(self, text, aliases=None):
         initial_aliases = dict(aliases) if aliases is not None else dict()
 
-        aliases = initial_aliases
+        temp_match = SequenceMatch(
+            self.content,
+            BetweenMatch(),
+            EndAnchorMatch(),
+        )
+        initial_context = MatchContext(
+            text=text,
+            position=0,
+            aliases=initial_aliases,
+            matched_text=None,
+            anchored=True,
+        )
 
         for _ in xrange(MAX_ITERATIONS):
-            # TODO: implement ".. $ at end" trick
-            context = MatchContextOld(text, aliases)
-            matched = self.content.execute(context)
+            solution = next(temp_match.execute(initial_context), None)
+            if solution is None:
+                return ApplyRuleResult(text=text, aliases=initial_aliases)
 
-            if context.aliases != aliases:
-                aliases = dict(context.aliases)
+            if solution.aliases != initial_context.aliases:
+                initial_context = initial_context._replace(aliases=solution.aliases)
                 continue
 
-            if matched is not False:
-                text = matched + context.text[context.position:]
-
-            return ApplyRuleResult(text=text, aliases=aliases)
+            return ApplyRuleResult(text=solution.matched_text, aliases=solution.aliases)
 
         raise RuleApplicationException("Dependencies of aliases are too complex")
