@@ -14,9 +14,9 @@ from baon.logic.ast.matches.MatchWithActions import MatchWithActions
 class AlternativesMatch(MatchWithActions):
     alternatives = ast_node_children()
     
-    def __init__(self, alternatives=None):
+    def __init__(self, *alternatives):
         MatchWithActions.__init__(self)
-        self.alternatives = alternatives if alternatives is not None else []
+        self.alternatives = list(alternatives)
 
     def is_empty(self):
         return (len(self.alternatives) == 0) or all(alt.is_empty() for alt in self.alternatives)

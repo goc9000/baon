@@ -19,13 +19,13 @@ class TestAlternativesMatch(MatchTestCase):
     def test_basic(self):
         self._test_match(
             text=u'  123abc',
-            match=AlternativesMatch([
+            match=AlternativesMatch(
                 FormatMatch('d'),
                 EndAnchorMatch(),
                 FormatMatch('ws'),
                 LiteralMatch(u'  123abc'),
                 LiteralMatch(u'efgh'),
-            ]),
+            ),
             expected_solutions=(
                 {'matched_text': u'  123', 'position': 5},
                 {'matched_text': u'  ', 'position': 2},
@@ -35,10 +35,10 @@ class TestAlternativesMatch(MatchTestCase):
     def test_no_alternatives_match(self):
         self._test_no_match(
             text=u'  123abc',
-            match=AlternativesMatch([
+            match=AlternativesMatch(
                 EndAnchorMatch(),
                 LiteralMatch(u'efgh'),
-            ]))
+            ))
 
     def test_no_match_on_empty_alternatives(self):
         self._test_no_match(

@@ -44,10 +44,10 @@ class TestRepeatMatch(MatchTestCase):
         self._test_match(
             text=u'abcabcabca',
             match=RepeatMatch(
-                AlternativesMatch([
+                AlternativesMatch(
                     LiteralMatch(u'abc'),
                     LiteralMatch(u'abcabca'),
-                ]),
+                ),
                 0, None),
             expected_solutions=[
                 {'matched_text': u'abcabcabc', 'position': 9},  # abc+abc+abc
@@ -59,10 +59,10 @@ class TestRepeatMatch(MatchTestCase):
         self._test_match(
             text=u'abcabcabca',
             match=RepeatMatch(
-                AlternativesMatch([
+                AlternativesMatch(
                     LiteralMatch(u'abcabca'),
                     LiteralMatch(u'abc'),
-                ]),
+                ),
                 0, None),
             expected_solutions=[
                 {'matched_text': u'abcabca', 'position': 7},  # abcabca
@@ -80,10 +80,10 @@ class TestRepeatMatch(MatchTestCase):
         self._test_match(
             text=u'abcabca',
             match=RepeatMatch(
-                AlternativesMatch([
+                AlternativesMatch(
                     LiteralMatch(u'abc'),
                     InsertLiteralMatch(u','),
-                ]),
+                ),
                 0, None),
             expected_solutions=[
                 {'matched_text': u'abcabc,', 'position': 6},
