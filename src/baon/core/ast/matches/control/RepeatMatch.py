@@ -1,4 +1,4 @@
-# baon/core/ast/matches/composite/RepeatMatch.py
+# baon/core/ast/matches/control/RepeatMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 

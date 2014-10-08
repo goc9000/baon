@@ -12,9 +12,9 @@ from ply.yacc import NullLogger
 
 from baon.core.ast.rules.RuleSet import RuleSet
 from baon.core.ast.rules.Rule import Rule
-from baon.core.ast.matches.composite.AlternativesMatch import AlternativesMatch
-from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
-from baon.core.ast.matches.composite.RepeatMatch import RepeatMatch
+from baon.core.ast.matches.control.AlternativesMatch import AlternativesMatch
+from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
+from baon.core.ast.matches.control.RepeatMatch import RepeatMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
 from baon.core.ast.matches.special.SearchReplaceMatch import SearchReplaceMatch
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch

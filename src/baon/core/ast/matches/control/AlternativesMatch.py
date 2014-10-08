@@ -1,4 +1,4 @@
-# baon/core/ast/matches/composite/AlternativesMatch.py
+# baon/core/ast/matches/control/AlternativesMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 

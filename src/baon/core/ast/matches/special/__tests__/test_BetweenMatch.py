@@ -10,8 +10,8 @@
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
 
 from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
-from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
-from baon.core.ast.matches.composite.RepeatMatch import RepeatMatch
+from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
+from baon.core.ast.matches.control.RepeatMatch import RepeatMatch
 from baon.core.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMatch
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
