@@ -1,4 +1,4 @@
-# baon/core/ast/matches/special/StartAnchorMatch.py
+# baon/core/ast/matches/positional/StartAnchorMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 

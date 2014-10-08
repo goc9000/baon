@@ -1,4 +1,4 @@
-# baon/core/ast/matches/special/__tests__/test_StartAnchorMatch.py
+# baon/core/ast/matches/positional/__tests__/test_EndAnchorMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -8,25 +8,26 @@
 
 
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
-from baon.core.ast.matches.special.StartAnchorMatch import StartAnchorMatch
+from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
 
 
-class TestStartAnchorMatch(MatchTestCase):
+class TestEndAnchorMatch(MatchTestCase):
 
-    def test_matches_at_start(self):
+    def test_matches_at_end(self):
         self._test_unique_match(
             text=u'abc def',
-            match=StartAnchorMatch(),
+            match=EndAnchorMatch(),
+            position=7,
             expected_solution={'matched_text': u''})
 
-    def test_no_match_if_not_at_start(self):
+    def test_no_match_if_not_at_end(self):
         self._test_no_match(
             text=u'abc def',
             position=2,
-            match=StartAnchorMatch())
+            match=EndAnchorMatch())
 
     def test_empty(self):
         self._test_unique_match(
             text=u'',
-            match=StartAnchorMatch(),
+            match=EndAnchorMatch(),
             expected_solution={'matched_text': u''})

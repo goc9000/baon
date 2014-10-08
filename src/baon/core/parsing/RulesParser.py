@@ -12,32 +12,25 @@ from ply.yacc import NullLogger
 
 from baon.core.ast.rules.RuleSet import RuleSet
 from baon.core.ast.rules.Rule import Rule
-
 from baon.core.ast.matches.composite.AlternativesMatch import AlternativesMatch
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.composite.RepeatMatch import RepeatMatch
 from baon.core.ast.matches.composite.SearchReplaceMatch import SearchReplaceMatch
-
-from baon.core.ast.matches.special.StartAnchorMatch import StartAnchorMatch
-from baon.core.ast.matches.special.EndAnchorMatch import EndAnchorMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
-
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.matches.pattern.RegexMatch import RegexMatch
 from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
-
+from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
+from baon.core.ast.matches.positional.StartAnchorMatch import StartAnchorMatch
 from baon.core.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMatch
 from baon.core.ast.matches.insertion.InsertAliasMatch import InsertAliasMatch
-
 from baon.core.ast.actions.DeleteAction import DeleteAction
 from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
 from baon.core.ast.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
 from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
 from baon.core.ast.actions.ReformatAction import ReformatAction
 from baon.core.ast.actions.ApplyRuleSetAction import ApplyRuleSetAction
-
 from baon.core.errors.RuleParseException import RuleParseException
-
 from baon.core.parsing.RulesLexer import RulesLexer, tokens
 from baon.core.parsing.SourceSpan import SourceSpan
 
