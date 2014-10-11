@@ -13,8 +13,7 @@ import random
 import string
 import codecs
 
-from baon.core.baon_utils import enum_partial_paths
-
+from baon.core.utils.baon_utils import enum_partial_paths
 from baon.core.plan.RenamePlanAction import RenamePlanAction
 from baon.core.plan.BasePathAction import BasePathAction
 from baon.core.plan.MkDirAction import MkDirAction

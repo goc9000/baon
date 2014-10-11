@@ -1,4 +1,4 @@
-# baon/core/__tests__/test_lang_utils.py
+# baon/core/utils/__tests__/test_lang_utils.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -10,7 +10,7 @@
 from unittest import TestCase
 from itertools import count
 
-from baon.core.lang_utils import is_string, is_arrayish, is_dictish
+from baon.core.utils.lang_utils import is_string, is_arrayish, is_dictish
 
 
 class TestLangUtilsPy(TestCase):

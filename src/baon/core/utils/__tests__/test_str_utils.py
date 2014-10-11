@@ -1,4 +1,4 @@
-# baon/core/__tests__/test_str_utils.py
+# baon/core/utils/__tests__/test_str_utils.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -9,7 +9,7 @@
 
 from unittest import TestCase
 
-from baon.core.str_utils import is_quoted_string
+from baon.core.utils.str_utils import is_quoted_string
 
 
 class TestStrUtilsPy(TestCase):

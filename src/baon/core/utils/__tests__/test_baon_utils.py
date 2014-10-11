@@ -1,4 +1,4 @@
-# baon/core/__tests__/test_baon_utils.py
+# baon/core/utils/__tests__/test_baon_utils.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -9,7 +9,7 @@
 
 from unittest import TestCase
 
-from baon.core.baon_utils import decode_baon_string_literal
+from baon.core.utils.baon_utils import decode_baon_string_literal
 
 
 class TestBaonUtilsPy(TestCase):

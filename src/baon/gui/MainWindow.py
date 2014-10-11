@@ -14,16 +14,14 @@ from PyQt4.QtGui import QWidget, QDialog, QDesktopWidget, QFileDialog, QMessageB
 
 from baon.gui.templates.Ui_MainWindow import Ui_MainWindow
 from baon.gui.qt_utils import qstr_to_unicode
-
 from RuleSyntaxHighlighter import RuleSyntaxHighlighter
-
 from baon.core.files.FileScanner import FileScanner
 from baon.core.Renamer import Renamer
 from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.rules.RuleSet import RuleSet
 from baon.core.errors.RuleParseException import RuleParseException
 from baon.core.errors.RuleCheckException import RuleCheckException
-from baon.core.grammar_utils import format_numerals
+from baon.core.utils.grammar_utils import format_numerals
 
 
 class MainWindow(QDialog, Ui_MainWindow):

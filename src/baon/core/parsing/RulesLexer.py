@@ -10,8 +10,7 @@
 from ply import lex
 from ply.lex import TOKEN
 
-from baon.core.baon_utils import decode_baon_string_literal
-
+from baon.core.utils.baon_utils import decode_baon_string_literal
 from baon.core.parsing.RulesToken import RulesToken
 from baon.core.parsing.SourceSpan import SourceSpan
 

@@ -10,7 +10,7 @@
 import os
 import string
 
-from baon.core.str_utils import is_quoted_string
+from baon.core.utils.str_utils import is_quoted_string
 
 
 SIMPLE_ESCAPES = {

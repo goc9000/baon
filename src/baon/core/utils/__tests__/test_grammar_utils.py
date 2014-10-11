@@ -1,4 +1,4 @@
-# baon/core/__tests__/test_grammar_utils.py
+# baon/core/utils/__tests__/test_grammar_utils.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -9,7 +9,7 @@
 
 from unittest import TestCase
 
-from baon.core.grammar_utils import to_title_case, find_words_and_separators, SimplePhrasePart
+from baon.core.utils.grammar_utils import to_title_case, find_words_and_separators, SimplePhrasePart
 
 
 class TestGrammarUtilsPy(TestCase):

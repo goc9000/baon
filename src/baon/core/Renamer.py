@@ -10,8 +10,8 @@
 import re
 import os
 
-from baon.core.baon_utils import enum_partial_paths
-from baon.core.grammar_utils import aesthetic_warning
+from baon.core.utils.baon_utils import enum_partial_paths
+from baon.core.utils.grammar_utils import aesthetic_warning
 from baon.core.files.RenamedFileReference import RenamedFileReference
 
 
