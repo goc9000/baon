@@ -16,7 +16,7 @@ from baon.gui.templates.Ui_MainWindow import Ui_MainWindow
 from baon.gui.qt_utils import qstr_to_unicode
 from RuleSyntaxHighlighter import RuleSyntaxHighlighter
 from baon.core.files.FileScanner import FileScanner
-from baon.core.Renamer import Renamer
+from baon.core.renaming.Renamer import Renamer
 from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.rules.RuleSet import RuleSet
 from baon.core.errors.RuleParseException import RuleParseException

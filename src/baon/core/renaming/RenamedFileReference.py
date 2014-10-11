@@ -1,4 +1,4 @@
-# baon/core/files/RenamedFileReference.py
+# baon/core/renaming/RenamedFileReference.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 

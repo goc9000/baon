@@ -1,4 +1,4 @@
-# baon/core/Renamer.py
+# baon/core/renaming/Renamer.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -10,9 +10,10 @@
 import re
 import os
 
+from baon.core.renaming.RenamedFileReference import RenamedFileReference
+
 from baon.core.utils.baon_utils import enum_partial_paths
 from baon.core.utils.grammar_utils import aesthetic_warning
-from baon.core.files.RenamedFileReference import RenamedFileReference
 
 
 class Renamer(object):
