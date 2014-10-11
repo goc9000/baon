@@ -30,10 +30,19 @@ class FileScanner(object):
         files = []
         
         path = os.path.join(base_path, rel_path)
-        
-        raw_files = os.listdir(path)
-        files_here = sorted([FileReference(os.path.join(path, name), os.path.join(rel_path, name)) for name in raw_files])
-        
+
+        files_here = []
+        for name in os.listdir(path):
+            real_path = os.path.join(path, name)
+
+            files_here.append(FileReference(
+                real_path,
+                os.path.join(rel_path, name),
+                os.path.isdir(real_path),
+            ))
+
+        files_here = sorted(files_here)
+
         stats['done'] += 1
         stats['total'] += len(files_here)
         if on_progress is not None:

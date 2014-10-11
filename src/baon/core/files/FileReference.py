@@ -7,19 +7,14 @@
 # Licensed under the GPL-3
 
 
-import os
-
-
 class FileReference(object):
     full_path = None
     filename = None
     is_dir = None
     
-    def __init__(self, full_path, filename, is_dir=None):
+    def __init__(self, full_path, filename, is_dir):
         self.full_path = full_path
         self.filename = filename
-        if is_dir is None:
-            is_dir = os.path.isdir(full_path)
         self.is_dir = is_dir
 
     def __cmp__(self, other):
