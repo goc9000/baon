@@ -1,4 +1,4 @@
-# baon/core/files/RenamedFileRef.py
+# baon/core/files/RenamedFileReference.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -7,10 +7,10 @@
 # Licensed under the GPL-3
 
 
-from baon.core.files.FileRef import FileRef
+from baon.core.files.FileReference import FileReference
 
 
-class RenamedFileRef(FileRef):
+class RenamedFileReference(FileReference):
     old_full_path = None
     old_filename = None
     error = None
@@ -24,7 +24,7 @@ class RenamedFileRef(FileRef):
         else:
             new_full_path = None
         
-        FileRef.__init__(self, new_full_path, new_filename, old_file_ref.is_dir)
+        FileReference.__init__(self, new_full_path, new_filename, old_file_ref.is_dir)
         
         self.old_full_path = old_file_ref.full_path
         self.old_filename = old_file_ref.filename

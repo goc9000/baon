@@ -9,7 +9,7 @@
 
 import os
 
-from baon.core.files.FileRef import FileRef
+from baon.core.files.FileReference import FileReference
 
 
 class FileScanner(object):
@@ -32,7 +32,7 @@ class FileScanner(object):
         path = os.path.join(base_path, rel_path)
         
         raw_files = os.listdir(path)
-        files_here = sorted([FileRef(os.path.join(path, name), os.path.join(rel_path, name)) for name in raw_files])
+        files_here = sorted([FileReference(os.path.join(path, name), os.path.join(rel_path, name)) for name in raw_files])
         
         stats['done'] += 1
         stats['total'] += len(files_here)

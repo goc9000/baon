@@ -1,4 +1,4 @@
-# baon/core/files/FileRef.py
+# baon/core/files/FileReference.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -10,7 +10,7 @@
 import os
 
 
-class FileRef(object):
+class FileReference(object):
     full_path = None
     filename = None
     is_dir = None

@@ -12,7 +12,7 @@ import os
 
 from baon.core.baon_utils import enum_partial_paths
 from baon.core.grammar_utils import aesthetic_warning
-from baon.core.files.RenamedFileRef import RenamedFileRef
+from baon.core.files.RenamedFileReference import RenamedFileReference
 
 
 class Renamer(object):
@@ -38,7 +38,7 @@ class Renamer(object):
         fname = fref.filename
         
         if (overrides is not None) and (fname in overrides):
-            return RenamedFileRef(fref, overrides[fname], True)
+            return RenamedFileReference(fref, overrides[fname], True)
         
         if not self.use_path:
             path, fname = os.path.split(fname)
@@ -56,7 +56,7 @@ class Renamer(object):
             fname = None
             error = str(e)
         
-        rfref = RenamedFileRef(fref, fname)
+        rfref = RenamedFileReference(fref, fname)
         rfref.error = error
         
         return rfref
