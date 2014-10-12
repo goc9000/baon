@@ -10,54 +10,58 @@
 import os
 
 from baon.core.files.FileReference import FileReference
+from baon.core.utils.ReportsProgress import ReportsProgress
 
 
-class FileScanner(object):
-    def __init__(self):
-        pass
+class FileScanner(ReportsProgress):
+    recursive = None
+
+    def __init__(self, recursive=True, on_progress=None):
+        ReportsProgress.__init__(self, on_progress)
+        self.recursive = recursive
     
-    def scan(self, base_path, recursive, on_progress=None):
+    def scan(self, base_path):
         if not os.path.exists(base_path):
-            raise RuntimeError("Path '{0}' does not exist".format(base_path))
+            raise RuntimeError(u"Path '{0}' does not exist".format(base_path))
         if not os.path.isdir(base_path):
-            raise RuntimeError("'{0}' is not a directory".format(base_path))
+            raise RuntimeError(u"'{0}' is not a directory".format(base_path))
         
         stats = dict(done=0, total=1)
-        
-        return self._scan(base_path, '', recursive, stats, on_progress)
-
-    def _scan(self, base_path, rel_path, recursive, stats, on_progress):
         files = []
-        
-        path = os.path.join(base_path, rel_path)
+
+        self._scan(base_path, u'', stats, files)
+
+        return files
+
+    def _scan(self, base_path, relative_path, stats, files_accumulator):
+        self._report_progress(stats['done'], stats['total'])
+
+        path = os.path.join(base_path, relative_path)
 
         files_here = []
         for name in os.listdir(path):
             real_path = os.path.join(path, name)
-
-            files_here.append(FileReference(
-                real_path,
-                os.path.join(rel_path, name),
-                os.path.isdir(real_path),
-            ))
+            relative_file_path = os.path.join(relative_path, name)
+            files_here.append(self._scan_single_file(real_path, relative_file_path))
 
         files_here = sorted(files_here)
 
         stats['done'] += 1
         stats['total'] += len(files_here)
-        if on_progress is not None:
-            on_progress(stats['done'], stats['total'])
-        
-        for f in files_here:
-            if f.is_dir and recursive:
-                sub_files = self._scan(base_path, f.filename, recursive, stats, on_progress)
-                if len(sub_files) > 0:
-                    files.extend(sub_files)
-                    continue
-            files.append(f)
+        self._report_progress(stats['done'], stats['total'])
+
+        for file_ref in files_here:
+            if file_ref.is_dir and self.recursive:
+                self._scan(base_path, file_ref.filename, stats, files_accumulator)
+            else:
+                files_accumulator.append(file_ref)
             
             stats['done'] += 1
-            if on_progress is not None:
-                on_progress(stats['done'], stats['total'])
-        
-        return files
+            self._report_progress(stats['done'], stats['total'])
+
+    def _scan_single_file(self, real_path, name):
+        return FileReference(
+            real_path,
+            name,
+            os.path.isdir(real_path),
+        )
