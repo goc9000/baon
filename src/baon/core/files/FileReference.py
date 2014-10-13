@@ -25,3 +25,6 @@ class FileReference(object):
             return -1 if self.filename < other.filename else 1
         
         return 0
+
+    def _test_repr(self):
+        return 'DIR' if self.is_dir else 'FILE', self.filename
