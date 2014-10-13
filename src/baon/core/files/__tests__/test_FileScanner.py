@@ -27,18 +27,22 @@ class TestFileScanner(TestCase):
     @classmethod
     def setUpClass(cls):
         cls._test_dir_path = tempfile.mkdtemp()
-        cls._make_dir('empty')
-        cls._make_file('dir1/file11.txt')
-        cls._make_file('dir1/file12')
-        cls._make_file('dir2/dir21/file211')
-        cls._make_file('dir2/dir21/file212')
-        cls._make_file('dir2/dir22/file221.bin')
-        cls._make_file('dir2/file21')
-        cls._make_dir('dir3/dir31')
-        cls._make_file('dir3/dir32/file321.txt')
-        cls._make_file('file1')
-        cls._make_file('file2.bin')
-        cls._make_file('file3')
+
+        cls._make_file('basic/dir1/file11.txt')
+        cls._make_file('basic/dir1/file12')
+        cls._make_file('basic/dir2/dir21/file211')
+        cls._make_file('basic/dir2/dir21/file212')
+        cls._make_file('basic/dir2/dir22/file221.bin')
+        cls._make_file('basic/dir2/file21')
+        cls._make_dir('basic/dir3/dir31')
+        cls._make_file('basic/dir3/dir32/file321.txt')
+        cls._make_file('basic/file1')
+        cls._make_file('basic/file2.bin')
+        cls._make_file('basic/file3')
+
+        cls._make_dir('empties/empty')
+        cls._make_dir('empties/dir1/empty1')
+        cls._make_file('empties/dir1/file1')
 
     @classmethod
     def _make_file(cls, file_path):
@@ -62,12 +66,12 @@ class TestFileScanner(TestCase):
 
     def test_basic_non_recursive(self):
         self._test_file_scanner(
+            base_path=u'basic',
             recursive=False,
             expected_result=(
                 ('DIR', u'dir1'),
                 ('DIR', u'dir2'),
                 ('DIR', u'dir3'),
-                ('DIR', u'empty'),
                 ('FILE', u'file1'),
                 ('FILE', u'file2.bin'),
                 ('FILE', u'file3'),
@@ -76,6 +80,7 @@ class TestFileScanner(TestCase):
 
     def test_basic_recursive(self):
         self._test_file_scanner(
+            base_path=u'basic',
             recursive=True,
             expected_result=(
                 ('FILE', u'dir1/file11.txt'),
@@ -88,6 +93,25 @@ class TestFileScanner(TestCase):
                 ('FILE', u'file1'),
                 ('FILE', u'file2.bin'),
                 ('FILE', u'file3'),
+            )
+        )
+
+    def test_empty_dirs_non_recursive(self):
+        self._test_file_scanner(
+            base_path=u'empties',
+            recursive=False,
+            expected_result=(
+                ('DIR', u'dir1'),
+                ('DIR', u'empty'),
+            )
+        )
+
+    def test_empty_dirs_recursive(self):
+        self._test_file_scanner(
+            base_path=u'empties',
+            recursive=True,
+            expected_result=(
+                ('FILE', u'dir1/file1'),
             )
         )
 
