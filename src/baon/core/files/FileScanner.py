@@ -51,7 +51,9 @@ class FileScanner(ReportsProgress):
         self._report_progress(stats['done'], stats['total'])
 
         for file_ref in files_here:
-            if file_ref.is_dir and self.recursive:
+            recurse = self.recursive and (file_ref.is_dir and not file_ref.is_link)
+
+            if recurse:
                 self._scan(base_path, file_ref.filename, stats, files_accumulator)
             else:
                 files_accumulator.append(file_ref)
@@ -60,8 +62,12 @@ class FileScanner(ReportsProgress):
             self._report_progress(stats['done'], stats['total'])
 
     def _scan_single_file(self, real_path, name):
+        is_link = os.path.islink(real_path)
+        is_dir = os.path.isdir(real_path)
+
         return FileReference(
             real_path,
             name,
-            os.path.isdir(real_path),
+            is_dir,
+            is_link,
         )
