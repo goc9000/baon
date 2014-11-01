@@ -7,28 +7,10 @@
 # Licensed under the GPL-3
 
 
-from baon.core.parsing.SourceSpan import SourceSpan
+from baon.core.errors.ExceptionWithSourceSpan import ExceptionWithSourceSpan
 
 
-class RuleParseException(Exception):
-    source_span = None
+class RuleParseException(ExceptionWithSourceSpan):
 
     def __init__(self, message, source_span=None):
-        Exception.__init__(self, message)
-        self.source_span = SourceSpan.copy(source_span)
-
-    def __str__(self):
-        return self.message
-
-    def test_repr(self):
-        base_tuple = (self.__class__.__name__, self.message)
-
-        if self.source_span is not None:
-            base_tuple += (
-                self.source_span.start_line,
-                self.source_span.start_column,
-                self.source_span.end_line,
-                self.source_span.end_column,
-            )
-
-        return base_tuple
+        ExceptionWithSourceSpan.__init__(self, message, source_span)
