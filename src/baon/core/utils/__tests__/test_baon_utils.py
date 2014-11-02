@@ -10,6 +10,7 @@
 from unittest import TestCase
 
 from baon.core.utils.baon_utils import decode_baon_string_literal
+from baon.core.parsing.rule_parse_exceptions import StringLiteralNotQuotedProperlyException
 
 
 class TestBaonUtilsPy(TestCase):
@@ -32,9 +33,9 @@ class TestBaonUtilsPy(TestCase):
         self.assertEqual(f_u_t(u'"invalid\\u12g4unicode"'), u'invalid\\u12g4unicode')
         self.assertEqual(f_u_t(u'"invalid_uni\\u123"'), u'invalid_uni\\u123')
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(StringLiteralNotQuotedProperlyException):
             f_u_t(u'unquoted')
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(StringLiteralNotQuotedProperlyException):
             f_u_t(u'"unterminated')
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(StringLiteralNotQuotedProperlyException):
             f_u_t(u'"mismatch\'')

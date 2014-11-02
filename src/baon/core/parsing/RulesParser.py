@@ -30,7 +30,8 @@ from baon.core.ast.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
 from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
 from baon.core.ast.actions.ReformatAction import ReformatAction
 from baon.core.ast.actions.ApplyRuleSetAction import ApplyRuleSetAction
-from baon.core.errors.RuleParseException import RuleParseException
+from baon.core.parsing.rule_parse_exceptions import MissingFormatSpecifierException, UnterminatedStringException, \
+    UnterminatedRegexException, RuleSyntaxErrorException
 from baon.core.parsing.RulesLexer import RulesLexer, tokens
 from baon.core.parsing.SourceSpan import SourceSpan
 
@@ -151,7 +152,7 @@ def p_match_regex(p):
     """match : REGEX"""
     regex_info = p[1].extras
     if 'unterminated' in regex_info and regex_info['unterminated']:
-        raise RuleParseException("Unterminated regex", p[1].source_span)
+        raise UnterminatedRegexException(p[1].source_span)
 
     flags = regex_info['flags'] if 'flags' in regex_info else set()
     p[0] = RegexMatch(regex_info['pattern'], flags)
@@ -224,7 +225,7 @@ def p_error(token):
     if token is None:
         raise EOFRuleParseException
 
-    raise RuleParseException("Syntax error", token.source_span)
+    raise RuleSyntaxErrorException(token.source_span)
 
 
 def _set_source_span(node, from_item, to_item=None):
@@ -237,9 +238,11 @@ def _set_source_span(node, from_item, to_item=None):
 def _handle_literal_token(token):
     literal_info = token.extras
     if 'unterminated' in literal_info and literal_info['unterminated']:
-        raise RuleParseException("Unterminated string", token.source_span)
+        raise UnterminatedStringException(token.source_span)
     if 'error' in literal_info:
-        raise RuleParseException(literal_info['error'], token.source_span)
+        error = literal_info['error']
+        error.source_span = token.source_span
+        raise error
 
     return literal_info['value']
 
@@ -251,7 +254,7 @@ def _handle_format_token(token):
     leading_zeros = spec_info['leading_zeros'] if 'leading_zeros' in spec_info else None
 
     if specifier is None:
-        raise RuleParseException("Missing format specifier", token.source_span)
+        raise MissingFormatSpecifierException(token.source_span)
 
     return specifier, width, leading_zeros
 
@@ -276,7 +279,7 @@ class RulesParser(object):
         try:
             return parser.parse(rules_text, RulesLexerForYACC())
         except EOFRuleParseException:
-            exception = RuleParseException('Syntax error')
+            exception = RuleSyntaxErrorException()
             exception.source_span = SourceSpan.at_end_of_source(rules_text)
             raise exception
 

@@ -87,9 +87,9 @@ def t_STRING_LITERAL(t):
     try:
         return RulesToken(t,
                           value=decode_baon_string_literal(t.value))
-    except RuntimeError as e:
+    except Exception as e:
         return RulesToken(t,
-                          error=e.message)
+                          error=e)
 
 
 @TOKEN('/(?P<regex_body>([^/\\n]|//)*)(?P<end_regex>(/[a-zA-Z]*)?)')

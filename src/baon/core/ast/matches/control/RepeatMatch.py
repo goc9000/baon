@@ -7,10 +7,11 @@
 # Licensed under the GPL-3
 
 
-from baon.core.errors.RuleCheckException import RuleCheckException
-
 from baon.core.ast.matches.MatchWithActions import MatchWithActions
 from baon.core.ast.ASTNode import ast_node_field, ast_node_child
+
+from baon.core.ast.rule_check_exceptions import MinimumMatchesNotSpecifiedException, \
+    MinimumMatchesNegativeException, MaximumMatchesZeroOrNegativeException, MinimumMatchesGreaterThanMaximumException
 
 
 class RepeatMatch(MatchWithActions):
@@ -27,15 +28,15 @@ class RepeatMatch(MatchWithActions):
 
     def _semantic_check_before_children(self, scope):
         if self.at_least is None:
-            raise RuleCheckException("Minimum number of matches must be specified")
+            raise MinimumMatchesNotSpecifiedException()
         if self.at_least < 0:
-            raise RuleCheckException("Minimum number of matches must be >= 0")
+            raise MinimumMatchesNegativeException()
 
         if self.at_most is not None:
             if self.at_most < 1:
-                raise RuleCheckException("Maximum number of matches must be >= 1")
+                raise MaximumMatchesZeroOrNegativeException()
             if self.at_least > self.at_most:
-                raise RuleCheckException("Minimum number of matches must be >= the minimum")
+                raise MinimumMatchesGreaterThanMaximumException()
 
     def _execute_match_with_actions_impl(self, context):
         for solution in self._generate_solutions_rec(context, [], False):

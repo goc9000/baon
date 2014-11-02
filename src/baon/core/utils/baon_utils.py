@@ -11,6 +11,7 @@ import os
 import string
 
 from baon.core.utils.str_utils import is_quoted_string
+from baon.core.parsing.rule_parse_exceptions import StringLiteralNotQuotedProperlyException
 
 
 SIMPLE_ESCAPES = {
@@ -27,7 +28,7 @@ SIMPLE_ESCAPES = {
 
 def decode_baon_string_literal(literal):
     if not is_quoted_string(literal):
-        raise RuntimeError("{0} is not a valid string literal".format(literal))
+        raise StringLiteralNotQuotedProperlyException()
 
     literal = literal[1:-1]  # strip quotes
     

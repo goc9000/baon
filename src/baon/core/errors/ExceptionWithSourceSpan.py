@@ -7,21 +7,19 @@
 # Licensed under the GPL-3
 
 
+from baon.core.errors.BAONExceptionBase import BAONExceptionBase
 from baon.core.parsing.SourceSpan import SourceSpan
 
 
-class ExceptionWithSourceSpan(Exception):
+class ExceptionWithSourceSpan(BAONExceptionBase):
     source_span = None
 
-    def __init__(self, message, source_span=None):
-        Exception.__init__(self, message)
+    def __init__(self, format_string, error_parameters, source_span=None):
+        BAONExceptionBase.__init__(self, format_string, error_parameters)
         self.source_span = SourceSpan.copy(source_span)
 
-    def __str__(self):
-        return self.message
-
     def test_repr(self):
-        base_tuple = (self.__class__.__name__, self.message)
+        base_tuple = BAONExceptionBase.test_repr(self)
 
         if self.source_span is not None:
             base_tuple += (

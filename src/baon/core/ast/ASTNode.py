@@ -11,7 +11,7 @@ import inspect
 
 from baon.core.parsing.SourceSpan import SourceSpan
 
-from baon.core.errors.RuleCheckException import RuleCheckException
+from baon.core.ast.rule_check_exceptions import RuleCheckException
 
 from baon.core.ast.ASTNodeField import ASTNodeField
 from baon.core.ast.ASTNodeChildRef import ASTNodeChildRef

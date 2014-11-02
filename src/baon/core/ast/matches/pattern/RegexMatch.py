@@ -9,10 +9,10 @@
 
 import re
 
-from baon.core.errors.RuleCheckException import RuleCheckException
-
 from baon.core.ast.ASTNode import ast_node_field
 from baon.core.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
+
+from baon.core.ast.rule_check_exceptions import ErrorInRegularExpressionException, InvalidRegexFlagException
 
 
 class RegexMatch(ElementaryPatternMatch):
@@ -30,7 +30,7 @@ class RegexMatch(ElementaryPatternMatch):
         try:
             re.compile(self.pattern)
         except re.error:
-            raise RuleCheckException('Error in regular expression')
+            raise ErrorInRegularExpressionException()
 
         return u'({0})'.format(self.pattern)
 
@@ -40,6 +40,6 @@ class RegexMatch(ElementaryPatternMatch):
             if flag == 'i':
                 flags_enum |= re.I
             else:
-                raise RuleCheckException(u"Invalid regex flag '{0}'".format(flag))
+                raise InvalidRegexFlagException(flag)
 
         return flags_enum

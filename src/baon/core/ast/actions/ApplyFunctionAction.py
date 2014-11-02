@@ -14,7 +14,7 @@ import baon.lib.simple_text_functions
 
 from baon.core.ast.actions.CompiledAction import CompiledAction, wrap_simple_text_function
 from baon.core.ast.ASTNode import ast_node_field
-from baon.core.errors.RuleCheckException import RuleCheckException
+from baon.core.ast.rule_check_exceptions import UnsupportedFunctionException
 
 
 def scan_package_for_functions(package):
@@ -55,4 +55,4 @@ class ApplyFunctionAction(CompiledAction):
         elif self.function_name in FUNC_DICT:
             return FUNC_DICT[self.function_name]
         else:
-            raise RuleCheckException("Unsupported function '{0}'".format(self.function_name))
+            raise UnsupportedFunctionException(self.function_name)

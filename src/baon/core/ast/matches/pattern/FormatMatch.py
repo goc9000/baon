@@ -10,7 +10,9 @@
 import os
 import re
 
-from baon.core.errors.RuleCheckException import RuleCheckException
+from baon.core.ast.rule_check_exceptions import UnrecognizedFormatSpecifierException, \
+    WidthMustBeAtLeast1ForSpecifierException, WidthInapplicableToSpecifierException, \
+    Leading0sInapplicableToSpecifierException, InvalidWidthForSpecifierException
 
 from baon.core.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
 from baon.core.ast.ASTNode import ast_node_field
@@ -45,21 +47,20 @@ class FormatMatch(ElementaryPatternMatch):
 
     def _get_pattern_impl(self):
         if self.specifier not in FORMAT_DICT:
-            raise RuleCheckException("Unrecognized format specifier '{0}'".format(self.specifier))
+            raise UnrecognizedFormatSpecifierException(self.specifier)
 
         pattern, repeat = FORMAT_DICT[self.specifier]
 
         if self.leading_zeros is True:
-            raise RuleCheckException("Leading 0s inapplicable to specifier '{0}'".format(self.specifier))
+            raise Leading0sInapplicableToSpecifierException(self.specifier)
 
         if self.width is not None:
             if '##' not in pattern:
-                raise RuleCheckException("Width inapplicable to specifier '{0}'".format(self.specifier))
-
+                raise WidthInapplicableToSpecifierException(self.specifier)
             if self.width < 0:
-                raise RuleCheckException("Invalid width")
+                raise InvalidWidthForSpecifierException(self.specifier)
             if self.width == 0 and repeat in ['+', '{1}']:
-                raise RuleCheckException("Width must be at least 1 for specifier '{0}'".format(self.specifier))
+                raise WidthMustBeAtLeast1ForSpecifierException(self.specifier)
 
             repeat = '{' + str(self.width) + '}'
 

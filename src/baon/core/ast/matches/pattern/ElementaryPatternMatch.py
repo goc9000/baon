@@ -10,7 +10,7 @@
 import re
 
 from baon.core.ast.matches.MatchWithActions import MatchWithActions
-from baon.core.errors.RuleCheckException import RuleCheckException
+from baon.core.ast.rule_check_exceptions import ErrorInRegularExpressionException
 
 
 class ElementaryPatternMatch(MatchWithActions):
@@ -32,7 +32,7 @@ class ElementaryPatternMatch(MatchWithActions):
         try:
             return re.compile(pattern, flags)
         except re.error:
-            raise RuleCheckException('Error in regular expression')
+            raise ErrorInRegularExpressionException()
 
     def _semantic_check_before_children(self, scope):
         self._compile_regex()

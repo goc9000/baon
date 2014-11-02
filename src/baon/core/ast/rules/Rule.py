@@ -9,7 +9,7 @@
 
 from baon.core.ast.ASTNode import ASTNode, ast_node_child
 
-from baon.core.errors.RuleApplicationException import RuleApplicationException
+from baon.core.ast.rule_application_exceptions import AliasDependenciesTooComplexException
 
 from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
@@ -59,4 +59,4 @@ class Rule(ASTNode):
 
             return ApplyRuleResult(text=solution.matched_text, aliases=solution.aliases)
 
-        raise RuleApplicationException("Dependencies of aliases are too complex")
+        raise AliasDependenciesTooComplexException()

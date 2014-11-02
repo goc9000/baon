@@ -10,8 +10,7 @@
 from unittest import TestCase
 
 from baon.core.parsing.RulesParser import RulesParser
-
-from baon.core.errors.RuleParseException import RuleParseException
+from baon.core.parsing.rule_parse_exceptions import RuleParseException
 
 
 class TestRulesLexer(TestCase):
@@ -46,7 +45,7 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('match', u'"abc"'),
                          ('LiteralMatch', u'abc'))
         self.assertEqual(self.parse_result('match', u'"abc'),
-                         ('RuleParseException', 'Unterminated string', 1, 1, 1, 4))
+                         ('UnterminatedStringException', 1, 1, 1, 4))
 
     def test_parse_regex_match(self):
         self.assertEqual(self.parse_result('match', u'/abc/'),
@@ -54,7 +53,7 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('match', u'/abc//def/i'),
                          ('RegexMatch', u'abc/def', {'i'}))
         self.assertEqual(self.parse_result('match', u'/abc'),
-                         ('RuleParseException', 'Unterminated regex', 1, 1, 1, 4))
+                         ('UnterminatedRegexException', 1, 1, 1, 4))
 
         # Malformed patterns or flags do NOT raise a RuleParseException. This is caught in the semantic check phase.
         self.assertEqual(self.parse_result('match', u'/[abc/'),
@@ -70,7 +69,7 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('match', u'%04d'),
                          ('FormatMatch', u'd', 4, 'leading'))
         self.assertEqual(self.parse_result('match', u'%'),
-                         ('RuleParseException', 'Missing format specifier', 1, 1, 1, 1))
+                         ('MissingFormatSpecifierException', 1, 1, 1, 1))
 
         # Erroneous specifiers do NOT raise a RuleParseException. This is caught in the semantic check phase.
         self.assertEqual(self.parse_result('match', u'%bogus'),
@@ -84,7 +83,7 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('match', u'<<"abc"'),
                          ('InsertLiteralMatch', u'abc'))
         self.assertEqual(self.parse_result('match', u'<<"abc'),
-                         ('RuleParseException', 'Unterminated string', 1, 3, 1, 6))
+                         ('UnterminatedStringException', 1, 3, 1, 6))
 
     def test_parse_subrule_match(self):
         self.assertEqual(self.parse_result('match', u'("abc")'),
@@ -112,7 +111,7 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('action', u'->"abc"'),
                          ('ReplaceByLiteralAction', u'abc'))
         self.assertEqual(self.parse_result('action', u'->"abc'),
-                         ('RuleParseException', 'Unterminated string', 1, 3, 1, 6))
+                         ('UnterminatedStringException', 1, 3, 1, 6))
 
     def test_parse_apply_function_action(self):
         self.assertEqual(self.parse_result('action', u'->title'),
@@ -126,7 +125,7 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('action', u'->%04d'),
                          ('ReformatAction', u'd', 4, 'leading'))
         self.assertEqual(self.parse_result('action', u'->%'),
-                         ('RuleParseException', 'Missing format specifier', 1, 3, 1, 3))
+                         ('MissingFormatSpecifierException', 1, 3, 1, 3))
 
         # Erroneous specifiers do NOT raise a RuleParseException. This is caught in the semantic check phase.
         self.assertEqual(self.parse_result('action', u'->%bogus'),
@@ -253,13 +252,13 @@ class TestRulesLexer(TestCase):
 
     def test_syntax_errors(self):
         self.assertEqual(self.parse_result('rule_set', u'#'),
-                         ('RuleParseException', 'Syntax error', 1, 1, 1, 1))
+                         ('RuleSyntaxErrorException', 1, 1, 1, 1))
         self.assertEqual(self.parse_result('rule_set', u'..->#'),
-                         ('RuleParseException', 'Syntax error', 1, 5, 1, 5))
+                         ('RuleSyntaxErrorException', 1, 5, 1, 5))
         self.assertEqual(self.parse_result('rule_set', u'..->'),
-                         ('RuleParseException', 'Syntax error', 1, 5, 1, 4))
+                         ('RuleSyntaxErrorException', 1, 5, 1, 4))
         self.assertEqual(self.parse_result('rule_set', u'())'),
-                         ('RuleParseException', 'Syntax error', 1, 3, 1, 3))
+                         ('RuleSyntaxErrorException', 1, 3, 1, 3))
 
     def parse_result(self, start_rule, rules_text):
         try:

@@ -10,7 +10,7 @@
 from baon.core.ast.actions.__tests__.ActionTestCase import ActionTestCase
 from baon.core.ast.actions.ReformatAction import ReformatAction
 
-from baon.core.errors.RuleApplicationException import RuleApplicationException
+from baon.core.ast.rule_application_exceptions import SpecifierExpectsNumberException
 
 
 class TestReformatAction(ActionTestCase):
@@ -32,5 +32,5 @@ class TestReformatAction(ActionTestCase):
         self._test_simple_text_action(u'  78 ', ReformatAction('d', 3), u'  078 ')
 
     def test_d_non_number(self):
-        with self.assertRaisesRegexp(RuleApplicationException, 'non-number'):
+        with self.assertRaises(SpecifierExpectsNumberException):
             self._test_simple_text_action(u'00abc', ReformatAction('d'), u'should fail')
