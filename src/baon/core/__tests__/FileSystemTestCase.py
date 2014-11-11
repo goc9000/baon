@@ -17,11 +17,13 @@ import shutil
 class FileSystemTestCase(TestCase):
     _test_dir_path = None
     _links_supported = None
+    _unicode_supported = None
 
     @classmethod
     def setUpClass(cls):
         cls._test_dir_path = tempfile.mkdtemp()
         cls._links_supported = cls._check_links_supported()
+        cls._unicode_supported = os.path.supports_unicode_filenames
         cls.setup_test_files()
 
     @classmethod

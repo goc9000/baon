@@ -16,8 +16,6 @@ import os
 class TestFileScanner(FileSystemTestCase):
     # TODO: Scan for files that: -cannot be renamed (no write access) - cannot be opened (dirs) - dangling symlinks
     # TODO: Scan for non-existent directory
-    # TODO: Scan for unicode files (check out os.path.supports_unicode_filenames)
-    # TODO: Do not follow symlinks
     # TODO: Test that it reports progress
 
     @classmethod
@@ -42,6 +40,10 @@ class TestFileScanner(FileSystemTestCase):
             cls._make_link('links/link1', 'basic/file2.bin')
             cls._make_link('links/link2', 'basic/dir1')
             cls._make_link('links/link3', 'dangling')
+
+        if cls._unicode_supported:
+            cls._make_file(u'unicode/\u0111\u0131\u0157/\u0192\u00ef\u0142\u00e9\u2461.txt')
+            cls._make_file(u'unicode/\u0192\u00ef\u0142\u00e9\u2460.txt')
 
     def test_basic_non_recursive(self):
         self._test_file_scanner(
@@ -119,6 +121,26 @@ class TestFileScanner(FileSystemTestCase):
                 ('LINK:DIR', u'link2'),  # Symlinks are not followed even in recursive mode
                 ('LINK:FILE', u'link1'),
                 ('LINK:FILE', u'link3'),
+            )
+        )
+
+    def test_unicode_non_recursive(self):
+        self._test_file_scanner(
+            base_path=u'unicode',
+            recursive=False,
+            expected_result=(
+                ('DIR', u'\u0111\u0131r\u0327'),
+                ('FILE', u'\u0192i\u0308\u0142e\u0301\u2460.txt'),
+            )
+        )
+
+    def test_unicode_recursive(self):
+        self._test_file_scanner(
+            base_path=u'unicode',
+            recursive=True,
+            expected_result=(
+                ('FILE', u'\u0111\u0131r\u0327/\u0192i\u0308\u0142e\u0301\u2461.txt'),
+                ('FILE', u'\u0192i\u0308\u0142e\u0301\u2460.txt'),
             )
         )
 
