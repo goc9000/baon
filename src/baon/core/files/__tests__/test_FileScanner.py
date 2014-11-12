@@ -8,15 +8,15 @@
 
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
+from baon.core.__tests__.ReportsProgressTestCase import ReportsProgressTestCase
 from baon.core.files.FileScanner import FileScanner
 
 import os
 
 
-class TestFileScanner(FileSystemTestCase):
+class TestFileScanner(FileSystemTestCase, ReportsProgressTestCase):
     # TODO: Scan for files that: -cannot be renamed (no write access) - cannot be opened (dirs) - dangling symlinks
     # TODO: Scan for non-existent directory
-    # TODO: Test that it reports progress
 
     @classmethod
     def setup_test_files(cls):
@@ -143,6 +143,13 @@ class TestFileScanner(FileSystemTestCase):
                 ('FILE', u'\u0192i\u0308\u0142e\u0301\u2460.txt'),
             )
         )
+
+    def test_reports_progress(self):
+        progress_events = []
+        scanner = FileScanner(recursive=True, on_progress=self._progress_collector(progress_events))
+        scanner.scan(os.path.join(self._test_dir_path, 'basic'))
+
+        self._verify_reported_progress(progress_events)
 
     def _test_file_scanner(self, base_path=u'', expected_result=None, **options):
         scanner = FileScanner(**options)
