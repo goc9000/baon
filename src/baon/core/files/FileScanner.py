@@ -57,9 +57,8 @@ class FileScanner(ReportsProgress):
                 self._scan(base_path, file_ref.filename, stats, files_accumulator)
             else:
                 files_accumulator.append(file_ref)
-            
-            stats['done'] += 1
-            self._report_progress(stats['done'], stats['total'])
+                stats['done'] += 1
+                self._report_progress(stats['done'], stats['total'])
 
     def _scan_single_file(self, real_path, name):
         is_link = os.path.islink(real_path)
