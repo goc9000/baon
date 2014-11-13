@@ -17,12 +17,14 @@ class FileReference(object):
     filename = None
     is_dir = None
     is_link = None
+    problems = None
     
-    def __init__(self, full_path, filename, is_dir, is_link):
+    def __init__(self, full_path, filename, is_dir, is_link, problems=None):
         self.full_path = full_path
         self.filename = filename
         self.is_dir = is_dir
         self.is_link = is_link
+        self.problems = list() if problems is None else problems
 
     def __cmp__(self, other):
         my_components = all_path_components(self.filename)
@@ -50,4 +52,9 @@ class FileReference(object):
         if self.is_link:
             type_str = 'LINK:' + type_str
 
-        return type_str, self.filename
+        repr_tuple = type_str, self.filename
+
+        if len(self.problems) > 0:
+            repr_tuple += tuple(problem.__class__.__name__ for problem in self.problems),
+
+        return repr_tuple

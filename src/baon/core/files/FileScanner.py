@@ -10,6 +10,8 @@
 import os
 
 from baon.core.files.FileReference import FileReference
+from baon.core.files.file_scanner_exceptions import CannotExploreDirectoryException
+
 from baon.core.utils.ReportsProgress import ReportsProgress
 
 
@@ -36,13 +38,21 @@ class FileScanner(ReportsProgress):
 
     def _scan(self, base_path, relative_path, explore_dir, stats, files_accumulator):
         full_path = os.path.join(base_path, relative_path)
+        problems = []
 
         is_link = os.path.islink(full_path)
         is_dir = os.path.isdir(full_path)
 
-        should_open_dir = is_dir and not is_link and explore_dir
-        if should_open_dir:
-            files_here = os.listdir(full_path)
+        directory_opened = False
+        files_here = None
+        if is_dir and not is_link and explore_dir:
+            try:
+                files_here = os.listdir(full_path)
+                directory_opened = True
+            except OSError as e:
+                problems.append(CannotExploreDirectoryException(inner_exception=e))
+
+        if directory_opened:
             stats['done'] += 1
             stats['total'] += len(files_here)
             self._report_progress(stats['done'], stats['total'])
@@ -64,6 +74,7 @@ class FileScanner(ReportsProgress):
                 relative_path,
                 is_dir,
                 is_link,
+                problems,
             )
         )
 

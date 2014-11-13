@@ -36,6 +36,20 @@ class TestFileScanner(FileSystemTestCase, ReportsProgressTestCase):
         cls._make_dir('empties/dir1/empty1')
         cls._make_file('empties/dir1/file1')
 
+        cls._make_file('permissions/normal_dir/file11.txt')
+        cls._make_file('permissions/normal_dir/file12.txt')
+        cls._make_file('permissions/no_read_dir/file21.txt')
+        cls._make_file('permissions/no_read_dir/file22.txt')
+        cls._set_rights('permissions/no_read_dir', read=False)
+        cls._make_file('permissions/no_exec_dir/file31.txt')
+        cls._make_file('permissions/no_exec_dir/file32.txt')
+        cls._set_rights('permissions/no_exec_dir', execute=False)
+        cls._make_file('permissions/normal.txt')
+        cls._make_file('permissions/no_read.txt')
+        cls._set_rights('permissions/no_read.txt', read=False)
+        cls._make_file('permissions/no_exec.txt')
+        cls._set_rights('permissions/no_exec.txt', execute=False)
+
         if cls._links_supported:
             cls._make_link('links/link1', 'basic/file2.bin')
             cls._make_link('links/link2', 'basic/dir1')
@@ -141,6 +155,36 @@ class TestFileScanner(FileSystemTestCase, ReportsProgressTestCase):
             expected_result=(
                 ('FILE', u'\u0111\u0131r\u0327/\u0192i\u0308\u0142e\u0301\u2461.txt'),
                 ('FILE', u'\u0192i\u0308\u0142e\u0301\u2460.txt'),
+            )
+        )
+
+    def test_permissions_non_recursive(self):
+        self._test_file_scanner(
+            base_path=u'permissions',
+            recursive=False,
+            expected_result=(
+                ('DIR', u'no_exec_dir'),
+                ('DIR', u'no_read_dir'),
+                ('DIR', u'normal_dir'),
+                ('FILE', u'no_exec.txt'),
+                ('FILE', u'no_read.txt'),
+                ('FILE', u'normal.txt'),
+            )
+        )
+
+    def test_permissions_recursive(self):
+        self._test_file_scanner(
+            base_path=u'permissions',
+            recursive=True,
+            expected_result=(
+                ('FILE', u'no_exec_dir/file31.txt'),
+                ('FILE', u'no_exec_dir/file32.txt'),
+                ('DIR', u'no_read_dir', ('CannotExploreDirectoryException',)),
+                ('FILE', u'normal_dir/file11.txt'),
+                ('FILE', u'normal_dir/file12.txt'),
+                ('FILE', u'no_exec.txt'),
+                ('FILE', u'no_read.txt'),
+                ('FILE', u'normal.txt'),
             )
         )
 

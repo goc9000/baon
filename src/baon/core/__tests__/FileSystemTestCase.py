@@ -12,6 +12,7 @@ from unittest import TestCase
 import os
 import tempfile
 import shutil
+import stat
 
 
 class FileSystemTestCase(TestCase):
@@ -19,11 +20,14 @@ class FileSystemTestCase(TestCase):
     _links_supported = None
     _unicode_supported = None
 
+    _restore_rights_stack = None
+
     @classmethod
     def setUpClass(cls):
         cls._test_dir_path = tempfile.mkdtemp()
         cls._links_supported = cls._check_links_supported()
         cls._unicode_supported = os.path.supports_unicode_filenames
+        cls._restore_rights_stack = list()
         cls.setup_test_files()
 
     @classmethod
@@ -32,6 +36,9 @@ class FileSystemTestCase(TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        for path, mode in reversed(cls._restore_rights_stack):
+            os.chmod(path, mode)
+
         shutil.rmtree(cls._test_dir_path)
 
     @classmethod
@@ -49,6 +56,27 @@ class FileSystemTestCase(TestCase):
 
         if not os.path.isdir(full_dir_path):
             os.makedirs(full_dir_path)
+
+    @classmethod
+    def _set_rights(cls, path, read=None, write=None, execute=None):
+        def adjust_bits(mode, bitmask, condition):
+            if condition is True:
+                return mode | bitmask
+            elif condition is False:
+                return mode & ~bitmask
+            else:
+                return mode
+
+        full_path = os.path.join(cls._test_dir_path, path)
+
+        current_mode = os.lstat(full_path).st_mode
+        cls._restore_rights_stack.append((full_path, current_mode))
+
+        current_mode = adjust_bits(current_mode, stat.S_IRUSR, read)
+        current_mode = adjust_bits(current_mode, stat.S_IWUSR, write)
+        current_mode = adjust_bits(current_mode, stat.S_IXUSR, execute)
+
+        os.chmod(full_path, current_mode)
 
     @classmethod
     def _check_links_supported(cls):
