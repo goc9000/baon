@@ -7,16 +7,16 @@
 # Licensed under the GPL-3
 
 
+import os
+
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
 from baon.core.__tests__.ReportsProgressTestCase import ReportsProgressTestCase
 from baon.core.files.FileScanner import FileScanner
-
-import os
+from baon.core.files.file_scanner_exceptions import BasePathDoesNotExistException, BasePathIsNotADirectoryException,\
+    CannotExploreBasePathException
 
 
 class TestFileScanner(FileSystemTestCase, ReportsProgressTestCase):
-    # TODO: Scan for files that: -cannot be renamed (no write access) - cannot be opened (dirs) - dangling symlinks
-    # TODO: Scan for non-existent directory
 
     @classmethod
     def setup_test_files(cls):
@@ -187,6 +187,18 @@ class TestFileScanner(FileSystemTestCase, ReportsProgressTestCase):
                 ('FILE', u'normal.txt'),
             )
         )
+
+    def test_scan_non_existent(self):
+        with self.assertRaises(BasePathDoesNotExistException):
+            FileScanner().scan(os.path.join(self._test_dir_path, 'non_existent'))
+
+    def test_scan_not_a_file(self):
+        with self.assertRaises(BasePathIsNotADirectoryException):
+            FileScanner().scan(os.path.join(self._test_dir_path, 'basic/file1'))
+
+    def test_scan_cannot_explore(self):
+        with self.assertRaises(CannotExploreBasePathException):
+            FileScanner().scan(os.path.join(self._test_dir_path, 'permissions/no_read_dir'))
 
     def test_reports_progress(self):
         progress_events = []

@@ -10,7 +10,8 @@
 import os
 
 from baon.core.files.FileReference import FileReference
-from baon.core.files.file_scanner_exceptions import CannotExploreDirectoryException
+from baon.core.files.file_scanner_exceptions import BasePathDoesNotExistException, BasePathIsNotADirectoryException,\
+    CannotExploreBasePathException, CannotExploreDirectoryException
 
 from baon.core.utils.ReportsProgress import ReportsProgress
 
@@ -23,15 +24,19 @@ class FileScanner(ReportsProgress):
         self.recursive = recursive
     
     def scan(self, base_path):
-        if not os.path.exists(base_path):
-            raise RuntimeError(u"Path '{0}' does not exist".format(base_path))
-        if not os.path.isdir(base_path):
-            raise RuntimeError(u"'{0}' is not a directory".format(base_path))
-        
-        files = []
         stats = dict(done=0, total=1)
         self._report_progress(stats['done'], stats['total'])
 
+        if not os.path.exists(base_path):
+            raise BasePathDoesNotExistException(path=base_path)
+        if not os.path.isdir(base_path):
+            raise BasePathIsNotADirectoryException(path=base_path)
+        try:
+            os.listdir(base_path)
+        except OSError as e:
+            raise CannotExploreBasePathException(path=base_path, inner_exception=e)
+
+        files = []
         self._scan(base_path, u'', True, stats, files)
 
         return sorted(files)
