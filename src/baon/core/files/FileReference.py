@@ -22,11 +22,8 @@ class FileReference(object):
     def __cmp__(self, other):
         if self.is_dir != other.is_dir:
             return -1 if self.is_dir else 1
-        
-        if self.filename != other.filename:
-            return -1 if self.filename < other.filename else 1
-        
-        return 0
+
+        return cmp(self.filename, other.filename)
 
     def _test_repr(self):
         type_str = 'DIR' if self.is_dir else 'FILE'

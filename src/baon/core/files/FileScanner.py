@@ -26,47 +26,46 @@ class FileScanner(ReportsProgress):
         if not os.path.isdir(base_path):
             raise RuntimeError(u"'{0}' is not a directory".format(base_path))
         
-        stats = dict(done=0, total=1)
         files = []
-
-        self._scan(base_path, u'', stats, files)
-
-        return files
-
-    def _scan(self, base_path, relative_path, stats, files_accumulator):
+        stats = dict(done=0, total=1)
         self._report_progress(stats['done'], stats['total'])
 
-        path = os.path.join(base_path, relative_path)
+        self._scan(base_path, u'', True, stats, files)
 
-        files_here = []
-        for name in os.listdir(path):
-            real_path = os.path.join(path, name)
-            relative_file_path = os.path.join(relative_path, name)
-            files_here.append(self._scan_single_file(real_path, relative_file_path))
+        return sorted(files)
 
-        files_here = sorted(files_here)
+    def _scan(self, base_path, relative_path, explore_dir, stats, files_accumulator):
+        full_path = os.path.join(base_path, relative_path)
+
+        is_link = os.path.islink(full_path)
+        is_dir = os.path.isdir(full_path)
+
+        should_open_dir = is_dir and not is_link and explore_dir
+        if should_open_dir:
+            files_here = os.listdir(full_path)
+            stats['done'] += 1
+            stats['total'] += len(files_here)
+            self._report_progress(stats['done'], stats['total'])
+
+            for name in files_here:
+                self._scan(
+                    base_path,
+                    os.path.join(relative_path, name),
+                    self.recursive,
+                    stats,
+                    files_accumulator
+                )
+
+            return
+
+        files_accumulator.append(
+            FileReference(
+                full_path,
+                relative_path,
+                is_dir,
+                is_link,
+            )
+        )
 
         stats['done'] += 1
-        stats['total'] += len(files_here)
         self._report_progress(stats['done'], stats['total'])
-
-        for file_ref in files_here:
-            recurse = self.recursive and (file_ref.is_dir and not file_ref.is_link)
-
-            if recurse:
-                self._scan(base_path, file_ref.filename, stats, files_accumulator)
-            else:
-                files_accumulator.append(file_ref)
-                stats['done'] += 1
-                self._report_progress(stats['done'], stats['total'])
-
-    def _scan_single_file(self, real_path, name):
-        is_link = os.path.islink(real_path)
-        is_dir = os.path.isdir(real_path)
-
-        return FileReference(
-            real_path,
-            name,
-            is_dir,
-            is_link,
-        )
