@@ -11,7 +11,8 @@ import os
 
 from baon.core.files.FileReference import FileReference
 from baon.core.files.file_scanner_exceptions import BasePathDoesNotExistException, BasePathIsNotADirectoryException,\
-    CannotExploreBasePathException, CannotExploreDirectoryException
+    CannotExploreBasePathException
+from baon.core.files.file_reference_exceptions import CannotExploreDirectoryException
 
 from baon.core.utils.ReportsProgress import ReportsProgress
 

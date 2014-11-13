@@ -34,10 +34,3 @@ class CannotExploreBasePathException(FileScannerException):
         FileScannerException.__init__(
             self, u"Cannot open directory '{path}' for exploration",
             {'path': path, 'inner_exception': inner_exception})
-
-
-class CannotExploreDirectoryException(FileScannerException):
-    def __init__(self, inner_exception=None):
-        FileScannerException.__init__(
-            self, u"Cannot open directory for exploration",
-            {'inner_exception': inner_exception})
