@@ -10,6 +10,25 @@
 import os
 
 
+def all_path_components(path):
+    components = []
+
+    while path != '':
+        head_path, last_component = os.path.split(path)
+        if last_component != '':
+            components.append(last_component)
+
+        if path == head_path:
+            components.append(head_path)
+            break
+
+        path = head_path
+
+    components.reverse()
+
+    return components
+
+
 def enum_partial_paths(path):
     """
     Enumerates all non-empty parents of the given relative path, from the shortest to the longest.
