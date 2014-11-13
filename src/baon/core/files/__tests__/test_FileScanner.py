@@ -153,6 +153,6 @@ class TestFileScanner(FileSystemTestCase, ReportsProgressTestCase):
 
     def _test_file_scanner(self, base_path=u'', expected_result=None, **options):
         scanner = FileScanner(**options)
-        files = tuple(item._test_repr() for item in scanner.scan(os.path.join(self._test_dir_path, base_path)))
+        files = tuple(item.test_repr() for item in scanner.scan(os.path.join(self._test_dir_path, base_path)))
 
         self.assertEqual(files, expected_result)

@@ -25,7 +25,7 @@ class FileReference(object):
 
         return cmp(self.filename, other.filename)
 
-    def _test_repr(self):
+    def test_repr(self):
         type_str = 'DIR' if self.is_dir else 'FILE'
         if self.is_link:
             type_str = 'LINK:' + type_str
