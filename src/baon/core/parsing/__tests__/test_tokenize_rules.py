@@ -1,4 +1,4 @@
-# baon/core/parsing/__tests__/test_RulesLexer.py
+# baon/core/parsing/__tests__/test_tokenize_rules.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -9,10 +9,10 @@
 
 from unittest import TestCase
 
-from baon.core.parsing.RulesLexer import RulesLexer
+from baon.core.parsing.tokenize_rules import tokenize_rules
 
 
-class TestRulesLexer(TestCase):
+class TestTokenizeRules(TestCase):
 
     def test_parse_id(self):
         self.assertEqual(self.parse_result(u'ident'),
@@ -215,4 +215,4 @@ class TestRulesLexer(TestCase):
                           (79, 'ANCHOR_END', u'$', 2, 3)])
 
     def parse_result(self, text_input):
-        return [token.test_repr() for token in RulesLexer.tokenize(text_input)]
+        return [token.test_repr() for token in tokenize_rules(text_input)]

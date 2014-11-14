@@ -1,4 +1,4 @@
-# baon/core/parsing/RulesLexer.py
+# baon/core/parsing/tokenize_rules.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -170,15 +170,13 @@ def merge_error_tokens(tokens_stream):
 lexer_template = lex.lex()
 
 
-class RulesLexer(object):
+def tokenize_rules(rules_text):
     """
     Design notes: The lexer is designed to be very lenient, in order for it to be used by the rules syntax highlighter.
     As a result, it may emit tokens that are not entirely syntactically correct, e.g. unterminated string literals or
     incomplete format specifiers. The parser has to account for this when receiving the tokens.
     """
-    @staticmethod
-    def tokenize(rules_text):
-        lexer = lexer_template.clone()
-        lexer.input(rules_text)
-        lexer.lineno = (1, 0)
-        return merge_error_tokens(augment_lex_tokens(lexer))
+    lexer = lexer_template.clone()
+    lexer.input(rules_text)
+    lexer.lineno = (1, 0)
+    return merge_error_tokens(augment_lex_tokens(lexer))

@@ -32,7 +32,7 @@ from baon.core.ast.actions.ReformatAction import ReformatAction
 from baon.core.ast.actions.ApplyRuleSetAction import ApplyRuleSetAction
 from baon.core.parsing.rule_parse_exceptions import MissingFormatSpecifierException, UnterminatedStringException, \
     UnterminatedRegexException, RuleSyntaxErrorException
-from baon.core.parsing.RulesLexer import RulesLexer, tokens
+from baon.core.parsing.tokenize_rules import tokenize_rules, tokens
 from baon.core.parsing.SourceSpan import SourceSpan
 
 
@@ -291,7 +291,7 @@ class RulesLexerForYACC(object):
         pass
 
     def input(self, rules_text):
-        self._token_stream = RulesLexer.tokenize(rules_text)
+        self._token_stream = tokenize_rules(rules_text)
 
     def token(self):
         return next(self._token_stream, None)
