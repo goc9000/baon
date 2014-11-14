@@ -1,4 +1,4 @@
-# baon/core/files/__tests__/test_FileScanner.py
+# baon/core/files/__tests__/test_scan_files.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -11,12 +11,12 @@ import os
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
 from baon.core.__tests__.ReportsProgressTestCase import ReportsProgressTestCase
-from baon.core.files.FileScanner import FileScanner
-from baon.core.files.file_scanner_exceptions import BasePathDoesNotExistException, BasePathIsNotADirectoryException,\
+from baon.core.files.scan_files import scan_files
+from baon.core.files.scan_files_exceptions import BasePathDoesNotExistException, BasePathIsNotADirectoryException,\
     CannotExploreBasePathException
 
 
-class TestFileScanner(FileSystemTestCase, ReportsProgressTestCase):
+class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
     @classmethod
     def setup_test_files(cls):
@@ -190,25 +190,30 @@ class TestFileScanner(FileSystemTestCase, ReportsProgressTestCase):
 
     def test_scan_non_existent(self):
         with self.assertRaises(BasePathDoesNotExistException):
-            FileScanner().scan(os.path.join(self._test_dir_path, 'non_existent'))
+            scan_files(os.path.join(self._test_dir_path, 'non_existent'))
 
     def test_scan_not_a_file(self):
         with self.assertRaises(BasePathIsNotADirectoryException):
-            FileScanner().scan(os.path.join(self._test_dir_path, 'basic/file1'))
+            scan_files(os.path.join(self._test_dir_path, 'basic/file1'))
 
     def test_scan_cannot_explore(self):
         with self.assertRaises(CannotExploreBasePathException):
-            FileScanner().scan(os.path.join(self._test_dir_path, 'permissions/no_read_dir'))
+            scan_files(os.path.join(self._test_dir_path, 'permissions/no_read_dir'))
 
     def test_reports_progress(self):
         progress_events = []
-        scanner = FileScanner(recursive=True, on_progress=self._progress_collector(progress_events))
-        scanner.scan(os.path.join(self._test_dir_path, 'basic'))
+        scan_files(
+            os.path.join(self._test_dir_path, 'basic'),
+            recursive=True,
+            on_progress=self._progress_collector(progress_events)
+        )
 
         self._verify_reported_progress(progress_events)
 
     def _test_file_scanner(self, base_path=u'', expected_result=None, **options):
-        scanner = FileScanner(**options)
-        files = tuple(item.test_repr() for item in scanner.scan(os.path.join(self._test_dir_path, base_path)))
+        files = scan_files(os.path.join(self._test_dir_path, base_path), **options)
 
-        self.assertEqual(files, expected_result)
+        self.assertEqual(
+            tuple(f.test_repr() for f in files),
+            expected_result
+        )
