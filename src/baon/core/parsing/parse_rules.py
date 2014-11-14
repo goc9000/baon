@@ -1,4 +1,4 @@
-# baon/core/parsing/RulesParser.py
+# baon/core/parsing/parse_rules.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -208,6 +208,7 @@ def p_action_apply_function(p):
     p[0] = ApplyFunctionAction(p[2].text)
     _set_source_span(p[0], p[1], p[2])
 
+
 def p_action_reformat(p):
     """action : OP_XFORM FORMAT_SPEC"""
     specifier, width, leading_zeros = _handle_format_token(p[2])
@@ -264,26 +265,6 @@ start = 'rule_set'
 parser_template = yacc.yacc(write_tables=False, debug=False, errorlog=NullLogger())
 
 
-class RulesParser(object):
-    @staticmethod
-    def parse(rules_text):
-        return RulesParser._run_parser(parser_template, rules_text)
-
-    @staticmethod
-    def debug_parse(rules_text, start_rule):
-        parser = yacc.yacc(start=start_rule, debug=False, write_tables=False, errorlog=NullLogger())
-        return RulesParser._run_parser(parser, rules_text)
-
-    @staticmethod
-    def _run_parser(parser, rules_text):
-        try:
-            return parser.parse(rules_text, RulesLexerForYACC())
-        except EOFRuleParseException:
-            exception = RuleSyntaxErrorException()
-            exception.source_span = SourceSpan.at_end_of_source(rules_text)
-            raise exception
-
-
 class RulesLexerForYACC(object):
     _token_stream = None
 
@@ -295,3 +276,15 @@ class RulesLexerForYACC(object):
 
     def token(self):
         return next(self._token_stream, None)
+
+
+def parse_rules(rules_text, start_rule=None):
+    if start_rule is None:
+        parser = parser_template
+    else:
+        parser = yacc.yacc(start=start_rule, debug=False, write_tables=False, errorlog=NullLogger())
+
+    try:
+        return parser.parse(rules_text, RulesLexerForYACC())
+    except EOFRuleParseException:
+        raise RuleSyntaxErrorException(source_span=SourceSpan.at_end_of_source(rules_text))

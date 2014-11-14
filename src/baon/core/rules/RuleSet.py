@@ -9,7 +9,7 @@
 
 import baon.core.ast.rules.RuleSet
 
-from baon.core.parsing.RulesParser import RulesParser
+from baon.core.parsing.parse_rules import parse_rules
 from baon.core.rules.SemanticCheckScope import SemanticCheckScope
 
 
@@ -28,4 +28,4 @@ class RuleSet(object):
 
     @staticmethod
     def from_source(rules_text):
-        return RuleSet(RulesParser.parse(rules_text))
+        return RuleSet(parse_rules(rules_text))

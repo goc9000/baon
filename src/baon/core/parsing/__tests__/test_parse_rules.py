@@ -1,4 +1,4 @@
-# baon/core/parsing/__tests__/test_RulesParser.py
+# baon/core/parsing/__tests__/test_parse_rules.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -9,7 +9,7 @@
 
 from unittest import TestCase
 
-from baon.core.parsing.RulesParser import RulesParser
+from baon.core.parsing.parse_rules import parse_rules
 from baon.core.parsing.rule_parse_exceptions import RuleParseException
 
 
@@ -262,6 +262,6 @@ class TestRulesLexer(TestCase):
 
     def parse_result(self, start_rule, rules_text):
         try:
-            return RulesParser.debug_parse(rules_text, start_rule).test_repr()
+            return parse_rules(rules_text, start_rule).test_repr()
         except RuleParseException as e:
             return e.test_repr()
