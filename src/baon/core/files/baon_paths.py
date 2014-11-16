@@ -20,9 +20,18 @@ def all_path_components(path):
     return path.split(os.sep)
 
 
-def extend_path(path, component):
-    assert component != u''
+def all_partial_paths(path):
+    partial_paths = []
+    partial_path = u''
 
+    for component in all_path_components(path):
+        partial_path = extend_path(partial_path, component)
+        partial_paths.append(partial_path)
+
+    return partial_paths
+
+
+def extend_path(path, component):
     return path + os.sep + component if path != u'' else component
 
 

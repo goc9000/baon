@@ -175,14 +175,3 @@ def find_words_and_separators(phrase, detect_abbreviations=True):
         ))
 
     return parts
-
-
-def aesthetic_warning(phrase):
-    if phrase.startswith(' '):
-        return 'starts with spaces'
-    if phrase.endswith(' '):
-        return 'ends with spaces'
-    if '  ' in phrase:
-        return 'contains double spaces'
-    
-    return None
