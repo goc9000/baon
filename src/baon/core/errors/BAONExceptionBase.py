@@ -14,7 +14,7 @@ class BAONExceptionBase(Exception):
     def __init__(self, format_string, error_parameters=None):
         self.format_string = format_string
         self.error_parameters = error_parameters if error_parameters is not None else dict()
-        Exception.__init__(self, format_string.format(**error_parameters))
+        Exception.__init__(self, format_string.format(**self.error_parameters))
 
     def __str__(self):
         return self.format_string.format(**self.error_parameters)

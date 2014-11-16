@@ -19,7 +19,7 @@ class FileReference(object):
     is_link = None
     problems = None
     
-    def __init__(self, full_path, filename, is_dir, is_link, problems=None):
+    def __init__(self, full_path, filename, is_dir, is_link=False, problems=None):
         self.full_path = full_path
         self.filename = filename
         self.is_dir = is_dir
