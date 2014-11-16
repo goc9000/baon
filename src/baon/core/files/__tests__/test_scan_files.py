@@ -11,6 +11,7 @@ import os
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
 from baon.core.__tests__.ReportsProgressTestCase import ReportsProgressTestCase
+
 from baon.core.files.scan_files import scan_files
 from baon.core.files.scan_files_exceptions import BasePathDoesNotExistException, BasePathIsNotADirectoryException,\
     CannotExploreBasePathException

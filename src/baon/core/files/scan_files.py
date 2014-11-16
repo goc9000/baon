@@ -11,6 +11,7 @@ import os
 
 from collections import deque
 
+from baon.core.files.baon_paths import extend_path
 from baon.core.files.FileReference import FileReference
 from baon.core.files.scan_files_exceptions import BasePathDoesNotExistException, BasePathIsNotADirectoryException,\
     CannotExploreBasePathException
@@ -51,7 +52,7 @@ def scan_files(base_path, recursive=True, on_progress=_dummy_on_progress):
         if is_dir and not is_link and (recursive or relative_path == u''):
             try:
                 files_in_dir = os.listdir(full_path)
-                scan_queue.extend(os.path.join(relative_path, name) for name in files_in_dir)
+                scan_queue.extend(extend_path(relative_path, name) for name in files_in_dir)
                 total += len(files_in_dir)
                 directory_opened = True
             except OSError as e:

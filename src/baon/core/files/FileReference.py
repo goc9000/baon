@@ -9,7 +9,7 @@
 
 import itertools
 
-from baon.core.utils.file_utils import all_path_components
+from baon.core.files.baon_paths import all_path_components
 
 
 class FileReference(object):
