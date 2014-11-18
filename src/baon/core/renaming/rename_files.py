@@ -29,11 +29,23 @@ PROBLEM_CHARS_REGEX = re.compile(r'["*:<>?\\/]')
 ONLY_DOTS_REGEX = re.compile(ur'^[.]+$')
 
 
-def rename_files(files, rule_set, use_path=False, use_extension=False, overrides=None):
-    renamed_files = [
-        _rename_file(file_ref, rule_set, use_path=use_path, use_extension=use_extension, overrides=overrides)
-        for file_ref in files
-    ]
+def _dummy_on_progress(done, total):
+    pass
+
+
+def rename_files(files, rule_set, use_path=False, use_extension=False, overrides=None, on_progress=_dummy_on_progress):
+    done = 0
+    total = len(files)
+    on_progress(done, total)
+
+    renamed_files = []
+
+    for file_ref in files:
+        renamed_files.append(
+            _rename_file(file_ref, rule_set, use_path=use_path, use_extension=use_extension, overrides=overrides)
+        )
+        done += 1
+        on_progress(done, total)
 
     _verify_renamed_files(renamed_files)
 

@@ -9,7 +9,7 @@
 
 import os
 
-from unittest import TestCase
+from baon.core.__tests__.ReportsProgressTestCase import ReportsProgressTestCase
 
 from baon.core.files.FileReference import FileReference
 
@@ -17,7 +17,7 @@ from baon.core.renaming.rename_files import rename_files
 from baon.core.parsing.parse_rules import parse_rules
 
 
-class TestRenameFiles(TestCase):
+class TestRenameFiles(ReportsProgressTestCase):
 
     def test_basic(self):
         self._test_rename_files(
@@ -338,6 +338,18 @@ class TestRenameFiles(TestCase):
             ),
             use_extension=True,
         )
+
+    def test_reports_progress(self):
+        progress_events = []
+
+        self._test_rename_files(
+            input_description=(('FILE', u'file{0}.txt'.format(i)) for i in xrange(10)),
+            rules_text=u'"file" <<"0"',
+            expected_result=tuple(('FILE', u'file0{0}.txt'.format(i)) for i in xrange(10)),
+            on_progress=self._progress_collector(progress_events),
+        )
+
+        self._verify_reported_progress(progress_events)
 
     def _test_rename_files(self, input_description, rules_text, expected_result, **options):
         files = [
