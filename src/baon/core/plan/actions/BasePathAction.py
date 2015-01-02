@@ -1,4 +1,4 @@
-# baon/core/plan/BasePathAction.py
+# baon/core/plan/actions/BasePathAction.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -9,7 +9,7 @@
 
 import os
 
-from baon.core.plan.RenamePlanAction import RenamePlanAction
+from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
 
 
 class BasePathAction(RenamePlanAction):

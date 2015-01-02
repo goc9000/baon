@@ -1,4 +1,4 @@
-# baon/core/plan/RmDirAction.py
+# baon/core/plan/RmDirIfEmptyAction.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -9,10 +9,10 @@
 
 import os
 
-from baon.core.plan.RenamePlanAction import RenamePlanAction
+from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
 
 
-class RmDirAction(RenamePlanAction):
+class RmDirIfEmptyAction(RenamePlanAction):
     directory = None
     
     def __init__(self, plan, directory):
@@ -20,7 +20,7 @@ class RmDirAction(RenamePlanAction):
         self.directory = directory
     
     def _getRepr(self):
-        return 'RmDir', self.directory
+        return 'RmDirIfEmpty', self.directory
 
     def execute(self):
         path = os.path.join(self.plan.base_path, self.directory)
@@ -34,7 +34,7 @@ class RmDirAction(RenamePlanAction):
             is_empty = (len(os.listdir(path)) == 0)
             
             if not is_empty:
-                raise RuntimeError("directory is not empty")
+                return
                 
             os.rmdir(path)
         except Exception as e:

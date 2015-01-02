@@ -1,4 +1,4 @@
-# baon/core/plan/RenamePlanAction.py
+# baon/core/plan/actions/RenamePlanAction.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 

@@ -1,4 +1,4 @@
-# baon/core/plan/MkDirAction.py
+# baon/core/plan/actions/MkDirAction.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -9,7 +9,7 @@
 
 import os
 
-from baon.core.plan.RenamePlanAction import RenamePlanAction
+from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
 
 
 class MkDirAction(RenamePlanAction):

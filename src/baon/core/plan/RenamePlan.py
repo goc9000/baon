@@ -14,13 +14,13 @@ import string
 import codecs
 
 from baon.core.utils.baon_utils import enum_partial_paths
-from baon.core.plan.RenamePlanAction import RenamePlanAction
-from baon.core.plan.BasePathAction import BasePathAction
-from baon.core.plan.MkDirAction import MkDirAction
-from baon.core.plan.MkDirIfNotExistsAction import MkDirIfNotExistsAction
-from baon.core.plan.MoveFileAction import MoveFileAction
-from baon.core.plan.RmDirAction import RmDirAction
-from baon.core.plan.RmDirIfEmptyAction import RmDirIfEmptyAction
+from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
+from baon.core.plan.actions.BasePathAction import BasePathAction
+from baon.core.plan.actions.MkDirAction import MkDirAction
+from baon.core.plan.actions.MkDirIfNotExistsAction import MkDirIfNotExistsAction
+from baon.core.plan.actions.MoveFileAction import MoveFileAction
+from baon.core.plan.actions.RmDirAction import RmDirAction
+from baon.core.plan.actions.RmDirIfEmptyAction import RmDirIfEmptyAction
 
 
 class RenamePlan(object):
