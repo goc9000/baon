@@ -8,6 +8,7 @@
 
 
 import re
+from abc import ABCMeta, abstractmethod
 
 
 PAT_FIRST_KW = re.compile(r'([\w]+)\s*')
@@ -23,6 +24,8 @@ def unquote_str(text):
 
 
 class RenamePlanAction(object):
+    __metaclass__ = ABCMeta
+
     plan = None
     
     def __init__(self, plan):
@@ -37,15 +40,18 @@ class RenamePlanAction(object):
             return kw
         else:
             return kw + ' ' + ' '.join(quote_str(arg) for arg in args)
-    
-    def _getRepr(self):
-        raise RuntimeError('RenamePlanAction is abstract, has no _getRepr() implementation')
-    
-    def execute(self):
-        raise RuntimeError('RenamePlanAction is abstract, has no execute() implementation')
 
+    @abstractmethod
+    def _getRepr(self):
+        return ()
+
+    @abstractmethod
+    def execute(self):
+        pass
+
+    @abstractmethod
     def undo(self):
-        raise RuntimeError('RenamePlanAction is abstract, has no undo() implementation')
+        pass
 
     @staticmethod
     def fromRepresentation(text, plan):
