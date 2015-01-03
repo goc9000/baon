@@ -21,7 +21,7 @@ class MoveFileAction(RenamePlanAction):
         self.from_path = from_path
         self.to_path = to_path
     
-    def _getRepr(self):
+    def _tuple_representation(self):
         return 'MoveFile', self.from_path, self.to_path
 
     def execute(self):

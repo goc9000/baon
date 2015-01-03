@@ -19,7 +19,7 @@ class RmDirIfEmptyAction(RenamePlanAction):
         RenamePlanAction.__init__(self, plan)
         self.directory = directory
     
-    def _getRepr(self):
+    def _tuple_representation(self):
         return 'RmDirIfEmpty', self.directory
 
     def execute(self):

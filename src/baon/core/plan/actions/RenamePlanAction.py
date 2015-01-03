@@ -32,7 +32,7 @@ class RenamePlanAction(object):
         self.plan = plan
     
     def representation(self):
-        tup = self._getRepr()
+        tup = self._tuple_representation()
         kw = tup[0]
         args = tup[1:]
         
@@ -42,7 +42,7 @@ class RenamePlanAction(object):
             return kw + ' ' + ' '.join(quote_str(arg) for arg in args)
 
     @abstractmethod
-    def _getRepr(self):
+    def _tuple_representation(self):
         return ()
 
     @abstractmethod
@@ -54,7 +54,7 @@ class RenamePlanAction(object):
         pass
 
     @staticmethod
-    def fromRepresentation(text, plan):
+    def from_representation(text, plan):
         m = PAT_FIRST_KW.match(text)
         if m is None:
             raise RuntimeError("Could not parse first keyword in line")

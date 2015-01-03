@@ -19,7 +19,7 @@ class BasePathAction(RenamePlanAction):
         RenamePlanAction.__init__(self, plan)
         self.path = path
     
-    def _getRepr(self):
+    def _tuple_representation(self):
         return 'BasePath', self.path
     
     def execute(self):

@@ -43,15 +43,15 @@ class RenamePlan(object):
         if len(files) == 0:
             raise RuntimeError("Nothing to do!")
         
-        buf_dir = self._getBufferDirName()
-        dirs_in_buf = self._createFinalStructureInBuffer(buf_dir, files)
-        self._moveFilesToBuffer(buf_dir, files)
-        self._mergeFinalStructure(buf_dir, files)
-        self._moveFilesToDestination(buf_dir, files)
-        self._removeOriginalDirs(files)
-        self._tearDownBuffer(dirs_in_buf)
+        buf_dir = self._get_buffer_dir_name()
+        dirs_in_buf = self._create_final_structure_in_buffer(buf_dir, files)
+        self._move_files_to_buffer(buf_dir, files)
+        self._merge_final_structure(buf_dir, files)
+        self._move_files_to_destination(buf_dir, files)
+        self._remove_original_dirs(files)
+        self._tear_down_buffer(dirs_in_buf)
     
-    def saveToFile(self, filename):
+    def save_to_file(self, filename):
         try:
             with codecs.open(filename, 'w', 'utf-8') as f:
                 f.writelines([step.representation() + os.linesep for step in self.steps])
@@ -63,7 +63,7 @@ class RenamePlan(object):
             
             raise RuntimeError("Error saving rename plan to file '{0}': {1}".format(filename, str(e)))
     
-    def getBackupFileName(self):
+    def get_backup_filename(self):
         while True:
             suffix = ''.join((random.choice(string.ascii_letters+string.digits) for _ in xrange(16)))
             name = os.path.join(os.path.expanduser('~'), "temp_BAON_rename_plan-{0}".format(suffix))
@@ -71,7 +71,7 @@ class RenamePlan(object):
                 return name
     
     @staticmethod
-    def findBackups():
+    def find_backups():
         try:
             home_dir = os.path.expanduser('~')
             files = os.listdir(home_dir)
@@ -86,7 +86,7 @@ class RenamePlan(object):
         return None
     
     @staticmethod
-    def loadFromFile(filename):
+    def load_from_file(filename):
         try:
             plan = RenamePlan()
             
@@ -94,7 +94,7 @@ class RenamePlan(object):
                 line_no = 1
                 for line in f:
                     try:
-                        plan.steps.append(RenamePlanAction.fromRepresentation(line, plan))
+                        plan.steps.append(RenamePlanAction.from_representation(line, plan))
                     except Exception as ex:
                         raise RuntimeError("Error in line {0}: {1}".format(line_no, str(ex)))
                     
@@ -130,14 +130,14 @@ class RenamePlan(object):
         for step in reversed(self.steps):
             step.undo()
     
-    def _getBufferDirName(self):
+    def _get_buffer_dir_name(self):
         while True:
             suffix = ''.join((random.choice(string.ascii_letters+string.digits) for _ in xrange(16)))
             name = "temp_BAON_dir_structure-{0}".format(suffix)
             if not os.path.exists(os.path.join(self.base_path, name)):
                 return name
     
-    def _createFinalStructureInBuffer(self, buf_dir, files):
+    def _create_final_structure_in_buffer(self, buf_dir, files):
         done = set()
         created = []
         
@@ -155,12 +155,12 @@ class RenamePlan(object):
         
         return created
     
-    def _moveFilesToBuffer(self, buf_dir, files):
+    def _move_files_to_buffer(self, buf_dir, files):
         for f in files:
             self.steps.append(MoveFileAction(self, f.old_filename,
                                              os.path.join(buf_dir, f.filename)))
     
-    def _mergeFinalStructure(self, buf_dir, files):
+    def _merge_final_structure(self, buf_dir, files):
         done = set()
         
         for f in files:
@@ -170,12 +170,12 @@ class RenamePlan(object):
                         self.steps.append(MkDirIfNotExistsAction(self, p))
                     done.add(p)
     
-    def _moveFilesToDestination(self, buf_dir, files):
+    def _move_files_to_destination(self, buf_dir, files):
         for f in files:
             self.steps.append(MoveFileAction(self, os.path.join(buf_dir, f.filename),
                                              f.filename))
     
-    def _removeOriginalDirs(self, files):
+    def _remove_original_dirs(self, files):
         done = set()
         dirs = []
         
@@ -188,6 +188,6 @@ class RenamePlan(object):
         for path in reversed(dirs):
             self.steps.append(RmDirIfEmptyAction(self, path))
     
-    def _tearDownBuffer(self, dirs_in_buf):
+    def _tear_down_buffer(self, dirs_in_buf):
         for folder in reversed(dirs_in_buf):
             self.steps.append(RmDirAction(self, folder))
