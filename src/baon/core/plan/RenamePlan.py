@@ -15,7 +15,6 @@ import codecs
 
 from baon.core.utils.baon_utils import enum_partial_paths
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
-from baon.core.plan.actions.BasePathAction import BasePathAction
 from baon.core.plan.actions.MkDirAction import MkDirAction
 from baon.core.plan.actions.MkDirIfNotExistsAction import MkDirIfNotExistsAction
 from baon.core.plan.actions.MoveFileAction import MoveFileAction
@@ -24,18 +23,14 @@ from baon.core.plan.actions.RmDirIfEmptyAction import RmDirIfEmptyAction
 
 
 class RenamePlan(object):
-    base_path = None
     steps = None
     
     def __init__(self, base_path=None, files=None):
+        self.steps = []
+
         if base_path is None:
-            self.base_path = None
-            self.steps = []
             return
-        
-        self.base_path = base_path
-        self.steps = [BasePathAction(self, base_path)]
-        
+
         if any(ren.error is not None for ren in files):
             raise RuntimeError("There are unresolved errors in the renamed files list")
         
@@ -43,12 +38,12 @@ class RenamePlan(object):
         if len(files) == 0:
             raise RuntimeError("Nothing to do!")
         
-        buf_dir = self._get_buffer_dir_name()
+        buf_dir = self._get_buffer_dir_name(base_path)
         dirs_in_buf = self._create_final_structure_in_buffer(buf_dir, files)
-        self._move_files_to_buffer(buf_dir, files)
-        self._merge_final_structure(buf_dir, files)
-        self._move_files_to_destination(buf_dir, files)
-        self._remove_original_dirs(files)
+        self._move_files_to_buffer(base_path, buf_dir, files)
+        self._merge_final_structure(base_path, files)
+        self._move_files_to_destination(base_path, buf_dir, files)
+        self._remove_original_dirs(base_path, files)
         self._tear_down_buffer(dirs_in_buf)
     
     def save_to_file(self, filename):
@@ -94,7 +89,7 @@ class RenamePlan(object):
                 line_no = 1
                 for line in f:
                     try:
-                        plan.steps.append(RenamePlanAction.from_representation(line, plan))
+                        plan.steps.append(RenamePlanAction.from_representation(line))
                     except Exception as ex:
                         raise RuntimeError("Error in line {0}: {1}".format(line_no, str(ex)))
                     
@@ -102,10 +97,6 @@ class RenamePlan(object):
                 
             if len(plan.steps) == 0:
                 raise RuntimeError("Plan file is empty")
-            if not isinstance(plan.steps[0], BasePathAction):
-                raise RuntimeError("Plan must begin with BasePath action")
-            
-            plan.base_path = plan.steps[0].path
         except Exception as e:
             raise RuntimeError("Error reading plan from '{0}': {1}".format(filename, str(e)))
         
@@ -130,18 +121,20 @@ class RenamePlan(object):
         for step in reversed(self.steps):
             step.undo()
     
-    def _get_buffer_dir_name(self):
+    def _get_buffer_dir_name(self, base_path):
         while True:
             suffix = ''.join((random.choice(string.ascii_letters+string.digits) for _ in xrange(16)))
             name = "temp_BAON_dir_structure-{0}".format(suffix)
-            if not os.path.exists(os.path.join(self.base_path, name)):
-                return name
+
+            path = os.path.join(base_path, name)
+            if not os.path.exists(path):
+                return path
     
     def _create_final_structure_in_buffer(self, buf_dir, files):
         done = set()
         created = []
         
-        self.steps.append(MkDirAction(self, buf_dir))
+        self.steps.append(MkDirAction(buf_dir))
         done.add(buf_dir)
         created.append(buf_dir)
         
@@ -149,33 +142,34 @@ class RenamePlan(object):
             for p in enum_partial_paths(f.filename):
                 path = os.path.join(buf_dir, p)
                 if not path in done:
-                    self.steps.append(MkDirAction(self, path))
+                    self.steps.append(MkDirAction(path))
                     done.add(path)
                     created.append(path)
         
         return created
     
-    def _move_files_to_buffer(self, buf_dir, files):
+    def _move_files_to_buffer(self, base_path, buf_dir, files):
         for f in files:
-            self.steps.append(MoveFileAction(self, f.old_filename,
+            self.steps.append(MoveFileAction(os.path.join(base_path, f.old_filename),
                                              os.path.join(buf_dir, f.filename)))
     
-    def _merge_final_structure(self, buf_dir, files):
+    def _merge_final_structure(self, base_path, files):
         done = set()
         
         for f in files:
             for p in enum_partial_paths(f.filename):
                 if not p in done:
-                    if not os.path.isdir(os.path.join(self.base_path, p)):
-                        self.steps.append(MkDirIfNotExistsAction(self, p))
+                    path = os.path.join(base_path, p)
+                    if not os.path.isdir(path):
+                        self.steps.append(MkDirIfNotExistsAction(path))
                     done.add(p)
     
-    def _move_files_to_destination(self, buf_dir, files):
+    def _move_files_to_destination(self, base_path, buf_dir, files):
         for f in files:
-            self.steps.append(MoveFileAction(self, os.path.join(buf_dir, f.filename),
-                                             f.filename))
+            self.steps.append(MoveFileAction(os.path.join(buf_dir, f.filename),
+                                             os.path.join(base_path, f.filename)))
     
-    def _remove_original_dirs(self, files):
+    def _remove_original_dirs(self, base_path, files):
         done = set()
         dirs = []
         
@@ -186,8 +180,8 @@ class RenamePlan(object):
                     dirs.append(path)
         
         for path in reversed(dirs):
-            self.steps.append(RmDirIfEmptyAction(self, path))
+            self.steps.append(RmDirIfEmptyAction(os.path.join(base_path, path)))
     
     def _tear_down_buffer(self, dirs_in_buf):
         for folder in reversed(dirs_in_buf):
-            self.steps.append(RmDirAction(self, folder))
+            self.steps.append(RmDirAction(folder))

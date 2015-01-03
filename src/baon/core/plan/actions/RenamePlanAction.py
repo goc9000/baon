@@ -26,10 +26,8 @@ def unquote_str(text):
 class RenamePlanAction(object):
     __metaclass__ = ABCMeta
 
-    plan = None
-    
-    def __init__(self, plan):
-        self.plan = plan
+    def __init__(self):
+        pass
     
     def representation(self):
         tup = self._tuple_representation()
@@ -54,7 +52,7 @@ class RenamePlanAction(object):
         pass
 
     @staticmethod
-    def from_representation(text, plan):
+    def from_representation(text):
         m = PAT_FIRST_KW.match(text)
         if m is None:
             raise RuntimeError("Could not parse first keyword in line")
@@ -80,9 +78,8 @@ class RenamePlanAction(object):
         if text[pos:].strip() != '':
             raise RuntimeError("Extra arguments found in line")
         
-        return cls(plan, *args)
+        return cls(*args)
 
-from BasePathAction import BasePathAction
 from MkDirAction import MkDirAction
 from MkDirIfNotExistsAction import MkDirIfNotExistsAction
 from MoveFileAction import MoveFileAction
@@ -90,7 +87,6 @@ from RmDirAction import RmDirAction
 from RmDirIfEmptyAction import RmDirIfEmptyAction
 
 ACTION_CLASSES_DICT = {
-    'BasePath':         (BasePathAction, 1),
     'MkDir':            (MkDirAction, 1),
     'MkDirIfNotExists': (MkDirIfNotExistsAction, 1),
     'MoveFile':         (MoveFileAction, 2),

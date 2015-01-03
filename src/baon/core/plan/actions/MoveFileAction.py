@@ -16,8 +16,8 @@ class MoveFileAction(RenamePlanAction):
     from_path = None
     to_path = None
     
-    def __init__(self, plan, from_path, to_path):
-        RenamePlanAction.__init__(self, plan)
+    def __init__(self, from_path, to_path):
+        RenamePlanAction.__init__(self)
         self.from_path = from_path
         self.to_path = to_path
     
@@ -25,25 +25,19 @@ class MoveFileAction(RenamePlanAction):
         return 'MoveFile', self.from_path, self.to_path
 
     def execute(self):
-        path1 = os.path.join(self.plan.base_path, self.from_path)
-        path2 = os.path.join(self.plan.base_path, self.to_path)
-        
         try:
-            if not os.path.exists(path1):
+            if not os.path.exists(self.from_path):
                 raise RuntimeError("source does not exist")
-            if os.path.exists(path2):
+            if os.path.exists(self.to_path):
                 raise RuntimeError("destination already exists")
             
-            os.rename(path1, path2)
+            os.rename(self.from_path, self.to_path)
         except Exception as e:
-            raise RuntimeError("Cannot move '{0}' to '{1}': {2}".format(path1, path2, str(e)))
+            raise RuntimeError("Cannot move '{0}' to '{1}': {2}".format(self.from_path, self.to_path, str(e)))
     
     def undo(self):
-        path1 = os.path.join(self.plan.base_path, self.from_path)
-        path2 = os.path.join(self.plan.base_path, self.to_path)
-        
         try:
-            if os.path.exists(path2) and not os.path.exists(path1):
-                os.rename(path2, path1)
+            if os.path.exists(self.to_path) and not os.path.exists(self.from_path):
+                os.rename(self.to_path, self.from_path)
         except OSError:
             pass

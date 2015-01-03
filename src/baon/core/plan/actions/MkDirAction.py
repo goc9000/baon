@@ -13,32 +13,28 @@ from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
 
 
 class MkDirAction(RenamePlanAction):
-    directory = None
+    path = None
     
-    def __init__(self, plan, directory):
-        RenamePlanAction.__init__(self, plan)
-        self.directory = directory
+    def __init__(self, path):
+        RenamePlanAction.__init__(self)
+        self.path = path
     
     def _tuple_representation(self):
-        return 'MkDir', self.directory
+        return 'MkDir', self.path
     
     def execute(self):
-        path = os.path.join(self.plan.base_path, self.directory)
-        
         try:
-            if os.path.isfile(path):
+            if os.path.isfile(self.path):
                 raise RuntimeError("a file by that name already exists")
-            if os.path.exists(path):
+            if os.path.exists(self.path):
                 raise RuntimeError("directory already exists")
             
-            os.mkdir(path)
+            os.mkdir(self.path)
         except Exception as e:
-            raise RuntimeError("Cannot create '{0}': {1}".format(path, str(e)))
+            raise RuntimeError("Cannot create '{0}': {1}".format(self.path, str(e)))
     
     def undo(self):
-        path = os.path.join(self.plan.base_path, self.directory)
-        
         try:
-            os.rmdir(path)
+            os.rmdir(self.path)
         except OSError:
             pass
