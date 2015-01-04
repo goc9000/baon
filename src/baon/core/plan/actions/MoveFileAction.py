@@ -10,6 +10,7 @@
 import os
 
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
+from baon.core.utils.lang_utils import is_arrayish
 
 
 class MoveFileAction(RenamePlanAction):
@@ -21,8 +22,8 @@ class MoveFileAction(RenamePlanAction):
         self.from_path = from_path
         self.to_path = to_path
     
-    def _tuple_representation(self):
-        return 'MoveFile', self.from_path, self.to_path
+    def json_representation(self):
+        return self.action_name_for_json_representation(), self.from_path, self.to_path
 
     def execute(self):
         try:
@@ -41,3 +42,17 @@ class MoveFileAction(RenamePlanAction):
                 os.rename(self.to_path, self.from_path)
         except OSError:
             pass
+
+    @classmethod
+    def from_json_representation(cls, json_repr):
+        if not is_arrayish(json_repr):
+            raise RuntimeError(u'JSON representation of action should be a vector')
+        if len(json_repr) != 3:
+            raise RuntimeError(u'JSON representation of action has incorrect length')
+
+        action_type, from_path, to_path = json_repr
+
+        if action_type != cls.action_name_for_json_representation():
+            raise RuntimeError(u"Expected JSON representation to start with '{0}' for this action".format(action_type))
+
+        return cls(from_path, to_path)

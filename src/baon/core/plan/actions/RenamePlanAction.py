@@ -8,19 +8,12 @@
 
 
 import re
+
 from abc import ABCMeta, abstractmethod
+from collections import deque
+from inspect import isabstract
 
-
-PAT_FIRST_KW = re.compile(r'([\w]+)\s*')
-PAT_QUOTED = re.compile(r'\s*("(\\"|[^"])*")\s*')
-
-
-def quote_str(text):
-    return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
-
-
-def unquote_str(text):
-    return text[1:-1].replace('\\"', '"').replace("\\\\", "\\")
+from baon.core.utils.lang_utils import is_arrayish
 
 
 class RenamePlanAction(object):
@@ -28,19 +21,9 @@ class RenamePlanAction(object):
 
     def __init__(self):
         pass
-    
-    def representation(self):
-        tup = self._tuple_representation()
-        kw = tup[0]
-        args = tup[1:]
-        
-        if len(args) == 0:
-            return kw
-        else:
-            return kw + ' ' + ' '.join(quote_str(arg) for arg in args)
 
     @abstractmethod
-    def _tuple_representation(self):
+    def json_representation(self):
         return ()
 
     @abstractmethod
@@ -51,45 +34,47 @@ class RenamePlanAction(object):
     def undo(self):
         pass
 
-    @staticmethod
-    def from_representation(text):
-        m = PAT_FIRST_KW.match(text)
-        if m is None:
-            raise RuntimeError("Could not parse first keyword in line")
-        
-        kw = m.group(1)
-        
-        if kw not in ACTION_CLASSES_DICT:
-            raise RuntimeError("Unknown action '{0}'".format(kw))
-        
-        cls, arg_count = ACTION_CLASSES_DICT[kw]
-        
-        pos = len(m.group(0))
-        args = []
-        for i in xrange(arg_count):
-            m = PAT_QUOTED.match(text, pos)
-            if m is None:
-                raise RuntimeError("Could not parse argument #{0}/{1}".format(i+1, arg_count))
-            
-            args.append(unquote_str(m.group(1)))
-            
-            pos += len(m.group(0))
-        
-        if text[pos:].strip() != '':
-            raise RuntimeError("Extra arguments found in line")
-        
-        return cls(*args)
+    @classmethod
+    def action_name_for_json_representation(cls):
+        match = re.match(u'^(.*)Action$', cls.__name__)
+        assert match is not None
 
-from MkDirAction import MkDirAction
-from MkDirIfNotExistsAction import MkDirIfNotExistsAction
-from MoveFileAction import MoveFileAction
-from RmDirAction import RmDirAction
-from RmDirIfEmptyAction import RmDirIfEmptyAction
+        return match.group(1)
 
-ACTION_CLASSES_DICT = {
-    'MkDir':            (MkDirAction, 1),
-    'MkDirIfNotExists': (MkDirIfNotExistsAction, 1),
-    'MoveFile':         (MoveFileAction, 2),
-    'RmDir':            (RmDirAction, 1),
-    'RmDirIfEmpty':     (RmDirIfEmptyAction, 1)
-}
+    @classmethod
+    def from_json_representation(cls, json_repr):
+        if not is_arrayish(json_repr):
+            raise RuntimeError(u'JSON representation of action should be a vector')
+        if len(json_repr) == 0:
+            raise RuntimeError(u'JSON representation of action should start with the action type')
+
+        action_type = json_repr[0]
+        action_class = get_action_class(action_type)
+
+        return action_class.from_json_representation(json_repr)
+
+
+action_class_lookup = None
+
+
+def get_action_class(action_type):
+    global action_class_lookup
+
+    if action_class_lookup is None:
+        action_class_lookup = {}
+
+        q = deque()
+        q.append(RenamePlanAction)
+
+        while len(q) > 0:
+            cls = q.popleft()
+            q.extend(cls.__subclasses__())
+
+            if not isabstract(cls):
+                action_class_lookup[cls.action_name_for_json_representation()] = cls
+
+    cls = action_class_lookup.get(action_type)
+    if cls is None:
+        raise RuntimeError(u"Unrecognized action: '{0}'".format(action_type))
+
+    return cls

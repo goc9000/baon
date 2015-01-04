@@ -10,6 +10,7 @@
 import os
 
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
+from baon.core.utils.lang_utils import is_arrayish
 
 
 class MkDirAction(RenamePlanAction):
@@ -19,9 +20,9 @@ class MkDirAction(RenamePlanAction):
         RenamePlanAction.__init__(self)
         self.path = path
     
-    def _tuple_representation(self):
-        return 'MkDir', self.path
-    
+    def json_representation(self):
+        return self.action_name_for_json_representation(), self.path
+
     def execute(self):
         try:
             if os.path.isfile(self.path):
@@ -38,3 +39,17 @@ class MkDirAction(RenamePlanAction):
             os.rmdir(self.path)
         except OSError:
             pass
+
+    @classmethod
+    def from_json_representation(cls, json_repr):
+        if not is_arrayish(json_repr):
+            raise RuntimeError(u'JSON representation of action should be a vector')
+        if len(json_repr) != 2:
+            raise RuntimeError(u'JSON representation of action has incorrect length')
+
+        action_type, path = json_repr
+
+        if action_type != cls.action_name_for_json_representation():
+            raise RuntimeError(u"Expected JSON representation to start with '{0}' for this action".format(action_type))
+
+        return cls(path)
