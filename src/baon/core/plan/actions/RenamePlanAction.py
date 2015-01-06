@@ -22,6 +22,9 @@ class RenamePlanAction(object):
     def __init__(self):
         pass
 
+    def test_repr(self):
+        return self.json_representation()
+
     @abstractmethod
     def json_representation(self):
         return ()

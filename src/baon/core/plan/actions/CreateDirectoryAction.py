@@ -1,4 +1,4 @@
-# baon/core/plan/actions/MkDirAction.py
+# baon/core/plan/actions/CreateDirectoryAction.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -13,7 +13,7 @@ from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
 from baon.core.utils.lang_utils import is_arrayish
 
 
-class MkDirAction(RenamePlanAction):
+class CreateDirectoryAction(RenamePlanAction):
     path = None
     
     def __init__(self, path):
