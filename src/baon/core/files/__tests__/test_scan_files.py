@@ -20,7 +20,7 @@ from baon.core.files.scan_files_exceptions import BasePathDoesNotExistException,
 class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
     @classmethod
-    def setup_test_files(cls):
+    def setup_test_files_basic(cls):
         cls._make_file('basic/dir1/file11.txt')
         cls._make_file('basic/dir1/file12')
         cls._make_file('basic/dir2/dir21/file211')
@@ -32,33 +32,6 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
         cls._make_file('basic/file1')
         cls._make_file('basic/file2.bin')
         cls._make_file('basic/file3')
-
-        cls._make_dir('empties/empty')
-        cls._make_dir('empties/dir1/empty1')
-        cls._make_file('empties/dir1/file1')
-
-        cls._make_file('permissions/normal_dir/file11.txt')
-        cls._make_file('permissions/normal_dir/file12.txt')
-        cls._make_file('permissions/no_read_dir/file21.txt')
-        cls._make_file('permissions/no_read_dir/file22.txt')
-        cls._set_rights('permissions/no_read_dir', read=False)
-        cls._make_file('permissions/no_exec_dir/file31.txt')
-        cls._make_file('permissions/no_exec_dir/file32.txt')
-        cls._set_rights('permissions/no_exec_dir', execute=False)
-        cls._make_file('permissions/normal.txt')
-        cls._make_file('permissions/no_read.txt')
-        cls._set_rights('permissions/no_read.txt', read=False)
-        cls._make_file('permissions/no_exec.txt')
-        cls._set_rights('permissions/no_exec.txt', execute=False)
-
-        if cls._links_supported:
-            cls._make_link('links/link1', 'basic/file2.bin')
-            cls._make_link('links/link2', 'basic/dir1')
-            cls._make_link('links/link3', 'dangling')
-
-        if cls._unicode_supported:
-            cls._make_file(u'unicode/\u0111\u0131\u0157/\u0192\u00ef\u0142\u00e9\u2461.txt')
-            cls._make_file(u'unicode/\u0192\u00ef\u0142\u00e9\u2460.txt')
 
     def test_basic_non_recursive(self):
         self._test_file_scanner(
@@ -92,6 +65,12 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             )
         )
 
+    @classmethod
+    def setup_test_files_empties(cls):
+        cls._make_dir('empties/empty')
+        cls._make_dir('empties/dir1/empty1')
+        cls._make_file('empties/dir1/file1')
+
     def test_empty_dirs_non_recursive(self):
         self._test_file_scanner(
             base_path=u'empties',
@@ -110,6 +89,13 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
                 ('FILE', u'dir1/file1'),
             )
         )
+
+    @classmethod
+    def setup_test_files_links(cls):
+        if cls._links_supported:
+            cls._make_link('links/link1', 'basic/file2.bin')
+            cls._make_link('links/link2', 'basic/dir1')
+            cls._make_link('links/link3', 'dangling')
 
     def test_links_non_recursive(self):
         if not self._links_supported:
@@ -139,7 +125,16 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             )
         )
 
+    @classmethod
+    def setup_test_files_unicode(cls):
+        if cls._unicode_supported:
+            cls._make_file(u'unicode/\u0111\u0131\u0157/\u0192\u00ef\u0142\u00e9\u2461.txt')
+            cls._make_file(u'unicode/\u0192\u00ef\u0142\u00e9\u2460.txt')
+
     def test_unicode_non_recursive(self):
+        if not self._unicode_supported:
+            self.skipTest('Skipping test_unicode_non_recursive: Unicode filenames are not supported on this platform')
+
         self._test_file_scanner(
             base_path=u'unicode',
             recursive=False,
@@ -150,6 +145,9 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
         )
 
     def test_unicode_recursive(self):
+        if not self._unicode_supported:
+            self.skipTest('Skipping test_unicode_recursive: Unicode filenames are not supported on this platform')
+
         self._test_file_scanner(
             base_path=u'unicode',
             recursive=True,
@@ -158,6 +156,22 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
                 ('FILE', u'\u0192i\u0308\u0142e\u0301\u2460.txt'),
             )
         )
+
+    @classmethod
+    def setup_test_files_permissions(cls):
+        cls._make_file('permissions/normal_dir/file11.txt')
+        cls._make_file('permissions/normal_dir/file12.txt')
+        cls._make_file('permissions/no_read_dir/file21.txt')
+        cls._make_file('permissions/no_read_dir/file22.txt')
+        cls._set_rights('permissions/no_read_dir', read=False)
+        cls._make_file('permissions/no_exec_dir/file31.txt')
+        cls._make_file('permissions/no_exec_dir/file32.txt')
+        cls._set_rights('permissions/no_exec_dir', execute=False)
+        cls._make_file('permissions/normal.txt')
+        cls._make_file('permissions/no_read.txt')
+        cls._set_rights('permissions/no_read.txt', read=False)
+        cls._make_file('permissions/no_exec.txt')
+        cls._set_rights('permissions/no_exec.txt', execute=False)
 
     def test_permissions_non_recursive(self):
         self._test_file_scanner(

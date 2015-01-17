@@ -13,6 +13,7 @@ import os
 import tempfile
 import shutil
 import stat
+import inspect
 
 
 class FileSystemTestCase(TestCase):
@@ -28,7 +29,11 @@ class FileSystemTestCase(TestCase):
         cls._links_supported = cls._check_links_supported()
         cls._unicode_supported = os.path.supports_unicode_filenames
         cls._restore_rights_stack = list()
+
         cls.setup_test_files()
+        for name, method in inspect.getmembers(cls, inspect.ismethod):
+            if name.startswith('setup_test_files_'):
+                method()
 
     @classmethod
     def setup_test_files(cls):
