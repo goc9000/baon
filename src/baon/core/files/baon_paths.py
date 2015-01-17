@@ -20,6 +20,10 @@ def all_path_components(path):
     return path.split(os.sep)
 
 
+def all_path_components_no_empty(path):
+    return all_path_components(path) if path != u'' else []
+
+
 def all_partial_paths(path):
     partial_paths = []
     partial_path = u''
@@ -31,6 +35,10 @@ def all_partial_paths(path):
     return partial_paths
 
 
+def join_path_components(components):
+    return os.sep.join(components)
+
+
 def extend_path(path, component):
     return path + os.sep + component if path != u'' else component
 
@@ -39,3 +47,9 @@ def split_path_and_filename(path):
     path, _, filename = path.rpartition(os.sep)
 
     return path, filename
+
+
+def split_path_head(path):
+    head, _, remaining_path = path.partition(os.sep)
+
+    return head, remaining_path
