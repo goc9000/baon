@@ -81,7 +81,7 @@ class FileSystemTestCase(TestCase):
         current_mode = adjust_bits(current_mode, stat.S_IWUSR, write)
         current_mode = adjust_bits(current_mode, stat.S_IXUSR, execute)
 
-        os.chmod(full_path, current_mode)
+        os.lchmod(full_path, current_mode)
 
     @classmethod
     def _check_links_supported(cls):
@@ -105,3 +105,44 @@ class FileSystemTestCase(TestCase):
         full_link_path = os.path.join(cls._test_dir_path, link_path)
         full_target_path = os.path.join(cls._test_dir_path, target_path)
         os.symlink(full_target_path, full_link_path)
+
+    @classmethod
+    def _realize_file_structure(cls, base_dir, files_repr):
+        deferred_set_rights = {}
+
+        for file_repr in files_repr:
+            kind, path1, path2, params = _parse_file_repr(file_repr)
+
+            if kind == 'FILE':
+                cls._make_file(os.path.join(base_dir, path1))
+            elif kind == 'DIR':
+                cls._make_dir(os.path.join(base_dir, path1))
+            elif kind == 'LINK':
+                cls._make_link(os.path.join(base_dir, path1), os.path.join(base_dir, path2))
+
+            rights = {k: v for k, v in params.iteritems() if k in {'read', 'write', 'execute'}}
+            if len(rights) > 0:
+                deferred_set_rights[path1] = rights
+
+        for path in reversed(sorted(deferred_set_rights.keys())):
+            cls._set_rights(os.path.join(base_dir, path), **deferred_set_rights[path])
+
+
+def _parse_file_repr(file_repr):
+    kind = file_repr[0]
+
+    if kind in {'FILE', 'DIR'}:
+        arity = 1
+    elif kind in {'LINK'}:
+        arity = 2
+    else:
+        raise RuntimeError(u'Malformed file representation: {0}'.format(file_repr))
+
+    path1 = file_repr[1]
+    path2 = file_repr[2] if arity > 1 else None
+
+    params = dict()
+    if len(file_repr) > 1 + arity:
+        params = file_repr[1 + arity]
+
+    return kind, path1, path2, params

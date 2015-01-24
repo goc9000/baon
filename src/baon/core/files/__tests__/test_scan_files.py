@@ -21,17 +21,21 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
     @classmethod
     def setup_test_files_basic(cls):
-        cls._make_file('basic/dir1/file11.txt')
-        cls._make_file('basic/dir1/file12')
-        cls._make_file('basic/dir2/dir21/file211')
-        cls._make_file('basic/dir2/dir21/file212')
-        cls._make_file('basic/dir2/dir22/file221.bin')
-        cls._make_file('basic/dir2/file21')
-        cls._make_dir('basic/dir3/dir31')
-        cls._make_file('basic/dir3/dir32/file321.txt')
-        cls._make_file('basic/file1')
-        cls._make_file('basic/file2.bin')
-        cls._make_file('basic/file3')
+        cls._realize_file_structure(
+            u'basic',
+            (
+                ('FILE', u'dir1/file11.txt'),
+                ('FILE', u'dir1/file12'),
+                ('FILE', u'dir2/dir21/file211'),
+                ('FILE', u'dir2/dir21/file212'),
+                ('FILE', u'dir2/dir22/file221.bin'),
+                ('FILE', u'dir2/file21'),
+                ('DIR', u'dir3/dir31'),
+                ('FILE', u'dir3/dir32/file321.txt'),
+                ('FILE', u'file1'),
+                ('FILE', u'file2.bin'),
+                ('FILE', u'file3'),
+            ))
 
     def test_basic_non_recursive(self):
         self._test_file_scanner(
@@ -67,9 +71,13 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
     @classmethod
     def setup_test_files_empties(cls):
-        cls._make_dir('empties/empty')
-        cls._make_dir('empties/dir1/empty1')
-        cls._make_file('empties/dir1/file1')
+        cls._realize_file_structure(
+            u'empties',
+            (
+                ('DIR', u'empty'),
+                ('DIR', u'dir1/empty1'),
+                ('FILE', u'dir1/file1'),
+            ))
 
     def test_empty_dirs_non_recursive(self):
         self._test_file_scanner(
@@ -93,9 +101,16 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
     @classmethod
     def setup_test_files_links(cls):
         if cls._links_supported:
-            cls._make_link('links/link1', 'basic/file2.bin')
-            cls._make_link('links/link2', 'basic/dir1')
-            cls._make_link('links/link3', 'dangling')
+            cls._realize_file_structure(
+                u'links',
+                (
+                    ('FILE', u'file2.bin'),
+                    ('DIR', u'dir1'),
+                    ('LINK', u'link1', u'file2.bin'),
+                    ('LINK', u'link2', u'dir1'),
+                    ('LINK', u'link3', u'dangling'),
+                    ('LINK', u'link4', u'link2'),
+                ))
 
     def test_links_non_recursive(self):
         if not self._links_supported:
@@ -105,7 +120,10 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             base_path=u'links',
             recursive=False,
             expected_result=(
+                ('DIR', u'dir1'),
                 ('LINK:DIR', u'link2'),
+                ('LINK:DIR', u'link4'),
+                ('FILE', u'file2.bin'),
                 ('LINK:FILE', u'link1'),
                 ('LINK:FILE', u'link3'),
             )
@@ -119,7 +137,9 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             base_path=u'links',
             recursive=True,
             expected_result=(
-                ('LINK:DIR', u'link2'),  # Symlinks are not followed even in recursive mode
+                ('LINK:DIR', u'link2'), # Symlinks are not followed even in recursive mode
+                ('LINK:DIR', u'link4'),
+                ('FILE', u'file2.bin'),
                 ('LINK:FILE', u'link1'),
                 ('LINK:FILE', u'link3'),
             )
@@ -128,8 +148,12 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
     @classmethod
     def setup_test_files_unicode(cls):
         if cls._unicode_supported:
-            cls._make_file(u'unicode/\u0111\u0131\u0157/\u0192\u00ef\u0142\u00e9\u2461.txt')
-            cls._make_file(u'unicode/\u0192\u00ef\u0142\u00e9\u2460.txt')
+            cls._realize_file_structure(
+                u'unicode',
+                (
+                    ('FILE', u'\u0111\u0131\u0157/\u0192\u00ef\u0142\u00e9\u2461.txt'),
+                    ('FILE', u'\u0192\u00ef\u0142\u00e9\u2460.txt'),
+                ))
 
     def test_unicode_non_recursive(self):
         if not self._unicode_supported:
@@ -159,19 +183,21 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
     @classmethod
     def setup_test_files_permissions(cls):
-        cls._make_file('permissions/normal_dir/file11.txt')
-        cls._make_file('permissions/normal_dir/file12.txt')
-        cls._make_file('permissions/no_read_dir/file21.txt')
-        cls._make_file('permissions/no_read_dir/file22.txt')
-        cls._set_rights('permissions/no_read_dir', read=False)
-        cls._make_file('permissions/no_exec_dir/file31.txt')
-        cls._make_file('permissions/no_exec_dir/file32.txt')
-        cls._set_rights('permissions/no_exec_dir', execute=False)
-        cls._make_file('permissions/normal.txt')
-        cls._make_file('permissions/no_read.txt')
-        cls._set_rights('permissions/no_read.txt', read=False)
-        cls._make_file('permissions/no_exec.txt')
-        cls._set_rights('permissions/no_exec.txt', execute=False)
+        cls._realize_file_structure(
+            u'permissions',
+            (
+                ('FILE', u'normal_dir/file11.txt'),
+                ('FILE', u'normal_dir/file12.txt'),
+                ('DIR', u'no_read_dir', {'read': False}),
+                ('FILE', u'no_read_dir/file21.txt'),
+                ('FILE', u'no_read_dir/file22.txt'),
+                ('DIR', u'no_exec_dir', {'execute': False}),
+                ('FILE', u'no_exec_dir/file31.txt'),
+                ('FILE', u'no_exec_dir/file32.txt'),
+                ('FILE', u'normal.txt'),
+                ('FILE', u'no_read.txt', {'read': False}),
+                ('FILE', u'no_exec.txt', {'execute': False}),
+            ))
 
     def test_permissions_non_recursive(self):
         self._test_file_scanner(

@@ -21,12 +21,16 @@ class TestMakeRenamePlan(FileSystemTestCase):
 
     @classmethod
     def setup_test_files_basic(cls):
-        cls._make_file('basic/dir1/file11.txt')
-        cls._make_file('basic/dir1/file12')
-        cls._make_file('basic/dir2/dir21/file211')
-        cls._make_file('basic/dir2/file21')
-        cls._make_file('basic/file1')
-        cls._make_file('basic/file2.bin')
+        cls._realize_file_structure(
+            u'basic',
+            (
+                ('FILE', u'dir1/file11.txt'),
+                ('FILE', u'dir1/file12'),
+                ('FILE', u'dir2/dir21/file211'),
+                ('FILE', u'dir2/file21'),
+                ('FILE', u'file1'),
+                ('FILE', u'file2.bin'),
+            ))
 
     def test_basic(self):
         self._test_make_rename_plan(
@@ -44,9 +48,13 @@ class TestMakeRenamePlan(FileSystemTestCase):
 
     @classmethod
     def setup_test_files_file_in_way(cls):
-        cls._make_file('file_in_way/file1')
-        cls._make_file('file_in_way/file2')
-        cls._make_file('file_in_way/entry')
+        cls._realize_file_structure(
+            u'file_in_way',
+            (
+                ('FILE', u'file1'),
+                ('FILE', u'file2'),
+                ('FILE', u'entry'),
+            ))
 
     def test_file_in_way_will_move(self):
         self._test_make_rename_plan(
@@ -79,15 +87,19 @@ class TestMakeRenamePlan(FileSystemTestCase):
 
     @classmethod
     def setup_test_files_chain(cls):
-        cls._make_file('chain/file1')
-        cls._make_file('chain/file2')
-        cls._make_file('chain/file3')
-        cls._make_file('chain/file4')
+        cls._realize_file_structure(
+            u'chain',
+            (
+                ('FILE', u'file1'),
+                ('FILE', u'file2'),
+                ('FILE', u'file3'),
+                ('FILE', u'file4'),
+            ))
 
     def test_chain(self):
         self._test_make_rename_plan(
             u'chain',
-            self._make_permutation_rules([2, 3, 4, 5]),
+            _make_permutation_rules([2, 3, 4, 5]),
             (
                 ('MoveFile', u'file4', u'file5'),
                 ('MoveFile', u'file3', u'file4'),
@@ -97,15 +109,19 @@ class TestMakeRenamePlan(FileSystemTestCase):
 
     @classmethod
     def setup_test_files_circular(cls):
-        cls._make_file('circular/file1')
-        cls._make_file('circular/file2')
-        cls._make_file('circular/file3')
-        cls._make_file('circular/file4')
+        cls._realize_file_structure(
+            u'circular',
+            (
+                ('FILE', u'file1'),
+                ('FILE', u'file2'),
+                ('FILE', u'file3'),
+                ('FILE', u'file4'),
+            ))
 
     def test_circular(self):
         self._test_make_rename_plan(
             u'circular',
-            self._make_permutation_rules([2, 3, 4, 1]),
+            _make_permutation_rules([2, 3, 4, 1]),
             (
                 ('MoveFile', u'file3', u'file3_1'),
                 ('MoveFile', u'file2', u'file3'),
@@ -116,19 +132,23 @@ class TestMakeRenamePlan(FileSystemTestCase):
 
     @classmethod
     def setup_test_files_complex_permutation(cls):
-        cls._make_file('complex_perm/file1')
-        cls._make_file('complex_perm/file2')
-        cls._make_file('complex_perm/file3')
-        cls._make_file('complex_perm/file4')
-        cls._make_file('complex_perm/file5')
-        cls._make_file('complex_perm/file6')
-        cls._make_file('complex_perm/file7')
-        cls._make_file('complex_perm/file8')
+        cls._realize_file_structure(
+            u'complex_perm',
+            (
+                ('FILE', u'file1'),
+                ('FILE', u'file2'),
+                ('FILE', u'file3'),
+                ('FILE', u'file4'),
+                ('FILE', u'file5'),
+                ('FILE', u'file6'),
+                ('FILE', u'file7'),
+                ('FILE', u'file8'),
+            ))
 
     def test_complex_permutation(self):
         self._test_make_rename_plan(
             u'complex_perm',
-            self._make_permutation_rules([2, 10, 4, 5, 3, 7, 8, 9]),
+            _make_permutation_rules([2, 10, 4, 5, 3, 7, 8, 9]),
             (
                 ('MoveFile', u'file8', u'file9'),
                 ('MoveFile', u'file7', u'file8'),
@@ -158,6 +178,6 @@ class TestMakeRenamePlan(FileSystemTestCase):
             expected_result,
         )
 
-    @staticmethod
-    def _make_permutation_rules(permutation):
-        return u'"file" ({0})'.format(u'|'.join(u'"{0}"->"{1}"'.format(i+1, p_i) for i, p_i in enumerate(permutation)))
+
+def _make_permutation_rules(permutation):
+    return u'"file" ({0})'.format(u'|'.join(u'"{0}"->"{1}"'.format(i+1, p_i) for i, p_i in enumerate(permutation)))
