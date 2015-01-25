@@ -11,7 +11,6 @@ from unittest import TestCase
 
 import os
 import tempfile
-import shutil
 import stat
 import inspect
 
@@ -20,8 +19,6 @@ class FileSystemTestCase(TestCase):
     _test_dir_path = None
     _links_supported = None
     _unicode_supported = None
-
-    _restore_rights_stack = None
 
     @classmethod
     def setUpClass(cls):
@@ -41,10 +38,7 @@ class FileSystemTestCase(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        for path, mode in reversed(cls._restore_rights_stack):
-            os.chmod(path, mode)
-
-        shutil.rmtree(cls._test_dir_path)
+        cls._cleanup_files(delete_root=True)
 
     @classmethod
     def _make_file(cls, file_path):
@@ -75,7 +69,6 @@ class FileSystemTestCase(TestCase):
         full_path = os.path.join(cls._test_dir_path, path)
 
         current_mode = os.lstat(full_path).st_mode
-        cls._restore_rights_stack.append((full_path, current_mode))
 
         current_mode = adjust_bits(current_mode, stat.S_IRUSR, read)
         current_mode = adjust_bits(current_mode, stat.S_IWUSR, write)
@@ -126,6 +119,22 @@ class FileSystemTestCase(TestCase):
 
         for path in reversed(sorted(deferred_set_rights.keys())):
             cls._set_rights(os.path.join(base_dir, path), **deferred_set_rights[path])
+
+    @classmethod
+    def _cleanup_files(cls, path=u'', delete_root=False):
+        cls._set_rights(path, read=True, write=True, execute=True)
+
+        full_path = os.path.join(cls._test_dir_path, path)
+
+        if os.path.isdir(full_path):
+            for item in os.listdir(full_path):
+                cls._cleanup_files(os.path.join(path, item), True)
+
+        if delete_root:
+            if os.path.isdir(full_path):
+                os.rmdir(full_path)
+            else:
+                os.unlink(full_path)
 
 
 def _parse_file_repr(file_repr):
