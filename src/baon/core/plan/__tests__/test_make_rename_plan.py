@@ -19,10 +19,8 @@ from baon.core.plan.make_rename_plan_exceptions import MakeRenamePlanException
 
 class TestMakeRenamePlan(FileSystemTestCase):
 
-    @classmethod
-    def setup_test_files_basic(cls):
-        cls._realize_file_structure(
-            u'basic',
+    def test_basic(self):
+        self._test_make_rename_plan(
             (
                 ('FILE', u'dir1/file11.txt'),
                 ('FILE', u'dir1/file12'),
@@ -30,11 +28,7 @@ class TestMakeRenamePlan(FileSystemTestCase):
                 ('FILE', u'dir2/file21'),
                 ('FILE', u'file1'),
                 ('FILE', u'file2.bin'),
-            ))
-
-    def test_basic(self):
-        self._test_make_rename_plan(
-            u'basic',
+            ),
             u'"file" "1"->"4"; "file42"->"dir3/file42"',
             (
                 ('CreateDirectory', u'dir1/dir3'),
@@ -46,19 +40,13 @@ class TestMakeRenamePlan(FileSystemTestCase):
                 ('DeleteDirectoryIfEmpty', u'dir1'),
             ))
 
-    @classmethod
-    def setup_test_files_file_in_way(cls):
-        cls._realize_file_structure(
-            u'file_in_way',
+    def test_file_in_way_will_move(self):
+        self._test_make_rename_plan(
             (
                 ('FILE', u'file1'),
                 ('FILE', u'file2'),
                 ('FILE', u'entry'),
-            ))
-
-    def test_file_in_way_will_move(self):
-        self._test_make_rename_plan(
-            u'file_in_way',
+            ),
             u'"entry"->"moved"; "file2"->"entry/file"',
             (
                 ('MoveFile', u'entry', u'entry_1'),
@@ -69,13 +57,21 @@ class TestMakeRenamePlan(FileSystemTestCase):
 
     def test_file_in_way_will_not_move(self):
         self._test_make_rename_plan(
-            u'file_in_way',
+            (
+                ('FILE', u'file1'),
+                ('FILE', u'file2'),
+                ('FILE', u'entry'),
+            ),
             u'"file2"->"entry/file"',
             ('CannotCreateDestinationDirFileInTheWayWillNotMoveException', {'destination_dir': u'entry'}))
 
     def test_file_in_way_will_move_find_free_name(self):
         self._test_make_rename_plan(
-            u'file_in_way',
+            (
+                ('FILE', u'file1'),
+                ('FILE', u'file2'),
+                ('FILE', u'entry'),
+            ),
             u'"file1"->"entry_1"; "entry"->"moved" $; "file2"->"entry/file"',
             (
                 ('MoveFile', u'entry', u'entry_2'),
@@ -85,20 +81,14 @@ class TestMakeRenamePlan(FileSystemTestCase):
                 ('MoveFile', u'file2', u'entry/file'),
             ))
 
-    @classmethod
-    def setup_test_files_chain(cls):
-        cls._realize_file_structure(
-            u'chain',
+    def test_chain(self):
+        self._test_make_rename_plan(
             (
                 ('FILE', u'file1'),
                 ('FILE', u'file2'),
                 ('FILE', u'file3'),
                 ('FILE', u'file4'),
-            ))
-
-    def test_chain(self):
-        self._test_make_rename_plan(
-            u'chain',
+            ),
             _make_permutation_rules([2, 3, 4, 5]),
             (
                 ('MoveFile', u'file4', u'file5'),
@@ -107,20 +97,14 @@ class TestMakeRenamePlan(FileSystemTestCase):
                 ('MoveFile', u'file1', u'file2'),
             ))
 
-    @classmethod
-    def setup_test_files_circular(cls):
-        cls._realize_file_structure(
-            u'circular',
+    def test_circular(self):
+        self._test_make_rename_plan(
             (
                 ('FILE', u'file1'),
                 ('FILE', u'file2'),
                 ('FILE', u'file3'),
                 ('FILE', u'file4'),
-            ))
-
-    def test_circular(self):
-        self._test_make_rename_plan(
-            u'circular',
+            ),
             _make_permutation_rules([2, 3, 4, 1]),
             (
                 ('MoveFile', u'file3', u'file3_1'),
@@ -130,10 +114,8 @@ class TestMakeRenamePlan(FileSystemTestCase):
                 ('MoveFile', u'file3_1', u'file4')
             ))
 
-    @classmethod
-    def setup_test_files_complex_permutation(cls):
-        cls._realize_file_structure(
-            u'complex_perm',
+    def test_complex_permutation(self):
+        self._test_make_rename_plan(
             (
                 ('FILE', u'file1'),
                 ('FILE', u'file2'),
@@ -143,11 +125,7 @@ class TestMakeRenamePlan(FileSystemTestCase):
                 ('FILE', u'file6'),
                 ('FILE', u'file7'),
                 ('FILE', u'file8'),
-            ))
-
-    def test_complex_permutation(self):
-        self._test_make_rename_plan(
-            u'complex_perm',
+            ),
             _make_permutation_rules([2, 10, 4, 5, 3, 7, 8, 9]),
             (
                 ('MoveFile', u'file8', u'file9'),
@@ -161,22 +139,22 @@ class TestMakeRenamePlan(FileSystemTestCase):
                 ('MoveFile', u'file3_1', u'file4')
             ))
 
-    def _test_make_rename_plan(self, base_dir, rules_text, expected_result):
-        base_path = os.path.join(self._test_dir_path, base_dir)
-        files = scan_files(base_path, recursive=True)
-        rule_set = parse_rules(rules_text)
-        renamed_files = rename_files(files, rule_set, use_path=False, use_extension=False)
+    def _test_make_rename_plan(self, files_repr, rules_text, expected_result):
+        with self._temp_file_structure(u'', files_repr):
+            files = scan_files(self._test_dir_path, recursive=True)
+            rule_set = parse_rules(rules_text)
+            renamed_files = rename_files(files, rule_set, use_path=False, use_extension=False)
 
-        try:
-            plan = make_rename_plan(base_path, renamed_files)
-            result = plan.test_repr()
-        except MakeRenamePlanException as e:
-            result = e.test_repr()
+            try:
+                plan = make_rename_plan(self._test_dir_path, renamed_files)
+                result = plan.test_repr()
+            except MakeRenamePlanException as e:
+                result = e.test_repr()
 
-        self.assertEquals(
-            result,
-            expected_result,
-        )
+            self.assertEquals(
+                result,
+                expected_result,
+            )
 
 
 def _make_permutation_rules(permutation):

@@ -12,33 +12,40 @@ from unittest import TestCase
 import os
 import tempfile
 import stat
-import inspect
+from contextlib import contextmanager
+from decorator import decorator
 
 
 class FileSystemTestCase(TestCase):
     _test_dir_path = None
-    _links_supported = None
-    _unicode_supported = None
+
+    links_supported = None
+    unicode_supported = None
 
     @classmethod
     def setUpClass(cls):
         cls._test_dir_path = tempfile.mkdtemp()
-        cls._links_supported = cls._check_links_supported()
-        cls._unicode_supported = os.path.supports_unicode_filenames
-        cls._restore_rights_stack = list()
 
-        cls.setup_test_files()
-        for name, method in inspect.getmembers(cls, inspect.ismethod):
-            if name.startswith('setup_test_files_'):
-                method()
-
-    @classmethod
-    def setup_test_files(cls):
-        pass
+        cls.links_supported = cls._check_links_supported()
+        cls.unicode_supported = os.path.supports_unicode_filenames
 
     @classmethod
     def tearDownClass(cls):
         cls._cleanup_files(delete_root=True)
+
+    @classmethod
+    def _check_links_supported(cls):
+        full_link_path = os.path.join(cls._test_dir_path, 'temp_link')
+        full_target_path = os.path.join(cls._test_dir_path, '')
+
+        try:
+            os.symlink(full_target_path, full_link_path)
+        except OSError:
+            return False
+
+        os.unlink(full_link_path)
+
+        return True
 
     @classmethod
     def _make_file(cls, file_path):
@@ -75,20 +82,6 @@ class FileSystemTestCase(TestCase):
         current_mode = adjust_bits(current_mode, stat.S_IXUSR, execute)
 
         os.lchmod(full_path, current_mode)
-
-    @classmethod
-    def _check_links_supported(cls):
-        full_link_path = os.path.join(cls._test_dir_path, 'temp_link')
-        full_target_path = os.path.join(cls._test_dir_path, '')
-
-        try:
-            os.symlink(full_target_path, full_link_path)
-        except OSError:
-            return False
-
-        os.unlink(full_link_path)
-
-        return True
 
     @classmethod
     def _make_link(cls, link_path, target_path):
@@ -135,6 +128,45 @@ class FileSystemTestCase(TestCase):
                 os.rmdir(full_path)
             else:
                 os.unlink(full_path)
+
+    @classmethod
+    @contextmanager
+    def _temp_file_structure(cls, base_path, files_repr):
+        cls._realize_file_structure(base_path, files_repr)
+
+        exc = None
+        try:
+            yield
+        except Exception as e:
+            exc = e
+
+        try:
+            cls._cleanup_files(base_path, base_path != u'')
+        except OSError:
+            pass
+
+        if exc is not None:
+            raise exc
+
+@decorator
+def requires_links_support(test_method, cls_or_self=None):
+    assert cls_or_self is not None, u'This decorator can only be used on a class or instance method'
+
+    if not cls_or_self.links_supported:
+        cls_or_self.skipTest(u'Skipping {0}: Links are not supported on this platform'.format(test_method.__name__))
+    else:
+        test_method(cls_or_self)
+
+
+@decorator
+def requires_unicode_support(test_method, cls_or_self=None):
+    assert cls_or_self is not None, u'This decorator can only be used on a class or instance method'
+
+    if not cls_or_self.links_supported:
+        cls_or_self.skipTest(
+            u'Skipping {0}: Unicode filenames are not supported on this platform'.format(test_method.__name__))
+    else:
+        test_method(cls_or_self)
 
 
 def _parse_file_repr(file_repr):

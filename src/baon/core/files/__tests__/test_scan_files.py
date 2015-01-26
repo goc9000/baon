@@ -9,7 +9,7 @@
 
 import os
 
-from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
+from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_links_support, requires_unicode_support
 from baon.core.__tests__.ReportsProgressTestCase import ReportsProgressTestCase
 
 from baon.core.files.scan_files import scan_files
@@ -19,27 +19,23 @@ from baon.core.files.scan_files_exceptions import BasePathDoesNotExistException,
 
 class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
-    @classmethod
-    def setup_test_files_basic(cls):
-        cls._realize_file_structure(
-            u'basic',
-            (
-                ('FILE', u'dir1/file11.txt'),
-                ('FILE', u'dir1/file12'),
-                ('FILE', u'dir2/dir21/file211'),
-                ('FILE', u'dir2/dir21/file212'),
-                ('FILE', u'dir2/dir22/file221.bin'),
-                ('FILE', u'dir2/file21'),
-                ('DIR', u'dir3/dir31'),
-                ('FILE', u'dir3/dir32/file321.txt'),
-                ('FILE', u'file1'),
-                ('FILE', u'file2.bin'),
-                ('FILE', u'file3'),
-            ))
+    BASIC_FILE_STRUCTURE = (
+        ('FILE', u'dir1/file11.txt'),
+        ('FILE', u'dir1/file12'),
+        ('FILE', u'dir2/dir21/file211'),
+        ('FILE', u'dir2/dir21/file212'),
+        ('FILE', u'dir2/dir22/file221.bin'),
+        ('FILE', u'dir2/file21'),
+        ('DIR', u'dir3/dir31'),
+        ('FILE', u'dir3/dir32/file321.txt'),
+        ('FILE', u'file1'),
+        ('FILE', u'file2.bin'),
+        ('FILE', u'file3'),
+    )
 
     def test_basic_non_recursive(self):
         self._test_file_scanner(
-            base_path=u'basic',
+            setup_files=self.BASIC_FILE_STRUCTURE,
             recursive=False,
             expected_result=(
                 ('DIR', u'dir1'),
@@ -53,7 +49,7 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
     def test_basic_recursive(self):
         self._test_file_scanner(
-            base_path=u'basic',
+            setup_files=self.BASIC_FILE_STRUCTURE,
             recursive=True,
             expected_result=(
                 ('FILE', u'dir1/file11.txt'),
@@ -69,19 +65,15 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             )
         )
 
-    @classmethod
-    def setup_test_files_empties(cls):
-        cls._realize_file_structure(
-            u'empties',
-            (
-                ('DIR', u'empty'),
-                ('DIR', u'dir1/empty1'),
-                ('FILE', u'dir1/file1'),
-            ))
+    EMPTIES_FILE_STRUCTURE = (
+        ('DIR', u'empty'),
+        ('DIR', u'dir1/empty1'),
+        ('FILE', u'dir1/file1'),
+    )
 
     def test_empty_dirs_non_recursive(self):
         self._test_file_scanner(
-            base_path=u'empties',
+            setup_files=self.EMPTIES_FILE_STRUCTURE,
             recursive=False,
             expected_result=(
                 ('DIR', u'dir1'),
@@ -91,33 +83,26 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
     def test_empty_dirs_recursive(self):
         self._test_file_scanner(
-            base_path=u'empties',
+            setup_files=self.EMPTIES_FILE_STRUCTURE,
             recursive=True,
             expected_result=(
                 ('FILE', u'dir1/file1'),
             )
         )
 
-    @classmethod
-    def setup_test_files_links(cls):
-        if cls._links_supported:
-            cls._realize_file_structure(
-                u'links',
-                (
-                    ('FILE', u'file2.bin'),
-                    ('DIR', u'dir1'),
-                    ('LINK', u'link1', u'file2.bin'),
-                    ('LINK', u'link2', u'dir1'),
-                    ('LINK', u'link3', u'dangling'),
-                    ('LINK', u'link4', u'link2'),
-                ))
+    LINKS_FILE_STRUCTURE = (
+        ('FILE', u'file2.bin'),
+        ('DIR', u'dir1'),
+        ('LINK', u'link1', u'file2.bin'),
+        ('LINK', u'link2', u'dir1'),
+        ('LINK', u'link3', u'dangling'),
+        ('LINK', u'link4', u'link2'),
+    )
 
+    @requires_links_support
     def test_links_non_recursive(self):
-        if not self._links_supported:
-            self.skipTest('Skipping test_links_non_recursive: Symlinks are not supported on this platform')
-
         self._test_file_scanner(
-            base_path=u'links',
+            setup_files=self.LINKS_FILE_STRUCTURE,
             recursive=False,
             expected_result=(
                 ('DIR', u'dir1'),
@@ -129,15 +114,13 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             )
         )
 
+    @requires_links_support
     def test_links_recursive(self):
-        if not self._links_supported:
-            self.skipTest('Skipping test_links_recursive: Symlinks are not supported on this platform')
-
         self._test_file_scanner(
-            base_path=u'links',
+            setup_files=self.LINKS_FILE_STRUCTURE,
             recursive=True,
             expected_result=(
-                ('LINK:DIR', u'link2'), # Symlinks are not followed even in recursive mode
+                ('LINK:DIR', u'link2'),  # Symlinks are not followed even in recursive mode
                 ('LINK:DIR', u'link4'),
                 ('FILE', u'file2.bin'),
                 ('LINK:FILE', u'link1'),
@@ -145,22 +128,15 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             )
         )
 
-    @classmethod
-    def setup_test_files_unicode(cls):
-        if cls._unicode_supported:
-            cls._realize_file_structure(
-                u'unicode',
-                (
-                    ('FILE', u'\u0111\u0131\u0157/\u0192\u00ef\u0142\u00e9\u2461.txt'),
-                    ('FILE', u'\u0192\u00ef\u0142\u00e9\u2460.txt'),
-                ))
+    UNICODE_FILE_STRUCTURE = (
+        ('FILE', u'\u0111\u0131\u0157/\u0192\u00ef\u0142\u00e9\u2461.txt'),
+        ('FILE', u'\u0192\u00ef\u0142\u00e9\u2460.txt'),
+    )
 
+    @requires_unicode_support
     def test_unicode_non_recursive(self):
-        if not self._unicode_supported:
-            self.skipTest('Skipping test_unicode_non_recursive: Unicode filenames are not supported on this platform')
-
         self._test_file_scanner(
-            base_path=u'unicode',
+            setup_files=self.UNICODE_FILE_STRUCTURE,
             recursive=False,
             expected_result=(
                 ('DIR', u'\u0111\u0131r\u0327'),
@@ -168,12 +144,10 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             )
         )
 
+    @requires_unicode_support
     def test_unicode_recursive(self):
-        if not self._unicode_supported:
-            self.skipTest('Skipping test_unicode_recursive: Unicode filenames are not supported on this platform')
-
         self._test_file_scanner(
-            base_path=u'unicode',
+            setup_files=self.UNICODE_FILE_STRUCTURE,
             recursive=True,
             expected_result=(
                 ('FILE', u'\u0111\u0131r\u0327/\u0192i\u0308\u0142e\u0301\u2461.txt'),
@@ -181,27 +155,23 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             )
         )
 
-    @classmethod
-    def setup_test_files_permissions(cls):
-        cls._realize_file_structure(
-            u'permissions',
-            (
-                ('FILE', u'normal_dir/file11.txt'),
-                ('FILE', u'normal_dir/file12.txt'),
-                ('DIR', u'no_read_dir', {'read': False}),
-                ('FILE', u'no_read_dir/file21.txt'),
-                ('FILE', u'no_read_dir/file22.txt'),
-                ('DIR', u'no_exec_dir', {'execute': False}),
-                ('FILE', u'no_exec_dir/file31.txt'),
-                ('FILE', u'no_exec_dir/file32.txt'),
-                ('FILE', u'normal.txt'),
-                ('FILE', u'no_read.txt', {'read': False}),
-                ('FILE', u'no_exec.txt', {'execute': False}),
-            ))
+    PERMISSIONS_FILE_STRUCTURE = (
+        ('FILE', u'normal_dir/file11.txt'),
+        ('FILE', u'normal_dir/file12.txt'),
+        ('DIR', u'no_read_dir', {'read': False}),
+        ('FILE', u'no_read_dir/file21.txt'),
+        ('FILE', u'no_read_dir/file22.txt'),
+        ('DIR', u'no_exec_dir', {'execute': False}),
+        ('FILE', u'no_exec_dir/file31.txt'),
+        ('FILE', u'no_exec_dir/file32.txt'),
+        ('FILE', u'normal.txt'),
+        ('FILE', u'no_read.txt', {'read': False}),
+        ('FILE', u'no_exec.txt', {'execute': False}),
+    )
 
     def test_permissions_non_recursive(self):
         self._test_file_scanner(
-            base_path=u'permissions',
+            setup_files=self.PERMISSIONS_FILE_STRUCTURE,
             recursive=False,
             expected_result=(
                 ('DIR', u'no_exec_dir'),
@@ -215,7 +185,7 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
     def test_permissions_recursive(self):
         self._test_file_scanner(
-            base_path=u'permissions',
+            setup_files=self.PERMISSIONS_FILE_STRUCTURE,
             recursive=True,
             expected_result=(
                 ('FILE', u'no_exec_dir/file31.txt'),
@@ -231,30 +201,39 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
     def test_scan_non_existent(self):
         with self.assertRaises(BasePathDoesNotExistException):
-            scan_files(os.path.join(self._test_dir_path, 'non_existent'))
+            scan_files(os.path.join(self._test_dir_path, u'non_existent'))
 
-    def test_scan_not_a_file(self):
+    def test_scan_base_path_not_a_dir(self):
         with self.assertRaises(BasePathIsNotADirectoryException):
-            scan_files(os.path.join(self._test_dir_path, 'basic/file1'))
+            with self._temp_file_structure(u'', (
+                ('FILE', u'file1'),
+            )):
+                scan_files(os.path.join(self._test_dir_path, u'file1'))
 
     def test_scan_cannot_explore(self):
         with self.assertRaises(CannotExploreBasePathException):
-            scan_files(os.path.join(self._test_dir_path, 'permissions/no_read_dir'))
+            with self._temp_file_structure(u'', (
+                ('DIR', u'no_read_dir', {'read': False}),
+            )):
+                scan_files(os.path.join(self._test_dir_path, u'no_read_dir'))
 
     def test_reports_progress(self):
         progress_events = []
-        scan_files(
-            os.path.join(self._test_dir_path, 'basic'),
-            recursive=True,
-            on_progress=self._progress_collector(progress_events)
-        )
+
+        with self._temp_file_structure(u'', self.BASIC_FILE_STRUCTURE):
+            scan_files(
+                base_path=self._test_dir_path,
+                recursive=True,
+                on_progress=self._progress_collector(progress_events)
+            )
 
         self._verify_reported_progress(progress_events)
 
-    def _test_file_scanner(self, base_path=u'', expected_result=None, **options):
-        files = scan_files(os.path.join(self._test_dir_path, base_path), **options)
+    def _test_file_scanner(self, setup_files=None, expected_result=None, **options):
+        with self._temp_file_structure(u'', setup_files):
+            files = scan_files(self._test_dir_path, **options)
 
         self.assertEqual(
             tuple(f.test_repr() for f in files),
-            expected_result
+            expected_result,
         )
