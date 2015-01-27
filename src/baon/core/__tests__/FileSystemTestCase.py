@@ -53,7 +53,7 @@ class FileSystemTestCase(TestCase):
         cls._make_dir(dir_name)
 
         full_file_path = os.path.join(cls._test_dir_path, file_path)
-        with file(full_file_path, 'w') as _:
+        with open(full_file_path, 'w') as _:
             pass
 
     @classmethod
@@ -106,7 +106,7 @@ class FileSystemTestCase(TestCase):
             elif kind == 'LINK':
                 cls._make_link(os.path.join(base_dir, path1), os.path.join(base_dir, path2))
 
-            rights = {k: v for k, v in params.iteritems() if k in {'read', 'write', 'execute'}}
+            rights = {k: v for k, v in params.items() if k in {'read', 'write', 'execute'}}
             if len(rights) > 0:
                 deferred_set_rights[path1] = rights
 
@@ -147,6 +147,7 @@ class FileSystemTestCase(TestCase):
 
         if exc is not None:
             raise exc
+
 
 @decorator
 def requires_links_support(test_method, cls_or_self=None):

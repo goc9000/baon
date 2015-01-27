@@ -24,9 +24,9 @@ from baon.core.renaming.rename_files_exceptions import UnprintableCharacterInFil
     ExtensionContainsSpacesWarning
 
 
-NON_PRINTABLE_REGEX = re.compile(ur'[\u0000-\u001f]')
+NON_PRINTABLE_REGEX = re.compile(r'[\u0000-\u001f]')
 PROBLEM_CHARS_REGEX = re.compile(r'["*:<>?\\/]')
-ONLY_DOTS_REGEX = re.compile(ur'^[.]+$')
+ONLY_DOTS_REGEX = re.compile(r'^[.]+$')
 
 
 def _dummy_on_progress(done, total):
@@ -69,8 +69,8 @@ def _rename_file(file_ref, rule_set, use_path=False, use_extension=False, overri
 
 def _get_renamed_filename(full_filename, rule_set, use_path, use_extension):
     input_text = full_filename
-    path = u''
-    extension = u''
+    path = ''
+    extension = ''
 
     if not use_path:
         path, input_text = split_path_and_filename(input_text)
@@ -115,11 +115,11 @@ def _check_for_intrinsic_errors(renamed_fref):
     path_components = all_path_components(full_filename)
     path_components, filename = path_components[:-1], path_components[-1]
 
-    if filename == u'':
+    if filename == '':
         problems.append(EmptyFilenameException())
     if ONLY_DOTS_REGEX.match(filename):
         problems.append(OnlyDotsFilenameException())
-    if any(component == u'' for component in path_components):
+    if any(component == '' for component in path_components):
         problems.append(EmptyPathComponentException())
     if any(ONLY_DOTS_REGEX.match(component) for component in path_components):
         problems.append(OnlyDotsPathComponentException())
@@ -131,29 +131,29 @@ def _check_for_intrinsic_warnings(renamed_fref):
 
     path_components = all_path_components(full_filename)
 
-    m = PROBLEM_CHARS_REGEX.search(u''.join(path_components))
+    m = PROBLEM_CHARS_REGEX.search(''.join(path_components))
     if m is not None:
         problems.append(ProblematicCharacterInFilenameWarning(character=m.group(0)))
 
     path_components, filename = path_components[:-1], path_components[-1]
 
     for component in path_components:
-        if component.startswith(u' '):
+        if component.startswith(' '):
             problems.append(PathComponentStartsWithSpaceWarning(component=component))
-        if component.endswith(u' '):
+        if component.endswith(' '):
             problems.append(PathComponentEndsWithSpaceWarning(component=component))
-        if u'  ' in component:
+        if '  ' in component:
             problems.append(PathComponentContainsDoubleSpacesWarning(component=component))
 
     basename, extension = os.path.splitext(filename)
 
-    if basename.startswith(u' '):
+    if basename.startswith(' '):
         problems.append(FilenameStartsWithSpaceWarning())
-    if basename.endswith(u' '):
+    if basename.endswith(' '):
         problems.append(BasenameEndsWithSpaceWarning())
-    if u'  ' in basename:
+    if '  ' in basename:
         problems.append(FilenameContainsDoubleSpacesWarning())
-    if u' ' in extension:
+    if ' ' in extension:
         problems.append(ExtensionContainsSpacesWarning())
 
 

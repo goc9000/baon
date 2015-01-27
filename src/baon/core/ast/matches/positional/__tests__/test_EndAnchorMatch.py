@@ -15,19 +15,19 @@ class TestEndAnchorMatch(MatchTestCase):
 
     def test_matches_at_end(self):
         self._test_unique_match(
-            text=u'abc def',
+            text='abc def',
             match=EndAnchorMatch(),
             position=7,
-            expected_solution={'matched_text': u''})
+            expected_solution={'matched_text': ''})
 
     def test_no_match_if_not_at_end(self):
         self._test_no_match(
-            text=u'abc def',
+            text='abc def',
             position=2,
             match=EndAnchorMatch())
 
     def test_empty(self):
         self._test_unique_match(
-            text=u'',
+            text='',
             match=EndAnchorMatch(),
-            expected_solution={'matched_text': u''})
+            expected_solution={'matched_text': ''})

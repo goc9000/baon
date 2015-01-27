@@ -32,7 +32,7 @@ class RegexMatch(ElementaryPatternMatch):
         except re.error:
             raise ErrorInRegularExpressionException()
 
-        return u'({0})'.format(self.pattern)
+        return '({0})'.format(self.pattern)
 
     def _get_flags_impl(self):
         flags_enum = re.U

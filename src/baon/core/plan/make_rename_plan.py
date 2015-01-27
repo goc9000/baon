@@ -118,7 +118,7 @@ def _nudge_file(path, base_path, taken_names_by_dir):
 
 def _coin_temporary_name(current_name, taken_names):
     for discriminant in count(1):
-        new_name = u"{0}_{1}".format(current_name, discriminant)
+        new_name = "{0}_{1}".format(current_name, discriminant)
 
         if not new_name in taken_names:
             return new_name
@@ -186,7 +186,8 @@ def _resolve_rename_chains(direct_arcs, reverse_arcs, base_path, created_dirs):
 
     actions = []
 
-    for end_node in end_nodes:
+    # We use sorted() to make the algorithm deterministic
+    for end_node in sorted(end_nodes):
         node = end_node
         while node in reverse_arcs:
             actions.append(_move_file(reverse_arcs[node], node, base_path, created_dirs))
@@ -199,8 +200,12 @@ def _resolve_rename_chains(direct_arcs, reverse_arcs, base_path, created_dirs):
 def _resolve_cycles(cycle_nodes, reverse_arcs, base_path, taken_names_by_dir, created_dirs):
     actions = []
 
-    while len(cycle_nodes) > 0:
-        start_node = cycle_nodes.pop()
+    resolved_nodes = set()
+
+    # We use sorted() to make the algorithm deterministic
+    for start_node in sorted(cycle_nodes):
+        if start_node in resolved_nodes:
+            continue
 
         temp_node = _nudge_file(start_node, base_path, taken_names_by_dir)
         actions.append(_move_file(start_node, temp_node, base_path, created_dirs))
@@ -208,7 +213,7 @@ def _resolve_cycles(cycle_nodes, reverse_arcs, base_path, taken_names_by_dir, cr
         node = start_node
         while reverse_arcs[node] != start_node:
             parent_node = reverse_arcs[node]
-            cycle_nodes.discard(parent_node)
+            resolved_nodes.add(parent_node)
 
             actions.append(_move_file(parent_node, node, base_path, created_dirs))
 

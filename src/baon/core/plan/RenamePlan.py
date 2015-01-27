@@ -32,7 +32,7 @@ class RenamePlan(object):
 
     def save_to_file(self, filename):
         try:
-            with file(filename, 'w') as f:
+            with open(filename, 'w') as f:
                 json.dump(self.json_representation(), f, indent=4)
         except Exception as e:
             try:
@@ -44,7 +44,7 @@ class RenamePlan(object):
 
     def get_backup_filename(self):
         while True:
-            suffix = ''.join((random.choice(string.ascii_letters+string.digits) for _ in xrange(16)))
+            suffix = ''.join((random.choice(string.ascii_letters+string.digits) for _ in range(16)))
             name = os.path.join(os.path.expanduser('~'), "temp_BAON_rename_plan-{0}".format(suffix))
             if not os.path.exists(name):
                 return name
@@ -52,13 +52,13 @@ class RenamePlan(object):
     def execute(self, on_progress=None):
         n_steps = len(self.steps)
         
-        for i in xrange(n_steps):
+        for i in range(n_steps):
             try:
                 if on_progress is not None:
                     on_progress(i, n_steps)
                 self.steps[i].execute()
             except Exception as e:
-                for j in xrange(i-1, -1, -1):
+                for j in range(i-1, -1, -1):
                     self.steps[j].undo()
                     if on_progress is not None:
                         on_progress(j, n_steps)
@@ -78,7 +78,7 @@ class RenamePlan(object):
     @staticmethod
     def from_json_representation(json_repr):
         if not is_arrayish(json_repr):
-            raise RuntimeError(u"JSON representation of plan should be a vector")
+            raise RuntimeError("JSON representation of plan should be a vector")
 
         return RenamePlan([RenamePlanAction.from_json_representation(action_repr) for action_repr in json_repr])
 

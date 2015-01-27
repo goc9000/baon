@@ -16,6 +16,6 @@ class TestWhitespaceFunctions(TestCase):
     def test_trim(self):
         f_u_t = baon.lib.simple_text_functions.whitespace.trim
 
-        self.assertEqual(f_u_t(u' abc  '), u'abc')
-        self.assertEqual(f_u_t(u'  some text   '), u'some text')
-        self.assertEqual(f_u_t(u'inner   space   '), u'inner   space')
+        self.assertEqual(f_u_t(' abc  '), 'abc')
+        self.assertEqual(f_u_t('  some text   '), 'some text')
+        self.assertEqual(f_u_t('inner   space   '), 'inner   space')

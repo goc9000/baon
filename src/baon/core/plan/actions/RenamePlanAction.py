@@ -16,9 +16,7 @@ from inspect import isabstract
 from baon.core.utils.lang_utils import is_arrayish
 
 
-class RenamePlanAction(object):
-    __metaclass__ = ABCMeta
-
+class RenamePlanAction(object, metaclass=ABCMeta):
     def __init__(self):
         pass
 
@@ -39,7 +37,7 @@ class RenamePlanAction(object):
 
     @classmethod
     def action_name_for_json_representation(cls):
-        match = re.match(u'^(.*)Action$', cls.__name__)
+        match = re.match('^(.*)Action$', cls.__name__)
         assert match is not None
 
         return match.group(1)
@@ -47,9 +45,9 @@ class RenamePlanAction(object):
     @classmethod
     def from_json_representation(cls, json_repr):
         if not is_arrayish(json_repr):
-            raise RuntimeError(u'JSON representation of action should be a vector')
+            raise RuntimeError('JSON representation of action should be a vector')
         if len(json_repr) == 0:
-            raise RuntimeError(u'JSON representation of action should start with the action type')
+            raise RuntimeError('JSON representation of action should start with the action type')
 
         action_type = json_repr[0]
         action_class = get_action_class(action_type)
@@ -78,6 +76,6 @@ def get_action_class(action_type):
 
     cls = action_class_lookup.get(action_type)
     if cls is None:
-        raise RuntimeError(u"Unrecognized action: '{0}'".format(action_type))
+        raise RuntimeError("Unrecognized action: '{0}'".format(action_type))
 
     return cls

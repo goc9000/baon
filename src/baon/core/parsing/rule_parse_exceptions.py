@@ -18,33 +18,33 @@ class RuleParseException(ExceptionWithSourceSpan):
 class MissingFormatSpecifierException(RuleParseException):
     def __init__(self, source_span=None):
         RuleParseException.__init__(
-            self, u"Missing format specifier", {},
+            self, "Missing format specifier", {},
             source_span)
 
 
 class RuleSyntaxErrorException(RuleParseException):
     def __init__(self, source_span=None):
         RuleParseException.__init__(
-            self, u"Syntax error", {},
+            self, "Syntax error", {},
             source_span)
 
 
 class StringLiteralNotQuotedProperlyException(RuleParseException):
     def __init__(self, source_span=None):
         RuleParseException.__init__(
-            self, u"String literal not quoted properly", {},
+            self, "String literal not quoted properly", {},
             source_span)
 
 
 class UnterminatedRegexException(RuleParseException):
     def __init__(self, source_span=None):
         RuleParseException.__init__(
-            self, u"Unterminated regex", {},
+            self, "Unterminated regex", {},
             source_span)
 
 
 class UnterminatedStringException(RuleParseException):
     def __init__(self, source_span=None):
         RuleParseException.__init__(
-            self, u"Unterminated string", {},
+            self, "Unterminated string", {},
             source_span)

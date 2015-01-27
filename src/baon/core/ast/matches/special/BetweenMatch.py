@@ -16,11 +16,11 @@ class BetweenMatch(MatchWithActions):
 
     def _execute_match_with_actions_impl(self, context):
         if context.anchored:
-            for end in xrange(context.position, len(context.text) + 1):
+            for end in range(context.position, len(context.text) + 1):
                 yield context._replace(
                     position=end,
                     matched_text=context.text[context.position:end],
                     anchored=False,
                 )
         else:
-            yield context._replace(matched_text=u'')
+            yield context._replace(matched_text='')

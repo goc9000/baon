@@ -23,20 +23,20 @@ class TestRuleSet(TestCase):
 
     def test_aliases_and_text_are_passed_from_rule_to_rule(self):
         self._test_rule_set(
-            text=u'abc 123',
+            text='abc 123',
             rule_set=RuleSet(
                 Rule(
                     SequenceMatch(
-                        LiteralMatch(u'abc').add_action(ApplyFunctionAction(u'paras')),
-                        FormatMatch(u'd').add_action(SaveToAliasAction(u'alias')),
+                        LiteralMatch('abc').add_action(ApplyFunctionAction('paras')),
+                        FormatMatch('d').add_action(SaveToAliasAction('alias')),
                     ),
                 ),
                 Rule(
-                    InsertAliasMatch(u'alias'),
+                    InsertAliasMatch('alias'),
                 ),
             ),
-            expected_text=u' 123(abc) 123',
-            expected_aliases={u'alias': u' 123'}
+            expected_text=' 123(abc) 123',
+            expected_aliases={'alias': ' 123'}
         )
 
     def _test_rule_set(self, text, rule_set, expected_text, aliases=None, expected_aliases=None):

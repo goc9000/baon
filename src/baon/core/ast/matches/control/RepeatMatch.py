@@ -60,4 +60,4 @@ class RepeatMatch(MatchWithActions):
                     yield item
 
         if not continuations_found and len(matches_so_far) >= self.at_least:
-            yield context._replace(matched_text=u''.join(matches_so_far))
+            yield context._replace(matched_text=''.join(matches_so_far))

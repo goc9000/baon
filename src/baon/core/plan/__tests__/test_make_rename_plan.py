@@ -7,8 +7,6 @@
 # Licensed under the GPL-3
 
 
-import os
-
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
 from baon.core.parsing.parse_rules import parse_rules
 from baon.core.files.scan_files import scan_files
@@ -22,125 +20,125 @@ class TestMakeRenamePlan(FileSystemTestCase):
     def test_basic(self):
         self._test_make_rename_plan(
             (
-                ('FILE', u'dir1/file11.txt'),
-                ('FILE', u'dir1/file12'),
-                ('FILE', u'dir2/dir21/file211'),
-                ('FILE', u'dir2/file21'),
-                ('FILE', u'file1'),
-                ('FILE', u'file2.bin'),
+                ('FILE', 'dir1/file11.txt'),
+                ('FILE', 'dir1/file12'),
+                ('FILE', 'dir2/dir21/file211'),
+                ('FILE', 'dir2/file21'),
+                ('FILE', 'file1'),
+                ('FILE', 'file2.bin'),
             ),
-            u'"file" "1"->"4"; "file42"->"dir3/file42"',
+            '"file" "1"->"4"; "file42"->"dir3/file42"',
             (
-                ('CreateDirectory', u'dir1/dir3'),
-                ('MoveFile', u'dir1/file11.txt', u'dir1/file41.txt'),
-                ('MoveFile', u'dir1/file12', u'dir1/dir3/file42'),
-                ('MoveFile', u'file1', u'file4'),
-                ('DeleteDirectoryIfEmpty', u'dir2/dir21'),
-                ('DeleteDirectoryIfEmpty', u'dir2'),
-                ('DeleteDirectoryIfEmpty', u'dir1'),
+                ('CreateDirectory', 'dir1/dir3'),
+                ('MoveFile', 'dir1/file12', 'dir1/dir3/file42'),
+                ('MoveFile', 'dir1/file11.txt', 'dir1/file41.txt'),
+                ('MoveFile', 'file1', 'file4'),
+                ('DeleteDirectoryIfEmpty', 'dir2/dir21'),
+                ('DeleteDirectoryIfEmpty', 'dir2'),
+                ('DeleteDirectoryIfEmpty', 'dir1'),
             ))
 
     def test_file_in_way_will_move(self):
         self._test_make_rename_plan(
             (
-                ('FILE', u'file1'),
-                ('FILE', u'file2'),
-                ('FILE', u'entry'),
+                ('FILE', 'file1'),
+                ('FILE', 'file2'),
+                ('FILE', 'entry'),
             ),
-            u'"entry"->"moved"; "file2"->"entry/file"',
+            '"entry"->"moved"; "file2"->"entry/file"',
             (
-                ('MoveFile', u'entry', u'entry_1'),
-                ('CreateDirectory', u'entry'),
-                ('MoveFile', u'entry_1', u'moved'),
-                ('MoveFile', u'file2', u'entry/file')
+                ('MoveFile', 'entry', 'entry_1'),
+                ('CreateDirectory', 'entry'),
+                ('MoveFile', 'file2', 'entry/file'),
+                ('MoveFile', 'entry_1', 'moved'),
             ))
 
     def test_file_in_way_will_not_move(self):
         self._test_make_rename_plan(
             (
-                ('FILE', u'file1'),
-                ('FILE', u'file2'),
-                ('FILE', u'entry'),
+                ('FILE', 'file1'),
+                ('FILE', 'file2'),
+                ('FILE', 'entry'),
             ),
-            u'"file2"->"entry/file"',
-            ('CannotCreateDestinationDirFileInTheWayWillNotMoveException', {'destination_dir': u'entry'}))
+            '"file2"->"entry/file"',
+            ('CannotCreateDestinationDirFileInTheWayWillNotMoveException', {'destination_dir': 'entry'}))
 
     def test_file_in_way_will_move_find_free_name(self):
         self._test_make_rename_plan(
             (
-                ('FILE', u'file1'),
-                ('FILE', u'file2'),
-                ('FILE', u'entry'),
+                ('FILE', 'file1'),
+                ('FILE', 'file2'),
+                ('FILE', 'entry'),
             ),
-            u'"file1"->"entry_1"; "entry"->"moved" $; "file2"->"entry/file"',
+            '"file1"->"entry_1"; "entry"->"moved" $; "file2"->"entry/file"',
             (
-                ('MoveFile', u'entry', u'entry_2'),
-                ('CreateDirectory', u'entry'),
-                ('MoveFile', u'file1', u'entry_1'),
-                ('MoveFile', u'entry_2', u'moved'),
-                ('MoveFile', u'file2', u'entry/file'),
+                ('MoveFile', 'entry', 'entry_2'),
+                ('CreateDirectory', 'entry'),
+                ('MoveFile', 'file2', 'entry/file'),
+                ('MoveFile', 'file1', 'entry_1'),
+                ('MoveFile', 'entry_2', 'moved'),
             ))
 
     def test_chain(self):
         self._test_make_rename_plan(
             (
-                ('FILE', u'file1'),
-                ('FILE', u'file2'),
-                ('FILE', u'file3'),
-                ('FILE', u'file4'),
+                ('FILE', 'file1'),
+                ('FILE', 'file2'),
+                ('FILE', 'file3'),
+                ('FILE', 'file4'),
             ),
             _make_permutation_rules([2, 3, 4, 5]),
             (
-                ('MoveFile', u'file4', u'file5'),
-                ('MoveFile', u'file3', u'file4'),
-                ('MoveFile', u'file2', u'file3'),
-                ('MoveFile', u'file1', u'file2'),
+                ('MoveFile', 'file4', 'file5'),
+                ('MoveFile', 'file3', 'file4'),
+                ('MoveFile', 'file2', 'file3'),
+                ('MoveFile', 'file1', 'file2'),
             ))
 
     def test_circular(self):
         self._test_make_rename_plan(
             (
-                ('FILE', u'file1'),
-                ('FILE', u'file2'),
-                ('FILE', u'file3'),
-                ('FILE', u'file4'),
+                ('FILE', 'file1'),
+                ('FILE', 'file2'),
+                ('FILE', 'file3'),
+                ('FILE', 'file4'),
             ),
             _make_permutation_rules([2, 3, 4, 1]),
             (
-                ('MoveFile', u'file3', u'file3_1'),
-                ('MoveFile', u'file2', u'file3'),
-                ('MoveFile', u'file1', u'file2'),
-                ('MoveFile', u'file4', u'file1'),
-                ('MoveFile', u'file3_1', u'file4')
+                ('MoveFile', 'file1', 'file1_1'),
+                ('MoveFile', 'file4', 'file1'),
+                ('MoveFile', 'file3', 'file4'),
+                ('MoveFile', 'file2', 'file3'),
+                ('MoveFile', 'file1_1', 'file2')
             ))
 
     def test_complex_permutation(self):
         self._test_make_rename_plan(
             (
-                ('FILE', u'file1'),
-                ('FILE', u'file2'),
-                ('FILE', u'file3'),
-                ('FILE', u'file4'),
-                ('FILE', u'file5'),
-                ('FILE', u'file6'),
-                ('FILE', u'file7'),
-                ('FILE', u'file8'),
+                ('FILE', 'file1'),
+                ('FILE', 'file2'),
+                ('FILE', 'file3'),
+                ('FILE', 'file4'),
+                ('FILE', 'file5'),
+                ('FILE', 'file6'),
+                ('FILE', 'file7'),
+                ('FILE', 'file8'),
             ),
             _make_permutation_rules([2, 10, 4, 5, 3, 7, 8, 9]),
             (
-                ('MoveFile', u'file8', u'file9'),
-                ('MoveFile', u'file7', u'file8'),
-                ('MoveFile', u'file6', u'file7'),
-                ('MoveFile', u'file2', u'file10'),
-                ('MoveFile', u'file1', u'file2'),
-                ('MoveFile', u'file3', u'file3_1'),
-                ('MoveFile', u'file5', u'file3'),
-                ('MoveFile', u'file4', u'file5'),
-                ('MoveFile', u'file3_1', u'file4')
+                ('MoveFile', 'file2', 'file10'),
+                ('MoveFile', 'file1', 'file2'),
+                ('MoveFile', 'file8', 'file9'),
+                ('MoveFile', 'file7', 'file8'),
+                ('MoveFile', 'file6', 'file7'),
+                ('MoveFile', 'file3', 'file3_1'),
+                ('MoveFile', 'file5', 'file3'),
+                ('MoveFile', 'file4', 'file5'),
+                ('MoveFile', 'file3_1', 'file4')
             ))
 
     def _test_make_rename_plan(self, files_repr, rules_text, expected_result):
-        with self._temp_file_structure(u'', files_repr):
+        with self._temp_file_structure('', files_repr):
             files = scan_files(self._test_dir_path, recursive=True)
             rule_set = parse_rules(rules_text)
             renamed_files = rename_files(files, rule_set, use_path=False, use_extension=False)
@@ -158,4 +156,4 @@ class TestMakeRenamePlan(FileSystemTestCase):
 
 
 def _make_permutation_rules(permutation):
-    return u'"file" ({0})'.format(u'|'.join(u'"{0}"->"{1}"'.format(i+1, p_i) for i, p_i in enumerate(permutation)))
+    return '"file" ({0})'.format('|'.join('"{0}"->"{1}"'.format(i+1, p_i) for i, p_i in enumerate(permutation)))

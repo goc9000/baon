@@ -15,62 +15,62 @@ class TestRegexMatch(MatchTestCase):
 
     def test_basic(self):
         self._test_unique_match(
-            text=u'A simple test',
-            match=RegexMatch(u'A simple test'),
-            expected_solution={'matched_text': u'A simple test', 'position': 13})
+            text='A simple test',
+            match=RegexMatch('A simple test'),
+            expected_solution={'matched_text': 'A simple test', 'position': 13})
         self._test_unique_match(
-            text=u'Abc  123  def',
-            match=RegexMatch(u'\w+(\s*)[0-9]+'),
-            expected_solution={'matched_text': u'Abc  123', 'position': 8})
+            text='Abc  123  def',
+            match=RegexMatch('\w+(\s*)[0-9]+'),
+            expected_solution={'matched_text': 'Abc  123', 'position': 8})
 
     def test_case_sensitive(self):
         self._test_unique_match(
-            text=u'CaSE sEnSItivE',
-            match=RegexMatch(u'CaSE sEnSItivE'),
-            expected_solution={'matched_text': u'CaSE sEnSItivE', 'position': 14})
+            text='CaSE sEnSItivE',
+            match=RegexMatch('CaSE sEnSItivE'),
+            expected_solution={'matched_text': 'CaSE sEnSItivE', 'position': 14})
         self._test_no_match(
-            text=u'CaSE sEnSItivE',
-            match=RegexMatch(u'CASE SENSITIVE'))
+            text='CaSE sEnSItivE',
+            match=RegexMatch('CASE SENSITIVE'))
         self._test_unique_match(
-            text=u'CaSE sEnSItivE',
-            match=RegexMatch(u'CASE SENSITIVE', ('i',)),
-            expected_solution={'matched_text': u'CaSE sEnSItivE', 'position': 14})
+            text='CaSE sEnSItivE',
+            match=RegexMatch('CASE SENSITIVE', ('i',)),
+            expected_solution={'matched_text': 'CaSE sEnSItivE', 'position': 14})
 
     def test_unicode(self):
         self._test_unique_match(
-            text=u'\u00e2\u0103\u00ee\u0219\u021b',
-            match=RegexMatch(u'\w+'),
-            expected_solution={'matched_text': u'\u00e2\u0103\u00ee\u0219\u021b', 'position': 5})
+            text='\u00e2\u0103\u00ee\u0219\u021b',
+            match=RegexMatch('\w+'),
+            expected_solution={'matched_text': '\u00e2\u0103\u00ee\u0219\u021b', 'position': 5})
 
     def test_must_match_at_start(self):
         self._test_no_match(
-            text=u'Must match at start',
-            match=RegexMatch(u'match at start'))
+            text='Must match at start',
+            match=RegexMatch('match at start'))
 
     def test_whitespace_matters(self):
         self._test_no_match(
-            text=u'Whitespace matters',
-            match=RegexMatch(u'   Whitespace'))
+            text='Whitespace matters',
+            match=RegexMatch('   Whitespace'))
 
     def test_anchored(self):
         self._test_unique_match(
-            text=u'Anchored match',
-            match=RegexMatch(u'match'),
+            text='Anchored match',
+            match=RegexMatch('match'),
             position=9,
-            expected_solution={'matched_text': u'match', 'position': 14})
+            expected_solution={'matched_text': 'match', 'position': 14})
         self._test_no_match(
-            text=u'Anchored match',
-            match=RegexMatch(u'^match'),
+            text='Anchored match',
+            match=RegexMatch('^match'),
             position=9)
         self._test_unique_match(
-            text=u'Anchored match',
-            match=RegexMatch(u'^Anchored'),
-            expected_solution={'matched_text': u'Anchored', 'position': 8})
+            text='Anchored match',
+            match=RegexMatch('^Anchored'),
+            expected_solution={'matched_text': 'Anchored', 'position': 8})
         self._test_no_match(
-            text=u'Anchored match',
-            match=RegexMatch(u'Anchored$'))
+            text='Anchored match',
+            match=RegexMatch('Anchored$'))
         self._test_unique_match(
-            text=u'Anchored match',
-            match=RegexMatch(u'match$'),
+            text='Anchored match',
+            match=RegexMatch('match$'),
             position=9,
-            expected_solution={'matched_text': u'match', 'position': 14})
+            expected_solution={'matched_text': 'match', 'position': 14})

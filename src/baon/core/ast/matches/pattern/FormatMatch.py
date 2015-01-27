@@ -65,6 +65,6 @@ class FormatMatch(ElementaryPatternMatch):
             repeat = '{' + str(self.width) + '}'
 
         if repeat is not None:
-            pattern = pattern.replace(u'##', repeat)
+            pattern = pattern.replace('##', repeat)
 
         return pattern

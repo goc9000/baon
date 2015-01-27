@@ -36,7 +36,7 @@ def scan_files(base_path, recursive=True, on_progress=_dummy_on_progress):
     except OSError as e:
         raise CannotExploreBasePathException(path=base_path, inner_exception=e)
 
-    scan_queue = deque([u''])
+    scan_queue = deque([''])
     files = []
 
     while len(scan_queue) > 0:
@@ -49,7 +49,7 @@ def scan_files(base_path, recursive=True, on_progress=_dummy_on_progress):
         is_dir = os.path.isdir(full_path)
 
         directory_opened = False
-        if is_dir and not is_link and (recursive or relative_path == u''):
+        if is_dir and not is_link and (recursive or relative_path == ''):
             try:
                 files_in_dir = os.listdir(full_path)
                 scan_queue.extend(extend_path(relative_path, name) for name in files_in_dir)

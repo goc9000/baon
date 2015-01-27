@@ -47,8 +47,8 @@ def decode_baon_string_literal(literal):
         if char_after_escape in SIMPLE_ESCAPES:  # simple escape
             output_parts.append(SIMPLE_ESCAPES[char_after_escape])
         elif char_after_escape == 'u' and pos <= len(literal)-4 \
-                and all(literal[pos+i] in string.hexdigits for i in xrange(4)):  # Unicode escape
-            output_parts.append(unichr(int(literal[pos:pos+4], 16)))
+                and all(literal[pos+i] in string.hexdigits for i in range(4)):  # Unicode escape
+            output_parts.append(chr(int(literal[pos:pos+4], 16)))
             pos += 4
         elif char_after_escape in '01234567':  # octal escape
             code = int(char_after_escape)
@@ -58,11 +58,11 @@ def decode_baon_string_literal(literal):
                 pos += 1
                 digits -= 1
             
-            output_parts.append(unichr(code))
+            output_parts.append(chr(code))
         else:  # unsupported escape
-            output_parts.append(u'\\')
+            output_parts.append('\\')
             output_parts.append(char_after_escape)
 
     output_parts.append(literal[pos:])
 
-    return u''.join(output_parts)
+    return ''.join(output_parts)

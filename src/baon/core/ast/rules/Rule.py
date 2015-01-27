@@ -48,7 +48,7 @@ class Rule(ASTNode):
             anchored=True,
         )
 
-        for _ in xrange(MAX_ITERATIONS):
+        for _ in range(MAX_ITERATIONS):
             solution = next(temp_match.execute(initial_context), None)
             if solution is None:
                 return ApplyRuleResult(text=text, aliases=initial_aliases)

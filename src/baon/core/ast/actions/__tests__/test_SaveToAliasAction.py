@@ -16,20 +16,20 @@ class TestSaveToAliasAction(ActionTestCase):
     def test_save_first_time(self):
         self._test_aliases_action(
             dict(),
-            SaveToAliasAction(u'alias'),
-            {u'alias': u'Matched text'}
+            SaveToAliasAction('alias'),
+            {'alias': 'Matched text'}
         )
 
     def test_save_overwrite(self):
         self._test_aliases_action(
-            {u'alias': u'Previous text'},
-            SaveToAliasAction(u'alias'),
-            {u'alias': u'Matched text'}
+            {'alias': 'Previous text'},
+            SaveToAliasAction('alias'),
+            {'alias': 'Matched text'}
         )
 
     def test_preserve_other_aliases(self):
         self._test_aliases_action(
-            {u'alias': u'Previous text'},
-            SaveToAliasAction(u'new_alias'),
-            {u'alias': u'Previous text', u'new_alias': u'Matched text'}
+            {'alias': 'Previous text'},
+            SaveToAliasAction('new_alias'),
+            {'alias': 'Previous text', 'new_alias': 'Matched text'}
         )

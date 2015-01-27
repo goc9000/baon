@@ -20,11 +20,11 @@ class RuleApplicationException(BAONExceptionBase):
 class AliasDependenciesTooComplexException(RuleApplicationException):
     def __init__(self):
         RuleApplicationException.__init__(
-            self, u"Dependencies of aliases are too complex", {})
+            self, "Dependencies of aliases are too complex", {})
 
 
 class SpecifierExpectsNumberException(RuleApplicationException):
     def __init__(self, specifier, received):
         RuleApplicationException.__init__(
-            self, u"%{specifier} expects a number, received '{received}'",
+            self, "%{specifier} expects a number, received '{received}'",
             {'specifier': specifier, 'received': received})

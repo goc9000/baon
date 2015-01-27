@@ -14,10 +14,10 @@ from baon.core.ast.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
 class TestReplaceByLiteralAction(ActionTestCase):
 
     def test_basic(self):
-        self._test_simple_text_action(u'Some text', ReplaceByLiteralAction(u'Other text'), u'Other text')
+        self._test_simple_text_action('Some text', ReplaceByLiteralAction('Other text'), 'Other text')
 
     def test_replace_empty(self):
-        self._test_simple_text_action(u'', ReplaceByLiteralAction(u'Some text'), u'Some text')
+        self._test_simple_text_action('', ReplaceByLiteralAction('Some text'), 'Some text')
 
     def test_replace_empty_with_empty(self):
-        self._test_simple_text_action(u'', ReplaceByLiteralAction(u''), u'')
+        self._test_simple_text_action('', ReplaceByLiteralAction(''), '')

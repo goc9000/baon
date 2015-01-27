@@ -15,13 +15,13 @@ class TestInsertLiteralMatch(MatchTestCase):
 
     def test_basic(self):
         self._test_unique_match(
-            text=u'abcdef',
+            text='abcdef',
             position=3,
-            match=InsertLiteralMatch(u'inserted text'),
-            expected_solution={'matched_text': u'inserted text'})
+            match=InsertLiteralMatch('inserted text'),
+            expected_solution={'matched_text': 'inserted text'})
 
     def test_insert_empty(self):
         self._test_unique_match(
-            text=u'abcdef',
-            match=InsertLiteralMatch(u''),
-            expected_solution={'matched_text': u''})
+            text='abcdef',
+            match=InsertLiteralMatch(''),
+            expected_solution={'matched_text': ''})

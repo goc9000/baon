@@ -18,5 +18,5 @@ class FileReferenceException(BAONExceptionBase):
 class CannotExploreDirectoryException(FileReferenceException):
     def __init__(self, inner_exception=None):
         FileReferenceException.__init__(
-            self, u"Cannot open directory for exploration",
+            self, "Cannot open directory for exploration",
             {'inner_exception': inner_exception})

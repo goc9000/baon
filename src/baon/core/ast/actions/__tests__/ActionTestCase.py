@@ -16,7 +16,7 @@ class ActionTestCase(TestCase):
 
     def _test_simple_text_action(self, text, action, expected_text):
         test_context = MatchContext(
-            text=u'ignored',
+            text='ignored',
             position=0,
             aliases=dict(),
             matched_text=text,
@@ -32,10 +32,10 @@ class ActionTestCase(TestCase):
 
     def _test_aliases_action(self, aliases, action, expected_aliases):
         test_context = MatchContext(
-            text=u'ignored',
+            text='ignored',
             position=0,
             aliases=aliases,
-            matched_text=u'Matched text',
+            matched_text='Matched text',
             anchored=True,
         )
 

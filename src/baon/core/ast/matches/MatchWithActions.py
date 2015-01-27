@@ -11,8 +11,6 @@ from baon.core.ast.ASTNode import ast_node_children
 
 from baon.core.ast.matches.Match import Match
 
-from baon.core.rules.MatchContext import MatchContext
-
 
 class MatchWithActions(Match):
     actions = ast_node_children(order=100)

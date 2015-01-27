@@ -14,7 +14,7 @@ from baon.core.ast.actions.DeleteAction import DeleteAction
 class TestDeleteAction(ActionTestCase):
 
     def test_basic(self):
-        self._test_simple_text_action(u'Some text', DeleteAction(), u'')
+        self._test_simple_text_action('Some text', DeleteAction(), '')
 
     def test_delete_empty(self):
-        self._test_simple_text_action(u'', DeleteAction(), u'')
+        self._test_simple_text_action('', DeleteAction(), '')

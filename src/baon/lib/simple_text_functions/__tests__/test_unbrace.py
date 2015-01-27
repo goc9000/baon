@@ -16,12 +16,12 @@ class TestUnbrace(TestCase):
     def test_unbrace(self):
         f_u_t = baon.lib.simple_text_functions.unbrace.unbrace
 
-        self.assertEqual(f_u_t(u'abc'), u'abc')
-        self.assertEqual(f_u_t(u'(some text)'), u'some text')
-        self.assertEqual(f_u_t(u'   (some text)  '), u'   some text  ')
-        self.assertEqual(f_u_t(u' [some text] '), u' some text ')
-        self.assertEqual(f_u_t(u' {some text} '), u' some text ')
-        self.assertEqual(f_u_t(u'some (text)'), u'some text')
-        self.assertEqual(f_u_t(u'(some) (text)'), u'some text')
-        self.assertEqual(f_u_t(u'(some) [text]'), u'some text')
-        self.assertEqual(f_u_t(u's({ome [te}}xt)'), u'some text')
+        self.assertEqual(f_u_t('abc'), 'abc')
+        self.assertEqual(f_u_t('(some text)'), 'some text')
+        self.assertEqual(f_u_t('   (some text)  '), '   some text  ')
+        self.assertEqual(f_u_t(' [some text] '), ' some text ')
+        self.assertEqual(f_u_t(' {some text} '), ' some text ')
+        self.assertEqual(f_u_t('some (text)'), 'some text')
+        self.assertEqual(f_u_t('(some) (text)'), 'some text')
+        self.assertEqual(f_u_t('(some) [text]'), 'some text')
+        self.assertEqual(f_u_t('s({ome [te}}xt)'), 'some text')

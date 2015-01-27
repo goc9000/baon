@@ -11,19 +11,19 @@ import re
 
 
 def inparas(text):
-    return _extract_text_from_braces(text, u'(', u')', u'')
+    return _extract_text_from_braces(text, '(', ')', '')
 
 
 def inbraces(text):
-    return _extract_text_from_braces(text, u'[', u']', u'')
+    return _extract_text_from_braces(text, '[', ']', '')
 
 
 def incurlies(text):
-    return _extract_text_from_braces(text, u'{', u'}', u'')
+    return _extract_text_from_braces(text, '{', '}', '')
 
 
 def _extract_text_from_braces(text, left_brace, right_brace, fail_value=None):
-    pattern = re.escape(left_brace) + u'([^' + re.escape(left_brace + right_brace) + u']+)' + re.escape(right_brace)
+    pattern = re.escape(left_brace) + '([^' + re.escape(left_brace + right_brace) + ']+)' + re.escape(right_brace)
 
     match = re.search(pattern, text)
 

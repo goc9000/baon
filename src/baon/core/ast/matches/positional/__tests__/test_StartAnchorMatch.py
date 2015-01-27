@@ -15,18 +15,18 @@ class TestStartAnchorMatch(MatchTestCase):
 
     def test_matches_at_start(self):
         self._test_unique_match(
-            text=u'abc def',
+            text='abc def',
             match=StartAnchorMatch(),
-            expected_solution={'matched_text': u''})
+            expected_solution={'matched_text': ''})
 
     def test_no_match_if_not_at_start(self):
         self._test_no_match(
-            text=u'abc def',
+            text='abc def',
             position=2,
             match=StartAnchorMatch())
 
     def test_empty(self):
         self._test_unique_match(
-            text=u'',
+            text='',
             match=StartAnchorMatch(),
-            expected_solution={'matched_text': u''})
+            expected_solution={'matched_text': ''})

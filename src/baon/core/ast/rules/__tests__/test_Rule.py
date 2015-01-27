@@ -24,89 +24,89 @@ class TestRule(TestCase):
 
     def test_basic(self):
         self._test_rule(
-            text=u'abc 123',
+            text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    LiteralMatch(u'abc').add_action(ApplyFunctionAction('paras')),
-                    FormatMatch(u'ws').add_action(DeleteAction()),
-                    FormatMatch(u'd').add_action(ApplyFunctionAction('braces')),
+                    LiteralMatch('abc').add_action(ApplyFunctionAction('paras')),
+                    FormatMatch('ws').add_action(DeleteAction()),
+                    FormatMatch('d').add_action(ApplyFunctionAction('braces')),
                 ),
             ),
-            expected_text=u'(abc)[123]'
+            expected_text='(abc)[123]'
         )
 
     def test_no_match(self):
         self._test_rule(
-            text=u'abc 123',
+            text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    LiteralMatch(u'abc').add_action(ApplyFunctionAction('paras')),
-                    FormatMatch(u'ws').add_action(DeleteAction()),
-                    LiteralMatch(u'x').add_action(ApplyFunctionAction('braces')),
+                    LiteralMatch('abc').add_action(ApplyFunctionAction('paras')),
+                    FormatMatch('ws').add_action(DeleteAction()),
+                    LiteralMatch('x').add_action(ApplyFunctionAction('braces')),
                 ),
             ),
-            expected_text=u'abc 123'
+            expected_text='abc 123'
         )
 
     def test_result_includes_text_not_covered_by_matches(self):
         self._test_rule(
-            text=u'abc 123',
+            text='abc 123',
             rule=Rule(
-                LiteralMatch(u'ab').add_action(ApplyFunctionAction('paras')),
+                LiteralMatch('ab').add_action(ApplyFunctionAction('paras')),
             ),
-            expected_text=u'(ab)c 123'
+            expected_text='(ab)c 123'
         )
 
     def test_ends_with_between_match(self):
         self._test_rule(
-            text=u'abc 123',
+            text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    LiteralMatch(u'ab').add_action(ApplyFunctionAction('paras')),
+                    LiteralMatch('ab').add_action(ApplyFunctionAction('paras')),
                     BetweenMatch().add_action(ApplyFunctionAction('braces')),
                 ),
             ),
-            expected_text=u'(ab)[c 123]'
+            expected_text='(ab)[c 123]'
         )
 
     def test_starts_with_between_match(self):
         self._test_rule(
-            text=u'abc 123',
+            text='abc 123',
             rule=Rule(
                 SequenceMatch(
                     BetweenMatch().add_action(ApplyFunctionAction('braces')),
-                    LiteralMatch(u'c').add_action(ApplyFunctionAction('paras')),
+                    LiteralMatch('c').add_action(ApplyFunctionAction('paras')),
                 ),
             ),
-            expected_text=u'[ab](c) 123'
+            expected_text='[ab](c) 123'
         )
 
     def test_post_add_alias(self):
         self._test_rule(
-            text=u'abc 123',
+            text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    LiteralMatch(u'abc'),
-                    FormatMatch(u'd').add_action(SaveToAliasAction(u'alias')),
-                    InsertAliasMatch(u'alias'),
+                    LiteralMatch('abc'),
+                    FormatMatch('d').add_action(SaveToAliasAction('alias')),
+                    InsertAliasMatch('alias'),
                 ),
             ),
-            expected_text=u'abc 123 123',
-            expected_aliases={u'alias': u' 123'},
+            expected_text='abc 123 123',
+            expected_aliases={'alias': ' 123'},
         )
 
     def test_pre_add_alias(self):
         self._test_rule(
-            text=u'abc 123',
+            text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    InsertAliasMatch(u'alias'),
-                    LiteralMatch(u'abc'),
-                    FormatMatch(u'd').add_action(SaveToAliasAction(u'alias')),
+                    InsertAliasMatch('alias'),
+                    LiteralMatch('abc'),
+                    FormatMatch('d').add_action(SaveToAliasAction('alias')),
                 ),
             ),
-            expected_text=u' 123abc 123',
-            expected_aliases={u'alias': u' 123'},
+            expected_text=' 123abc 123',
+            expected_aliases={'alias': ' 123'},
         )
 
     def _test_rule(self, text, rule, expected_text, aliases=None, expected_aliases=None):

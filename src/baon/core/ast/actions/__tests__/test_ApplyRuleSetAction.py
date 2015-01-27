@@ -23,29 +23,29 @@ class TestApplyRuleSetAction(ActionTestCase):
 
     def test_basic(self):
         self._test_simple_text_action(
-            u'abracadabra',
+            'abracadabra',
             ApplyRuleSetAction(
                 RuleSet(
                     Rule(
                         SequenceMatch(
                             BetweenMatch(),
-                            LiteralMatch(u'c').add_action(DeleteAction()),
+                            LiteralMatch('c').add_action(DeleteAction()),
                         )
                     )
                 )
             ),
-            u'abraadabra'
+            'abraadabra'
         )
 
     def test_aliases_are_saved(self):
         self._test_aliases_action(
-            {u'prev_alias': u'prev_value'},
+            {'prev_alias': 'prev_value'},
             ApplyRuleSetAction(
                 RuleSet(
                     Rule(
-                        InsertLiteralMatch(u'value').add_action(SaveToAliasAction(u'alias')).add_action(DeleteAction()),
+                        InsertLiteralMatch('value').add_action(SaveToAliasAction('alias')).add_action(DeleteAction()),
                     )
                 )
             ),
-            {u'alias': u'value', u'prev_alias': u'prev_value'},
+            {'alias': 'value', 'prev_alias': 'prev_value'},
         )

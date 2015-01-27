@@ -14,4 +14,4 @@ PAT_BRACE = re.compile(r"[()\[\]{}]")
 
 
 def unbrace(text):
-    return PAT_BRACE.sub(u'', text)
+    return PAT_BRACE.sub('', text)

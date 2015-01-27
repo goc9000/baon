@@ -16,81 +16,81 @@ from baon.core.parsing.rule_parse_exceptions import RuleParseException
 class TestRulesLexer(TestCase):
 
     def test_parse_empty(self):
-        self.assertEqual(self.parse_result('rule_set', u''),
+        self.assertEqual(self.parse_result('rule_set', ''),
                          ('RuleSet',))
-        self.assertEqual(self.parse_result('rule_set', u';'),
+        self.assertEqual(self.parse_result('rule_set', ';'),
                          ('RuleSet',))
-        self.assertEqual(self.parse_result('rule_set', u'\n'),
+        self.assertEqual(self.parse_result('rule_set', '\n'),
                          ('RuleSet',))
-        self.assertEqual(self.parse_result('rule_set', u'  ;  \n ;;\n  \n\n'),
+        self.assertEqual(self.parse_result('rule_set', '  ;  \n ;;\n  \n\n'),
                          ('RuleSet',))
-        self.assertEqual(self.parse_result('rule_set', u'|'),
+        self.assertEqual(self.parse_result('rule_set', '|'),
                          ('RuleSet',))
-        self.assertEqual(self.parse_result('rule_set', u'|;|'),
+        self.assertEqual(self.parse_result('rule_set', '|;|'),
                          ('RuleSet',))
-        self.assertEqual(self.parse_result('rule_set', u'|||;;||;|;|'),
+        self.assertEqual(self.parse_result('rule_set', '|||;;||;|;|'),
                          ('RuleSet',))
 
     def test_parse_anchor_matches(self):
-        self.assertEqual(self.parse_result('match', u'^'),
+        self.assertEqual(self.parse_result('match', '^'),
                          ('StartAnchorMatch',))
-        self.assertEqual(self.parse_result('match', u'$'),
+        self.assertEqual(self.parse_result('match', '$'),
                          ('EndAnchorMatch',))
 
     def test_parse_between_match(self):
-        self.assertEqual(self.parse_result('match', u'..'),
+        self.assertEqual(self.parse_result('match', '..'),
                          ('BetweenMatch',))
 
     def test_parse_literal_match(self):
-        self.assertEqual(self.parse_result('match', u'"abc"'),
-                         ('LiteralMatch', u'abc'))
-        self.assertEqual(self.parse_result('match', u'"abc'),
+        self.assertEqual(self.parse_result('match', '"abc"'),
+                         ('LiteralMatch', 'abc'))
+        self.assertEqual(self.parse_result('match', '"abc'),
                          ('UnterminatedStringException', 1, 1, 1, 4))
 
     def test_parse_regex_match(self):
-        self.assertEqual(self.parse_result('match', u'/abc/'),
-                         ('RegexMatch', u'abc'))
-        self.assertEqual(self.parse_result('match', u'/abc//def/i'),
-                         ('RegexMatch', u'abc/def', {'i'}))
-        self.assertEqual(self.parse_result('match', u'/abc'),
+        self.assertEqual(self.parse_result('match', '/abc/'),
+                         ('RegexMatch', 'abc'))
+        self.assertEqual(self.parse_result('match', '/abc//def/i'),
+                         ('RegexMatch', 'abc/def', {'i'}))
+        self.assertEqual(self.parse_result('match', '/abc'),
                          ('UnterminatedRegexException', 1, 1, 1, 4))
 
         # Malformed patterns or flags do NOT raise a RuleParseException. This is caught in the semantic check phase.
-        self.assertEqual(self.parse_result('match', u'/[abc/'),
-                         ('RegexMatch', u'[abc'))
-        self.assertEqual(self.parse_result('match', u'/abc/QXYZ'),
-                         ('RegexMatch', u'abc', {'Q', 'X', 'Y', 'Z'}))
+        self.assertEqual(self.parse_result('match', '/[abc/'),
+                         ('RegexMatch', '[abc'))
+        self.assertEqual(self.parse_result('match', '/abc/QXYZ'),
+                         ('RegexMatch', 'abc', {'Q', 'X', 'Y', 'Z'}))
 
     def test_parse_format_match(self):
-        self.assertEqual(self.parse_result('match', u'%c'),
-                         ('FormatMatch', u'c'))
-        self.assertEqual(self.parse_result('match', u'%4s'),
-                         ('FormatMatch', u's', 4))
-        self.assertEqual(self.parse_result('match', u'%04d'),
-                         ('FormatMatch', u'd', 4, 'leading'))
-        self.assertEqual(self.parse_result('match', u'%'),
+        self.assertEqual(self.parse_result('match', '%c'),
+                         ('FormatMatch', 'c'))
+        self.assertEqual(self.parse_result('match', '%4s'),
+                         ('FormatMatch', 's', 4))
+        self.assertEqual(self.parse_result('match', '%04d'),
+                         ('FormatMatch', 'd', 4, 'leading'))
+        self.assertEqual(self.parse_result('match', '%'),
                          ('MissingFormatSpecifierException', 1, 1, 1, 1))
 
         # Erroneous specifiers do NOT raise a RuleParseException. This is caught in the semantic check phase.
-        self.assertEqual(self.parse_result('match', u'%bogus'),
-                         ('FormatMatch', u'bogus'))
+        self.assertEqual(self.parse_result('match', '%bogus'),
+                         ('FormatMatch', 'bogus'))
 
     def test_parse_insert_alias_match(self):
-        self.assertEqual(self.parse_result('match', u'<<abc'),
-                         ('InsertAliasMatch', u'abc'))
+        self.assertEqual(self.parse_result('match', '<<abc'),
+                         ('InsertAliasMatch', 'abc'))
 
     def test_parse_insert_literal_match(self):
-        self.assertEqual(self.parse_result('match', u'<<"abc"'),
-                         ('InsertLiteralMatch', u'abc'))
-        self.assertEqual(self.parse_result('match', u'<<"abc'),
+        self.assertEqual(self.parse_result('match', '<<"abc"'),
+                         ('InsertLiteralMatch', 'abc'))
+        self.assertEqual(self.parse_result('match', '<<"abc'),
                          ('UnterminatedStringException', 1, 3, 1, 6))
 
     def test_parse_subrule_match(self):
-        self.assertEqual(self.parse_result('match', u'("abc")'),
+        self.assertEqual(self.parse_result('match', '("abc")'),
                          ('AlternativesMatch',
                           ('SequenceMatch',
-                           ('LiteralMatch', u'abc'))))
-        self.assertEqual(self.parse_result('match', u'($|..*)!'),
+                           ('LiteralMatch', 'abc'))))
+        self.assertEqual(self.parse_result('match', '($|..*)!'),
                          ('AlternativesMatch',
                           ('SequenceMatch',
                            ('EndAnchorMatch',)),
@@ -100,42 +100,42 @@ class TestRulesLexer(TestCase):
                           ('DeleteAction',)))
 
     def test_parse_delete_action(self):
-        self.assertEqual(self.parse_result('action', u'!'),
+        self.assertEqual(self.parse_result('action', '!'),
                          ('DeleteAction',))
 
     def test_parse_save_to_alias_action(self):
-        self.assertEqual(self.parse_result('action', u'>>abc'),
-                         ('SaveToAliasAction', u'abc'))
+        self.assertEqual(self.parse_result('action', '>>abc'),
+                         ('SaveToAliasAction', 'abc'))
 
     def test_parse_replace_by_literal_action(self):
-        self.assertEqual(self.parse_result('action', u'->"abc"'),
-                         ('ReplaceByLiteralAction', u'abc'))
-        self.assertEqual(self.parse_result('action', u'->"abc'),
+        self.assertEqual(self.parse_result('action', '->"abc"'),
+                         ('ReplaceByLiteralAction', 'abc'))
+        self.assertEqual(self.parse_result('action', '->"abc'),
                          ('UnterminatedStringException', 1, 3, 1, 6))
 
     def test_parse_apply_function_action(self):
-        self.assertEqual(self.parse_result('action', u'->title'),
-                         ('ApplyFunctionAction', u'title'))
+        self.assertEqual(self.parse_result('action', '->title'),
+                         ('ApplyFunctionAction', 'title'))
 
     def test_parse_reformat_action(self):
-        self.assertEqual(self.parse_result('action', u'->%c'),
-                         ('ReformatAction', u'c'))
-        self.assertEqual(self.parse_result('action', u'->%4s'),
-                         ('ReformatAction', u's', 4))
-        self.assertEqual(self.parse_result('action', u'->%04d'),
-                         ('ReformatAction', u'd', 4, 'leading'))
-        self.assertEqual(self.parse_result('action', u'->%'),
+        self.assertEqual(self.parse_result('action', '->%c'),
+                         ('ReformatAction', 'c'))
+        self.assertEqual(self.parse_result('action', '->%4s'),
+                         ('ReformatAction', 's', 4))
+        self.assertEqual(self.parse_result('action', '->%04d'),
+                         ('ReformatAction', 'd', 4, 'leading'))
+        self.assertEqual(self.parse_result('action', '->%'),
                          ('MissingFormatSpecifierException', 1, 3, 1, 3))
 
         # Erroneous specifiers do NOT raise a RuleParseException. This is caught in the semantic check phase.
-        self.assertEqual(self.parse_result('action', u'->%bogus'),
-                         ('ReformatAction', u'bogus'))
+        self.assertEqual(self.parse_result('action', '->%bogus'),
+                         ('ReformatAction', 'bogus'))
 
     def test_parse_apply_rule_set_action(self):
-        self.assertEqual(self.parse_result('action', u'->()'),
+        self.assertEqual(self.parse_result('action', '->()'),
                          ('ApplyRuleSetAction',
                           ('RuleSet',)))
-        self.assertEqual(self.parse_result('action', u'->(..|%d $\n"abc"!)'),
+        self.assertEqual(self.parse_result('action', '->(..|%d $\n"abc"!)'),
                          ('ApplyRuleSetAction',
                           ('RuleSet',
                            ('Rule',
@@ -143,121 +143,121 @@ class TestRulesLexer(TestCase):
                              ('SequenceMatch',
                               ('BetweenMatch',)),
                              ('SequenceMatch',
-                              ('FormatMatch', u'd'),
+                              ('FormatMatch', 'd'),
                               ('EndAnchorMatch',)))),
                            ('Rule',
                             ('AlternativesMatch',
                              ('SequenceMatch',
-                              ('LiteralMatch', u'abc',
+                              ('LiteralMatch', 'abc',
                                ('DeleteAction',))))))))
 
     def test_parse_match_with_actions(self):
-        self.assertEqual(self.parse_result('match', u'"abc"!'),
-                         ('LiteralMatch', u'abc',
+        self.assertEqual(self.parse_result('match', '"abc"!'),
+                         ('LiteralMatch', 'abc',
                           ('DeleteAction',)))
-        self.assertEqual(self.parse_result('match', u'%d>>ghi->"def"'),
-                         ('FormatMatch', u'd',
-                          ('SaveToAliasAction', u'ghi'),
-                          ('ReplaceByLiteralAction', u'def')))
+        self.assertEqual(self.parse_result('match', '%d>>ghi->"def"'),
+                         ('FormatMatch', 'd',
+                          ('SaveToAliasAction', 'ghi'),
+                          ('ReplaceByLiteralAction', 'def')))
 
     def test_parse_match_with_repeats(self):
-        self.assertEqual(self.parse_result('match', u'"abc"?'),
+        self.assertEqual(self.parse_result('match', '"abc"?'),
                          ('RepeatMatch', 0, 1,
-                          ('LiteralMatch', u'abc')))
-        self.assertEqual(self.parse_result('match', u'%d+'),
+                          ('LiteralMatch', 'abc')))
+        self.assertEqual(self.parse_result('match', '%d+'),
                          ('RepeatMatch', 1, None,
-                          ('FormatMatch', u'd')))
+                          ('FormatMatch', 'd')))
 
     def test_parse_match_with_actions_and_repeats(self):
-        self.assertEqual(self.parse_result('match', u'"abc"!*'),
+        self.assertEqual(self.parse_result('match', '"abc"!*'),
                          ('RepeatMatch', 0, None,
-                          ('LiteralMatch', u'abc',
+                          ('LiteralMatch', 'abc',
                            ('DeleteAction',))))
-        self.assertEqual(self.parse_result('match', u'"abc"+->"def"'),
+        self.assertEqual(self.parse_result('match', '"abc"+->"def"'),
                          ('RepeatMatch', 1, None,
-                          ('LiteralMatch', u'abc'),
-                          ('ReplaceByLiteralAction', u'def')))
-        self.assertEqual(self.parse_result('match', u'"abc"+->"def"*!'),
+                          ('LiteralMatch', 'abc'),
+                          ('ReplaceByLiteralAction', 'def')))
+        self.assertEqual(self.parse_result('match', '"abc"+->"def"*!'),
                          ('RepeatMatch', 0, None,
                           ('RepeatMatch', 1, None,
-                           ('LiteralMatch', u'abc'),
-                           ('ReplaceByLiteralAction', u'def')),
+                           ('LiteralMatch', 'abc'),
+                           ('ReplaceByLiteralAction', 'def')),
                           ('DeleteAction',)))
 
     def test_parse_search_match(self):
-        self.assertEqual(self.parse_result('sequence_match_term', u'@"abc"!'),
+        self.assertEqual(self.parse_result('sequence_match_term', '@"abc"!'),
                          ('SearchReplaceMatch',
-                          ('LiteralMatch', u'abc',
+                          ('LiteralMatch', 'abc',
                            ('DeleteAction',))))
-        self.assertEqual(self.parse_result('sequence_match_term', u'@..>>etc!'),
+        self.assertEqual(self.parse_result('sequence_match_term', '@..>>etc!'),
                          ('SearchReplaceMatch',
                           ('BetweenMatch',
-                           ('SaveToAliasAction', u'etc'),
+                           ('SaveToAliasAction', 'etc'),
                            ('DeleteAction',))))
 
     def test_parse_sequence_match(self):
-        self.assertEqual(self.parse_result('sequence_match', u'.. $'),
+        self.assertEqual(self.parse_result('sequence_match', '.. $'),
                          ('SequenceMatch',
                           ('BetweenMatch',),
                           ('EndAnchorMatch',)))
-        self.assertEqual(self.parse_result('sequence_match', u'^->"abc"..>>def$'),
+        self.assertEqual(self.parse_result('sequence_match', '^->"abc"..>>def$'),
                          ('SequenceMatch',
                           ('StartAnchorMatch',
-                           ('ReplaceByLiteralAction', u'abc')),
+                           ('ReplaceByLiteralAction', 'abc')),
                           ('BetweenMatch',
-                           ('SaveToAliasAction', u'def')),
+                           ('SaveToAliasAction', 'def')),
                           ('EndAnchorMatch',)))
 
     def test_parse_rule(self):
-        self.assertEqual(self.parse_result('rule', u'..'),
+        self.assertEqual(self.parse_result('rule', '..'),
                          ('Rule',
                           ('AlternativesMatch',
                            ('SequenceMatch',
                             ('BetweenMatch',)))))
-        self.assertEqual(self.parse_result('rule', u'^|"a"'),
+        self.assertEqual(self.parse_result('rule', '^|"a"'),
                          ('Rule',
                           ('AlternativesMatch',
                            ('SequenceMatch',
                             ('StartAnchorMatch',)),
                            ('SequenceMatch',
-                            ('LiteralMatch', u'a')))))
-        self.assertEqual(self.parse_result('rule', u'%d->"a"|..!$|<<abc'),
+                            ('LiteralMatch', 'a')))))
+        self.assertEqual(self.parse_result('rule', '%d->"a"|..!$|<<abc'),
                          ('Rule',
                           ('AlternativesMatch',
                            ('SequenceMatch',
-                            ('FormatMatch', u'd',
-                             ('ReplaceByLiteralAction', u'a'))),
+                            ('FormatMatch', 'd',
+                             ('ReplaceByLiteralAction', 'a'))),
                            ('SequenceMatch',
                             ('BetweenMatch',
                              ('DeleteAction',)),
                             ('EndAnchorMatch',)),
                            ('SequenceMatch',
-                            ('InsertAliasMatch', u'abc')))))
+                            ('InsertAliasMatch', 'abc')))))
 
     def test_parse_rule_set(self):
-        self.assertEqual(self.parse_result('rule_set', u'..->title;^|"a"!'),
+        self.assertEqual(self.parse_result('rule_set', '..->title;^|"a"!'),
                          ('RuleSet',
                           ('Rule',
                            ('AlternativesMatch',
                             ('SequenceMatch',
                              ('BetweenMatch',
-                              ('ApplyFunctionAction', u'title'))))),
+                              ('ApplyFunctionAction', 'title'))))),
                           ('Rule',
                            ('AlternativesMatch',
                             ('SequenceMatch',
                              ('StartAnchorMatch',)),
                             ('SequenceMatch',
-                             ('LiteralMatch', u'a',
+                             ('LiteralMatch', 'a',
                               ('DeleteAction',)))))))
 
     def test_syntax_errors(self):
-        self.assertEqual(self.parse_result('rule_set', u'#'),
+        self.assertEqual(self.parse_result('rule_set', '#'),
                          ('RuleSyntaxErrorException', 1, 1, 1, 1))
-        self.assertEqual(self.parse_result('rule_set', u'..->#'),
+        self.assertEqual(self.parse_result('rule_set', '..->#'),
                          ('RuleSyntaxErrorException', 1, 5, 1, 5))
-        self.assertEqual(self.parse_result('rule_set', u'..->'),
+        self.assertEqual(self.parse_result('rule_set', '..->'),
                          ('RuleSyntaxErrorException', 1, 5, 1, 4))
-        self.assertEqual(self.parse_result('rule_set', u'())'),
+        self.assertEqual(self.parse_result('rule_set', '())'),
                          ('RuleSyntaxErrorException', 1, 3, 1, 3))
 
     def parse_result(self, start_rule, rules_text):

@@ -77,7 +77,7 @@ def is_compound_name(word):
         return False
 
     any_dashes = False
-    for i in xrange(1, len(word) - 1):
+    for i in range(1, len(word) - 1):
         if word[i] == '-':
             any_dashes = True
             if not word[i + 1].isupper():
@@ -87,7 +87,7 @@ def is_compound_name(word):
 
 
 def is_dash_char(c):
-    return c in {'-', u'\u2013', u'\u2014'}
+    return c in {'-', '\u2013', '\u2014'}
 
 
 def is_particle(word):
@@ -95,7 +95,7 @@ def is_particle(word):
 
 
 def is_abbreviation(word):
-    return word.lower() in {u'vs'}
+    return word.lower() in {'vs'}
 
 
 def capitalize_word(word, is_first_word=True, may_be_acronym=True):
@@ -125,11 +125,11 @@ def to_title_case(phrase):
 
         is_acronym = word.isupper() and len(word) > 1 and not phrase_is_upper
 
-        has_break_before = (index == 0) or (not parts[index-1].is_word and parts[index-1].content != u',')
-        has_break_after = (index >= len(parts) - 1) or (not parts[index+1].is_word and parts[index+1].content != u',')
+        has_break_before = (index == 0) or (not parts[index-1].is_word and parts[index-1].content != ',')
+        has_break_after = (index >= len(parts) - 1) or (not parts[index+1].is_word and parts[index+1].content != ',')
 
         if is_acronym or is_mac_name(word) or is_compound_name(word):
-            pass # leave unchanged
+            pass  # leave unchanged
         elif is_particle(word) and not has_break_before and not has_break_after:
             word = word.lower()
         else:
@@ -137,18 +137,18 @@ def to_title_case(phrase):
 
         parts[index] = parts[index]._replace(content=word)
 
-    return parts[0].ws_before + u''.join([part.content + part.ws_after for part in parts])
+    return parts[0].ws_before + ''.join([part.content + part.ws_after for part in parts])
 
 
 def find_words_and_separators(phrase, detect_abbreviations=True):
-    pat_alphanum = u'[^\W_]'  # any Unicode alphanumeric except underscore
+    pat_alphanum = '[^\W_]'  # any Unicode alphanumeric except underscore
 
-    pat_word_or_punctuation = u'|'.join([
-        u"(?P<word>{0}((['-]|{0})*{0})?)".format(pat_alphanum),
-        u'(?P<fullstop_and_ellipsis>[.]+)',
-        u'(?P<q_and_e_marks>[!?]+)',
-        u"(?P<dashes>[\u2013\u2014-]+)",
-        u'(?P<other>\S)',
+    pat_word_or_punctuation = '|'.join([
+        "(?P<word>{0}((['-]|{0})*{0})?)".format(pat_alphanum),
+        '(?P<fullstop_and_ellipsis>[.]+)',
+        '(?P<q_and_e_marks>[!?]+)',
+        "(?P<dashes>[\u2013\u2014-]+)",
+        '(?P<other>\S)',
     ])
 
     matches = list(re.finditer(pat_word_or_punctuation, phrase, re.I + re.U))
@@ -159,10 +159,10 @@ def find_words_and_separators(phrase, detect_abbreviations=True):
         next_match_start = matches[index + 1].start() if index < len(matches) - 1 else len(phrase)
 
         if detect_abbreviations:
-            if match.group(0) == u'.' and len(parts) > 0 and is_abbreviation(parts[-1].content) \
-                    and parts[-1].ws_after == u'':
+            if match.group(0) == '.' and len(parts) > 0 and is_abbreviation(parts[-1].content) \
+                    and parts[-1].ws_after == '':
                 parts[-1] = parts[-1]._replace(
-                    content=parts[-1].content + u'.',
+                    content=parts[-1].content + '.',
                     ws_after=phrase[match.end():next_match_start]
                 )
                 continue

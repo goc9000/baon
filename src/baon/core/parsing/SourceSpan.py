@@ -11,7 +11,7 @@ def compute_line_col(pos, text):
     line_no = 1
     line_start_pos = 0
 
-    for line in text.split(u"\n"):
+    for line in text.split("\n"):
         line_end_pos = line_start_pos + len(line)
 
         if pos <= line_end_pos:

@@ -8,15 +8,15 @@
 
 
 def paras(text):
-    return _add_braces(text, u'(', u')')
+    return _add_braces(text, '(', ')')
 
 
 def braces(text):
-    return _add_braces(text, u'[', u']')
+    return _add_braces(text, '[', ']')
 
 
 def curlies(text):
-    return _add_braces(text, u'{', u'}')
+    return _add_braces(text, '{', '}')
 
 
 def _add_braces(text, left_brace, right_brace):

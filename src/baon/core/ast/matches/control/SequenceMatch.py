@@ -29,7 +29,7 @@ class SequenceMatch(MatchWithActions):
         term_index = len(matches_so_far)
 
         if term_index == len(self.terms):
-            yield context._replace(matched_text=u''.join(matches_so_far))
+            yield context._replace(matched_text=''.join(matches_so_far))
         else:
             for solution in self.terms[term_index].execute(context):
                 for item in self._generate_solutions_rec(solution, matches_so_far + [solution.matched_text]):

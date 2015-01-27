@@ -21,12 +21,12 @@ def all_path_components(path):
 
 
 def all_path_components_no_empty(path):
-    return all_path_components(path) if path != u'' else []
+    return all_path_components(path) if path != '' else []
 
 
 def all_partial_paths(path):
     partial_paths = []
-    partial_path = u''
+    partial_path = ''
 
     for component in all_path_components(path):
         partial_path = extend_path(partial_path, component)
@@ -40,7 +40,7 @@ def join_path_components(components):
 
 
 def extend_path(path, component):
-    return path + os.sep + component if path != u'' else component
+    return path + os.sep + component if path != '' else component
 
 
 def split_path_and_filename(path):

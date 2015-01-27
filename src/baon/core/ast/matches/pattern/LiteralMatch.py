@@ -23,4 +23,4 @@ class LiteralMatch(ElementaryPatternMatch):
         self.text = text
 
     def _get_pattern_impl(self):
-        return u'({0})'.format(re.escape(self.text))
+        return '({0})'.format(re.escape(self.text))

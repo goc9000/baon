@@ -20,4 +20,4 @@ class InsertAliasMatch(InsertionMatch):
         self.alias = alias
 
     def _get_inserted_text_impl(self, context):
-        return context.aliases.get(self.alias, u'')
+        return context.aliases.get(self.alias, '')

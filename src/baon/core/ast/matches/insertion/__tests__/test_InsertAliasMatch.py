@@ -15,16 +15,16 @@ class TestInsertAliasMatch(MatchTestCase):
 
     def test_existing_alias(self):
         self._test_unique_match(
-            text=u'abcdef',
+            text='abcdef',
             position=3,
-            aliases={u'alias1': u'content1', u'alias2': u'content2'},
-            match=InsertAliasMatch(u'alias1'),
-            expected_solution={'matched_text': u'content1'})
+            aliases={'alias1': 'content1', 'alias2': 'content2'},
+            match=InsertAliasMatch('alias1'),
+            expected_solution={'matched_text': 'content1'})
 
     def test_nonexisting_alias(self):
         self._test_unique_match(
-            text=u'abcdef',
+            text='abcdef',
             position=3,
-            aliases={u'alias1': u'content1', u'alias2': u'content2'},
-            match=InsertAliasMatch(u'non_existent'),
-            expected_solution={'matched_text': u''})
+            aliases={'alias1': 'content1', 'alias2': 'content2'},
+            match=InsertAliasMatch('non_existent'),
+            expected_solution={'matched_text': ''})

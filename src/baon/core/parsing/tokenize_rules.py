@@ -98,9 +98,8 @@ def t_REGEX(t):
         return RulesToken(t, unterminated=True)
 
     extras = {
-        'pattern': t.lexer.lexmatch.group('regex_body').replace(u'//', u'/'),
+        'pattern': t.lexer.lexmatch.group('regex_body').replace('//', '/'),
     }
-
 
     flags = set(t.lexer.lexmatch.group('end_regex')[1:])
     if len(flags) > 0:

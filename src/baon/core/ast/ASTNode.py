@@ -79,8 +79,9 @@ class ASTNode(object):
             self.source_span.end_line,
             self.source_span.end_column,
             self.__class__.__name__,
-        ) + self._test_repr_params() +\
-               tuple(child.test_repr_with_source_spans() for child in self._test_repr_children())
+        ) + self._test_repr_params() + tuple(
+            child.test_repr_with_source_spans() for child in self._test_repr_children()
+        )
 
     def _init_ast_node_fields(self):
         self._ast_node_fields = []

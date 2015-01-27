@@ -19,48 +19,48 @@ class RenameFilesException(BAONExceptionBase):
 class UnprintableCharacterInFilenameException(RenameFilesException):
     def __init__(self, character_code):
         RenameFilesException.__init__(
-            self, u"Non-printable character \\u{character_code:04x} present in filename",
+            self, "Non-printable character \\u{character_code:04x} present in filename",
             {'character_code': character_code})
 
 
 class EmptyFilenameException(RenameFilesException):
     def __init__(self):
-        RenameFilesException.__init__(self, u"Filename is empty")
+        RenameFilesException.__init__(self, "Filename is empty")
 
 
 class OnlyDotsFilenameException(RenameFilesException):
     def __init__(self):
-        RenameFilesException.__init__(self, u"Filename may not be . or ..")
+        RenameFilesException.__init__(self, "Filename may not be . or ..")
 
 
 class EmptyPathComponentException(RenameFilesException):
     def __init__(self):
-        RenameFilesException.__init__(self, u"Path has empty component")
+        RenameFilesException.__init__(self, "Path has empty component")
 
 
 class OnlyDotsPathComponentException(RenameFilesException):
     def __init__(self):
-        RenameFilesException.__init__(self, u"Path may not contain a . or .. component")
+        RenameFilesException.__init__(self, "Path may not contain a . or .. component")
 
 
 class FileCollidesWithFileException(RenameFilesException):
     def __init__(self):
-        RenameFilesException.__init__(self, u"Collides with other file")
+        RenameFilesException.__init__(self, "Collides with other file")
 
 
 class FileCollidesWithDirectoryException(RenameFilesException):
     def __init__(self):
-        RenameFilesException.__init__(self, u"Collides with directory")
+        RenameFilesException.__init__(self, "Collides with directory")
 
 
 class DirectoryCollidesWithFileException(RenameFilesException):
     def __init__(self):
-        RenameFilesException.__init__(self, u"Collides with other directory")
+        RenameFilesException.__init__(self, "Collides with other directory")
 
 
 class WouldMergeImplicitlyWithOtherFoldersException(RenameFilesException):
     def __init__(self):
-        RenameFilesException.__init__(self, u"Would merge implicitly with other folders")
+        RenameFilesException.__init__(self, "Would merge implicitly with other folders")
 
 
 class RenameFilesWarning(BAONWarningBase):
@@ -71,46 +71,46 @@ class RenameFilesWarning(BAONWarningBase):
 class ProblematicCharacterInFilenameWarning(RenameFilesWarning):
     def __init__(self, character):
         RenameFilesWarning.__init__(
-            self, u"Problematic character present in filename: {character}",
+            self, "Problematic character present in filename: {character}",
             {'character': character})
 
 
 class PathComponentStartsWithSpaceWarning(RenameFilesWarning):
     def __init__(self, component):
         RenameFilesWarning.__init__(
-            self, u"Path component '{component}' starts with spaces",
+            self, "Path component '{component}' starts with spaces",
             {'component': component})
 
 
 class PathComponentEndsWithSpaceWarning(RenameFilesWarning):
     def __init__(self, component):
         RenameFilesWarning.__init__(
-            self, u"Path component '{component}' ends with spaces",
+            self, "Path component '{component}' ends with spaces",
             {'component': component})
 
 
 class PathComponentContainsDoubleSpacesWarning(RenameFilesWarning):
     def __init__(self, component):
         RenameFilesWarning.__init__(
-            self, u"Path component '{component}' contains double spaces",
+            self, "Path component '{component}' contains double spaces",
             {'component': component})
 
 
 class FilenameStartsWithSpaceWarning(RenameFilesWarning):
     def __init__(self):
-        RenameFilesWarning.__init__(self, u"Filename starts with spaces")
+        RenameFilesWarning.__init__(self, "Filename starts with spaces")
 
 
 class BasenameEndsWithSpaceWarning(RenameFilesWarning):
     def __init__(self):
-        RenameFilesWarning.__init__(self, u"Filename contains spaces before the extension")
+        RenameFilesWarning.__init__(self, "Filename contains spaces before the extension")
 
 
 class FilenameContainsDoubleSpacesWarning(RenameFilesWarning):
     def __init__(self):
-        RenameFilesWarning.__init__(self, u"Filename contains double spaces")
+        RenameFilesWarning.__init__(self, "Filename contains double spaces")
 
 
 class ExtensionContainsSpacesWarning(RenameFilesWarning):
     def __init__(self):
-        RenameFilesWarning.__init__(self, u"Extension contains spaces")
+        RenameFilesWarning.__init__(self, "Extension contains spaces")

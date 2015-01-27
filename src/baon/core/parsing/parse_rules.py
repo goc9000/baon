@@ -40,9 +40,9 @@ from baon.core.parsing.SourceSpan import SourceSpan
 assert len(tokens) > 0
 
 
-class EOFRuleParseException:
+class EOFRuleParseException(BaseException):
     def __init__(self):
-        pass
+        BaseException.__init__(self)
 
 
 def p_rule_set_add_rule(p):

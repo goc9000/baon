@@ -42,7 +42,7 @@ class SearchReplaceMatch(Match):
         if solution is not None:
             yield context._replace(
                 text=context.text[:context.position]+solution.matched_text,
-                matched_text=u'',
+                matched_text='',
                 aliases=solution.aliases,
             )
         else:

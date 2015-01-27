@@ -17,7 +17,7 @@ class TestLangUtilsPy(TestCase):
     def test_is_string(self):
         f_u_t = is_string
         self.assertTrue(f_u_t('string'))
-        self.assertTrue(f_u_t(u'unicode\u1234'))
+        self.assertTrue(f_u_t('unicode\u1234'))
         self.assertFalse(f_u_t(123))
         self.assertFalse(f_u_t(['a', 'b', 'c']))
         self.assertFalse(f_u_t({'a': 'b', 'b': 'c'}))

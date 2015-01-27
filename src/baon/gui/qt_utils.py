@@ -29,9 +29,7 @@ def parse_qcolor(color_spec):
 
         raise RuntimeError('Unsupported format')
     except Exception as e:
-        message = 'Invalid QColor spec "{0}"'.format(color_spec)
-        if e.message != '':
-            message += ' - ' + e.message
+        message = 'Invalid QColor spec "{0}" - {1}'.format(color_spec, e)
 
         raise RuntimeError(message)
 
@@ -53,7 +51,7 @@ def _parse_qcolor_html(color_spec):
     if len(digits) not in [6, 8]:
         raise RuntimeError('Invalid length for HTML format')
 
-    components = [int(digits[i:i+2], 16) for i in xrange(0, len(digits), 2)]
+    components = [int(digits[i:i+2], 16) for i in range(0, len(digits), 2)]
 
     return QColor.fromRgb(*components)
 
