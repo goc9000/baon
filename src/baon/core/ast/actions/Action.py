@@ -7,12 +7,15 @@
 # Licensed under the GPL-3
 
 
+from abc import ABCMeta, abstractmethod
+
 from baon.core.ast.ASTNode import ASTNode
 
 
-class Action(ASTNode):
+class Action(ASTNode, metaclass=ABCMeta):
     def __init__(self):
         ASTNode.__init__(self)
 
+    @abstractmethod
     def execute(self, context):
-        raise RuntimeError("execute() not implemented in subclass")
+        return context

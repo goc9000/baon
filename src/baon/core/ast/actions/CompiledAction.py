@@ -7,6 +7,8 @@
 # Licensed under the GPL-3
 
 
+from abc import abstractmethod
+
 from baon.core.ast.actions.Action import Action
 
 
@@ -33,8 +35,9 @@ class CompiledAction(Action):
         self._cached_function = self._compile_function()
         return self._cached_function
 
+    @abstractmethod
     def _compile_function(self):
-        raise RuntimeError("_compile_function() not implemented in subclass")
+        return lambda x: x
 
     def _semantic_check_before_children(self, scope):
         self._compile_function()

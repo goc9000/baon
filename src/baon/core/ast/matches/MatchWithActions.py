@@ -7,8 +7,9 @@
 # Licensed under the GPL-3
 
 
-from baon.core.ast.ASTNode import ast_node_children
+from abc import abstractmethod
 
+from baon.core.ast.ASTNode import ast_node_children
 from baon.core.ast.matches.Match import Match
 
 
@@ -30,5 +31,6 @@ class MatchWithActions(Match):
 
             yield solution
 
+    @abstractmethod
     def _execute_match_with_actions_impl(self, context):
-        raise RuntimeError("_execute_match_with_actions_impl() not implemented in subclass")
+        return []

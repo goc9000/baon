@@ -9,6 +9,8 @@
 
 import re
 
+from abc import abstractmethod
+
 from baon.core.ast.matches.MatchWithActions import MatchWithActions
 from baon.core.ast.rule_check_exceptions import ErrorInRegularExpressionException
 
@@ -19,8 +21,9 @@ class ElementaryPatternMatch(MatchWithActions):
     def __init__(self):
         MatchWithActions.__init__(self)
 
+    @abstractmethod
     def _get_pattern_impl(self):
-        raise RuntimeError('_get_pattern_impl() unimplemented in subclass')
+        return ''
 
     def _get_flags_impl(self):
         return 0

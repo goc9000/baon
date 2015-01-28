@@ -7,6 +7,8 @@
 # Licensed under the GPL-3
 
 
+from abc import abstractmethod
+
 from baon.core.ast.matches.MatchWithActions import MatchWithActions
 
 
@@ -17,5 +19,6 @@ class InsertionMatch(MatchWithActions):
     def _execute_match_with_actions_impl(self, context):
         yield context._replace(matched_text=self._get_inserted_text_impl(context))
 
+    @abstractmethod
     def _get_inserted_text_impl(self, context):
-        raise RuntimeError('_get_inserted_text_impl() unimplemented in subclass')
+        return ''
