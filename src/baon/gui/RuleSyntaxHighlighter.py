@@ -90,13 +90,13 @@ class RuleSyntaxHighlighter(QSyntaxHighlighter):
         if error_span is None:
             return None
 
-        source = qstr_to_unicode(self.document().toPlainText()) + u"\n"
+        source = qstr_to_unicode(self.document().toPlainText()) + "\n"
         start = clamp(error_span.start_pos, 0, len(source) - 1)
         end = clamp(error_span.end_pos, start, len(source) - 1)
 
         while start > 0 and unicode.isspace(source[start]):
             start -= 1
-        while end > start and source[end] == u"\n":
+        while end > start and source[end] == "\n":
             end -= 1
 
         return SourceSpan.from_start_end(start, end, source)

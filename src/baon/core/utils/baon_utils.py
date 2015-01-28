@@ -33,14 +33,14 @@ def decode_baon_string_literal(literal):
     
     output_parts = []
     pos = 0
-    
+
     while pos < len(literal):
         next_escape_pos = literal.find('\\', pos)
         if (next_escape_pos == -1) or (next_escape_pos == len(literal)-1):
             break
         
         output_parts.append(literal[pos:next_escape_pos])
-        
+
         char_after_escape = literal[next_escape_pos+1]
         pos = next_escape_pos + 2
 

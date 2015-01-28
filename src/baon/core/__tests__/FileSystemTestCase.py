@@ -114,7 +114,7 @@ class FileSystemTestCase(TestCase):
             cls._set_rights(os.path.join(base_dir, path), **deferred_set_rights[path])
 
     @classmethod
-    def _cleanup_files(cls, path=u'', delete_root=False):
+    def _cleanup_files(cls, path='', delete_root=False):
         cls._set_rights(path, read=True, write=True, execute=True)
 
         full_path = os.path.join(cls._test_dir_path, path)
@@ -141,7 +141,7 @@ class FileSystemTestCase(TestCase):
             exc = e
 
         try:
-            cls._cleanup_files(base_path, base_path != u'')
+            cls._cleanup_files(base_path, base_path != '')
         except OSError:
             pass
 
@@ -151,21 +151,21 @@ class FileSystemTestCase(TestCase):
 
 @decorator
 def requires_links_support(test_method, cls_or_self=None):
-    assert cls_or_self is not None, u'This decorator can only be used on a class or instance method'
+    assert cls_or_self is not None, 'This decorator can only be used on a class or instance method'
 
     if not cls_or_self.links_supported:
-        cls_or_self.skipTest(u'Skipping {0}: Links are not supported on this platform'.format(test_method.__name__))
+        cls_or_self.skipTest('Skipping {0}: Links are not supported on this platform'.format(test_method.__name__))
     else:
         test_method(cls_or_self)
 
 
 @decorator
 def requires_unicode_support(test_method, cls_or_self=None):
-    assert cls_or_self is not None, u'This decorator can only be used on a class or instance method'
+    assert cls_or_self is not None, 'This decorator can only be used on a class or instance method'
 
     if not cls_or_self.links_supported:
         cls_or_self.skipTest(
-            u'Skipping {0}: Unicode filenames are not supported on this platform'.format(test_method.__name__))
+            'Skipping {0}: Unicode filenames are not supported on this platform'.format(test_method.__name__))
     else:
         test_method(cls_or_self)
 
@@ -178,7 +178,7 @@ def _parse_file_repr(file_repr):
     elif kind in {'LINK'}:
         arity = 2
     else:
-        raise RuntimeError(u'Malformed file representation: {0}'.format(file_repr))
+        raise RuntimeError('Malformed file representation: {0}'.format(file_repr))
 
     path1 = file_repr[1]
     path2 = file_repr[2] if arity > 1 else None
