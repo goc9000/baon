@@ -10,6 +10,10 @@
 import os
 
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
+from baon.core.plan.actions.plan_action_exceptions import CannotCreateDirAlreadyExistsException,\
+    CannotCreateDirFileInWayException, CannotCreateDirParentDoesNotExistException,\
+    CannotCreateDirParentNotADirectoryException, CannotCreateDirNoPermissionsException,\
+    CannotCreateDirOtherErrorException
 from baon.core.utils.lang_utils import is_arrayish
 
 
@@ -26,19 +30,29 @@ class CreateDirectoryAction(RenamePlanAction):
     def execute(self):
         try:
             if os.path.isfile(self.path):
-                raise RuntimeError("a file by that name already exists")
+                raise CannotCreateDirFileInWayException(self.path)
             if os.path.exists(self.path):
-                raise RuntimeError("directory already exists")
-            
+                raise CannotCreateDirAlreadyExistsException(self.path)
+
+            parent_path, _ = os.path.split(self.path)
+
+            if not os.path.exists(parent_path):
+                raise CannotCreateDirParentDoesNotExistException(self.path)
+            if os.path.isfile(parent_path):
+                raise CannotCreateDirParentNotADirectoryException(self.path)
+
             os.mkdir(self.path)
-        except Exception as e:
-            raise RuntimeError("Cannot create '{0}': {1}".format(self.path, str(e)))
-    
+        except PermissionError:
+            raise CannotCreateDirNoPermissionsException(self.path)
+        except OSError as e:
+            raise CannotCreateDirOtherErrorException(self.path, e)
+
     def undo(self):
         try:
             os.rmdir(self.path)
+            return True
         except OSError:
-            pass
+            return False
 
     @classmethod
     def from_json_representation(cls, json_repr):

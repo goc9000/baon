@@ -152,6 +152,16 @@ class FileSystemTestCase(TestCase):
         if exc is not None:
             raise exc
 
+    def assert_is_dir(self, path):
+        if not os.path.exists(path):
+            self.fail('Path does not exists: {0}'.format(path))
+        if not os.path.isdir(path):
+            self.fail('Path is not directory: {0}'.format(path))
+
+    def assert_path_does_not_exist(self, path):
+        if os.path.exists(path):
+            self.fail('Path unexpectedly exists: {0}'.format(path))
+
 
 @decorator
 def requires_links_support(test_method, cls_or_self=None):
