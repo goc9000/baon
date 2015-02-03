@@ -7,8 +7,6 @@
 # Licensed under the GPL-3
 
 
-import os
-
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_links_support, requires_unicode_support
 from baon.core.__tests__.ReportsProgressTestCase import ReportsProgressTestCase
 
@@ -201,21 +199,21 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
     def test_scan_non_existent(self):
         with self.assertRaises(BasePathDoesNotExistException):
-            scan_files(os.path.join(self._test_dir_path, 'non_existent'))
+            scan_files(self._full_test_path('non_existent'))
 
     def test_scan_base_path_not_a_dir(self):
         with self.assertRaises(BasePathIsNotADirectoryException):
             with self._temp_file_structure('', (
                 ('FILE', 'file1'),
             )):
-                scan_files(os.path.join(self._test_dir_path, 'file1'))
+                scan_files(self._full_test_path('file1'))
 
     def test_scan_cannot_explore(self):
         with self.assertRaises(CannotExploreBasePathException):
             with self._temp_file_structure('', (
                 ('DIR', 'no_read_dir', {'read': False}),
             )):
-                scan_files(os.path.join(self._test_dir_path, 'no_read_dir'))
+                scan_files(self._full_test_path('no_read_dir'))
 
     def test_reports_progress(self):
         progress_events = []

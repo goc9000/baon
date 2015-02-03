@@ -17,7 +17,7 @@ from decorator import decorator
 
 
 class FileSystemTestCase(TestCase):
-    _test_dir_path = None
+    _test_dir_path = ''
 
     links_supported = None
     unicode_supported = None
@@ -34,9 +34,13 @@ class FileSystemTestCase(TestCase):
         cls._cleanup_files(delete_root=True)
 
     @classmethod
+    def _full_test_path(cls, relative_path):
+        return os.path.join(cls._test_dir_path, relative_path)
+
+    @classmethod
     def _check_links_supported(cls):
-        full_link_path = os.path.join(cls._test_dir_path, 'temp_link')
-        full_target_path = os.path.join(cls._test_dir_path, '')
+        full_link_path = cls._full_test_path('temp_link')
+        full_target_path = cls._full_test_path('')
 
         try:
             os.symlink(full_target_path, full_link_path)
@@ -52,13 +56,13 @@ class FileSystemTestCase(TestCase):
         dir_name, _ = os.path.split(file_path)
         cls._make_dir(dir_name)
 
-        full_file_path = os.path.join(cls._test_dir_path, file_path)
+        full_file_path = cls._full_test_path(file_path)
         with open(full_file_path, 'w') as _:
             pass
 
     @classmethod
     def _make_dir(cls, dir_path):
-        full_dir_path = os.path.join(cls._test_dir_path, dir_path)
+        full_dir_path = cls._full_test_path(dir_path)
 
         if not os.path.isdir(full_dir_path):
             os.makedirs(full_dir_path)
@@ -73,7 +77,7 @@ class FileSystemTestCase(TestCase):
             else:
                 return mode
 
-        full_path = os.path.join(cls._test_dir_path, path)
+        full_path = cls._full_test_path(path)
 
         current_mode = os.lstat(full_path).st_mode
 
@@ -88,8 +92,8 @@ class FileSystemTestCase(TestCase):
         dir_name, _ = os.path.split(link_path)
         cls._make_dir(dir_name)
 
-        full_link_path = os.path.join(cls._test_dir_path, link_path)
-        full_target_path = os.path.join(cls._test_dir_path, target_path)
+        full_link_path = cls._full_test_path(link_path)
+        full_target_path = cls._full_test_path(target_path)
         os.symlink(full_target_path, full_link_path)
 
     @classmethod
@@ -117,7 +121,7 @@ class FileSystemTestCase(TestCase):
     def _cleanup_files(cls, path='', delete_root=False):
         cls._set_rights(path, read=True, write=True, execute=True)
 
-        full_path = os.path.join(cls._test_dir_path, path)
+        full_path = cls._full_test_path(path)
 
         if os.path.isdir(full_path):
             for item in os.listdir(full_path):
