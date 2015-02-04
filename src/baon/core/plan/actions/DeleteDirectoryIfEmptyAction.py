@@ -10,6 +10,8 @@
 import os
 
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
+from baon.core.plan.actions.plan_action_exceptions import CannotDeleteDirDoesNotExistException,\
+    CannotDeleteDirIsAFileException, CannotDeleteDirNoPermissionsException, CannotDeleteDirOtherErrorException
 from baon.core.utils.lang_utils import is_arrayish
 
 
@@ -26,25 +28,28 @@ class DeleteDirectoryIfEmptyAction(RenamePlanAction):
     def execute(self):
         try:
             if os.path.isfile(self.path):
-                raise RuntimeError("a file by that name exists")
+                raise CannotDeleteDirIsAFileException(self.path)
             if not os.path.exists(self.path):
-                raise RuntimeError("directory does not exist")
-            
+                raise CannotDeleteDirDoesNotExistException(self.path)
+
             is_empty = (len(os.listdir(self.path)) == 0)
-            
             if not is_empty:
                 return
 
             os.rmdir(self.path)
-        except Exception as e:
-            raise RuntimeError("Cannot remove '{0}': {1}".format(self.path, str(e)))
-    
+        except PermissionError:
+            raise CannotDeleteDirNoPermissionsException(self.path)
+        except OSError as e:
+            raise CannotDeleteDirOtherErrorException(self.path, e)
+
     def undo(self):
         try:
-            if not os.path.exists(self.path):
+            if not os.path.isdir(self.path):
                 os.mkdir(self.path)
+
+            return True
         except OSError:
-            pass
+            return False
 
     @classmethod
     def from_json_representation(cls, json_repr):

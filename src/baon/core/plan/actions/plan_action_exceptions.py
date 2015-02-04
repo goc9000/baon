@@ -57,3 +57,37 @@ class CannotCreateDirOtherErrorException(CreateDirectoryActionException):
             self, path,
             'of a system error: {exception.strerror}',
             {'exception': os_error})
+
+
+class DeleteDirectoryActionException(RenamePlanActionException):
+    def __init__(self, path, reason_format_string, reason_parameters=None):
+        reason_parameters = dict(reason_parameters or dict())
+        reason_parameters['path'] = path
+
+        RenamePlanActionException.__init__(
+            self,
+            "Cannot delete directory '{path}' because " + reason_format_string,
+            reason_parameters)
+
+
+class CannotDeleteDirDoesNotExistException(DeleteDirectoryActionException):
+    def __init__(self, path):
+        DeleteDirectoryActionException.__init__(self, path, 'it does not exist')
+
+
+class CannotDeleteDirIsAFileException(DeleteDirectoryActionException):
+    def __init__(self, path):
+        DeleteDirectoryActionException.__init__(self, path, 'it is actually a file')
+
+
+class CannotDeleteDirNoPermissionsException(DeleteDirectoryActionException):
+    def __init__(self, path):
+        DeleteDirectoryActionException.__init__(self, path, 'we do not have permission')
+
+
+class CannotDeleteDirOtherErrorException(DeleteDirectoryActionException):
+    def __init__(self, path, os_error):
+        DeleteDirectoryActionException.__init__(
+            self, path,
+            'of a system error: {exception.strerror}',
+            {'exception': os_error})
