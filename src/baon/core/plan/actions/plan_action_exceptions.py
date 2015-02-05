@@ -91,3 +91,40 @@ class CannotDeleteDirOtherErrorException(DeleteDirectoryActionException):
             self, path,
             'of a system error: {exception.strerror}',
             {'exception': os_error})
+
+
+class MoveFileActionException(RenamePlanActionException):
+    def __init__(self, from_path, to_path, reason_format_string, reason_parameters=None):
+        reason_parameters = dict(reason_parameters or dict())
+        reason_parameters['from_path'] = from_path
+        reason_parameters['to_path'] = to_path
+
+        RenamePlanActionException.__init__(
+            self,
+            "Cannot move file '{from_path}' because " + reason_format_string,
+            reason_parameters)
+
+
+class CannotMoveFileDoesNotExistException(MoveFileActionException):
+    def __init__(self, from_path, to_path):
+        MoveFileActionException.__init__(self, from_path, to_path, 'it does not exist')
+
+
+class CannotMoveFileDestinationExistsException(MoveFileActionException):
+    def __init__(self, from_path, to_path):
+        MoveFileActionException.__init__(
+            self, from_path, to_path,
+            "the destination '{to_path}' already exists")
+
+
+class CannotMoveFileNoPermissionsException(MoveFileActionException):
+    def __init__(self, from_path, to_path):
+        MoveFileActionException.__init__(self, from_path, to_path, 'we do not have permission')
+
+
+class CannotMoveFileOtherErrorException(MoveFileActionException):
+    def __init__(self, from_path, to_path, os_error):
+        MoveFileActionException.__init__(
+            self, from_path, to_path,
+            'of a system error: {exception.strerror}',
+            {'exception': os_error})

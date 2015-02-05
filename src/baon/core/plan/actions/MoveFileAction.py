@@ -10,6 +10,8 @@
 import os
 
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
+from baon.core.plan.actions.plan_action_exceptions import CannotMoveFileDoesNotExistException,\
+    CannotMoveFileDestinationExistsException, CannotMoveFileNoPermissionsException, CannotMoveFileOtherErrorException
 from baon.core.utils.lang_utils import is_arrayish
 
 
@@ -28,20 +30,22 @@ class MoveFileAction(RenamePlanAction):
     def execute(self):
         try:
             if not os.path.exists(self.from_path):
-                raise RuntimeError("source does not exist")
+                raise CannotMoveFileDoesNotExistException(self.from_path, self.to_path)
             if os.path.exists(self.to_path):
-                raise RuntimeError("destination already exists")
+                raise CannotMoveFileDestinationExistsException(self.from_path, self.to_path)
 
             os.rename(self.from_path, self.to_path)
-        except Exception as e:
-            raise RuntimeError("Cannot move '{0}' to '{1}': {2}".format(self.from_path, self.to_path, str(e)))
+        except PermissionError:
+            raise CannotMoveFileNoPermissionsException(self.from_path, self.to_path)
+        except OSError as e:
+            raise CannotMoveFileOtherErrorException(self.from_path, self.to_path, e)
 
     def undo(self):
         try:
-            if os.path.exists(self.to_path) and not os.path.exists(self.from_path):
-                os.rename(self.to_path, self.from_path)
+            os.rename(self.to_path, self.from_path)
+            return True
         except OSError:
-            pass
+            return False
 
     @classmethod
     def from_json_representation(cls, json_repr):
