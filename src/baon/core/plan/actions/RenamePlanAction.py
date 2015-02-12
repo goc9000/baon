@@ -24,16 +24,16 @@ class RenamePlanAction(object, metaclass=ABCMeta):
         return self.json_representation()
 
     @abstractmethod
-    def json_representation(self):
-        return ()
-
-    @abstractmethod
     def execute(self):
         pass
 
     @abstractmethod
     def undo(self):
         pass
+
+    @abstractmethod
+    def json_representation(self):
+        return ()
 
     @classmethod
     def action_name_for_json_representation(cls):

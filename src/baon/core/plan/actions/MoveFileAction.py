@@ -24,9 +24,6 @@ class MoveFileAction(RenamePlanAction):
         self.from_path = from_path
         self.to_path = to_path
 
-    def json_representation(self):
-        return self.action_name_for_json_representation(), self.from_path, self.to_path
-
     def execute(self):
         try:
             if not os.path.exists(self.from_path):
@@ -46,6 +43,9 @@ class MoveFileAction(RenamePlanAction):
             return True
         except OSError:
             return False
+
+    def json_representation(self):
+        return self.action_name_for_json_representation(), self.from_path, self.to_path
 
     @classmethod
     def from_json_representation(cls, json_repr):

@@ -21,9 +21,6 @@ class DeleteDirectoryIfEmptyAction(RenamePlanAction):
     def __init__(self, path):
         RenamePlanAction.__init__(self)
         self.path = path
-    
-    def json_representation(self):
-        return self.action_name_for_json_representation(), self.path
 
     def execute(self):
         try:
@@ -50,6 +47,9 @@ class DeleteDirectoryIfEmptyAction(RenamePlanAction):
             return True
         except OSError:
             return False
+
+    def json_representation(self):
+        return self.action_name_for_json_representation(), self.path
 
     @classmethod
     def from_json_representation(cls, json_repr):
