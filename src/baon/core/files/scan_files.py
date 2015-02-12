@@ -34,7 +34,7 @@ def scan_files(base_path, recursive=True, on_progress=_dummy_on_progress):
     try:
         os.listdir(base_path)
     except OSError as e:
-        raise CannotExploreBasePathException(path=base_path, inner_exception=e)
+        raise CannotExploreBasePathException(path=base_path, inner_exception=e) from None
 
     scan_queue = deque([''])
     files = []

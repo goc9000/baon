@@ -38,9 +38,9 @@ class DeleteDirectoryIfEmptyAction(RenamePlanAction):
 
             os.rmdir(self.path)
         except PermissionError:
-            raise CannotDeleteDirNoPermissionsException(self.path)
+            raise CannotDeleteDirNoPermissionsException(self.path) from None
         except OSError as e:
-            raise CannotDeleteDirOtherErrorException(self.path, e)
+            raise CannotDeleteDirOtherErrorException(self.path, e) from None
 
     def undo(self):
         try:

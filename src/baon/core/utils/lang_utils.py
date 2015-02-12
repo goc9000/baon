@@ -9,6 +9,8 @@
 
 import sys
 
+from contextlib import contextmanager
+
 
 def is_python3():
     return sys.version_info[0] >= 3
@@ -31,3 +33,11 @@ def is_arrayish(x):
 def is_dictish(x):
     """Checks whether x is dictish, i.e. a dict-like object accessible by any key."""
     return hasattr(x, '__getitem__') and hasattr(x, 'keys') and not is_string(x)
+
+
+@contextmanager
+def swallow_os_errors():
+    try:
+        yield
+    except OSError:
+        pass

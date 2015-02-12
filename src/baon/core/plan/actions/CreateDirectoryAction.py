@@ -43,9 +43,9 @@ class CreateDirectoryAction(RenamePlanAction):
 
             os.mkdir(self.path)
         except PermissionError:
-            raise CannotCreateDirNoPermissionsException(self.path)
+            raise CannotCreateDirNoPermissionsException(self.path) from None
         except OSError as e:
-            raise CannotCreateDirOtherErrorException(self.path, e)
+            raise CannotCreateDirOtherErrorException(self.path, e) from None
 
     def undo(self):
         try:

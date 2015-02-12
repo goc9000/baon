@@ -14,7 +14,7 @@ import string
 import codecs
 import json
 
-from baon.core.utils.lang_utils import is_arrayish
+from baon.core.utils.lang_utils import is_arrayish, swallow_os_errors
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
 
 
@@ -35,10 +35,8 @@ class RenamePlan(object):
             with open(filename, 'w') as f:
                 json.dump(self.json_representation(), f, indent=4)
         except Exception as e:
-            try:
+            with swallow_os_errors():
                 os.remove(filename)
-            except OSError:
-                pass
             
             raise e
 
@@ -93,6 +91,6 @@ class RenamePlan(object):
                 if re.match(r"temp_BAON_rename_plan-", filename) and os.path.isfile(path):
                     return path
         except Exception:
-            raise RuntimeError("Could not look for backups in home directory!")
+            raise RuntimeError("Could not look for backups in home directory!") from None
 
         return None

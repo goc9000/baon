@@ -12,8 +12,11 @@ from unittest import TestCase
 import os
 import tempfile
 import stat
+
 from contextlib import contextmanager
 from decorator import decorator
+
+from baon.core.utils.lang_utils import swallow_os_errors
 
 
 class FileSystemTestCase(TestCase):
@@ -138,19 +141,11 @@ class FileSystemTestCase(TestCase):
     def _temp_file_structure(cls, base_path, files_repr):
         cls._realize_file_structure(base_path, files_repr)
 
-        exc = None
         try:
             yield
-        except Exception as e:
-            exc = e
-
-        try:
-            cls._cleanup_files(base_path, base_path != '')
-        except OSError:
-            pass
-
-        if exc is not None:
-            raise exc
+        finally:
+            with swallow_os_errors():
+                cls._cleanup_files(base_path, base_path != '')
 
     def assert_is_dir(self, path):
         if not os.path.exists(path):

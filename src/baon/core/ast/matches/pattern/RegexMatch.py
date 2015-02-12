@@ -26,11 +26,11 @@ class RegexMatch(ElementaryPatternMatch):
         self.flags = flags if flags is not None else ()
 
     def _get_pattern_impl(self):
-        # First compile it without the parantheses, as otherwise we would accept malformed expressions such as /)(/
+        # First compile it without the parentheses, as otherwise we would accept malformed expressions such as /)(/
         try:
             re.compile(self.pattern)
         except re.error:
-            raise ErrorInRegularExpressionException()
+            raise ErrorInRegularExpressionException() from None
 
         return '({0})'.format(self.pattern)
 

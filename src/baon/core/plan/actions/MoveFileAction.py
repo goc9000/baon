@@ -36,9 +36,9 @@ class MoveFileAction(RenamePlanAction):
 
             os.rename(self.from_path, self.to_path)
         except PermissionError:
-            raise CannotMoveFileNoPermissionsException(self.from_path, self.to_path)
+            raise CannotMoveFileNoPermissionsException(self.from_path, self.to_path) from None
         except OSError as e:
-            raise CannotMoveFileOtherErrorException(self.from_path, self.to_path, e)
+            raise CannotMoveFileOtherErrorException(self.from_path, self.to_path, e) from None
 
     def undo(self):
         try:

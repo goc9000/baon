@@ -287,4 +287,4 @@ def parse_rules(rules_text, start_rule=None):
     try:
         return parser.parse(rules_text, RulesLexerForYACC())
     except EOFRuleParseException:
-        raise RuleSyntaxErrorException(source_span=SourceSpan.at_end_of_source(rules_text))
+        raise RuleSyntaxErrorException(source_span=SourceSpan.at_end_of_source(rules_text)) from None

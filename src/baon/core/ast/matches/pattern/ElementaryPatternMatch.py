@@ -35,7 +35,7 @@ class ElementaryPatternMatch(MatchWithActions):
         try:
             return re.compile(pattern, flags)
         except re.error:
-            raise ErrorInRegularExpressionException()
+            raise ErrorInRegularExpressionException() from None
 
     def _semantic_check_before_children(self, scope):
         self._compile_regex()
