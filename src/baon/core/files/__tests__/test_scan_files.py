@@ -10,9 +10,10 @@
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_links_support, requires_unicode_support
 from baon.core.__tests__.ReportsProgressTestCase import ReportsProgressTestCase
 
+from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
+    CannotExploreBasePathError
+
 from baon.core.files.scan_files import scan_files
-from baon.core.files.scan_files_exceptions import BasePathDoesNotExistException, BasePathIsNotADirectoryException,\
-    CannotExploreBasePathException
 
 
 class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
@@ -188,7 +189,7 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             expected_result=(
                 ('FILE', 'no_exec_dir/file31.txt'),
                 ('FILE', 'no_exec_dir/file32.txt'),
-                ('DIR', 'no_read_dir', ('CannotExploreDirectoryException',)),
+                ('DIR', 'no_read_dir', ('CannotExploreDirectoryError',)),
                 ('FILE', 'normal_dir/file11.txt'),
                 ('FILE', 'normal_dir/file12.txt'),
                 ('FILE', 'no_exec.txt'),
@@ -198,18 +199,18 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
         )
 
     def test_scan_non_existent(self):
-        with self.assertRaises(BasePathDoesNotExistException):
+        with self.assertRaises(BasePathDoesNotExistError):
             scan_files(self._full_test_path('non_existent'))
 
     def test_scan_base_path_not_a_dir(self):
-        with self.assertRaises(BasePathIsNotADirectoryException):
+        with self.assertRaises(BasePathIsNotADirectoryError):
             with self._temp_file_structure('', (
                 ('FILE', 'file1'),
             )):
                 scan_files(self._full_test_path('file1'))
 
     def test_scan_cannot_explore(self):
-        with self.assertRaises(CannotExploreBasePathException):
+        with self.assertRaises(CannotExploreBasePathError):
             with self._temp_file_structure('', (
                 ('DIR', 'no_read_dir', {'read': False}),
             )):

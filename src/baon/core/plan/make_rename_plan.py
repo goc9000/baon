@@ -13,21 +13,22 @@ from collections import defaultdict
 from itertools import count
 
 from baon.core.files.baon_paths import all_partial_paths, split_path_and_filename, extend_path
+
+from baon.core.plan.__errors__.make_rename_plan_errors import \
+    CannotCreateDestinationDirInaccessibleParentError, \
+    CannotCreateDestinationDirUnexpectedNonDirParentError, \
+    CannotCreateDestinationDirNoReadPermissionForParentError, \
+    CannotCreateDestinationDirNoTraversePermissionForParentError, \
+    CannotCreateDestinationDirNoWritePermissionForParentError, \
+    CannotCreateDestinationDirFileInTheWayWillNotMoveError, \
+    RenamedFilesListInvalidMultipleDestinationsError, \
+    RenamedFilesListInvalidSameDestinationError, \
+    CannotMoveFileNoWritePermissionForDirError
+
 from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
 from baon.core.plan.actions.MoveFileAction import MoveFileAction
 from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryIfEmptyAction
-from baon.core.plan.make_rename_plan_exceptions import \
-    CannotCreateDestinationDirInaccessibleParentException, \
-    CannotCreateDestinationDirUnexpectedNonDirParentException, \
-    CannotCreateDestinationDirNoReadPermissionForParentException, \
-    CannotCreateDestinationDirNoTraversePermissionForParentException, \
-    CannotCreateDestinationDirNoWritePermissionForParentException, \
-    CannotCreateDestinationDirFileInTheWayWillNotMoveException, \
-    RenamedFilesListInvalidMultipleDestinationsException, \
-    RenamedFilesListInvalidSameDestinationException, \
-    CannotMoveFileNoWritePermissionForDirException
-
 
 def make_rename_plan(base_path, renamed_files):
     taken_names_by_dir = _compute_taken_names_by_dir(renamed_files)
@@ -70,26 +71,26 @@ def _plan_creating_destination_dirs(base_path, renamed_files, taken_names_by_dir
             real_parent_path = os.path.join(base_path, parent_path)
 
             if not os.path.exists(real_parent_path):
-                raise CannotCreateDestinationDirInaccessibleParentException(path)
+                raise CannotCreateDestinationDirInaccessibleParentError(path)
             if not os.path.isdir(real_parent_path):
-                raise CannotCreateDestinationDirUnexpectedNonDirParentException(path)
+                raise CannotCreateDestinationDirUnexpectedNonDirParentError(path)
             if not os.access(real_parent_path, os.R_OK):
-                raise CannotCreateDestinationDirNoReadPermissionForParentException(path)
+                raise CannotCreateDestinationDirNoReadPermissionForParentError(path)
             if not os.access(real_parent_path, os.X_OK):
-                raise CannotCreateDestinationDirNoTraversePermissionForParentException(path)
+                raise CannotCreateDestinationDirNoTraversePermissionForParentError(path)
 
             if os.path.exists(real_path) and os.path.isdir(real_path):
                 continue
 
             if not os.access(real_parent_path, os.W_OK):
-                raise CannotCreateDestinationDirNoWritePermissionForParentException(path)
+                raise CannotCreateDestinationDirNoWritePermissionForParentError(path)
 
             if os.path.exists(real_path) and not os.path.isdir(real_path):
                 # A file is in the way. If it is scheduled to move, we will nudge it, i.e.
                 # move it to a temporary alternate name in the same directory
                 will_move = path in initial_paths and path not in final_paths
                 if not will_move:
-                    raise CannotCreateDestinationDirFileInTheWayWillNotMoveException(path)
+                    raise CannotCreateDestinationDirFileInTheWayWillNotMoveError(path)
 
                 new_path = _nudge_file(path, base_path, taken_names_by_dir)
                 nudges[path] = new_path
@@ -131,7 +132,7 @@ def _move_file(from_path, to_path, base_path, created_dirs):
         if parent_path in created_dirs:
             continue
         if not os.access(os.path.join(base_path, parent_path), os.W_OK):
-            raise CannotMoveFileNoWritePermissionForDirException(from_path, to_path, parent_path)
+            raise CannotMoveFileNoWritePermissionForDirError(from_path, to_path, parent_path)
 
     return MoveFileAction(from_path, to_path)
 
@@ -170,9 +171,9 @@ def _create_rename_graph(renamed_files, nudges):
         current_source = reverse_arcs.get(destination)
 
         if current_dest is not None and current_dest != destination:
-            raise RenamedFilesListInvalidMultipleDestinationsException(source, destination, current_dest)
+            raise RenamedFilesListInvalidMultipleDestinationsError(source, destination, current_dest)
         if current_source is not None and current_source != source:
-            raise RenamedFilesListInvalidSameDestinationException(destination, source, current_source)
+            raise RenamedFilesListInvalidSameDestinationError(destination, source, current_source)
 
         direct_arcs[source] = destination
         reverse_arcs[destination] = source

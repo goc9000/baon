@@ -14,14 +14,14 @@ from collections import defaultdict
 
 from baon.core.files.baon_paths import all_path_components, all_partial_paths, extend_path, split_path_and_filename
 
+from baon.core.renaming.__errors__.rename_files_errors import UnprintableCharacterInFilenameError, EmptyFilenameError,\
+    OnlyDotsFilenameError, EmptyPathComponentError, OnlyDotsPathComponentError, FileCollidesWithFileError,\
+    FileCollidesWithDirectoryError, DirectoryCollidesWithFileError, WouldMergeImplicitlyWithOtherFoldersError,\
+    ProblematicCharacterInFilenameWarning, PathComponentStartsWithSpaceWarning, PathComponentEndsWithSpaceWarning,\
+    PathComponentContainsDoubleSpacesWarning, FilenameStartsWithSpaceWarning, BasenameEndsWithSpaceWarning,\
+    FilenameContainsDoubleSpacesWarning, ExtensionContainsSpacesWarning
+
 from baon.core.renaming.RenamedFileReference import RenamedFileReference
-from baon.core.renaming.rename_files_exceptions import UnprintableCharacterInFilenameException, EmptyFilenameException,\
-    OnlyDotsFilenameException, EmptyPathComponentException, OnlyDotsPathComponentException,\
-    FileCollidesWithFileException, FileCollidesWithDirectoryException, DirectoryCollidesWithFileException,\
-    WouldMergeImplicitlyWithOtherFoldersException, ProblematicCharacterInFilenameWarning,\
-    PathComponentStartsWithSpaceWarning, PathComponentEndsWithSpaceWarning, PathComponentContainsDoubleSpacesWarning,\
-    FilenameStartsWithSpaceWarning, BasenameEndsWithSpaceWarning, FilenameContainsDoubleSpacesWarning,\
-    ExtensionContainsSpacesWarning
 
 
 NON_PRINTABLE_REGEX = re.compile(r'[\u0000-\u001f]')
@@ -110,19 +110,19 @@ def _check_for_intrinsic_errors(renamed_fref):
 
     m = NON_PRINTABLE_REGEX.search(full_filename)
     if m is not None:
-        problems.append(UnprintableCharacterInFilenameException(ord(m.group(0))))
+        problems.append(UnprintableCharacterInFilenameError(ord(m.group(0))))
 
     path_components = all_path_components(full_filename)
     path_components, filename = path_components[:-1], path_components[-1]
 
     if filename == '':
-        problems.append(EmptyFilenameException())
+        problems.append(EmptyFilenameError())
     if ONLY_DOTS_REGEX.match(filename):
-        problems.append(OnlyDotsFilenameException())
+        problems.append(OnlyDotsFilenameError())
     if any(component == '' for component in path_components):
-        problems.append(EmptyPathComponentException())
+        problems.append(EmptyPathComponentError())
     if any(ONLY_DOTS_REGEX.match(component) for component in path_components):
-        problems.append(OnlyDotsPathComponentException())
+        problems.append(OnlyDotsPathComponentError())
 
 
 def _check_for_intrinsic_warnings(renamed_fref):
@@ -174,12 +174,12 @@ def _check_for_collisions(renamed_files):
     for f in renamed_files:
         if f.is_dir:
             if file_path_use_counts[f.filename] > 0:
-                f.problems.append(DirectoryCollidesWithFileException())
+                f.problems.append(DirectoryCollidesWithFileError())
             elif (dir_path_use_counts[f.filename] > 1) or (f.filename in partial_dir_paths):
-                f.problems.append(WouldMergeImplicitlyWithOtherFoldersException())
+                f.problems.append(WouldMergeImplicitlyWithOtherFoldersError())
         else:
             if file_path_use_counts[f.filename] > 1:
-                f.problems.append(FileCollidesWithFileException())
+                f.problems.append(FileCollidesWithFileError())
             elif (dir_path_use_counts[f.filename] > 0) or (f.filename in partial_dir_paths) or \
                     (f.filename in partial_dir_paths):
-                f.problems.append(FileCollidesWithDirectoryException())
+                f.problems.append(FileCollidesWithDirectoryError())

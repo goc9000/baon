@@ -1,4 +1,4 @@
-# baon/core/renaming/rename_files_exceptions.py
+# baon/core/renaming/__errors__/rename_files_errors.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -7,65 +7,65 @@
 # Licensed under the GPL-3
 
 
-from baon.core.errors.BAONExceptionBase import BAONExceptionBase
-from baon.core.errors.BAONWarningBase import BAONWarningBase
+from baon.core.errors.BAONError import BAONError
+from baon.core.errors.BAONWarning import BAONWarning
 
 
-class RenameFilesException(BAONExceptionBase):
+class RenameFilesError(BAONError):
     def __init__(self, format_string, error_parameters=None):
-        BAONExceptionBase.__init__(self, format_string, error_parameters)
+        BAONError.__init__(self, format_string, error_parameters)
 
 
-class UnprintableCharacterInFilenameException(RenameFilesException):
+class UnprintableCharacterInFilenameError(RenameFilesError):
     def __init__(self, character_code):
-        RenameFilesException.__init__(
+        RenameFilesError.__init__(
             self, "Non-printable character \\u{character_code:04x} present in filename",
             {'character_code': character_code})
 
 
-class EmptyFilenameException(RenameFilesException):
+class EmptyFilenameError(RenameFilesError):
     def __init__(self):
-        RenameFilesException.__init__(self, "Filename is empty")
+        RenameFilesError.__init__(self, "Filename is empty")
 
 
-class OnlyDotsFilenameException(RenameFilesException):
+class OnlyDotsFilenameError(RenameFilesError):
     def __init__(self):
-        RenameFilesException.__init__(self, "Filename may not be . or ..")
+        RenameFilesError.__init__(self, "Filename may not be . or ..")
 
 
-class EmptyPathComponentException(RenameFilesException):
+class EmptyPathComponentError(RenameFilesError):
     def __init__(self):
-        RenameFilesException.__init__(self, "Path has empty component")
+        RenameFilesError.__init__(self, "Path has empty component")
 
 
-class OnlyDotsPathComponentException(RenameFilesException):
+class OnlyDotsPathComponentError(RenameFilesError):
     def __init__(self):
-        RenameFilesException.__init__(self, "Path may not contain a . or .. component")
+        RenameFilesError.__init__(self, "Path may not contain a . or .. component")
 
 
-class FileCollidesWithFileException(RenameFilesException):
+class FileCollidesWithFileError(RenameFilesError):
     def __init__(self):
-        RenameFilesException.__init__(self, "Collides with other file")
+        RenameFilesError.__init__(self, "Collides with other file")
 
 
-class FileCollidesWithDirectoryException(RenameFilesException):
+class FileCollidesWithDirectoryError(RenameFilesError):
     def __init__(self):
-        RenameFilesException.__init__(self, "Collides with directory")
+        RenameFilesError.__init__(self, "Collides with directory")
 
 
-class DirectoryCollidesWithFileException(RenameFilesException):
+class DirectoryCollidesWithFileError(RenameFilesError):
     def __init__(self):
-        RenameFilesException.__init__(self, "Collides with other directory")
+        RenameFilesError.__init__(self, "Collides with other directory")
 
 
-class WouldMergeImplicitlyWithOtherFoldersException(RenameFilesException):
+class WouldMergeImplicitlyWithOtherFoldersError(RenameFilesError):
     def __init__(self):
-        RenameFilesException.__init__(self, "Would merge implicitly with other folders")
+        RenameFilesError.__init__(self, "Would merge implicitly with other folders")
 
 
-class RenameFilesWarning(BAONWarningBase):
+class RenameFilesWarning(BAONWarning):
     def __init__(self, format_string, error_parameters=None):
-        BAONWarningBase.__init__(self, format_string, error_parameters)
+        BAONWarning.__init__(self, format_string, error_parameters)
 
 
 class ProblematicCharacterInFilenameWarning(RenameFilesWarning):

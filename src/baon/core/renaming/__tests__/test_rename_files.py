@@ -122,7 +122,7 @@ class TestRenameFiles(ReportsProgressTestCase):
         self._test_rename_files(
             input_description=(('FILE', 'dir1/dir2/file.txt'),),
             rules_text='@"2"->"\\u0000"',
-            expected_result=(('FILE', 'dir1/dir\u0000/file.txt', ('UnprintableCharacterInFilenameException',)),),
+            expected_result=(('FILE', 'dir1/dir\u0000/file.txt', ('UnprintableCharacterInFilenameError',)),),
             use_path=True,
         )
 
@@ -130,7 +130,7 @@ class TestRenameFiles(ReportsProgressTestCase):
         self._test_rename_files(
             input_description=(('FILE', 'dir1/dir2/file.txt'),),
             rules_text='@"file.txt"!',
-            expected_result=(('FILE', 'dir1/dir2/', ('EmptyFilenameException',)),),
+            expected_result=(('FILE', 'dir1/dir2/', ('EmptyFilenameError',)),),
             use_extension=True,
             use_path=True,
         )
@@ -139,7 +139,7 @@ class TestRenameFiles(ReportsProgressTestCase):
         self._test_rename_files(
             input_description=(('FILE', 'dir1/dir2/file.txt'),),
             rules_text='@"file.txt"->"."',
-            expected_result=(('FILE', 'dir1/dir2/.', ('OnlyDotsFilenameException',)),),
+            expected_result=(('FILE', 'dir1/dir2/.', ('OnlyDotsFilenameError',)),),
             use_extension=True,
             use_path=True,
         )
@@ -148,7 +148,7 @@ class TestRenameFiles(ReportsProgressTestCase):
         self._test_rename_files(
             input_description=(('FILE', 'dir1/dir2/file.txt'),),
             rules_text='@"dir2"!',
-            expected_result=(('FILE', 'dir1//file.txt', ('EmptyPathComponentException',)),),
+            expected_result=(('FILE', 'dir1//file.txt', ('EmptyPathComponentError',)),),
             use_path=True,
         )
 
@@ -157,7 +157,7 @@ class TestRenameFiles(ReportsProgressTestCase):
             input_description=(('FILE', 'dir1/dir2/file.txt'),),
             rules_text='@("dir" %d)!',
             # Note: only one exception is generated
-            expected_result=(('FILE', '//file.txt', ('EmptyPathComponentException',)),),
+            expected_result=(('FILE', '//file.txt', ('EmptyPathComponentError',)),),
             use_path=True,
         )
 
@@ -165,7 +165,7 @@ class TestRenameFiles(ReportsProgressTestCase):
         self._test_rename_files(
             input_description=(('FILE', 'dir1/dir2/file.txt'),),
             rules_text='@"dir2"->"."',
-            expected_result=(('FILE', 'dir1/./file.txt', ('OnlyDotsPathComponentException',)),),
+            expected_result=(('FILE', 'dir1/./file.txt', ('OnlyDotsPathComponentError',)),),
             use_path=True,
         )
 
@@ -174,7 +174,7 @@ class TestRenameFiles(ReportsProgressTestCase):
             input_description=(('FILE', 'dir1/dir2/file.txt'),),
             rules_text='@("dir" %d)->"."',
             # Note: only one exception is generated
-            expected_result=(('FILE', '././file.txt', ('OnlyDotsPathComponentException',)),),
+            expected_result=(('FILE', '././file.txt', ('OnlyDotsPathComponentError',)),),
             use_path=True,
         )
 
@@ -188,8 +188,8 @@ class TestRenameFiles(ReportsProgressTestCase):
             rules_text='@"2"->"3"',
             expected_result=(
                 ('FILE', 'dir1/dir2/file1'),
-                ('FILE', 'dir1/dir2/file3.txt', ('FileCollidesWithFileException',)),
-                ('FILE', 'dir1/dir2/file3.txt', ('FileCollidesWithFileException',)),
+                ('FILE', 'dir1/dir2/file3.txt', ('FileCollidesWithFileError',)),
+                ('FILE', 'dir1/dir2/file3.txt', ('FileCollidesWithFileError',)),
             ),
         )
 
@@ -202,9 +202,9 @@ class TestRenameFiles(ReportsProgressTestCase):
             ),
             rules_text='@"file3.txt"->"dir3"',
             expected_result=(
-                ('DIR', 'dir3', ('DirectoryCollidesWithFileException',)),
+                ('DIR', 'dir3', ('DirectoryCollidesWithFileError',)),
                 ('FILE', 'file2.txt'),
-                ('FILE', 'dir3', ('FileCollidesWithDirectoryException',)),
+                ('FILE', 'dir3', ('FileCollidesWithDirectoryError',)),
             ),
             use_extension=True,
         )
@@ -220,7 +220,7 @@ class TestRenameFiles(ReportsProgressTestCase):
             expected_result=(
                 ('DIR', 'dir1/dir2/dir3'),
                 ('FILE', 'dir1/dir2/file2.txt'),
-                ('FILE', 'dir1/dir2', ('FileCollidesWithDirectoryException',)),
+                ('FILE', 'dir1/dir2', ('FileCollidesWithDirectoryError',)),
             ),
             use_path=True,
             use_extension=True,
@@ -235,8 +235,8 @@ class TestRenameFiles(ReportsProgressTestCase):
             ),
             rules_text='@"3"->"2"',
             expected_result=(
-                ('DIR', 'dir2', ('WouldMergeImplicitlyWithOtherFoldersException',)),
-                ('DIR', 'dir2', ('WouldMergeImplicitlyWithOtherFoldersException',)),
+                ('DIR', 'dir2', ('WouldMergeImplicitlyWithOtherFoldersError',)),
+                ('DIR', 'dir2', ('WouldMergeImplicitlyWithOtherFoldersError',)),
                 ('FILE', 'file1.txt'),
             ),
         )
@@ -250,7 +250,7 @@ class TestRenameFiles(ReportsProgressTestCase):
             ),
             rules_text='@"dir1/dir2/dir3"->"dir1"',
             expected_result=(
-                ('DIR', 'dir1', ('WouldMergeImplicitlyWithOtherFoldersException',)),
+                ('DIR', 'dir1', ('WouldMergeImplicitlyWithOtherFoldersError',)),
                 ('FILE', 'dir1/dir2/file2.txt'),
                 ('FILE', 'dir1/dir2/file3.txt'),
             ),

@@ -1,4 +1,4 @@
-# baon/core/parsing/rule_parse_exceptions.py
+# baon/core/parsing/__errors__/rule_parse_errors.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -7,44 +7,44 @@
 # Licensed under the GPL-3
 
 
-from baon.core.errors.ExceptionWithSourceSpan import ExceptionWithSourceSpan
+from baon.core.errors.BAONErrorWithSourceSpan import BAONErrorWithSourceSpan
 
 
-class RuleParseException(ExceptionWithSourceSpan):
+class RuleParseError(BAONErrorWithSourceSpan):
     def __init__(self, format_string, error_parameters, source_span=None):
-        ExceptionWithSourceSpan.__init__(self, format_string, error_parameters, source_span)
+        BAONErrorWithSourceSpan.__init__(self, format_string, error_parameters, source_span)
 
 
-class MissingFormatSpecifierException(RuleParseException):
+class MissingFormatSpecifierError(RuleParseError):
     def __init__(self, source_span=None):
-        RuleParseException.__init__(
+        RuleParseError.__init__(
             self, "Missing format specifier", {},
             source_span)
 
 
-class RuleSyntaxErrorException(RuleParseException):
+class RuleSyntaxError(RuleParseError):
     def __init__(self, source_span=None):
-        RuleParseException.__init__(
+        RuleParseError.__init__(
             self, "Syntax error", {},
             source_span)
 
 
-class StringLiteralNotQuotedProperlyException(RuleParseException):
+class StringLiteralNotQuotedProperlyError(RuleParseError):
     def __init__(self, source_span=None):
-        RuleParseException.__init__(
+        RuleParseError.__init__(
             self, "String literal not quoted properly", {},
             source_span)
 
 
-class UnterminatedRegexException(RuleParseException):
+class UnterminatedRegexError(RuleParseError):
     def __init__(self, source_span=None):
-        RuleParseException.__init__(
+        RuleParseError.__init__(
             self, "Unterminated regex", {},
             source_span)
 
 
-class UnterminatedStringException(RuleParseException):
+class UnterminatedStringError(RuleParseError):
     def __init__(self, source_span=None):
-        RuleParseException.__init__(
+        RuleParseError.__init__(
             self, "Unterminated string", {},
             source_span)

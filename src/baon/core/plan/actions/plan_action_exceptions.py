@@ -7,12 +7,12 @@
 # Licensed under the GPL-3
 
 
-from baon.core.errors.BAONExceptionBase import BAONExceptionBase
+from baon.core.errors.BAONError import BAONError
 
 
-class RenamePlanActionException(BAONExceptionBase):
+class RenamePlanActionException(BAONError):
     def __init__(self, format_string, error_parameters=None):
-        BAONExceptionBase.__init__(self, format_string, error_parameters)
+        BAONError.__init__(self, format_string, error_parameters)
 
 
 class CreateDirectoryActionException(RenamePlanActionException):

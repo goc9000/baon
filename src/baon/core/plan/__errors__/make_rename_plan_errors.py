@@ -1,4 +1,4 @@
-# baon/core/plan/make_rename_plan_exceptions.py
+# baon/core/plan/__errors__/make_rename_plan_errors.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -7,92 +7,92 @@
 # Licensed under the GPL-3
 
 
-from baon.core.errors.BAONExceptionBase import BAONExceptionBase
+from baon.core.errors.BAONError import BAONError
 
 
-class MakeRenamePlanException(BAONExceptionBase):
+class MakeRenamePlanError(BAONError):
     def __init__(self, format_string, error_parameters=None):
-        BAONExceptionBase.__init__(self, format_string, error_parameters)
+        BAONError.__init__(self, format_string, error_parameters)
 
 
-class CannotCreateDestinationDirException(MakeRenamePlanException):
+class CannotCreateDestinationDirError(MakeRenamePlanError):
     def __init__(self, destination_dir, reason_format_string, reason_parameters=None):
         reason_parameters = dict(reason_parameters or dict())
         reason_parameters['destination_dir'] = destination_dir
 
-        MakeRenamePlanException.__init__(
+        MakeRenamePlanError.__init__(
             self,
             "Cannot create destination directory '{destination_dir}' because " + reason_format_string,
             reason_parameters)
 
 
-class CannotCreateDestinationDirInaccessibleParentException(CannotCreateDestinationDirException):
+class CannotCreateDestinationDirInaccessibleParentError(CannotCreateDestinationDirError):
     def __init__(self, destination_dir):
-        CannotCreateDestinationDirException.__init__(
+        CannotCreateDestinationDirError.__init__(
             self,
             destination_dir,
             "the parent directory is inaccessible")
 
 
-class CannotCreateDestinationDirUnexpectedNonDirParentException(CannotCreateDestinationDirException):
+class CannotCreateDestinationDirUnexpectedNonDirParentError(CannotCreateDestinationDirError):
     def __init__(self, destination_dir):
-        CannotCreateDestinationDirException.__init__(
+        CannotCreateDestinationDirError.__init__(
             self,
             destination_dir,
             "the parent entry is unexpectedly not a directory")
 
 
-class CannotCreateDestinationDirNoReadPermissionForParentException(CannotCreateDestinationDirException):
+class CannotCreateDestinationDirNoReadPermissionForParentError(CannotCreateDestinationDirError):
     def __init__(self, destination_dir):
-        CannotCreateDestinationDirException.__init__(
+        CannotCreateDestinationDirError.__init__(
             self,
             destination_dir,
             "we do not have read permission on the parent directory")
 
 
-class CannotCreateDestinationDirNoTraversePermissionForParentException(CannotCreateDestinationDirException):
+class CannotCreateDestinationDirNoTraversePermissionForParentError(CannotCreateDestinationDirError):
     def __init__(self, destination_dir):
-        CannotCreateDestinationDirException.__init__(
+        CannotCreateDestinationDirError.__init__(
             self,
             destination_dir,
             "we do not have traverse permission on the parent directory")
 
 
-class CannotCreateDestinationDirNoWritePermissionForParentException(CannotCreateDestinationDirException):
+class CannotCreateDestinationDirNoWritePermissionForParentError(CannotCreateDestinationDirError):
     def __init__(self, destination_dir):
-        CannotCreateDestinationDirException.__init__(
+        CannotCreateDestinationDirError.__init__(
             self,
             destination_dir,
             "we do not have write permission on the parent directory")
 
 
-class CannotCreateDestinationDirFileInTheWayWillNotMoveException(CannotCreateDestinationDirException):
+class CannotCreateDestinationDirFileInTheWayWillNotMoveError(CannotCreateDestinationDirError):
     def __init__(self, destination_dir):
-        CannotCreateDestinationDirException.__init__(
+        CannotCreateDestinationDirError.__init__(
             self,
             destination_dir,
             "a file of the same name is in the way and it is not part of the move")
 
 
-class RenamedFilesListInvalidMultipleDestinationsException(MakeRenamePlanException):
+class RenamedFilesListInvalidMultipleDestinationsError(MakeRenamePlanError):
     def __init__(self, source, destination_1, destination_2):
-        MakeRenamePlanException.__init__(
+        MakeRenamePlanError.__init__(
             self,
             "Rename list is invalid: '{source}' is renamed to both '{destination_1}' and '{destination_2}' ",
             {'source': source, 'destination_1': destination_1, 'destination_2': destination_2})
 
 
-class RenamedFilesListInvalidSameDestinationException(MakeRenamePlanException):
+class RenamedFilesListInvalidSameDestinationError(MakeRenamePlanError):
     def __init__(self, destination, source_1, source_2):
-        MakeRenamePlanException.__init__(
+        MakeRenamePlanError.__init__(
             self,
             "Rename list is invalid: Both '{source_1}' and '{source_2}' are renamed to '{destination}'",
             {'destination': destination, 'source_1': source_1, 'source_2': source_2})
 
 
-class CannotMoveFileNoWritePermissionForDirException(MakeRenamePlanException):
+class CannotMoveFileNoWritePermissionForDirError(MakeRenamePlanError):
     def __init__(self, source, destination, directory):
-        MakeRenamePlanException.__init__(
+        MakeRenamePlanError.__init__(
             self,
             "Cannot rename '{source}' to '{destination}' as we do not have write permission on '{directory}'",
             {'source': source, 'destination': destination, 'directory': directory})

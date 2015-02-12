@@ -7,14 +7,14 @@
 # Licensed under the GPL-3
 
 
-from baon.core.errors.ExceptionWithSourceSpan import ExceptionWithSourceSpan
+from baon.core.errors.BAONErrorWithSourceSpan import BAONErrorWithSourceSpan
 
 
-class RuleCheckException(ExceptionWithSourceSpan):
+class RuleCheckException(BAONErrorWithSourceSpan):
     scope = None
     
     def __init__(self, format_string, error_parameters, scope=None, source_span=None):
-        ExceptionWithSourceSpan.__init__(self, format_string, error_parameters, source_span)
+        BAONErrorWithSourceSpan.__init__(self, format_string, error_parameters, source_span)
         self.scope = scope
 
 

@@ -11,8 +11,10 @@ from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
 from baon.core.parsing.parse_rules import parse_rules
 from baon.core.files.scan_files import scan_files
 from baon.core.renaming.rename_files import rename_files
+
+from baon.core.plan.__errors__.make_rename_plan_errors import MakeRenamePlanError
+
 from baon.core.plan.make_rename_plan import make_rename_plan
-from baon.core.plan.make_rename_plan_exceptions import MakeRenamePlanException
 
 
 class TestMakeRenamePlan(FileSystemTestCase):
@@ -61,7 +63,7 @@ class TestMakeRenamePlan(FileSystemTestCase):
                 ('FILE', 'entry'),
             ),
             '"file2"->"entry/file"',
-            ('CannotCreateDestinationDirFileInTheWayWillNotMoveException', {'destination_dir': 'entry'}))
+            ('CannotCreateDestinationDirFileInTheWayWillNotMoveError', {'destination_dir': 'entry'}))
 
     def test_file_in_way_will_move_find_free_name(self):
         self._test_make_rename_plan(
@@ -146,7 +148,7 @@ class TestMakeRenamePlan(FileSystemTestCase):
             try:
                 plan = make_rename_plan(self._test_dir_path, renamed_files)
                 result = plan.test_repr()
-            except MakeRenamePlanException as e:
+            except MakeRenamePlanError as e:
                 result = e.test_repr()
 
             self.assertEquals(
