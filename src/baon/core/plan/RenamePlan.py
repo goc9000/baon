@@ -76,7 +76,7 @@ class RenamePlan(object):
     @staticmethod
     def from_json_representation(json_repr):
         if not is_arrayish(json_repr):
-            raise RuntimeError("JSON representation of plan should be a vector")
+            raise ValueError("JSON representation of plan should be a vector")
 
         return RenamePlan([RenamePlanAction.from_json_representation(action_repr) for action_repr in json_repr])
 

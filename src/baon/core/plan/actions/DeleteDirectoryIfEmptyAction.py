@@ -54,13 +54,13 @@ class DeleteDirectoryIfEmptyAction(RenamePlanAction):
     @classmethod
     def from_json_representation(cls, json_repr):
         if not is_arrayish(json_repr):
-            raise RuntimeError('JSON representation of action should be a vector')
+            raise ValueError('JSON representation of action should be a vector')
         if len(json_repr) != 2:
-            raise RuntimeError('JSON representation of action has incorrect length')
+            raise ValueError('JSON representation of action has incorrect length')
 
         action_type, path = json_repr
 
         if action_type != cls.action_name_for_json_representation():
-            raise RuntimeError("Expected JSON representation to start with '{0}' for this action".format(action_type))
+            raise ValueError("Expected JSON representation to start with '{0}' for this action".format(action_type))
 
         return cls(path)

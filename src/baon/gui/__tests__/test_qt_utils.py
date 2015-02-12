@@ -31,33 +31,23 @@ class TestQtUtilsPy(TestCase):
         self.assertEqual(f_u_t({'r': 0.25, 'g': 0.5, 'b': 1.0}).getRgb(), (64, 128, 255, 255))
         self.assertEqual(f_u_t({'red': 64, 'g': 128, 'b': 255, 'alpha': 32}).getRgb(), (64, 128, 255, 32))
 
-        with self.assertRaises(RuntimeError):
-            f_u_t(123)
-        with self.assertRaises(RuntimeError):
-            f_u_t((64, 128))
-        with self.assertRaises(RuntimeError):
-            f_u_t((64, 128, 255, 32, 250))
-        with self.assertRaises(RuntimeError):
-            f_u_t((64, 128.0, 255))
-        with self.assertRaises(RuntimeError):
-            f_u_t((64, -1, 255))
-        with self.assertRaises(RuntimeError):
-            f_u_t((64, 0, 256))
-        with self.assertRaises(RuntimeError):
-            f_u_t(('64', '128', '255'))
-        with self.assertRaises(RuntimeError):
-            f_u_t('#4080gf')
-        with self.assertRaises(RuntimeError):
-            f_u_t('#4080')
-        with self.assertRaises(RuntimeError):
-            f_u_t('bogusname')
-        with self.assertRaises(RuntimeError):
-            f_u_t('#4080ff80ff')
-        with self.assertRaises(RuntimeError):
-            f_u_t({'r': 64, 'b': 255})
-        with self.assertRaises(RuntimeError):
-            f_u_t({'r': 64, 'g': 100, 'b': 255, 'extra': 4})
-        with self.assertRaises(RuntimeError):
-            f_u_t({'r': 64, 'red': 32, 'g': 100, 'b': 255})
-        with self.assertRaises(RuntimeError):
-            f_u_t({'r': 64, 'g': 128.0, 'b': 255})
+    def test_parse_qcolor_invalid(self):
+        for spec in (
+            123,
+            (64, 128),
+            (64, 128, 255, 32, 250),
+            (64, 128.0, 255),
+            (64, -1, 255),
+            (64, 0, 256),
+            ('64', '128', '255'),
+            '#4080gf',
+            '#4080',
+            'bogusname',
+            '#4080ff80ff',
+            {'r': 64, 'b': 255},
+            {'r': 64, 'g': 100, 'b': 255, 'extra': 4},
+            {'r': 64, 'red': 32, 'g': 100, 'b': 255},
+            {'r': 64, 'g': 128.0, 'b': 255},
+        ):
+            with self.assertRaises(ValueError):
+                parse_qcolor(spec)

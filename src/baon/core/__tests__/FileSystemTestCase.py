@@ -186,20 +186,23 @@ def requires_unicode_support(test_method, cls_or_self=None):
 
 
 def _parse_file_repr(file_repr):
-    kind = file_repr[0]
+    try:
+        kind = file_repr[0]
 
-    if kind in {'FILE', 'DIR'}:
-        arity = 1
-    elif kind in {'LINK'}:
-        arity = 2
-    else:
-        raise RuntimeError('Malformed file representation: {0}'.format(file_repr))
+        if kind in {'FILE', 'DIR'}:
+            arity = 1
+        elif kind in {'LINK'}:
+            arity = 2
+        else:
+            raise ValueError()
 
-    path1 = file_repr[1]
-    path2 = file_repr[2] if arity > 1 else None
+        path1 = file_repr[1]
+        path2 = file_repr[2] if arity > 1 else None
 
-    params = dict()
-    if len(file_repr) > 1 + arity:
-        params = file_repr[1 + arity]
+        params = dict()
+        if len(file_repr) > 1 + arity:
+            params = file_repr[1 + arity]
 
-    return kind, path1, path2, params
+        return kind, path1, path2, params
+    except Exception:
+        raise AssertionError('Malformed test file representation: {0}'.format(file_repr)) from None

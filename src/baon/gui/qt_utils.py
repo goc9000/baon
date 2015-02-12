@@ -27,11 +27,11 @@ def parse_qcolor(color_spec):
         elif is_dictish(color_spec):
             return _parse_qcolor_dictish(color_spec)
 
-        raise RuntimeError('Unsupported format')
+        raise ValueError('Unsupported format')
     except Exception as e:
         message = 'Invalid QColor spec "{0}" - {1}'.format(color_spec, e)
 
-        raise RuntimeError(message)
+        raise ValueError(message) from None
 
 
 def _parse_qcolor_string(color_spec):
@@ -42,14 +42,14 @@ def _parse_qcolor_string(color_spec):
         color.setNamedColor(color_spec)
         return color
 
-    raise RuntimeError('Color name not recognized and not a HTML format')
+    raise ValueError('Color name not recognized and not a HTML format')
 
 
 def _parse_qcolor_html(color_spec):
     digits = color_spec[1:] if color_spec.startswith('#') else color_spec
 
     if len(digits) not in [6, 8]:
-        raise RuntimeError('Invalid length for HTML format')
+        raise ValueError('Invalid length for HTML format')
 
     components = [int(digits[i:i+2], 16) for i in range(0, len(digits), 2)]
 
@@ -64,46 +64,46 @@ def _parse_qcolor_dictish(color_spec):
         for role in ['red', 'green', 'blue', 'alpha']:
             if (component.lower() == role) or (component.lower() == role[0]):
                 if role in found_components:
-                    raise RuntimeError('Duplicate value for {0}'.format(role))
+                    raise ValueError('Duplicate value for {0}'.format(role))
 
                 found_components[role] = value
                 found_role = True
                 break
 
         if not found_role:
-            raise RuntimeError('Invalid component "{0}"'.format(component))
+            raise ValueError('Invalid component "{0}"'.format(component))
 
     new_spec = []
     for role in ['red', 'green', 'blue', 'alpha']:
         if role in found_components:
             new_spec.append(found_components[role])
         elif role != 'alpha':
-            raise RuntimeError('Missing value for {0}'.format(role))
+            raise ValueError('Missing value for {0}'.format(role))
 
     return _parse_qcolor_arrayish(new_spec)
 
 
 def _parse_qcolor_arrayish(color_spec):
     if len(color_spec) < 3 or len(color_spec) > 4:
-        raise RuntimeError('Expecting an array of length 3 or 4')
+        raise ValueError('Expecting an array of length 3 or 4')
 
     if len(set(type(x) for x in color_spec)) > 1:
-        raise RuntimeError('All components must have the same type')
+        raise ValueError('All components must have the same type')
 
     comp_type = type(color_spec[0])
 
     if comp_type == int:
         if not all(0 <= x <= 255 for x in color_spec):
-            raise RuntimeError('Integer components must be in the [0..255] range')
+            raise ValueError('Integer components must be in the [0..255] range')
 
         return QColor.fromRgb(*color_spec)
     elif comp_type == float:
         if not all(0.0 <= x <= 1.0 for x in color_spec):
-            raise RuntimeError('Float components must be in the [0.0..1.0] range')
+            raise ValueError('Float components must be in the [0.0..1.0] range')
 
         return QColor.fromRgbF(*color_spec)
 
-    raise RuntimeError('Only int and float components are supported')
+    raise ValueError('Only int and float components are supported')
 
 
 UNDERLINE_STYLES = {
@@ -132,7 +132,7 @@ def mk_txt_fmt(derive=None, fg=None, bg=None, bold=False, ul=None, ul_color=None
         elif ul in UNDERLINE_STYLES:
             text_format.setUnderlineStyle(UNDERLINE_STYLES[ul])
         else:
-            raise RuntimeError("Unsupported underline style: '{0}'".format(ul))
+            raise ValueError("Unsupported underline style: '{0}'".format(ul))
 
     if ul_color is not None:
         text_format.setUnderlineColor(parse_qcolor(ul_color))

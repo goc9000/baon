@@ -45,9 +45,9 @@ class RenamePlanAction(object, metaclass=ABCMeta):
     @classmethod
     def from_json_representation(cls, json_repr):
         if not is_arrayish(json_repr):
-            raise RuntimeError('JSON representation of action should be a vector')
+            raise ValueError('JSON representation of action should be a vector')
         if len(json_repr) == 0:
-            raise RuntimeError('JSON representation of action should start with the action type')
+            raise ValueError('JSON representation of action should start with the action type')
 
         action_type = json_repr[0]
         action_class = get_action_class(action_type)
@@ -76,6 +76,6 @@ def get_action_class(action_type):
 
     cls = action_class_lookup.get(action_type)
     if cls is None:
-        raise RuntimeError("Unrecognized action: '{0}'".format(action_type))
+        raise ValueError("Unrecognized action: '{0}'".format(action_type))
 
     return cls
