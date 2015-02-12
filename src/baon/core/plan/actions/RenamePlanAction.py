@@ -10,10 +10,8 @@
 import re
 
 from abc import ABCMeta, abstractmethod
-from collections import deque
-from inspect import isabstract
 
-from baon.core.utils.lang_utils import is_arrayish
+from baon.core.utils.lang_utils import is_arrayish, iter_non_abstract_descendants
 
 
 class RenamePlanAction(object, metaclass=ABCMeta):
@@ -62,17 +60,9 @@ def get_action_class(action_type):
     global action_class_lookup
 
     if action_class_lookup is None:
-        action_class_lookup = {}
-
-        q = deque()
-        q.append(RenamePlanAction)
-
-        while len(q) > 0:
-            cls = q.popleft()
-            q.extend(cls.__subclasses__())
-
-            if not isabstract(cls):
-                action_class_lookup[cls.action_name_for_json_representation()] = cls
+        action_class_lookup = {
+            cls.action_name_for_json_representation(): cls for cls in iter_non_abstract_descendants(RenamePlanAction)
+        }
 
     cls = action_class_lookup.get(action_type)
     if cls is None:

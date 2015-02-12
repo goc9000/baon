@@ -9,6 +9,8 @@
 
 import sys
 
+from collections import deque
+from inspect import isabstract
 from contextlib import contextmanager
 
 
@@ -41,3 +43,15 @@ def swallow_os_errors():
         yield
     except OSError:
         pass
+
+
+def iter_non_abstract_descendants(cls):
+    q = deque()
+    q.append(cls)
+
+    while len(q) > 0:
+        cls = q.popleft()
+        q.extend(cls.__subclasses__())
+
+        if not isabstract(cls):
+            yield cls
