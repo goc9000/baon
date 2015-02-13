@@ -14,22 +14,25 @@ from baon.gui.qt_utils import parse_qcolor
 
 class TestQtUtilsPy(TestCase):
     def test_parse_qcolor(self):
-        f_u_t = parse_qcolor
-        self.assertEqual(f_u_t((64, 128, 255)).getRgb(), (64, 128, 255, 255))
-        self.assertEqual(f_u_t((64, 128, 255, 32)).getRgb(), (64, 128, 255, 32))
-        self.assertEqual(f_u_t((0.25, 0.5, 1.0)).getRgb(), (64, 128, 255, 255))
-        self.assertEqual(f_u_t('#4080ff').getRgb(), (64, 128, 255, 255))
-        self.assertEqual(f_u_t('#4080ff20').getRgb(), (64, 128, 255, 32))
-        self.assertEqual(f_u_t('#4080Ff').getRgb(), (64, 128, 255, 255))
-        self.assertEqual(f_u_t('4080ff').getRgb(), (64, 128, 255, 255))
-        self.assertEqual(f_u_t('red').getRgb(), (255, 0, 0, 255))
-        self.assertEqual(f_u_t('Red').getRgb(), (255, 0, 0, 255))
-        self.assertEqual(f_u_t({'r': 64, 'g': 128, 'b': 255}).getRgb(), (64, 128, 255, 255))
-        self.assertEqual(f_u_t({'r': 64, 'g': 128, 'b': 255, 'a': 32}).getRgb(), (64, 128, 255, 32))
-        self.assertEqual(f_u_t({'r': 64, 'G': 128, 'b': 255, 'A': 32}).getRgb(), (64, 128, 255, 32))
-        self.assertEqual(f_u_t({'reD': 64, 'Green': 128, 'bLuE': 255, 'ALPHA': 32}).getRgb(), (64, 128, 255, 32))
-        self.assertEqual(f_u_t({'r': 0.25, 'g': 0.5, 'b': 1.0}).getRgb(), (64, 128, 255, 255))
-        self.assertEqual(f_u_t({'red': 64, 'g': 128, 'b': 255, 'alpha': 32}).getRgb(), (64, 128, 255, 32))
+        for spec, expected_rgba in (
+            ((64, 128, 255), (64, 128, 255, 255)),
+            ((64, 128, 255, 32), (64, 128, 255, 32)),
+            ((0.25, 0.5, 1.0), (64, 128, 255, 255)),
+            ('#4080ff', (64, 128, 255, 255)),
+            ('#4080ff20', (64, 128, 255, 32)),
+            ('#4080Ff', (64, 128, 255, 255)),
+            ('4080ff', (64, 128, 255, 255)),
+            ('red', (255, 0, 0, 255)),
+            ('Red', (255, 0, 0, 255)),
+            ({'r': 64, 'g': 128, 'b': 255}, (64, 128, 255, 255)),
+            ({'r': 64, 'g': 128, 'b': 255, 'a': 32}, (64, 128, 255, 32)),
+            ({'r': 64, 'G': 128, 'b': 255, 'A': 32}, (64, 128, 255, 32)),
+            ({'reD': 64, 'Green': 128, 'bLuE': 255, 'ALPHA': 32}, (64, 128, 255, 32)),
+            ({'r': 0.25, 'g': 0.5, 'b': 1.0}, (64, 128, 255, 255)),
+            ({'red': 64, 'g': 128, 'b': 255, 'alpha': 32}, (64, 128, 255, 32)),
+        ):
+            with self.subTest(color_spec=spec, expected_rgba=expected_rgba):
+                self.assertEqual(parse_qcolor(spec).getRgb(), expected_rgba)
 
     def test_parse_qcolor_invalid(self):
         for spec in (
@@ -49,5 +52,6 @@ class TestQtUtilsPy(TestCase):
             {'r': 64, 'red': 32, 'g': 100, 'b': 255},
             {'r': 64, 'g': 128.0, 'b': 255},
         ):
-            with self.assertRaises(ValueError):
-                parse_qcolor(spec)
+            with self.subTest(color_spec=spec):
+                with self.assertRaises(ValueError):
+                    parse_qcolor(spec)
