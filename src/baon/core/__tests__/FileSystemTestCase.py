@@ -25,25 +25,18 @@ class FileSystemTestCase(TestCase):
     links_supported = None
     unicode_supported = None
 
-    @classmethod
-    def setUpClass(cls):
-        cls._test_dir_path = tempfile.mkdtemp()
+    def setUp(self):
+        self._test_dir_path = tempfile.mkdtemp()
 
-        cls.links_supported = cls._check_links_supported()
-        cls.unicode_supported = os.path.supports_unicode_filenames
+        self.links_supported = self._check_links_supported()
+        self.unicode_supported = os.path.supports_unicode_filenames
 
-    @classmethod
-    def tearDownClass(cls):
-        cls._cleanup_files(delete_root=True)
+    def tearDown(self):
+        self.cleanup_files(delete_root=True)
 
-    @classmethod
-    def _full_test_path(cls, relative_path):
-        return os.path.join(cls._test_dir_path, relative_path)
-
-    @classmethod
-    def _check_links_supported(cls):
-        full_link_path = cls._full_test_path('temp_link')
-        full_target_path = cls._full_test_path('')
+    def _check_links_supported(self):
+        full_link_path = self.full_test_path('temp_link')
+        full_target_path = self.full_test_path('')
 
         try:
             os.symlink(full_target_path, full_link_path)
@@ -54,24 +47,24 @@ class FileSystemTestCase(TestCase):
 
         return True
 
-    @classmethod
-    def _make_file(cls, file_path):
-        dir_name, _ = os.path.split(file_path)
-        cls._make_dir(dir_name)
+    def full_test_path(self, relative_path):
+        return os.path.join(self._test_dir_path, relative_path)
 
-        full_file_path = cls._full_test_path(file_path)
+    def make_file(self, file_path):
+        dir_name, _ = os.path.split(file_path)
+        self.make_dir(dir_name)
+
+        full_file_path = self.full_test_path(file_path)
         with open(full_file_path, 'w') as _:
             pass
 
-    @classmethod
-    def _make_dir(cls, dir_path):
-        full_dir_path = cls._full_test_path(dir_path)
+    def make_dir(self, dir_path):
+        full_dir_path = self.full_test_path(dir_path)
 
         if not os.path.isdir(full_dir_path):
             os.makedirs(full_dir_path)
 
-    @classmethod
-    def _set_rights(cls, path, read=None, write=None, execute=None):
+    def set_rights(self, path, read=None, write=None, execute=None):
         def adjust_bits(mode, bitmask, condition):
             if condition is True:
                 return mode | bitmask
@@ -80,7 +73,7 @@ class FileSystemTestCase(TestCase):
             else:
                 return mode
 
-        full_path = cls._full_test_path(path)
+        full_path = self.full_test_path(path)
 
         current_mode = os.lstat(full_path).st_mode
 
@@ -90,45 +83,42 @@ class FileSystemTestCase(TestCase):
 
         os.lchmod(full_path, current_mode)
 
-    @classmethod
-    def _make_link(cls, link_path, target_path):
+    def make_link(self, link_path, target_path):
         dir_name, _ = os.path.split(link_path)
-        cls._make_dir(dir_name)
+        self.make_dir(dir_name)
 
-        full_link_path = cls._full_test_path(link_path)
-        full_target_path = cls._full_test_path(target_path)
+        full_link_path = self.full_test_path(link_path)
+        full_target_path = self.full_test_path(target_path)
         os.symlink(full_target_path, full_link_path)
 
-    @classmethod
-    def _realize_file_structure(cls, base_dir, files_repr):
+    def realize_file_structure(self, base_dir, files_repr):
         deferred_set_rights = {}
 
         for file_repr in files_repr:
             kind, path1, path2, params = _parse_file_repr(file_repr)
 
             if kind == 'FILE':
-                cls._make_file(os.path.join(base_dir, path1))
+                self.make_file(os.path.join(base_dir, path1))
             elif kind == 'DIR':
-                cls._make_dir(os.path.join(base_dir, path1))
+                self.make_dir(os.path.join(base_dir, path1))
             elif kind == 'LINK':
-                cls._make_link(os.path.join(base_dir, path1), os.path.join(base_dir, path2))
+                self.make_link(os.path.join(base_dir, path1), os.path.join(base_dir, path2))
 
             rights = {k: v for k, v in params.items() if k in {'read', 'write', 'execute'}}
             if len(rights) > 0:
                 deferred_set_rights[path1] = rights
 
         for path in reversed(sorted(deferred_set_rights.keys())):
-            cls._set_rights(os.path.join(base_dir, path), **deferred_set_rights[path])
+            self.set_rights(os.path.join(base_dir, path), **deferred_set_rights[path])
 
-    @classmethod
-    def _cleanup_files(cls, path='', delete_root=False):
-        cls._set_rights(path, read=True, write=True, execute=True)
+    def cleanup_files(self, path='', delete_root=False):
+        self.set_rights(path, read=True, write=True, execute=True)
 
-        full_path = cls._full_test_path(path)
+        full_path = self.full_test_path(path)
 
         if os.path.isdir(full_path):
             for item in os.listdir(full_path):
-                cls._cleanup_files(os.path.join(path, item), True)
+                self.cleanup_files(os.path.join(path, item), True)
 
         if delete_root:
             if os.path.isdir(full_path):
@@ -136,16 +126,15 @@ class FileSystemTestCase(TestCase):
             else:
                 os.unlink(full_path)
 
-    @classmethod
     @contextmanager
-    def _temp_file_structure(cls, base_path, files_repr):
-        cls._realize_file_structure(base_path, files_repr)
+    def temp_file_structure(self, base_path, files_repr):
+        self.realize_file_structure(base_path, files_repr)
 
         try:
             yield
         finally:
             with swallow_os_errors():
-                cls._cleanup_files(base_path, base_path != '')
+                self.cleanup_files(base_path, base_path != '')
 
     def assert_is_dir(self, path):
         if not os.path.exists(path):

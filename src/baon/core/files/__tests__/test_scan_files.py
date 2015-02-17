@@ -200,26 +200,26 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
 
     def test_scan_non_existent(self):
         with self.assertRaises(BasePathDoesNotExistError):
-            scan_files(self._full_test_path('non_existent'))
+            scan_files(self.full_test_path('non_existent'))
 
     def test_scan_base_path_not_a_dir(self):
         with self.assertRaises(BasePathIsNotADirectoryError):
-            with self._temp_file_structure('', (
+            with self.temp_file_structure('', (
                 ('FILE', 'file1'),
             )):
-                scan_files(self._full_test_path('file1'))
+                scan_files(self.full_test_path('file1'))
 
     def test_scan_cannot_explore(self):
         with self.assertRaises(CannotExploreBasePathError):
-            with self._temp_file_structure('', (
+            with self.temp_file_structure('', (
                 ('DIR', 'no_read_dir', {'read': False}),
             )):
-                scan_files(self._full_test_path('no_read_dir'))
+                scan_files(self.full_test_path('no_read_dir'))
 
     def test_reports_progress(self):
         progress_events = []
 
-        with self._temp_file_structure('', self.BASIC_FILE_STRUCTURE):
+        with self.temp_file_structure('', self.BASIC_FILE_STRUCTURE):
             scan_files(
                 base_path=self._test_dir_path,
                 recursive=True,
@@ -229,7 +229,7 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
         self._verify_reported_progress(progress_events)
 
     def _test_file_scanner(self, setup_files=None, expected_result=None, **options):
-        with self._temp_file_structure('', setup_files):
+        with self.temp_file_structure('', setup_files):
             files = scan_files(self._test_dir_path, **options)
 
         self.assertEqual(

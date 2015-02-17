@@ -16,86 +16,91 @@ from baon.core.plan.actions.MoveFileAction import MoveFileAction
 class TestMoveFileAction(RenamePlanActionTestCase):
 
     def test_basic(self):
-        with self._temp_file_structure('', (('FILE', 'file1'),)):
-            path1 = self._full_test_path('file1')
-            path2 = self._full_test_path('file2')
+        self.make_file('file1')
 
-            MoveFileAction(path1, path2).execute()
+        path1 = self.full_test_path('file1')
+        path2 = self.full_test_path('file2')
 
-            self.assert_path_does_not_exist(path1)
-            self.assert_is_file(path2)
+        MoveFileAction(path1, path2).execute()
+
+        self.assert_path_does_not_exist(path1)
+        self.assert_is_file(path2)
 
     def test_basic_dir(self):
-        with self._temp_file_structure('', (('DIR', 'dir1'),)):
-            path1 = self._full_test_path('dir1')
-            path2 = self._full_test_path('dir2')
+        self.make_dir('dir1')
 
-            MoveFileAction(path1, path2).execute()
+        path1 = self.full_test_path('dir1')
+        path2 = self.full_test_path('dir2')
 
-            self.assert_path_does_not_exist(path1)
-            self.assert_is_dir(path2)
+        MoveFileAction(path1, path2).execute()
+
+        self.assert_path_does_not_exist(path1)
+        self.assert_is_dir(path2)
 
     def test_dir_with_files(self):
-        with self._temp_file_structure('', (('FILE', 'dir1/file'),)):
-            path1 = self._full_test_path('dir1')
-            path2 = self._full_test_path('dir2')
+        self.make_file('dir1/file')
 
-            MoveFileAction(path1, path2).execute()
+        path1 = self.full_test_path('dir1')
+        path2 = self.full_test_path('dir2')
 
-            self.assert_path_does_not_exist(path1)
-            self.assert_is_dir(path2)
-            self.assert_is_file(self._full_test_path('dir2/file'))
+        MoveFileAction(path1, path2).execute()
+
+        self.assert_path_does_not_exist(path1)
+        self.assert_is_dir(path2)
+        self.assert_is_file(self.full_test_path('dir2/file'))
 
     def test_fail_not_exists(self):
-        with self._temp_file_structure('', ()):
-            with self.assertRaises(CannotMoveFileDoesNotExistException):
-                MoveFileAction(self._full_test_path('file1'), self._full_test_path('file2')).execute()
+        with self.assertRaises(CannotMoveFileDoesNotExistException):
+            MoveFileAction(self.full_test_path('file1'), self.full_test_path('file2')).execute()
 
     def test_fail_destination_exists(self):
-        with self._temp_file_structure('', (
-            ('FILE', 'file1'),
-            ('FILE', 'file2'),
-        )):
-            with self.assertRaises(CannotMoveFileDestinationExistsException):
-                MoveFileAction(self._full_test_path('file1'), self._full_test_path('file2')).execute()
+        self.make_file('file1')
+        self.make_file('file2')
+
+        with self.assertRaises(CannotMoveFileDestinationExistsException):
+            MoveFileAction(self.full_test_path('file1'), self.full_test_path('file2')).execute()
 
     def test_no_source_permission(self):
-        with self._temp_file_structure('', (
+        self.realize_file_structure('', (
             ('FILE', 'dir1/file'),
             ('DIR', 'dir1', {'write': False}),
             ('DIR', 'dir2'),
-        )):
-            with self.assertRaises(CannotMoveFileNoPermissionsException):
-                MoveFileAction(self._full_test_path('dir1/file'), self._full_test_path('dir2/file')).execute()
+        ))
+
+        with self.assertRaises(CannotMoveFileNoPermissionsException):
+            MoveFileAction(self.full_test_path('dir1/file'), self.full_test_path('dir2/file')).execute()
 
     def test_no_destination_permission(self):
-        with self._temp_file_structure('', (
+        self.realize_file_structure('', (
             ('FILE', 'dir1/file'),
             ('DIR', 'dir2', {'write': False}),
-        )):
-            with self.assertRaises(CannotMoveFileNoPermissionsException):
-                MoveFileAction(self._full_test_path('dir1/file'), self._full_test_path('dir2/file')).execute()
+        ))
+
+        with self.assertRaises(CannotMoveFileNoPermissionsException):
+            MoveFileAction(self.full_test_path('dir1/file'), self.full_test_path('dir2/file')).execute()
 
     def test_undo(self):
-        with self._temp_file_structure('', (('FILE', 'file1'),)):
-            path1 = self._full_test_path('file1')
-            path2 = self._full_test_path('file2')
-            action = MoveFileAction(path1, path2)
+        self.make_file('file1')
 
-            action.execute()
-            self.assert_path_does_not_exist(path1)
-            self.assert_is_file(path2)
+        path1 = self.full_test_path('file1')
+        path2 = self.full_test_path('file2')
+        action = MoveFileAction(path1, path2)
 
-            self.assertTrue(action.undo(), 'action.undo() failed unexpectedly')
-            self.assert_is_file(path1)
-            self.assert_path_does_not_exist(path2)
+        action.execute()
+        self.assert_path_does_not_exist(path1)
+        self.assert_is_file(path2)
+
+        self.assertTrue(action.undo(), 'action.undo() failed unexpectedly')
+        self.assert_is_file(path1)
+        self.assert_path_does_not_exist(path2)
 
     def test_undo_fail(self):
-        with self._temp_file_structure('', (('FILE', 'file1'),)):
-            path1 = self._full_test_path('file1')
-            path2 = self._full_test_path('file2')
-            action = MoveFileAction(path1, path2)
+        self.make_file('file1')
 
-            self.assertFalse(action.undo(), 'action.undo() succeeded unexpectedly')
-            self.assert_is_file(path1)
-            self.assert_path_does_not_exist(path2)
+        path1 = self.full_test_path('file1')
+        path2 = self.full_test_path('file2')
+        action = MoveFileAction(path1, path2)
+
+        self.assertFalse(action.undo(), 'action.undo() succeeded unexpectedly')
+        self.assert_is_file(path1)
+        self.assert_path_does_not_exist(path2)
