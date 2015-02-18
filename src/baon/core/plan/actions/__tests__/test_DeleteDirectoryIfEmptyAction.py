@@ -44,7 +44,7 @@ class TestDeleteDirectoryIfEmptyAction(RenamePlanActionTestCase):
             DeleteDirectoryIfEmptyAction(self.full_test_path('file')).execute()
 
     def test_fail_no_write(self):
-        self.realize_file_structure('', (
+        self.make_file_structure('', (
             ('DIR', 'parent_dir', {'write': False}),
             ('DIR', 'parent_dir/empty_dir'),
         ))
@@ -52,14 +52,14 @@ class TestDeleteDirectoryIfEmptyAction(RenamePlanActionTestCase):
             DeleteDirectoryIfEmptyAction(self.full_test_path('parent_dir/empty_dir')).execute()
 
     def test_fail_no_write_but_ok(self):
-        self.realize_file_structure('', (
+        self.make_file_structure('', (
             ('DIR', 'parent_dir', {'write': False}),
             ('FILE', 'parent_dir/non_empty_dir/file'),
         ))
         DeleteDirectoryIfEmptyAction(self.full_test_path('parent_dir/non_empty_dir')).execute()
 
     def test_fail_no_read(self):
-        self.realize_file_structure('', (('DIR', 'opaque_dir', {'read': False}),))
+        self.make_dir('opaque_dir', read=False)
 
         with self.assertRaises(CannotDeleteDirNoPermissionsException):
             DeleteDirectoryIfEmptyAction(self.full_test_path('opaque_dir')).execute()

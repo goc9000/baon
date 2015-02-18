@@ -50,7 +50,7 @@ class FileSystemTestCase(TestCase):
     def full_test_path(self, relative_path):
         return os.path.join(self._test_dir_path, relative_path)
 
-    def make_file(self, file_path):
+    def make_file(self, file_path, read=None, write=None, execute=None):
         dir_name, _ = os.path.split(file_path)
         self.make_dir(dir_name)
 
@@ -58,11 +58,28 @@ class FileSystemTestCase(TestCase):
         with open(full_file_path, 'w') as _:
             pass
 
-    def make_dir(self, dir_path):
+        if read is not None or write is not None or execute is not None:
+            self.set_rights(file_path, read=read, write=write, execute=execute)
+
+    def make_dir(self, dir_path, read=None, write=None, execute=None):
         full_dir_path = self.full_test_path(dir_path)
 
         if not os.path.isdir(full_dir_path):
             os.makedirs(full_dir_path)
+
+        if read is not None or write is not None or execute is not None:
+            self.set_rights(dir_path, read=read, write=write, execute=execute)
+
+    def make_link(self, link_path, target_path, read=None, write=None, execute=None):
+        dir_name, _ = os.path.split(link_path)
+        self.make_dir(dir_name)
+
+        full_link_path = self.full_test_path(link_path)
+        full_target_path = self.full_test_path(target_path)
+        os.symlink(full_target_path, full_link_path)
+
+        if read is not None or write is not None or execute is not None:
+            self.set_rights(link_path, read=read, write=write, execute=execute)
 
     def set_rights(self, path, read=None, write=None, execute=None):
         def adjust_bits(mode, bitmask, condition):
@@ -83,26 +100,23 @@ class FileSystemTestCase(TestCase):
 
         os.lchmod(full_path, current_mode)
 
-    def make_link(self, link_path, target_path):
-        dir_name, _ = os.path.split(link_path)
-        self.make_dir(dir_name)
-
-        full_link_path = self.full_test_path(link_path)
-        full_target_path = self.full_test_path(target_path)
-        os.symlink(full_target_path, full_link_path)
-
-    def realize_file_structure(self, base_dir, files_repr):
+    def make_file_structure(self, base_dir, files_repr):
         deferred_set_rights = {}
 
         for file_repr in files_repr:
             kind, path1, path2, params = _parse_file_repr(file_repr)
 
+            full_path1 = os.path.join(base_dir, path1)
+            full_path2 = os.path.join(base_dir, path2) if path2 is not None else None
+
+            other_params = {k: v for k, v in params.items() if k not in {'read', 'write', 'execute'}}
+
             if kind == 'FILE':
-                self.make_file(os.path.join(base_dir, path1))
+                self.make_file(full_path1, **other_params)
             elif kind == 'DIR':
-                self.make_dir(os.path.join(base_dir, path1))
+                self.make_dir(full_path1, **other_params)
             elif kind == 'LINK':
-                self.make_link(os.path.join(base_dir, path1), os.path.join(base_dir, path2))
+                self.make_link(full_path1, full_path2, **other_params)
 
             rights = {k: v for k, v in params.items() if k in {'read', 'write', 'execute'}}
             if len(rights) > 0:
@@ -128,7 +142,7 @@ class FileSystemTestCase(TestCase):
 
     @contextmanager
     def temp_file_structure(self, base_path, files_repr):
-        self.realize_file_structure(base_path, files_repr)
+        self.make_file_structure(base_path, files_repr)
 
         try:
             yield

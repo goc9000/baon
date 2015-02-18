@@ -61,7 +61,7 @@ class TestMoveFileAction(RenamePlanActionTestCase):
             MoveFileAction(self.full_test_path('file1'), self.full_test_path('file2')).execute()
 
     def test_no_source_permission(self):
-        self.realize_file_structure('', (
+        self.make_file_structure('', (
             ('FILE', 'dir1/file'),
             ('DIR', 'dir1', {'write': False}),
             ('DIR', 'dir2'),
@@ -71,7 +71,7 @@ class TestMoveFileAction(RenamePlanActionTestCase):
             MoveFileAction(self.full_test_path('dir1/file'), self.full_test_path('dir2/file')).execute()
 
     def test_no_destination_permission(self):
-        self.realize_file_structure('', (
+        self.make_file_structure('', (
             ('FILE', 'dir1/file'),
             ('DIR', 'dir2', {'write': False}),
         ))

@@ -46,7 +46,7 @@ class TestCreateDirectoryAction(RenamePlanActionTestCase):
             CreateDirectoryAction(self.full_test_path('parent/new_dir')).execute()
 
     def test_fail_parent_permissions(self):
-        self.realize_file_structure('', (('DIR', 'parent', {'write': False}),))
+        self.make_dir('parent', write=False)
 
         with self.assertRaises(CannotCreateDirNoPermissionsException):
             CreateDirectoryAction(self.full_test_path('parent/new_dir')).execute()
