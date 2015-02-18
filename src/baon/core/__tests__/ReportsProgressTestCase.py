@@ -7,14 +7,20 @@
 # Licensed under the GPL-3
 
 
+from contextlib import contextmanager
 from unittest import TestCase
 
 
 class ReportsProgressTestCase(TestCase):
-    def _progress_collector(self, progress_events):
-        return lambda count, total: progress_events.append((count, total))
+    @contextmanager
+    def verify_reported_progress(self):
+        progress_events = []
 
-    def _verify_reported_progress(self, progress_events):
+        def progress_collector(count, total):
+            progress_events.append((count, total))
+
+        yield progress_collector
+
         self.assertFalse(len(progress_events) == 0, 'No progress reported!')
 
         first_event = progress_events[0]
