@@ -9,9 +9,11 @@
 
 import os
 
+from baon.core.plan.actions.__errors__.plan_action_errors import CannotDeleteDirDoesNotExistError,\
+    CannotDeleteDirIsAFileError, CannotDeleteDirNoPermissionsError, CannotDeleteDirOtherError
+
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
-from baon.core.plan.actions.plan_action_exceptions import CannotDeleteDirDoesNotExistException,\
-    CannotDeleteDirIsAFileException, CannotDeleteDirNoPermissionsException, CannotDeleteDirOtherErrorException
+
 from baon.core.utils.lang_utils import is_arrayish
 
 
@@ -25,9 +27,9 @@ class DeleteDirectoryIfEmptyAction(RenamePlanAction):
     def execute(self):
         try:
             if os.path.isfile(self.path):
-                raise CannotDeleteDirIsAFileException(self.path)
+                raise CannotDeleteDirIsAFileError(self.path)
             if not os.path.exists(self.path):
-                raise CannotDeleteDirDoesNotExistException(self.path)
+                raise CannotDeleteDirDoesNotExistError(self.path)
 
             is_empty = (len(os.listdir(self.path)) == 0)
             if not is_empty:
@@ -35,9 +37,9 @@ class DeleteDirectoryIfEmptyAction(RenamePlanAction):
 
             os.rmdir(self.path)
         except PermissionError:
-            raise CannotDeleteDirNoPermissionsException(self.path) from None
+            raise CannotDeleteDirNoPermissionsError(self.path) from None
         except OSError as e:
-            raise CannotDeleteDirOtherErrorException(self.path, e) from None
+            raise CannotDeleteDirOtherError(self.path, e) from None
 
     def undo(self):
         try:

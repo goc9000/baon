@@ -8,8 +8,9 @@
 
 
 from baon.core.plan.actions.__tests__.RenamePlanActionTestCase import RenamePlanActionTestCase
-from baon.core.plan.actions.plan_action_exceptions import CannotDeleteDirDoesNotExistException,\
-    CannotDeleteDirIsAFileException, CannotDeleteDirNoPermissionsException
+from baon.core.plan.actions.__errors__.plan_action_errors import CannotDeleteDirDoesNotExistError,\
+    CannotDeleteDirIsAFileError, CannotDeleteDirNoPermissionsError
+
 from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryIfEmptyAction
 
 
@@ -34,13 +35,13 @@ class TestDeleteDirectoryIfEmptyAction(RenamePlanActionTestCase):
         self.assert_is_dir(path)
 
     def test_fail_does_not_exist(self):
-        with self.assertRaises(CannotDeleteDirDoesNotExistException):
+        with self.assertRaises(CannotDeleteDirDoesNotExistError):
             DeleteDirectoryIfEmptyAction(self.full_test_path('non_existent_dir')).execute()
 
     def test_fail_is_a_file(self):
         self.make_file('file')
 
-        with self.assertRaises(CannotDeleteDirIsAFileException):
+        with self.assertRaises(CannotDeleteDirIsAFileError):
             DeleteDirectoryIfEmptyAction(self.full_test_path('file')).execute()
 
     def test_fail_no_write(self):
@@ -48,7 +49,7 @@ class TestDeleteDirectoryIfEmptyAction(RenamePlanActionTestCase):
             ('DIR', 'parent_dir', {'write': False}),
             ('DIR', 'parent_dir/empty_dir'),
         ))
-        with self.assertRaises(CannotDeleteDirNoPermissionsException):
+        with self.assertRaises(CannotDeleteDirNoPermissionsError):
             DeleteDirectoryIfEmptyAction(self.full_test_path('parent_dir/empty_dir')).execute()
 
     def test_fail_no_write_but_ok(self):
@@ -61,7 +62,7 @@ class TestDeleteDirectoryIfEmptyAction(RenamePlanActionTestCase):
     def test_fail_no_read(self):
         self.make_dir('opaque_dir', read=False)
 
-        with self.assertRaises(CannotDeleteDirNoPermissionsException):
+        with self.assertRaises(CannotDeleteDirNoPermissionsError):
             DeleteDirectoryIfEmptyAction(self.full_test_path('opaque_dir')).execute()
 
     def test_undo(self):

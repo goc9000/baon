@@ -8,8 +8,9 @@
 
 
 from baon.core.plan.actions.__tests__.RenamePlanActionTestCase import RenamePlanActionTestCase
-from baon.core.plan.actions.plan_action_exceptions import CannotMoveFileDoesNotExistException,\
-    CannotMoveFileDestinationExistsException, CannotMoveFileNoPermissionsException
+from baon.core.plan.actions.__errors__.plan_action_errors import CannotMoveFileDoesNotExistError,\
+    CannotMoveFileDestinationExistsError, CannotMoveFileNoPermissionsError
+
 from baon.core.plan.actions.MoveFileAction import MoveFileAction
 
 
@@ -50,14 +51,14 @@ class TestMoveFileAction(RenamePlanActionTestCase):
         self.assert_is_file(self.full_test_path('dir2/file'))
 
     def test_fail_not_exists(self):
-        with self.assertRaises(CannotMoveFileDoesNotExistException):
+        with self.assertRaises(CannotMoveFileDoesNotExistError):
             MoveFileAction(self.full_test_path('file1'), self.full_test_path('file2')).execute()
 
     def test_fail_destination_exists(self):
         self.make_file('file1')
         self.make_file('file2')
 
-        with self.assertRaises(CannotMoveFileDestinationExistsException):
+        with self.assertRaises(CannotMoveFileDestinationExistsError):
             MoveFileAction(self.full_test_path('file1'), self.full_test_path('file2')).execute()
 
     def test_no_source_permission(self):
@@ -67,7 +68,7 @@ class TestMoveFileAction(RenamePlanActionTestCase):
             ('DIR', 'dir2'),
         ))
 
-        with self.assertRaises(CannotMoveFileNoPermissionsException):
+        with self.assertRaises(CannotMoveFileNoPermissionsError):
             MoveFileAction(self.full_test_path('dir1/file'), self.full_test_path('dir2/file')).execute()
 
     def test_no_destination_permission(self):
@@ -76,7 +77,7 @@ class TestMoveFileAction(RenamePlanActionTestCase):
             ('DIR', 'dir2', {'write': False}),
         ))
 
-        with self.assertRaises(CannotMoveFileNoPermissionsException):
+        with self.assertRaises(CannotMoveFileNoPermissionsError):
             MoveFileAction(self.full_test_path('dir1/file'), self.full_test_path('dir2/file')).execute()
 
     def test_undo(self):
