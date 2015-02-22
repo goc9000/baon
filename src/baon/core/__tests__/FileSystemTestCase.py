@@ -50,13 +50,14 @@ class FileSystemTestCase(TestCase):
     def full_test_path(self, relative_path):
         return os.path.join(self._test_dir_path, relative_path)
 
-    def make_file(self, file_path, read=None, write=None, execute=None):
+    def make_file(self, file_path, contents=None, read=None, write=None, execute=None):
         dir_name, _ = os.path.split(file_path)
         self.make_dir(dir_name)
 
         full_file_path = self.full_test_path(file_path)
-        with open(full_file_path, 'w') as _:
-            pass
+        with open(full_file_path, 'w') as f:
+            if contents is not None:
+                f.write(contents)
 
         if read is not None or write is not None or execute is not None:
             self.set_rights(file_path, read=read, write=write, execute=execute)
@@ -151,20 +152,36 @@ class FileSystemTestCase(TestCase):
                 self.cleanup_files(base_path, base_path != '')
 
     def assert_is_dir(self, path):
-        if not os.path.exists(path):
-            self.fail('Path does not exist: {0}'.format(path))
+        self.assert_path_exists(path)
+
         if not os.path.isdir(path):
             self.fail('Path is not a directory: {0}'.format(path))
 
     def assert_is_file(self, path):
-        if not os.path.exists(path):
-            self.fail('Path does not exist: {0}'.format(path))
+        self.assert_path_exists(path)
+
         if not os.path.isfile(path):
             self.fail('Path is not a file: {0}'.format(path))
+
+    def assert_path_exists(self, path):
+        if not os.path.exists(path):
+            self.fail('Path does not exist: {0}'.format(path))
 
     def assert_path_does_not_exist(self, path):
         if os.path.exists(path):
             self.fail('Path should not exist: {0}'.format(path))
+
+    def assert_file_contents(self, path, contents):
+        self.assertEqual(self.get_file_contents(path), contents)
+
+    def assert_file_contents_not(self, path, contents):
+        self.assertNotEqual(self.get_file_contents(path), contents)
+
+    def get_file_contents(self, path):
+        self.assert_is_file(path)
+
+        with open(path, 'rt') as f:
+            return f.read()
 
 
 @decorator
