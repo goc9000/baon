@@ -12,7 +12,10 @@ import json
 
 from baon.core.plan.__errors__.rename_plan_errors import CannotSaveRenamePlanFailedWritingFileError,\
     CannotSaveRenamePlanPermissionsError, CannotSaveRenamePlanOtherError, CannotLoadRenamePlanFailedReadingFileError,\
-    CannotLoadRenamePlanInvalidFormatError, CannotLoadRenamePlanPermissionsError, CannotLoadRenamePlanOtherError
+    CannotLoadRenamePlanInvalidFormatError, CannotLoadRenamePlanPermissionsError, CannotLoadRenamePlanOtherError, \
+    RenamePlanExecuteFailedBecauseActionFailedError, RenamePlanExecuteFailedBecauseOtherError
+
+from baon.core.plan.actions.__errors__.plan_action_errors import RenamePlanActionError
 
 from baon.core.utils.lang_utils import is_arrayish, is_dictish, is_string, swallow_os_errors
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
@@ -33,22 +36,47 @@ class RenamePlan(object):
 
     def execute(self, on_progress=None):
         n_steps = len(self.steps)
+        last_successful_step = None
 
-        for i in range(n_steps):
-            try:
+        try:
+            for i in range(n_steps):
                 if on_progress is not None:
                     on_progress(i, n_steps)
+
                 self.steps[i].execute()
-            except Exception as e:
-                for j in range(i-1, -1, -1):
-                    self.steps[j].undo()
-                    if on_progress is not None:
-                        on_progress(j, n_steps)
+
+                last_successful_step = i
+        except Exception as e:
+            rollback_ok = self._undo(from_step=last_successful_step) if last_successful_step is not None else True
+
+            try:
                 raise e
+            except RenamePlanActionError as action_error:
+                raise RenamePlanExecuteFailedBecauseActionFailedError(action_error, rollback_ok) from None
+            except Exception as e:
+                raise RenamePlanExecuteFailedBecauseOtherError(e) from None
 
     def undo(self):
-        for step in reversed(self.steps):
-            step.undo()
+        return self._undo()
+
+    def undo_partial_execution(self):
+        return self._undo(initial_failures_ok=True)
+
+    def _undo(self, from_step=None, initial_failures_ok=False):
+        steps_to_undo = self.steps if from_step is None else self.steps[:from_step + 1]
+        allow_errors = initial_failures_ok
+        general_success = True
+
+        for step in reversed(steps_to_undo):
+            if not step.undo():
+                if not allow_errors:
+                    general_success = False
+            else:
+                allow_errors = False
+
+            # Note: we intentionally plow through even if some undo actions failed
+
+        return general_success
 
     def test_repr(self):
         return tuple(step.json_representation() for step in self.steps)

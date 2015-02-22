@@ -47,7 +47,7 @@ class CannotSaveRenamePlanOtherError(CannotSaveRenamePlanError):
         CannotSaveRenamePlanError.__init__(
             self,
             filename,
-            'of another error',
+            'of an unspecified error',
             {'inner_error': error})
 
 
@@ -91,5 +91,39 @@ class CannotLoadRenamePlanOtherError(CannotLoadRenamePlanError):
         CannotLoadRenamePlanError.__init__(
             self,
             filename,
-            'of another error',
+            'of an unspecified error',
+            {'inner_error': error})
+
+
+class RenamePlanExecuteError(RenamePlanError):
+    def __init__(self, reason_format_string, reason_parameters=None):
+        reason_parameters = dict(reason_parameters or dict())
+
+        RenamePlanError.__init__(
+            self,
+            "Failed to execute rename plan because " + reason_format_string,
+            reason_parameters)
+
+
+class RenamePlanExecuteFailedBecauseActionFailedError(RenamePlanExecuteError):
+    def __init__(self, action_error, rollback_ok):
+        if rollback_ok:
+            rollback_text = \
+                'The actions up to this point were rolled back and the directory is now in its original condition.'
+        else:
+            rollback_text = \
+                'WARNING! The actions were not rolled back successfully. THe directory may now be in an inconsistent '\
+                'state. Proceed with caution.'
+
+        RenamePlanExecuteError.__init__(
+            self,
+            "a step failed:\n\n{action_error}\n\n" + rollback_text,
+            {'action_error': action_error, 'rollback_ok': rollback_ok})
+
+
+class RenamePlanExecuteFailedBecauseOtherError(RenamePlanExecuteError):
+    def __init__(self, error):
+        RenamePlanExecuteError.__init__(
+            self,
+            'of an unspecified error',
             {'inner_error': error})
