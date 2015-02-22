@@ -20,6 +20,12 @@ from baon.core.utils.lang_utils import swallow_os_errors
 
 
 class FileSystemTestCase(TestCase):
+    """
+    Note: the file functions here work with respect to a temporary test directory. Any files created there are
+    automatically deleted at the end of the test. In order to write or read files externally, you have to specify
+    absolute paths. Note that external files are not deleted automatically.
+    """
+
     _test_dir_path = ''
 
     links_supported = None
@@ -35,8 +41,8 @@ class FileSystemTestCase(TestCase):
         self.cleanup_files(delete_root=True)
 
     def _check_links_supported(self):
-        full_link_path = self.full_test_path('temp_link')
-        full_target_path = self.full_test_path('')
+        full_link_path = self.resolve_test_path('temp_link')
+        full_target_path = self.resolve_test_path('')
 
         try:
             os.symlink(full_target_path, full_link_path)
@@ -47,36 +53,38 @@ class FileSystemTestCase(TestCase):
 
         return True
 
-    def full_test_path(self, relative_path):
+    def resolve_test_path(self, relative_path):
         return os.path.join(self._test_dir_path, relative_path)
 
-    def make_file(self, file_path, contents=None, read=None, write=None, execute=None):
-        dir_name, _ = os.path.split(file_path)
+    def open_file(self, path, *args):
+        return open(self.resolve_test_path(path), *args)
+
+    def make_file(self, path, contents=None, read=None, write=None, execute=None):
+        dir_name, _ = os.path.split(path)
         self.make_dir(dir_name)
 
-        full_file_path = self.full_test_path(file_path)
-        with open(full_file_path, 'w') as f:
+        with self.open_file(path, 'w') as f:
             if contents is not None:
                 f.write(contents)
 
         if read is not None or write is not None or execute is not None:
-            self.set_rights(file_path, read=read, write=write, execute=execute)
+            self.set_rights(path, read=read, write=write, execute=execute)
 
-    def make_dir(self, dir_path, read=None, write=None, execute=None):
-        full_dir_path = self.full_test_path(dir_path)
+    def make_dir(self, path, read=None, write=None, execute=None):
+        full_dir_path = self.resolve_test_path(path)
 
         if not os.path.isdir(full_dir_path):
             os.makedirs(full_dir_path)
 
         if read is not None or write is not None or execute is not None:
-            self.set_rights(dir_path, read=read, write=write, execute=execute)
+            self.set_rights(path, read=read, write=write, execute=execute)
 
     def make_link(self, link_path, target_path, read=None, write=None, execute=None):
         dir_name, _ = os.path.split(link_path)
         self.make_dir(dir_name)
 
-        full_link_path = self.full_test_path(link_path)
-        full_target_path = self.full_test_path(target_path)
+        full_link_path = self.resolve_test_path(link_path)
+        full_target_path = self.resolve_test_path(target_path)
         os.symlink(full_target_path, full_link_path)
 
         if read is not None or write is not None or execute is not None:
@@ -91,7 +99,7 @@ class FileSystemTestCase(TestCase):
             else:
                 return mode
 
-        full_path = self.full_test_path(path)
+        full_path = self.resolve_test_path(path)
 
         current_mode = os.lstat(full_path).st_mode
 
@@ -129,7 +137,7 @@ class FileSystemTestCase(TestCase):
     def cleanup_files(self, path='', delete_root=False):
         self.set_rights(path, read=True, write=True, execute=True)
 
-        full_path = self.full_test_path(path)
+        full_path = self.resolve_test_path(path)
 
         if os.path.isdir(full_path):
             for item in os.listdir(full_path):
@@ -154,21 +162,21 @@ class FileSystemTestCase(TestCase):
     def assert_is_dir(self, path):
         self.assert_path_exists(path)
 
-        if not os.path.isdir(path):
+        if not os.path.isdir(self.resolve_test_path(path)):
             self.fail('Path is not a directory: {0}'.format(path))
 
     def assert_is_file(self, path):
         self.assert_path_exists(path)
 
-        if not os.path.isfile(path):
+        if not os.path.isfile(self.resolve_test_path(path)):
             self.fail('Path is not a file: {0}'.format(path))
 
     def assert_path_exists(self, path):
-        if not os.path.exists(path):
+        if not os.path.exists(self.resolve_test_path(path)):
             self.fail('Path does not exist: {0}'.format(path))
 
     def assert_path_does_not_exist(self, path):
-        if os.path.exists(path):
+        if os.path.exists(self.resolve_test_path(path)):
             self.fail('Path should not exist: {0}'.format(path))
 
     def assert_file_contents(self, path, contents):
@@ -180,7 +188,7 @@ class FileSystemTestCase(TestCase):
     def get_file_contents(self, path):
         self.assert_is_file(path)
 
-        with open(path, 'rt') as f:
+        with self.open_file(path, 'rt') as f:
             return f.read()
 
 

@@ -141,12 +141,12 @@ class TestMakeRenamePlan(FileSystemTestCase):
 
     def _test_make_rename_plan(self, files_repr, rules_text, expected_result):
         with self.temp_file_structure('', files_repr):
-            files = scan_files(self._test_dir_path, recursive=True)
+            files = scan_files(self.resolve_test_path(''), recursive=True)
             rule_set = parse_rules(rules_text)
             renamed_files = rename_files(files, rule_set, use_path=False, use_extension=False)
 
             try:
-                plan = make_rename_plan(self._test_dir_path, renamed_files)
+                plan = make_rename_plan(self.resolve_test_path(''), renamed_files)
                 result = plan.test_repr()
             except MakeRenamePlanError as e:
                 result = e.test_repr()

@@ -19,47 +19,38 @@ class TestMoveFileAction(RenamePlanActionTestCase):
     def test_basic(self):
         self.make_file('file1')
 
-        path1 = self.full_test_path('file1')
-        path2 = self.full_test_path('file2')
+        self._make_action('file1', 'file2').execute()
 
-        MoveFileAction(path1, path2).execute()
-
-        self.assert_path_does_not_exist(path1)
-        self.assert_is_file(path2)
+        self.assert_path_does_not_exist('file1')
+        self.assert_is_file('file2')
 
     def test_basic_dir(self):
         self.make_dir('dir1')
 
-        path1 = self.full_test_path('dir1')
-        path2 = self.full_test_path('dir2')
+        self._make_action('dir1', 'dir2').execute()
 
-        MoveFileAction(path1, path2).execute()
-
-        self.assert_path_does_not_exist(path1)
-        self.assert_is_dir(path2)
+        self.assert_path_does_not_exist('dir1')
+        self.assert_is_dir('dir2')
 
     def test_dir_with_files(self):
         self.make_file('dir1/file')
 
-        path1 = self.full_test_path('dir1')
-        path2 = self.full_test_path('dir2')
+        self._make_action('dir1', 'dir2').execute()
 
-        MoveFileAction(path1, path2).execute()
-
-        self.assert_path_does_not_exist(path1)
-        self.assert_is_dir(path2)
-        self.assert_is_file(self.full_test_path('dir2/file'))
+        self.assert_path_does_not_exist('dir1')
+        self.assert_is_dir('dir2')
+        self.assert_is_file('dir2/file')
 
     def test_fail_not_exists(self):
         with self.assertRaises(CannotMoveFileDoesNotExistError):
-            MoveFileAction(self.full_test_path('file1'), self.full_test_path('file2')).execute()
+            self._make_action('file1', 'file2').execute()
 
     def test_fail_destination_exists(self):
         self.make_file('file1')
         self.make_file('file2')
 
         with self.assertRaises(CannotMoveFileDestinationExistsError):
-            MoveFileAction(self.full_test_path('file1'), self.full_test_path('file2')).execute()
+            self._make_action('file1', 'file2').execute()
 
     def test_no_source_permission(self):
         self.make_file_structure('', (
@@ -69,7 +60,7 @@ class TestMoveFileAction(RenamePlanActionTestCase):
         ))
 
         with self.assertRaises(CannotMoveFileNoPermissionsError):
-            MoveFileAction(self.full_test_path('dir1/file'), self.full_test_path('dir2/file')).execute()
+            self._make_action('dir1/file', 'dir2/file').execute()
 
     def test_no_destination_permission(self):
         self.make_file_structure('', (
@@ -78,30 +69,29 @@ class TestMoveFileAction(RenamePlanActionTestCase):
         ))
 
         with self.assertRaises(CannotMoveFileNoPermissionsError):
-            MoveFileAction(self.full_test_path('dir1/file'), self.full_test_path('dir2/file')).execute()
+            self._make_action('dir1/file', 'dir2/file').execute()
 
     def test_undo(self):
         self.make_file('file1')
 
-        path1 = self.full_test_path('file1')
-        path2 = self.full_test_path('file2')
-        action = MoveFileAction(path1, path2)
+        action = self._make_action('file1', 'file2')
 
         action.execute()
-        self.assert_path_does_not_exist(path1)
-        self.assert_is_file(path2)
+        self.assert_path_does_not_exist('file1')
+        self.assert_is_file('file2')
 
         self.assertTrue(action.undo(), 'action.undo() failed unexpectedly')
-        self.assert_is_file(path1)
-        self.assert_path_does_not_exist(path2)
+        self.assert_is_file('file1')
+        self.assert_path_does_not_exist('file2')
 
     def test_undo_fail(self):
         self.make_file('file1')
 
-        path1 = self.full_test_path('file1')
-        path2 = self.full_test_path('file2')
-        action = MoveFileAction(path1, path2)
+        action = self._make_action('file1', 'file2')
 
         self.assertFalse(action.undo(), 'action.undo() succeeded unexpectedly')
-        self.assert_is_file(path1)
-        self.assert_path_does_not_exist(path2)
+        self.assert_is_file('file1')
+        self.assert_path_does_not_exist('file2')
+
+    def _make_action(self, from_path, to_path):
+        return MoveFileAction(self.resolve_test_path(from_path), self.resolve_test_path(to_path))
