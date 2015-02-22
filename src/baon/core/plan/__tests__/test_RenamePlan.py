@@ -7,21 +7,12 @@
 # Licensed under the GPL-3
 
 
-from unittest import TestCase
+from baon.core.plan.__tests__.RenamePlanTestCaseBase import RenamePlanTestCaseBase
 
 from baon.core.plan.RenamePlan import RenamePlan
-from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
-from baon.core.plan.actions.MoveFileAction import MoveFileAction
-from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryIfEmptyAction
 
 
-class TestRenamePlan(TestCase):
-
-    RENAME_PLAN_EXAMPLE = RenamePlan([
-        CreateDirectoryAction('/base/dest_dir'),
-        MoveFileAction('/base/src_dir/file1', '/base/dest_dir/file2'),
-        DeleteDirectoryIfEmptyAction('/base/src_dir'),
-    ])
+class TestRenamePlan(RenamePlanTestCaseBase):
 
     def test_parse_basic(self):
         reconstructed_plan = RenamePlan.from_json_representation(self.RENAME_PLAN_EXAMPLE.json_representation())
