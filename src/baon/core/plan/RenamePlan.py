@@ -11,8 +11,11 @@ import os
 import re
 import random
 import string
-import codecs
 import json
+
+from baon.core.plan.__errors__.rename_plan_errors import CannotSaveRenamePlanFailedWritingFileError,\
+    CannotSaveRenamePlanPermissionsError, CannotSaveRenamePlanOtherError, CannotLoadRenamePlanFailedReadingFileError,\
+    CannotLoadRenamePlanInvalidFormatError, CannotLoadRenamePlanPermissionsError, CannotLoadRenamePlanOtherError
 
 from baon.core.utils.lang_utils import is_arrayish, swallow_os_errors
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
@@ -62,21 +65,39 @@ class RenamePlan(object):
         return RenamePlan([RenamePlanAction.from_json_representation(action_repr) for action_repr in json_repr])
 
     def save_to_file(self, filename):
+        success = False
+
         try:
-            with open(filename, 'w') as f:
+            with open(filename, 'wt') as f:
                 json.dump(self.json_representation(), f, indent=4)
+
+            success = True
+        except PermissionError:
+            raise CannotSaveRenamePlanPermissionsError(filename) from None
+        except OSError:
+            raise CannotSaveRenamePlanFailedWritingFileError(filename) from None
         except Exception as e:
-            with swallow_os_errors():
-                os.remove(filename)
-            
-            raise e
+            raise CannotSaveRenamePlanOtherError(filename, e) from None
+        finally:
+            if not success:
+                with swallow_os_errors():
+                    os.remove(filename)
 
     @staticmethod
     def load_from_file(filename):
-        with codecs.open(filename, 'r', 'utf-8') as f:
-            representation = json.load(f)
+        try:
+            with open(filename, 'rt') as f:
+                representation = json.load(f)
 
-        return RenamePlan.from_json_representation(representation)
+                return RenamePlan.from_json_representation(representation)
+        except PermissionError:
+            raise CannotLoadRenamePlanPermissionsError(filename) from None
+        except OSError:
+            raise CannotLoadRenamePlanFailedReadingFileError(filename) from None
+        except ValueError as e:
+            raise CannotLoadRenamePlanInvalidFormatError(filename) from None
+        except Exception as e:
+            raise CannotLoadRenamePlanOtherError(filename, e) from None
 
     def get_backup_filename(self):
         while True:
