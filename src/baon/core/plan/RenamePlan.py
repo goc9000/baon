@@ -8,9 +8,6 @@
 
 
 import os
-import re
-import random
-import string
 import json
 
 from baon.core.plan.__errors__.rename_plan_errors import CannotSaveRenamePlanFailedWritingFileError,\
@@ -126,25 +123,3 @@ class RenamePlan(object):
             raise CannotLoadRenamePlanInvalidFormatError(filename) from None
         except Exception as e:
             raise CannotLoadRenamePlanOtherError(filename, e) from None
-
-    def get_backup_filename(self):
-        while True:
-            suffix = ''.join((random.choice(string.ascii_letters+string.digits) for _ in range(16)))
-            name = os.path.join(os.path.expanduser('~'), "temp_BAON_rename_plan-{0}".format(suffix))
-            if not os.path.exists(name):
-                return name
-
-    @staticmethod
-    def find_backups():
-        try:
-            home_dir = os.path.expanduser('~')
-            files = os.listdir(home_dir)
-
-            for filename in files:
-                path = os.path.join(home_dir, filename)
-                if re.match(r"temp_BAON_rename_plan-", filename) and os.path.isfile(path):
-                    return path
-        except Exception:
-            raise RuntimeError("Could not look for backups in home directory!") from None
-
-        return None
