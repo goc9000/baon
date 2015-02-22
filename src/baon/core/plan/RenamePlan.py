@@ -17,7 +17,7 @@ from baon.core.plan.__errors__.rename_plan_errors import CannotSaveRenamePlanFai
     CannotSaveRenamePlanPermissionsError, CannotSaveRenamePlanOtherError, CannotLoadRenamePlanFailedReadingFileError,\
     CannotLoadRenamePlanInvalidFormatError, CannotLoadRenamePlanPermissionsError, CannotLoadRenamePlanOtherError
 
-from baon.core.utils.lang_utils import is_arrayish, swallow_os_errors
+from baon.core.utils.lang_utils import is_arrayish, is_dictish, swallow_os_errors
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
 
 
@@ -52,17 +52,28 @@ class RenamePlan(object):
             step.undo()
 
     def test_repr(self):
-        return tuple(self.json_representation())
+        return tuple(step.json_representation() for step in self.steps)
 
     def json_representation(self):
-        return [step.json_representation() for step in self.steps]
+        representation = {
+            'steps': [step.json_representation() for step in self.steps],
+        }
+
+        return representation
 
     @staticmethod
     def from_json_representation(json_repr):
-        if not is_arrayish(json_repr):
-            raise ValueError("JSON representation of plan should be a vector")
+        if not is_dictish(json_repr):
+            raise ValueError("JSON representation of plan should be a dictionary")
 
-        return RenamePlan([RenamePlanAction.from_json_representation(action_repr) for action_repr in json_repr])
+        if 'steps' not in json_repr:
+            raise ValueError("Missing top-level field 'steps'")
+        steps_repr = json_repr['steps']
+        if not is_arrayish(steps_repr):
+            raise ValueError("JSON representation of 'steps' field should be a vector")
+        steps = [RenamePlanAction.from_json_representation(action_repr) for action_repr in steps_repr]
+
+        return RenamePlan(steps)
 
     def save_to_file(self, filename):
         success = False

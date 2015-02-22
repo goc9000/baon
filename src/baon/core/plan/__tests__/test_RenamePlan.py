@@ -27,17 +27,20 @@ class TestRenamePlan(RenamePlanTestCaseBase):
         )
 
     def test_parse_empty(self):
-        reconstructed_plan = RenamePlan.from_json_representation([])
+        reconstructed_plan = RenamePlan.from_json_representation({
+            'steps': [],
+        })
         self.assertEqual(reconstructed_plan.test_repr(), ())
 
     def test_parse_malformed(self):
         for json_repr in (
             123,
             'bogus',
-            {},
             (1, 2, 3),
-            (('InvalidAction', 'path'),),
-            (('CreateDirectory', 'path', 'path2'),),
+            {},
+            {'steps': (1, 2, 3)},
+            {'steps': (('InvalidAction', 'path'),)},
+            {'steps': (('CreateDirectory', 'path', 'path2'),)},
         ):
             with self.subTest(json_repr=json_repr):
                 with self.assertRaises(ValueError):
