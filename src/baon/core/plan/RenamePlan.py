@@ -24,6 +24,11 @@ class RenamePlan(object):
     def __init__(self, steps):
         self.steps = steps
 
+    def __eq__(self, other):
+        return \
+            (len(self.steps) == len(other.steps)) and \
+            all(step == other_step for step, other_step in zip(self.steps, other.steps))
+
     def execute(self, on_progress=None):
         n_steps = len(self.steps)
 

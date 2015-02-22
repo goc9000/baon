@@ -18,6 +18,9 @@ class RenamePlanAction(object, metaclass=ABCMeta):
     def __init__(self):
         pass
 
+    def __eq__(self, other):
+        return self.json_representation() == other.json_representation()
+
     def test_repr(self):
         return self.json_representation()
 
