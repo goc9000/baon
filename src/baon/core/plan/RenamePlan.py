@@ -17,15 +17,17 @@ from baon.core.plan.__errors__.rename_plan_errors import CannotSaveRenamePlanFai
     CannotSaveRenamePlanPermissionsError, CannotSaveRenamePlanOtherError, CannotLoadRenamePlanFailedReadingFileError,\
     CannotLoadRenamePlanInvalidFormatError, CannotLoadRenamePlanPermissionsError, CannotLoadRenamePlanOtherError
 
-from baon.core.utils.lang_utils import is_arrayish, is_dictish, swallow_os_errors
+from baon.core.utils.lang_utils import is_arrayish, is_dictish, is_string, swallow_os_errors
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
 
 
 class RenamePlan(object):
     steps = None
+    comment = None
     
-    def __init__(self, steps):
+    def __init__(self, steps, comment=None):
         self.steps = steps
+        self.comment = comment
 
     def __eq__(self, other):
         return \
@@ -59,6 +61,9 @@ class RenamePlan(object):
             'steps': [step.json_representation() for step in self.steps],
         }
 
+        if self.comment is not None:
+            representation['comment'] = self.comment
+
         return representation
 
     @staticmethod
@@ -70,15 +75,27 @@ class RenamePlan(object):
             raise ValueError("Missing top-level field 'steps'")
         steps_repr = json_repr['steps']
         if not is_arrayish(steps_repr):
-            raise ValueError("JSON representation of 'steps' field should be a vector")
+            raise ValueError("Expected vector for 'steps' field")
         steps = [RenamePlanAction.from_json_representation(action_repr) for action_repr in steps_repr]
 
-        return RenamePlan(steps)
+        comment = None
+        if 'comment' in json_repr:
+            if not is_string(json_repr['comment']):
+                raise ValueError("Expected stirng for 'comment' field")
+            comment = json_repr['comment']
 
-    def save_to_file(self, filename):
+        return RenamePlan(steps, comment)
+
+    def save_to_file(self, filename, comment=None):
         success = False
 
         try:
+            json_repr = self.json_representation()
+
+            # Override saved comment without changing .comment field in plan
+            if comment is not None:
+                json_repr['comment'] = comment
+
             with open(filename, 'wt') as f:
                 json.dump(self.json_representation(), f, indent=4)
 
