@@ -7,10 +7,10 @@
 # Licensed under the GPL-3
 
 
+from baon.core.ast.__errors__.rule_application_errors import SpecifierExpectsNumberError
+
 from baon.core.ast.actions.__tests__.ActionTestCase import ActionTestCase
 from baon.core.ast.actions.ReformatAction import ReformatAction
-
-from baon.core.ast.rule_application_exceptions import SpecifierExpectsNumberException
 
 
 class TestReformatAction(ActionTestCase):
@@ -32,5 +32,5 @@ class TestReformatAction(ActionTestCase):
         self._test_simple_text_action('  78 ', ReformatAction('d', 3), '  078 ')
 
     def test_d_non_number(self):
-        with self.assertRaises(SpecifierExpectsNumberException):
+        with self.assertRaises(SpecifierExpectsNumberError):
             self._test_simple_text_action('00abc', ReformatAction('d'), 'should fail')

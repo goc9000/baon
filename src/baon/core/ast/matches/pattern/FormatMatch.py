@@ -10,9 +10,9 @@
 import os
 import re
 
-from baon.core.ast.rule_check_exceptions import UnrecognizedFormatSpecifierException, \
-    WidthMustBeAtLeast1ForSpecifierException, WidthInapplicableToSpecifierException, \
-    Leading0sInapplicableToSpecifierException, InvalidWidthForSpecifierException
+from baon.core.ast.__errors__.rule_check_errors import UnrecognizedFormatSpecifierError, \
+    WidthMustBeAtLeast1ForSpecifierError, WidthInapplicableToSpecifierError, \
+    Leading0sInapplicableToSpecifierError, InvalidWidthForSpecifierError
 
 from baon.core.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
 from baon.core.ast.ASTNode import ast_node_field
@@ -47,20 +47,20 @@ class FormatMatch(ElementaryPatternMatch):
 
     def _get_pattern_impl(self):
         if self.specifier not in FORMAT_DICT:
-            raise UnrecognizedFormatSpecifierException(self.specifier)
+            raise UnrecognizedFormatSpecifierError(self.specifier)
 
         pattern, repeat = FORMAT_DICT[self.specifier]
 
         if self.leading_zeros is True:
-            raise Leading0sInapplicableToSpecifierException(self.specifier)
+            raise Leading0sInapplicableToSpecifierError(self.specifier)
 
         if self.width is not None:
             if '##' not in pattern:
-                raise WidthInapplicableToSpecifierException(self.specifier)
+                raise WidthInapplicableToSpecifierError(self.specifier)
             if self.width < 0:
-                raise InvalidWidthForSpecifierException(self.specifier)
+                raise InvalidWidthForSpecifierError(self.specifier)
             if self.width == 0 and repeat in ['+', '{1}']:
-                raise WidthMustBeAtLeast1ForSpecifierException(self.specifier)
+                raise WidthMustBeAtLeast1ForSpecifierError(self.specifier)
 
             repeat = '{' + str(self.width) + '}'
 

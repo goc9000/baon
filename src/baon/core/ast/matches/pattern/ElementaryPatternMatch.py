@@ -11,8 +11,9 @@ import re
 
 from abc import abstractmethod
 
+from baon.core.ast.__errors__.rule_check_errors import ErrorInRegularExpressionError
+
 from baon.core.ast.matches.MatchWithActions import MatchWithActions
-from baon.core.ast.rule_check_exceptions import ErrorInRegularExpressionException
 
 
 class ElementaryPatternMatch(MatchWithActions):
@@ -35,7 +36,7 @@ class ElementaryPatternMatch(MatchWithActions):
         try:
             return re.compile(pattern, flags)
         except re.error:
-            raise ErrorInRegularExpressionException() from None
+            raise ErrorInRegularExpressionError() from None
 
     def _semantic_check_before_children(self, scope):
         self._compile_regex()

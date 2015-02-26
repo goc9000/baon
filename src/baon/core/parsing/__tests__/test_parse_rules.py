@@ -56,7 +56,7 @@ class TestRulesLexer(TestCase):
         self.assertEqual(self.parse_result('match', '/abc'),
                          ('UnterminatedRegexError', 1, 1, 1, 4))
 
-        # Malformed patterns or flags do NOT raise a RuleParseException. This is caught in the semantic check phase.
+        # Malformed patterns or flags do NOT raise a RuleParseError. This is caught in the semantic check phase.
         self.assertEqual(self.parse_result('match', '/[abc/'),
                          ('RegexMatch', '[abc'))
         self.assertEqual(self.parse_result('match', '/abc/QXYZ'),

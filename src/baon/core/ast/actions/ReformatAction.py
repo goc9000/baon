@@ -9,20 +9,20 @@
 
 import re
 
+from baon.core.ast.__errors__.rule_check_errors import UnrecognizedFormatSpecifierError,\
+    WidthMustBeAtLeast1ForSpecifierError
+
+from baon.core.ast.__errors__.rule_application_errors import SpecifierExpectsNumberError
+
 from baon.core.ast.actions.CompiledAction import CompiledAction, wrap_simple_text_function
 from baon.core.ast.ASTNode import ast_node_field
-
-from baon.core.ast.rule_application_exceptions import SpecifierExpectsNumberException
-
-from baon.core.ast.rule_check_exceptions import UnrecognizedFormatSpecifierException,\
-    WidthMustBeAtLeast1ForSpecifierException
 
 
 def strip_zeroes(s):
     m = re.match(r'^(\s*)([0-9]+)(\s*)$', s)
     
     if m is None:
-        raise SpecifierExpectsNumberException('d', s)
+        raise SpecifierExpectsNumberError('d', s)
     
     mid = m.group(2).lstrip('0')
     if mid == '':
@@ -35,7 +35,7 @@ def pad_with_zeroes(s, digits):
     m = re.match(r'^(\s*)([0-9]+)(\s*)$', s)
     
     if m is None:
-        raise SpecifierExpectsNumberException('d', s)
+        raise SpecifierExpectsNumberError('d', s)
     
     mid = m.group(2).lstrip('0')
     if mid == '':
@@ -63,8 +63,8 @@ class ReformatAction(CompiledAction):
             if self.width is None:
                 return wrap_simple_text_function(strip_zeroes)
             if self.width <= 0:
-                raise WidthMustBeAtLeast1ForSpecifierException(self.specifier)
+                raise WidthMustBeAtLeast1ForSpecifierError(self.specifier)
 
             return wrap_simple_text_function(lambda text: pad_with_zeroes(text, self.width))
 
-        raise UnrecognizedFormatSpecifierException(self.specifier)
+        raise UnrecognizedFormatSpecifierError(self.specifier)

@@ -11,7 +11,7 @@ import inspect
 
 from baon.core.parsing.SourceSpan import SourceSpan
 
-from baon.core.ast.rule_check_exceptions import RuleCheckException
+from baon.core.ast.__errors__.rule_check_errors import RuleCheckError
 
 from baon.core.ast.ASTNodeField import ASTNodeField
 from baon.core.ast.ASTNodeChildRef import ASTNodeChildRef
@@ -48,7 +48,7 @@ class ASTNode(object):
             for child in self.iter_ast_children():
                 child.semantic_check(scope)
             self._semantic_check_after_children(scope)
-        except RuleCheckException as e:
+        except RuleCheckError as e:
             if e.scope is None:
                 e.scope = scope
             if e.source_span is None:

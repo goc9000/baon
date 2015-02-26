@@ -1,4 +1,4 @@
-# baon/core/ast/rule_application_exceptions.py
+# baon/core/ast/__errors__/rule_application_errors.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -10,21 +10,21 @@
 from baon.core.errors.BAONError import BAONError
 
 
-class RuleApplicationException(BAONError):
+class RuleApplicationError(BAONError):
     scope = None
 
     def __init__(self, format_string, error_parameters):
         BAONError.__init__(self, format_string, error_parameters)
 
 
-class AliasDependenciesTooComplexException(RuleApplicationException):
+class AliasDependenciesTooComplexError(RuleApplicationError):
     def __init__(self):
-        RuleApplicationException.__init__(
+        RuleApplicationError.__init__(
             self, "Dependencies of aliases are too complex", {})
 
 
-class SpecifierExpectsNumberException(RuleApplicationException):
+class SpecifierExpectsNumberError(RuleApplicationError):
     def __init__(self, specifier, received):
-        RuleApplicationException.__init__(
+        RuleApplicationError.__init__(
             self, "%{specifier} expects a number, received '{received}'",
             {'specifier': specifier, 'received': received})

@@ -9,7 +9,8 @@
 
 from unittest import TestCase
 
-from baon.core.ast.rule_check_exceptions import RuleCheckException
+from baon.core.ast.__errors__.rule_check_errors import RuleCheckError
+
 from baon.core.rules.RuleSet import RuleSet
 
 
@@ -19,39 +20,39 @@ class TestSemanticCheck(TestCase):
         self.assertEqual(self.check_result('/abc/i'),
                          True)
         self.assertEqual(self.check_result('/[abc/'),
-                         ('ErrorInRegularExpressionException', 1, 1, 1, 6))
+                         ('ErrorInRegularExpressionError', 1, 1, 1, 6))
         self.assertEqual(self.check_result('/abc/Qi'),
-                         ('InvalidRegexFlagException', {'flag': 'Q'}, 1, 1, 1, 7))
+                         ('InvalidRegexFlagError', {'flag': 'Q'}, 1, 1, 1, 7))
 
     def test_check_format_match(self):
         self.assertEqual(self.check_result('%4d'),
                          True)
         self.assertEqual(self.check_result('%bogus'),
-                         ('UnrecognizedFormatSpecifierException', {'specifier': 'bogus'}, 1, 1, 1, 6))
+                         ('UnrecognizedFormatSpecifierError', {'specifier': 'bogus'}, 1, 1, 1, 6))
         self.assertEqual(self.check_result('%0s'),
-                         ('WidthMustBeAtLeast1ForSpecifierException', {'specifier': 's'}, 1, 1, 1, 3))
+                         ('WidthMustBeAtLeast1ForSpecifierError', {'specifier': 's'}, 1, 1, 1, 3))
         self.assertEqual(self.check_result('%0c'),
-                         ('WidthMustBeAtLeast1ForSpecifierException', {'specifier': 'c'}, 1, 1, 1, 3))
+                         ('WidthMustBeAtLeast1ForSpecifierError', {'specifier': 'c'}, 1, 1, 1, 3))
         self.assertEqual(self.check_result('%0ws'),
                          True)
         self.assertEqual(self.check_result('%4path'),
-                         ('WidthInapplicableToSpecifierException', {'specifier': 'path'}, 1, 1, 1, 6))
+                         ('WidthInapplicableToSpecifierError', {'specifier': 'path'}, 1, 1, 1, 6))
         self.assertEqual(self.check_result('%05s'),
-                         ("Leading0sInapplicableToSpecifierException", {'specifier': 's'}, 1, 1, 1, 4))
+                         ('Leading0sInapplicableToSpecifierError', {'specifier': 's'}, 1, 1, 1, 4))
 
     def test_check_apply_function_action(self):
         self.assertEqual(self.check_result('%s->title'),
                          True)
         self.assertEqual(self.check_result('%s->tilte'),
-                         ('UnsupportedFunctionException', {'function_name': 'tilte'}, 1, 3, 1, 9))
+                         ('UnsupportedFunctionError', {'function_name': 'tilte'}, 1, 3, 1, 9))
 
     def test_check_apply_rule_set_action_checks_inside_rule_set(self):
         self.assertEqual(self.check_result('%s->(%d)'),
                          True)
         self.assertEqual(self.check_result('%s->(%bogus)'),
-                         ('UnrecognizedFormatSpecifierException', {'specifier': 'bogus'}, 1, 6, 1, 11))
+                         ('UnrecognizedFormatSpecifierError', {'specifier': 'bogus'}, 1, 6, 1, 11))
         self.assertEqual(self.check_result('%s->(%d->(..->tilte))'),
-                         ('UnsupportedFunctionException', {'function_name': 'tilte'}, 1, 13, 1, 19))
+                         ('UnsupportedFunctionError', {'function_name': 'tilte'}, 1, 13, 1, 19))
 
     def test_check_reformat_action(self):
         self.assertEqual(self.check_result('%d->%d'),
@@ -61,32 +62,32 @@ class TestSemanticCheck(TestCase):
         self.assertEqual(self.check_result('%d->%04d'),
                          True)
         self.assertEqual(self.check_result('%d->%s'),
-                         ('UnrecognizedFormatSpecifierException', {'specifier': 's'}, 1, 3, 1, 6))
+                         ('UnrecognizedFormatSpecifierError', {'specifier': 's'}, 1, 3, 1, 6))
         self.assertEqual(self.check_result('%d->%0d'),
-                         ('WidthMustBeAtLeast1ForSpecifierException', {'specifier': 'd'}, 1, 3, 1, 7))
+                         ('WidthMustBeAtLeast1ForSpecifierError', {'specifier': 'd'}, 1, 3, 1, 7))
 
     def test_check_match_sequence(self):
         self.assertEqual(self.check_result('%d %bogus %s'),
-                         ('UnrecognizedFormatSpecifierException', {'specifier': 'bogus'}, 1, 4, 1, 9))
+                         ('UnrecognizedFormatSpecifierError', {'specifier': 'bogus'}, 1, 4, 1, 9))
         self.assertEqual(self.check_result('%d %first %second %s'),
-                         ('UnrecognizedFormatSpecifierException', {'specifier': 'first'}, 1, 4, 1, 9))
+                         ('UnrecognizedFormatSpecifierError', {'specifier': 'first'}, 1, 4, 1, 9))
 
     def test_check_repeat_match(self):
         self.assertEqual(self.check_result('%d->bogus+'),
-                         ('UnsupportedFunctionException', {'function_name': 'bogus'}, 1, 3, 1, 9))
+                         ('UnsupportedFunctionError', {'function_name': 'bogus'}, 1, 3, 1, 9))
 
     def test_check_subrule_match_checks_inside_rule(self):
         self.assertEqual(self.check_result('%s (%d)'),
                          True)
         self.assertEqual(self.check_result('%s (%bogus)'),
-                         ('UnrecognizedFormatSpecifierException', {'specifier': 'bogus'}, 1, 5, 1, 10))
+                         ('UnrecognizedFormatSpecifierError', {'specifier': 'bogus'}, 1, 5, 1, 10))
         self.assertEqual(self.check_result('%s (%d (..->tilte))'),
-                         ('UnsupportedFunctionException', {'function_name': 'tilte'}, 1, 11, 1, 17))
+                         ('UnsupportedFunctionError', {'function_name': 'tilte'}, 1, 11, 1, 17))
 
     def check_result(self, text_input):
         try:
             RuleSet.from_source(text_input)
-        except RuleCheckException as e:
+        except RuleCheckError as e:
             return e.test_repr()
 
         return True
