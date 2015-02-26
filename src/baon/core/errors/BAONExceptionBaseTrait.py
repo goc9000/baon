@@ -7,21 +7,22 @@
 # Licensed under the GPL-3
 
 
-class BAONExceptionBaseTrait(object):
-    format_string = None
-    error_parameters = None
+from abc import ABCMeta, abstractmethod
 
-    def __init__(self, format_string, error_parameters=None):
-        self.format_string = format_string
-        self.error_parameters = error_parameters if error_parameters is not None else dict()
+
+class BAONExceptionBaseTrait(BaseException, metaclass=ABCMeta):
 
     def __str__(self):
-        return self.format_string.format(**self.error_parameters)
+        return self._get_format_string().format(**self.args[0])
+
+    @abstractmethod
+    def _get_format_string(self):
+        return ''
 
     def test_repr(self):
         base_tuple = (self.__class__.__name__,)
 
-        if len(self.error_parameters) > 0:
-            base_tuple += (self.error_parameters,)
+        if len(self.args[0]) > 0:
+            base_tuple += (self.args[0],)
 
         return base_tuple

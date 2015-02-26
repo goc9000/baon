@@ -7,107 +7,111 @@
 # Licensed under the GPL-3
 
 
+from abc import ABCMeta, abstractmethod
+
 from baon.core.errors.BAONError import BAONError
 
 
-class RenamePlanError(BAONError):
-    def __init__(self, format_string, error_parameters=None):
-        BAONError.__init__(self, format_string, error_parameters)
+class RenamePlanError(BAONError, metaclass=ABCMeta):
+    pass
 
 
-class CannotSaveRenamePlanError(RenamePlanError):
-    def __init__(self, filename, reason_format_string, reason_parameters=None):
-        reason_parameters = dict(reason_parameters or dict())
-        reason_parameters['filename'] = filename
+class CannotSaveRenamePlanError(RenamePlanError, metaclass=ABCMeta):
+    def __init__(self, filename, **extra_parameters):
+        super(CannotSaveRenamePlanError, self).__init__(filename=filename, **extra_parameters)
 
-        RenamePlanError.__init__(
-            self,
-            "Cannot save rename plan to '{filename}' because " + reason_format_string,
-            reason_parameters)
+    def _get_format_string(self):
+        return "Cannot save rename plan to '{filename}' because " + self._get_reason_format_string()
+
+    @abstractmethod
+    def _get_reason_format_string(self):
+        return ''
 
 
 class CannotSaveRenamePlanPermissionsError(CannotSaveRenamePlanError):
     def __init__(self, filename):
-        CannotSaveRenamePlanError.__init__(
-            self,
-            filename,
-            'of a permissions issue')
+        super(CannotSaveRenamePlanPermissionsError, self).__init__(filename)
 
+    def _get_reason_format_string(self):
+        return 'of a permissions issue'
 
 class CannotSaveRenamePlanFailedWritingFileError(CannotSaveRenamePlanError):
     def __init__(self, filename):
-        CannotSaveRenamePlanError.__init__(
-            self,
-            filename,
-            "the file could not be written")
+        super(CannotSaveRenamePlanFailedWritingFileError, self).__init__(filename)
 
+    def _get_reason_format_string(self):
+        return 'the file could not be written'
 
 class CannotSaveRenamePlanOtherError(CannotSaveRenamePlanError):
     def __init__(self, filename, error):
-        CannotSaveRenamePlanError.__init__(
-            self,
-            filename,
-            'of an unspecified error',
-            {'inner_error': error})
+        super(CannotSaveRenamePlanOtherError, self).__init__(filename, inner_error=error)
+
+    def _get_reason_format_string(self):
+        return 'of an unspecified error'
 
 
-class CannotLoadRenamePlanError(RenamePlanError):
-    def __init__(self, filename, reason_format_string, reason_parameters=None):
-        reason_parameters = dict(reason_parameters or dict())
-        reason_parameters['filename'] = filename
+class CannotLoadRenamePlanError(RenamePlanError, metaclass=ABCMeta):
+    def __init__(self, filename, **extra_parameters):
+        super(CannotLoadRenamePlanError, self).__init__(filename=filename, **extra_parameters)
 
-        RenamePlanError.__init__(
-            self,
-            "Cannot load rename plan from '{filename}' because " + reason_format_string,
-            reason_parameters)
+    def _get_format_string(self):
+        return "Cannot load rename plan from '{filename}' because " + self._get_reason_format_string()
+
+    @abstractmethod
+    def _get_reason_format_string(self):
+        return ''
 
 
 class CannotLoadRenamePlanPermissionsError(CannotLoadRenamePlanError):
     def __init__(self, filename):
-        CannotLoadRenamePlanError.__init__(
-            self,
-            filename,
-            'of a permissions issue')
+        super(CannotLoadRenamePlanPermissionsError, self).__init__(filename)
+
+    def _get_reason_format_string(self):
+        return 'of a permissions issue'
 
 
 class CannotLoadRenamePlanFailedReadingFileError(CannotLoadRenamePlanError):
     def __init__(self, filename):
-        CannotLoadRenamePlanError.__init__(
-            self,
-            filename,
-            "the file could not be read")
+        super(CannotLoadRenamePlanFailedReadingFileError, self).__init__(filename)
+
+    def _get_reason_format_string(self):
+        return 'the file could not be read'
 
 
 class CannotLoadRenamePlanInvalidFormatError(CannotLoadRenamePlanError):
     def __init__(self, filename):
-        CannotLoadRenamePlanError.__init__(
-            self,
-            filename,
-            "the file is corrupt or not a BAON rename plan")
+        super(CannotLoadRenamePlanInvalidFormatError, self).__init__(filename)
+
+    def _get_reason_format_string(self):
+        return 'the file is corrupt or not a BAON rename plan'
 
 
 class CannotLoadRenamePlanOtherError(CannotLoadRenamePlanError):
     def __init__(self, filename, error):
-        CannotLoadRenamePlanError.__init__(
-            self,
-            filename,
-            'of an unspecified error',
-            {'inner_error': error})
+        super(CannotLoadRenamePlanOtherError, self).__init__(filename, inner_error=error)
+
+    def _get_reason_format_string(self):
+        return 'of an unspecified error'
 
 
-class RenamePlanExecuteError(RenamePlanError):
-    def __init__(self, reason_format_string, reason_parameters=None):
-        reason_parameters = dict(reason_parameters or dict())
+class RenamePlanExecuteError(RenamePlanError, metaclass=ABCMeta):
+    def _get_format_string(self):
+        return "Failed to execute rename plan because " + self._get_reason_format_string()
 
-        RenamePlanError.__init__(
-            self,
-            "Failed to execute rename plan because " + reason_format_string,
-            reason_parameters)
+    @abstractmethod
+    def _get_reason_format_string(self):
+        return ''
 
 
 class RenamePlanExecuteFailedBecauseActionFailedError(RenamePlanExecuteError):
     def __init__(self, action_error, rollback_ok):
-        if rollback_ok:
+        super(RenamePlanExecuteFailedBecauseActionFailedError, self).__init__(
+            action_error=action_error,
+            rollback_ok=rollback_ok,
+        )
+
+    def _get_reason_format_string(self):
+        if self.args[0]['rollback_ok']:
             rollback_text = \
                 'The actions up to this point were rolled back and the directory is now in its original condition.'
         else:
@@ -115,15 +119,12 @@ class RenamePlanExecuteFailedBecauseActionFailedError(RenamePlanExecuteError):
                 'WARNING! The actions were not rolled back successfully. THe directory may now be in an inconsistent '\
                 'state. Proceed with caution.'
 
-        RenamePlanExecuteError.__init__(
-            self,
-            "a step failed:\n\n{action_error}\n\n" + rollback_text,
-            {'action_error': action_error, 'rollback_ok': rollback_ok})
+        return "a step failed:\n\n{action_error}\n\n" + rollback_text
 
 
 class RenamePlanExecuteFailedBecauseOtherError(RenamePlanExecuteError):
     def __init__(self, error):
-        RenamePlanExecuteError.__init__(
-            self,
-            'of an unspecified error',
-            {'inner_error': error})
+        super(RenamePlanExecuteFailedBecauseOtherError, self).__init__(inner_error=error)
+
+    def _get_reason_format_string(self):
+        return 'of an unspecified error'

@@ -7,16 +7,18 @@
 # Licensed under the GPL-3
 
 
+from abc import ABCMeta
+
 from baon.core.errors.BAONError import BAONError
 
 
-class FileReferenceError(BAONError):
-    def __init__(self, format_string, error_parameters=None):
-        BAONError.__init__(self, format_string, error_parameters)
+class FileReferenceError(BAONError, metaclass=ABCMeta):
+    pass
 
 
 class CannotExploreDirectoryError(FileReferenceError):
-    def __init__(self, inner_error=None):
-        FileReferenceError.__init__(
-            self, 'Cannot open directory for exploration',
-            {'inner_error': inner_error})
+    def __init__(self, inner_error):
+        super(CannotExploreDirectoryError, self).__init__(inner_error=inner_error)
+
+    def _get_format_string(self):
+        return 'Cannot open directory for exploration'

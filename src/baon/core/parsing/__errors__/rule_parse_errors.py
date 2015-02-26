@@ -7,44 +7,50 @@
 # Licensed under the GPL-3
 
 
+from abc import ABCMeta
+
 from baon.core.errors.BAONErrorWithSourceSpan import BAONErrorWithSourceSpan
 
 
-class RuleParseError(BAONErrorWithSourceSpan):
-    def __init__(self, format_string, error_parameters, source_span=None):
-        BAONErrorWithSourceSpan.__init__(self, format_string, error_parameters, source_span)
+class RuleParseError(BAONErrorWithSourceSpan, metaclass=ABCMeta):
+    pass
 
 
 class MissingFormatSpecifierError(RuleParseError):
     def __init__(self, source_span=None):
-        RuleParseError.__init__(
-            self, "Missing format specifier", {},
-            source_span)
+        super(MissingFormatSpecifierError, self).__init__(source_span)
+
+    def _get_format_string(self):
+        return 'Missing format specifier'
 
 
 class RuleSyntaxError(RuleParseError):
     def __init__(self, source_span=None):
-        RuleParseError.__init__(
-            self, "Syntax error", {},
-            source_span)
+        super(RuleSyntaxError, self).__init__(source_span)
+
+    def _get_format_string(self):
+        return 'Syntax error'
 
 
 class StringLiteralNotQuotedProperlyError(RuleParseError):
     def __init__(self, source_span=None):
-        RuleParseError.__init__(
-            self, "String literal not quoted properly", {},
-            source_span)
+        super(StringLiteralNotQuotedProperlyError, self).__init__(source_span)
+
+    def _get_format_string(self):
+        return 'String literal not quoted properly'
 
 
 class UnterminatedRegexError(RuleParseError):
     def __init__(self, source_span=None):
-        RuleParseError.__init__(
-            self, "Unterminated regex", {},
-            source_span)
+        super(UnterminatedRegexError, self).__init__(source_span)
+
+    def _get_format_string(self):
+        return 'Unterminated regex'
 
 
 class UnterminatedStringError(RuleParseError):
     def __init__(self, source_span=None):
-        RuleParseError.__init__(
-            self, "Unterminated string", {},
-            source_span)
+        super(UnterminatedStringError, self).__init__(source_span)
+
+    def _get_format_string(self):
+        return 'Unterminated string'

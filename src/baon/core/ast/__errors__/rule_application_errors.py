@@ -7,24 +7,23 @@
 # Licensed under the GPL-3
 
 
+from abc import ABCMeta
+
 from baon.core.errors.BAONError import BAONError
 
 
-class RuleApplicationError(BAONError):
+class RuleApplicationError(BAONError, metaclass=ABCMeta):
     scope = None
-
-    def __init__(self, format_string, error_parameters):
-        BAONError.__init__(self, format_string, error_parameters)
 
 
 class AliasDependenciesTooComplexError(RuleApplicationError):
-    def __init__(self):
-        RuleApplicationError.__init__(
-            self, "Dependencies of aliases are too complex", {})
+    def _get_format_string(self):
+        return 'Dependencies of aliases are too complex'
 
 
 class SpecifierExpectsNumberError(RuleApplicationError):
     def __init__(self, specifier, received):
-        RuleApplicationError.__init__(
-            self, "%{specifier} expects a number, received '{received}'",
-            {'specifier': specifier, 'received': received})
+        super(SpecifierExpectsNumberError, self).__init__(specifier=specifier, received=received)
+
+    def _get_format_string(self):
+        return "%{specifier} expects a number, received '{received}'"

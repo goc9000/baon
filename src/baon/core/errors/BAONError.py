@@ -7,11 +7,13 @@
 # Licensed under the GPL-3
 
 
+from abc import ABCMeta
+
 from baon.core.errors.BAONExceptionBaseTrait import BAONExceptionBaseTrait
 
 
-class BAONError(Exception, BAONExceptionBaseTrait):
+class BAONError(BAONExceptionBaseTrait, Exception, metaclass=ABCMeta):
 
-    def __init__(self, format_string, error_parameters=None):
-        BAONExceptionBaseTrait.__init__(self, format_string, error_parameters)
-        Exception.__init__(self, format_string.format(**self.error_parameters))
+    def __init__(self, **error_parameters):
+        BAONExceptionBaseTrait.__init__(self)
+        Exception.__init__(self, error_parameters)

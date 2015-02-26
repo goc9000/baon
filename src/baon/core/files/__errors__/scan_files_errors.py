@@ -7,30 +7,34 @@
 # Licensed under the GPL-3
 
 
+from abc import ABCMeta
+
 from baon.core.errors.BAONError import BAONError
 
 
-class ScanFilesError(BAONError):
-    def __init__(self, format_string, error_parameters=None):
-        BAONError.__init__(self, format_string, error_parameters)
+class ScanFilesError(BAONError, metaclass=ABCMeta):
+    pass
 
 
 class BasePathDoesNotExistError(ScanFilesError):
     def __init__(self, path):
-        ScanFilesError.__init__(
-            self, "Directory '{path}' does not exist",
-            {'path': path})
+        super(BasePathDoesNotExistError, self).__init__(path=path)
+
+    def _get_format_string(self):
+        return "Directory '{path}' does not exist"
 
 
 class BasePathIsNotADirectoryError(ScanFilesError):
     def __init__(self, path):
-        ScanFilesError.__init__(
-            self, "'{path}' is not a directory",
-            {'path': path})
+        super(BasePathIsNotADirectoryError, self).__init__(path=path)
+
+    def _get_format_string(self):
+        return "'{path}' is not a directory"
 
 
 class CannotExploreBasePathError(ScanFilesError):
-    def __init__(self, path, inner_error=None):
-        ScanFilesError.__init__(
-            self, "Cannot open directory '{path}' for exploration",
-            {'path': path, 'inner_error': inner_error})
+    def __init__(self, path, inner_error):
+        super(CannotExploreBasePathError, self).__init__(path=path, inner_error=inner_error)
+
+    def _get_format_string(self):
+        return "Cannot open directory '{path}' for exploration"

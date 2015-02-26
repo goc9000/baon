@@ -7,103 +7,95 @@
 # Licensed under the GPL-3
 
 
+from abc import ABCMeta
+
 from baon.core.errors.BAONErrorWithSourceSpan import BAONErrorWithSourceSpan
 
 
-class RuleCheckError(BAONErrorWithSourceSpan):
+class RuleCheckError(BAONErrorWithSourceSpan, metaclass=ABCMeta):
     scope = None
     
-    def __init__(self, format_string, error_parameters, scope=None, source_span=None):
-        BAONErrorWithSourceSpan.__init__(self, format_string, error_parameters, source_span)
+    def __init__(self, scope=None, source_span=None, **error_parameters):
+        BAONErrorWithSourceSpan.__init__(self, source_span=source_span, **error_parameters)
         self.scope = scope
 
 
 class ErrorInRegularExpressionError(RuleCheckError):
-    def __init__(self, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Error in regular expression", {},
-            scope, source_span)
+    def _get_format_string(self):
+        return 'Error in regular expression'
 
 
 class InvalidRegexFlagError(RuleCheckError):
     def __init__(self, flag, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Invalid regex flag '{flag}'",
-            {'flag': flag},
-            scope, source_span)
+        super(InvalidRegexFlagError, self).__init__(scope, source_span, flag=flag)
+
+    def _get_format_string(self):
+        return "Invalid regex flag '{flag}'"
 
 
 class InvalidWidthForSpecifierError(RuleCheckError):
     def __init__(self, specifier, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Invalid width for specifier '{specifier}'",
-            {'specifier': specifier},
-            scope, source_span)
+        super(InvalidWidthForSpecifierError, self).__init__(scope, source_span, specifier=specifier)
+
+    def _get_format_string(self):
+        return "Invalid width for specifier '{specifier}'"
 
 
 class Leading0sInapplicableToSpecifierError(RuleCheckError):
     def __init__(self, specifier, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Leading 0s inapplicable to specifier '{specifier}'",
-            {'specifier': specifier},
-            scope, source_span)
+        super(Leading0sInapplicableToSpecifierError, self).__init__(scope, source_span, specifier=specifier)
+
+    def _get_format_string(self):
+        return "Leading 0s inapplicable to specifier '{specifier}'"
 
 
 class MaximumMatchesZeroOrNegativeError(RuleCheckError):
-    def __init__(self, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Maximum number of matches must be at least 1", {},
-            scope, source_span)
+    def _get_format_string(self):
+        return 'Maximum number of matches must be at least 1'
 
 
 class MinimumMatchesGreaterThanMaximumError(RuleCheckError):
-    def __init__(self, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Minimum number of matches must be greater than or equal to the minimum", {},
-            scope, source_span)
+    def _get_format_string(self):
+        return 'Minimum number of matches must be greater than or equal to the minimum'
 
 
 class MinimumMatchesNegativeError(RuleCheckError):
-    def __init__(self, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Minimum number of matches must be non-negative", {},
-            scope, source_span)
+    def _get_format_string(self):
+        return 'Minimum number of matches must be non-negative'
 
 
 class MinimumMatchesNotSpecifiedError(RuleCheckError):
-    def __init__(self, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Minimum number of matches must be specified", {},
-            scope, source_span)
+    def _get_format_string(self):
+        return 'Minimum number of matches must be specified'
 
 
 class UnrecognizedFormatSpecifierError(RuleCheckError):
     def __init__(self, specifier, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Unrecognized format specifier '{specifier}'",
-            {'specifier': specifier},
-            scope, source_span)
+        super(UnrecognizedFormatSpecifierError, self).__init__(scope, source_span, specifier=specifier)
+
+    def _get_format_string(self):
+        return "Unrecognized format specifier '{specifier}'"
 
 
 class UnsupportedFunctionError(RuleCheckError):
     def __init__(self, function_name, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Unsupported function '{function_name}'",
-            {'function_name': function_name},
-            scope, source_span)
+        super(UnsupportedFunctionError, self).__init__(scope, source_span, function_name=function_name)
+
+    def _get_format_string(self):
+        return "Unsupported function '{function_name}'"
 
 
 class WidthInapplicableToSpecifierError(RuleCheckError):
     def __init__(self, specifier, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Width inapplicable to specifier '{specifier}'",
-            {'specifier': specifier},
-            scope, source_span)
+        super(WidthInapplicableToSpecifierError, self).__init__(scope, source_span, specifier=specifier)
+
+    def _get_format_string(self):
+        return "Width inapplicable to specifier '{specifier}'"
 
 
 class WidthMustBeAtLeast1ForSpecifierError(RuleCheckError):
     def __init__(self, specifier, scope=None, source_span=None):
-        RuleCheckError.__init__(
-            self, "Width must be at least 1 for specifier '{specifier}'",
-            {'specifier': specifier},
-            scope, source_span)
+        super(WidthMustBeAtLeast1ForSpecifierError, self).__init__(scope, source_span, specifier=specifier)
+
+    def _get_format_string(self):
+        return "Width must be at least 1 for specifier '{specifier}'"

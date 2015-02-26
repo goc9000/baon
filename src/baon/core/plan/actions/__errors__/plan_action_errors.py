@@ -7,124 +7,158 @@
 # Licensed under the GPL-3
 
 
+from abc import ABCMeta, abstractmethod
+
 from baon.core.errors.BAONError import BAONError
 
 
-class RenamePlanActionError(BAONError):
-    def __init__(self, format_string, error_parameters=None):
-        BAONError.__init__(self, format_string, error_parameters)
+class RenamePlanActionError(BAONError, metaclass=ABCMeta):
+    pass
 
 
-class CreateDirectoryActionError(RenamePlanActionError):
-    def __init__(self, path, reason_format_string, reason_parameters=None):
-        reason_parameters = dict(reason_parameters or dict())
-        reason_parameters['path'] = path
+class CreateDirectoryActionError(RenamePlanActionError, metaclass=ABCMeta):
+    def __init__(self, path, **extra_parameters):
+        super(CreateDirectoryActionError, self).__init__(path=path, **extra_parameters)
 
-        RenamePlanActionError.__init__(
-            self,
-            "Cannot create directory '{path}' because " + reason_format_string,
-            reason_parameters)
+    def _get_format_string(self):
+        return "Cannot create directory '{path}' because " + self._get_reason_format_string(self)
+
+    @abstractmethod
+    def _get_reason_format_string(self):
+        return ''
 
 
 class CannotCreateDirAlreadyExistsError(CreateDirectoryActionError):
     def __init__(self, path):
-        CreateDirectoryActionError.__init__(self, path, 'it already exists')
+        super(CannotCreateDirAlreadyExistsError, self).__init__(path)
+
+    def _get_reason_format_string(self):
+        return 'it already exists'
 
 
 class CannotCreateDirFileInWayError(CreateDirectoryActionError):
     def __init__(self, path):
-        CreateDirectoryActionError.__init__(self, path, 'a file by that name already exists')
+        super(CannotCreateDirFileInWayError, self).__init__(path)
+
+    def _get_reason_format_string(self):
+        return 'a file by that name already exists'
 
 
 class CannotCreateDirParentDoesNotExistError(CreateDirectoryActionError):
     def __init__(self, path):
-        CreateDirectoryActionError.__init__(self, path, 'the parent directory does not exist')
+        super(CannotCreateDirParentDoesNotExistError, self).__init__(path)
+
+    def _get_reason_format_string(self):
+        return 'the parent directory does not exist'
 
 
 class CannotCreateDirParentNotADirectoryError(CreateDirectoryActionError):
     def __init__(self, path):
-        CreateDirectoryActionError.__init__(self, path, 'the parent entry is not a directory')
+        super(CannotCreateDirParentNotADirectoryError, self).__init__(path)
+
+    def _get_reason_format_string(self):
+        return 'the parent entry is not a directory'
 
 
 class CannotCreateDirNoPermissionsError(CreateDirectoryActionError):
     def __init__(self, path):
-        CreateDirectoryActionError.__init__(self, path, 'we do not have permission')
+        super(CannotCreateDirNoPermissionsError, self).__init__(path)
+
+    def _get_reason_format_string(self):
+        return 'we do not have permission'
 
 
 class CannotCreateDirOtherError(CreateDirectoryActionError):
     def __init__(self, path, os_error):
-        CreateDirectoryActionError.__init__(
-            self, path,
-            'of a system error: {error.strerror}',
-            {'error': os_error})
+        super(CannotCreateDirOtherError, self).__init__(path, os_error=os_error)
+
+    def _get_reason_format_string(self):
+        return 'of a system error: {error.strerror}'
 
 
-class DeleteDirectoryActionError(RenamePlanActionError):
-    def __init__(self, path, reason_format_string, reason_parameters=None):
-        reason_parameters = dict(reason_parameters or dict())
-        reason_parameters['path'] = path
+class DeleteDirectoryActionError(RenamePlanActionError, metaclass=ABCMeta):
+    def __init__(self, path, **extra_parameters):
+        super(DeleteDirectoryActionError, self).__init__(path=path, **extra_parameters)
 
-        RenamePlanActionError.__init__(
-            self,
-            "Cannot delete directory '{path}' because " + reason_format_string,
-            reason_parameters)
+    def _get_format_string(self):
+        return "Cannot delete directory '{path}' because " + self._get_reason_format_string(self)
+
+    @abstractmethod
+    def _get_reason_format_string(self):
+        return ''
 
 
 class CannotDeleteDirDoesNotExistError(DeleteDirectoryActionError):
     def __init__(self, path):
-        DeleteDirectoryActionError.__init__(self, path, 'it does not exist')
+        super(CannotDeleteDirDoesNotExistError, self).__init__(path)
+
+    def _get_reason_format_string(self):
+        return 'it does not exist'
 
 
 class CannotDeleteDirIsAFileError(DeleteDirectoryActionError):
     def __init__(self, path):
-        DeleteDirectoryActionError.__init__(self, path, 'it is actually a file')
+        super(CannotDeleteDirIsAFileError, self).__init__(path)
+
+    def _get_reason_format_string(self):
+        return 'it is actually a file'
 
 
 class CannotDeleteDirNoPermissionsError(DeleteDirectoryActionError):
     def __init__(self, path):
-        DeleteDirectoryActionError.__init__(self, path, 'we do not have permission')
+        super(CannotDeleteDirNoPermissionsError, self).__init__(path)
+
+    def _get_reason_format_string(self):
+        return 'we do not have permission'
 
 
 class CannotDeleteDirOtherError(DeleteDirectoryActionError):
     def __init__(self, path, os_error):
-        DeleteDirectoryActionError.__init__(
-            self, path,
-            'of a system error: {error.strerror}',
-            {'error': os_error})
+        super(CannotDeleteDirOtherError, self).__init__(path, os_error=os_error)
+
+    def _get_reason_format_string(self):
+        return 'of a system error: {error.strerror}'
 
 
-class MoveFileActionError(RenamePlanActionError):
-    def __init__(self, from_path, to_path, reason_format_string, reason_parameters=None):
-        reason_parameters = dict(reason_parameters or dict())
-        reason_parameters['from_path'] = from_path
-        reason_parameters['to_path'] = to_path
+class MoveFileActionError(RenamePlanActionError, metaclass=ABCMeta):
+    def __init__(self, from_path, to_path, **extra_parameters):
+        super(MoveFileActionError, self).__init__(from_path=from_path, to_path=to_path, **extra_parameters)
 
-        RenamePlanActionError.__init__(
-            self,
-            "Cannot move file '{from_path}' because " + reason_format_string,
-            reason_parameters)
+    def _get_format_string(self):
+        return "Cannot move file '{from_path}' because " + self._get_reason_format_string(self)
+
+    @abstractmethod
+    def _get_reason_format_string(self):
+        return ''
 
 
 class CannotMoveFileDoesNotExistError(MoveFileActionError):
     def __init__(self, from_path, to_path):
-        MoveFileActionError.__init__(self, from_path, to_path, 'it does not exist')
+        super(CannotMoveFileDoesNotExistError, self).__init__(from_path, to_path)
+
+    def _get_reason_format_string(self):
+        return 'it does not exist'
 
 
 class CannotMoveFileDestinationExistsError(MoveFileActionError):
     def __init__(self, from_path, to_path):
-        MoveFileActionError.__init__(
-            self, from_path, to_path,
-            "the destination '{to_path}' already exists")
+        super(CannotMoveFileDestinationExistsError, self).__init__(from_path, to_path)
+
+    def _get_reason_format_string(self):
+        return "the destination '{to_path}' already exists"
 
 
 class CannotMoveFileNoPermissionsError(MoveFileActionError):
     def __init__(self, from_path, to_path):
-        MoveFileActionError.__init__(self, from_path, to_path, 'we do not have permission')
+        super(CannotMoveFileNoPermissionsError, self).__init__(from_path, to_path)
+
+    def _get_reason_format_string(self):
+        return 'we do not have permission'
 
 
 class CannotMoveFileOtherError(MoveFileActionError):
     def __init__(self, from_path, to_path, os_error):
-        MoveFileActionError.__init__(
-            self, from_path, to_path,
-            'of a system error: {error.strerror}',
-            {'error': os_error})
+        super(CannotMoveFileOtherError, self).__init__(from_path, to_path, os_error=os_error)
+
+    def _get_reason_format_string(self):
+        return 'of a system error: {error.strerror}'
