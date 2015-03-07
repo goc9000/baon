@@ -35,12 +35,14 @@ class CannotSaveRenamePlanPermissionsError(CannotSaveRenamePlanError):
     def _get_reason_format_string(self):
         return 'of a permissions issue'
 
+
 class CannotSaveRenamePlanFailedWritingFileError(CannotSaveRenamePlanError):
     def __init__(self, filename):
         super(CannotSaveRenamePlanFailedWritingFileError, self).__init__(filename)
 
     def _get_reason_format_string(self):
         return 'the file could not be written'
+
 
 class CannotSaveRenamePlanOtherError(CannotSaveRenamePlanError):
     def __init__(self, filename, error):
