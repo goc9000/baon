@@ -30,7 +30,14 @@ class RenamePlanAction(object, metaclass=ABCMeta):
 
     @abstractmethod
     def undo(self):
-        pass
+        """
+        Undoes the action.
+
+        Returns True if the action had been executed and has been successfully undone; False if the action had not
+        been executed and/or there was a problem undoing it; or None if the action, as well as undoing it, would be
+        a no-op.
+        """
+        return None
 
     @abstractmethod
     def json_representation(self):

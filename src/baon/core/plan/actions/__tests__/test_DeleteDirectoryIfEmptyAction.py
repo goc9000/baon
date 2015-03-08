@@ -80,7 +80,7 @@ class TestDeleteDirectoryIfEmptyAction(RenamePlanActionTestCase):
         action.execute()
         self.assert_is_dir('non_empty_dir')
 
-        self.assertTrue(action.undo(), 'action.undo() failed unexpectedly')
+        self.assertIsNone(action.undo(), 'action.undo() should report a no-op')
         self.assert_is_dir('non_empty_dir')
 
     def test_fail_undo(self):

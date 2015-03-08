@@ -43,9 +43,10 @@ class DeleteDirectoryIfEmptyAction(RenamePlanAction):
 
     def undo(self):
         try:
-            if not os.path.isdir(self.path):
-                os.mkdir(self.path)
+            if os.path.isdir(self.path) and len(os.listdir(self.path)) > 0:
+                return None
 
+            os.mkdir(self.path)
             return True
         except OSError:
             return False

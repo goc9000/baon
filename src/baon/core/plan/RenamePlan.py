@@ -68,10 +68,12 @@ class RenamePlan(object):
         general_success = True
 
         for step in reversed(steps_to_undo):
-            if not step.undo():
+            status = step.undo()
+
+            if status is False:
                 if not allow_errors:
                     general_success = False
-            else:
+            elif status is True:
                 allow_errors = False
 
             # Note: we intentionally plow through even if some undo actions failed
