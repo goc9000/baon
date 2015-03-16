@@ -9,7 +9,7 @@
 
 import os
 
-from baon.core.__tests__.ReportsProgressTestCase import ReportsProgressTestCase
+from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
 from baon.core.files.FileReference import FileReference
 
@@ -340,12 +340,12 @@ class TestRenameFiles(ReportsProgressTestCase):
         )
 
     def test_reports_progress(self):
-        with self.verify_reported_progress() as on_progress:
+        with self.verify_reported_progress() as progress_receiver:
             self._test_rename_files(
                 input_description=(('FILE', 'file{0}.txt'.format(i)) for i in range(10)),
                 rules_text='"file" <<"0"',
                 expected_result=tuple(('FILE', 'file0{0}.txt'.format(i)) for i in range(10)),
-                on_progress=on_progress,
+                progress_receiver=progress_receiver,
             )
 
     def _test_rename_files(self, input_description, rules_text, expected_result, **options):

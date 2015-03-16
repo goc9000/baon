@@ -8,7 +8,8 @@
 
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_links_support, requires_unicode_support
-from baon.core.__tests__.ReportsProgressTestCase import ReportsProgressTestCase
+
+from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
 from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
     CannotExploreBasePathError
@@ -217,12 +218,12 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
                 scan_files(self.resolve_test_path('no_read_dir'))
 
     def test_reports_progress(self):
-        with self.verify_reported_progress() as on_progress:
+        with self.verify_reported_progress() as progress_receiver:
             with self.temp_file_structure('', self.BASIC_FILE_STRUCTURE):
                 scan_files(
                     base_path=self.resolve_test_path(''),
                     recursive=True,
-                    on_progress=on_progress
+                    progress_receiver=progress_receiver,
                 )
 
     def _test_scan_files(self, setup_files=None, expected_result=None, **options):
