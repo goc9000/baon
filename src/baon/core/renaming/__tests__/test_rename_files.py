@@ -118,6 +118,30 @@ class TestRenameFiles(ReportsProgressTestCase):
             use_path=True,
         )
 
+    def test_override(self):
+        self._test_rename_files(
+            input_description=(
+                ('FILE', 'dir1/file11.txt'),
+                ('FILE', 'dir2.d/dir21/file211'),
+                ('FILE', 'file1.txt'),
+                ('FILE', 'file2.txt'),
+                ('FILE', 'file3'),
+            ),
+            rules_text='..->paras',
+            expected_result=(
+                ('FILE', 'dir3/dir4/[file341].bin', 'OVERRIDE'),
+                ('FILE', 'dir2.d/dir21/(file211)'),
+                ('FILE', 'file100.txt', 'OVERRIDE'),
+                ('FILE', '(file2).txt'),
+                ('FILE', '(file3)'),
+            ),
+            use_path=False,
+            overrides={
+                'file1.txt': 'file100.txt',
+                'dir1/file11.txt': 'dir3/dir4/[file341].bin',
+            },
+        )
+
     def test_error_unprintable_char_in_filename(self):
         self._test_rename_files(
             input_description=(('FILE', 'dir1/dir2/file.txt'),),
