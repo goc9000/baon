@@ -45,6 +45,14 @@ def swallow_os_errors():
         pass
 
 
+@contextmanager
+def swallow_all_errors():
+    try:
+        yield
+    except:
+        pass
+
+
 def iter_non_abstract_descendants(cls):
     q = deque()
     q.append(cls)

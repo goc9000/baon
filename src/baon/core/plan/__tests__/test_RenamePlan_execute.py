@@ -10,8 +10,8 @@
 import os
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
-
 from baon.core.plan.__tests__.RenamePlanTestCaseBase import RenamePlanTestCaseBase
+from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
 from baon.core.plan.__errors__.rename_plan_errors import RenamePlanExecuteFailedBecauseActionFailedError
 
@@ -23,7 +23,7 @@ from baon.core.plan.actions.MoveFileAction import MoveFileAction
 from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryIfEmptyAction
 
 
-class TestRenamePlanExecute(RenamePlanTestCaseBase, FileSystemTestCase):
+class TestRenamePlanExecute(RenamePlanTestCaseBase, FileSystemTestCase, ReportsProgressTestCase):
 
     INITIAL_FILE_STRUCTURE = (
         ('FILE', 'dir1/file1'),
@@ -57,6 +57,10 @@ class TestRenamePlanExecute(RenamePlanTestCaseBase, FileSystemTestCase):
 
         # Files should have been rolled back
         self.assertEqual(self._rescan_files(), actual_initial_structure)
+
+    def test_execute_progress(self):
+        with self.verify_reported_progress() as progress_receiver:
+            self._make_rename_plan().execute(progress_receiver=progress_receiver)
 
     def test_undo_full(self):
         """

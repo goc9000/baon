@@ -17,8 +17,11 @@ from baon.core.plan.__errors__.rename_plan_errors import CannotSaveRenamePlanFai
 
 from baon.core.plan.actions.__errors__.plan_action_errors import RenamePlanActionError
 
-from baon.core.utils.lang_utils import is_arrayish, is_dictish, is_string, swallow_os_errors
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
+
+from baon.core.utils.progress.DummyProgressReceiver import DummyProgressReceiver
+
+from baon.core.utils.lang_utils import is_arrayish, is_dictish, is_string, swallow_os_errors, swallow_all_errors
 
 
 class RenamePlan(object):
@@ -34,19 +37,23 @@ class RenamePlan(object):
             (len(self.steps) == len(other.steps)) and \
             all(step == other_step for step, other_step in zip(self.steps, other.steps))
 
-    def execute(self, on_progress=None):
+    def execute(self, progress_receiver=None):
+        progress_receiver = progress_receiver or DummyProgressReceiver()
+
         n_steps = len(self.steps)
         last_successful_step = None
+        progress_receiver.on_more_total(n_steps)
 
         try:
             for i in range(n_steps):
-                if on_progress is not None:
-                    on_progress(i, n_steps)
-
                 self.steps[i].execute()
+                progress_receiver.on_more_done(1)
 
                 last_successful_step = i
         except Exception as e:
+            with swallow_all_errors():
+                progress_receiver.on_indeterminate_progress()
+
             rollback_ok = self._undo(from_step=last_successful_step) if last_successful_step is not None else True
 
             try:

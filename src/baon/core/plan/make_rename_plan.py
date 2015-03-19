@@ -30,6 +30,7 @@ from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
 from baon.core.plan.actions.MoveFileAction import MoveFileAction
 from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryIfEmptyAction
 
+
 def make_rename_plan(base_path, renamed_files):
     taken_names_by_dir = _compute_taken_names_by_dir(renamed_files)
 
@@ -121,7 +122,7 @@ def _coin_temporary_name(current_name, taken_names):
     for discriminant in count(1):
         new_name = "{0}_{1}".format(current_name, discriminant)
 
-        if not new_name in taken_names:
+        if new_name not in taken_names:
             return new_name
 
 
