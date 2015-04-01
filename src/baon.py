@@ -11,8 +11,10 @@
 
 from baon.core.app_args import parse_app_args
 
+from baon.gui.qt.BAONQtApplication import BAONQtApplication
+
 
 if __name__ == "__main__":
     args = parse_app_args()
 
-    raise NotImplementedError('No BAON app core implemented')
+    BAONQtApplication(args).exec_()
