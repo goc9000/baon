@@ -11,7 +11,13 @@ import sys
 
 from PyQt4.QtGui import QApplication
 
+from baon.gui.qt.widgets.MainWindow import MainWindow
+
 
 class BAONQtApplication(QApplication):
+    main_window = None
+
     def __init__(self, args):
         QApplication.__init__(self, sys.argv)
+        self.main_window = MainWindow()
+        self.main_window.show()
