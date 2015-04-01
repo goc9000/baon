@@ -9,3 +9,7 @@
 
 APP_NAME = 'BAON'
 APP_AUTHOR = 'DCM'
+
+APP_DESCRIPTION = """
+Mass file renamer.
+""".strip()
