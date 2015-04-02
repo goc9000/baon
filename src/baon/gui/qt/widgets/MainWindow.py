@@ -7,7 +7,7 @@
 # Licensed under the GPL-3
 
 
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, pyqtSignal
 from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QFont, QGroupBox, QHBoxLayout, QLabel, QLineEdit,\
     QProgressBar, QPushButton, QSizePolicy, QSpacerItem, QTextEdit, QVBoxLayout
 
@@ -31,6 +31,10 @@ class MainWindow(CenterWindowOnScreenTrait, QDialog):
     DEFAULT_WINDOW_WIDTH = 800
     DEFAULT_WINDOW_HEIGHT = 600
     RULES_BOX_HEIGHT = 112
+
+    scan_recursive_changed = pyqtSignal(bool)
+    use_path_changed = pyqtSignal(bool)
+    use_extension_changed = pyqtSignal(bool)
 
     _base_path_editor = None
     _browse_button = None
@@ -75,8 +79,13 @@ class MainWindow(CenterWindowOnScreenTrait, QDialog):
         box = QGroupBox(self.OPTIONS_BOX_TEXT, self)
 
         self._scan_recursive_checkbox = QCheckBox(self.SCAN_RECURSIVE_CHECKBOX_TEXT, box)
+        self._scan_recursive_checkbox.toggled.connect(self.scan_recursive_changed)
+
         self._use_path_checkbox = QCheckBox(self.USE_PATH_CHECKBOX_TEXT, box)
+        self._use_path_checkbox.toggled.connect(self.use_path_changed)
+
         self._use_extension_checkbox = QCheckBox(self.USE_EXTENSION_CHECKBOX_TEXT, box)
+        self._use_extension_checkbox.toggled.connect(self.use_extension_changed)
 
         layout = QHBoxLayout(box)
         layout.addWidget(self._scan_recursive_checkbox)
