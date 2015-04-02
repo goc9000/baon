@@ -1,4 +1,4 @@
-# baon/gui/qt/BAONQtApplication.py
+# baon/ui/qt_gui/BAONQtApplication.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -11,7 +11,7 @@ import sys
 
 from PyQt4.QtGui import QApplication
 
-from baon.gui.qt.widgets.MainWindow import MainWindow
+from baon.ui.qt_gui.forms.MainWindow import MainWindow
 
 
 class BAONQtApplication(QApplication):

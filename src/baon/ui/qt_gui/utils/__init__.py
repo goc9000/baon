@@ -1,4 +1,4 @@
-# baon/gui/qt/utils/__init__.py
+# baon/ui/qt_gui/utils/__init__.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #

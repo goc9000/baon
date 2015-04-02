@@ -1,4 +1,4 @@
-# baon/gui/qt/widgets/MainWindow.py
+# baon/ui/qt_gui/forms/MainWindow.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -11,12 +11,12 @@ from PyQt4.QtCore import Qt, pyqtSignal
 from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QFont, QGroupBox, QHBoxLayout, QLabel, QLineEdit,\
     QProgressBar, QPushButton, QSizePolicy, QSpacerItem, QTextEdit, QVBoxLayout
 
-from baon.gui.qt.utils.CenterWindowOnScreenTrait import CenterWindowOnScreenTrait
+from baon.ui.qt_gui.utils.WindowWithCenterOnScreenTrait import WindowWithCenterOnScreenTrait
 
-from baon.gui.qt.widgets.FilesDisplay import FilesDisplay
+from baon.ui.qt_gui.widgets.FilesDisplay import FilesDisplay
 
 
-class MainWindow(CenterWindowOnScreenTrait, QDialog):
+class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
     WINDOW_TITLE_TEXT = 'BAON'
     BASE_PATH_LABEL_TEXT = 'Base Path'
     BROWSE_BUTTON_TEXT = 'Browse...'

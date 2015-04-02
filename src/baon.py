@@ -11,7 +11,7 @@
 
 from baon.core.app_args import parse_app_args
 
-from baon.gui.qt.BAONQtApplication import BAONQtApplication
+from baon.ui.qt_gui.BAONQtApplication import BAONQtApplication
 
 
 if __name__ == "__main__":

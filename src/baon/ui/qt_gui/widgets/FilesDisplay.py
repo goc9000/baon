@@ -1,4 +1,4 @@
-# baon/gui/qt/widgets/FilesDisplay.py
+# baon/ui/qt_gui/widgets/FilesDisplay.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
