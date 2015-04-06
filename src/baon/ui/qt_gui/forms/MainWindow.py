@@ -8,18 +8,17 @@
 
 
 from PyQt4.QtCore import Qt, pyqtSignal
-from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QFont, QGroupBox, QHBoxLayout, QLabel, QLineEdit,\
-    QProgressBar, QPushButton, QSizePolicy, QSpacerItem, QTextEdit, QVBoxLayout
+from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QFont, QGroupBox, QHBoxLayout, QLabel, QProgressBar,\
+    QSizePolicy, QTextEdit, QVBoxLayout
 
 from baon.ui.qt_gui.utils.WindowWithCenterOnScreenTrait import WindowWithCenterOnScreenTrait
 
+from baon.ui.qt_gui.widgets.BasePathPanel import BasePathPanel
 from baon.ui.qt_gui.widgets.FilesDisplay import FilesDisplay
 
 
 class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
     WINDOW_TITLE_TEXT = 'BAON'
-    BASE_PATH_LABEL_TEXT = 'Base Path'
-    BROWSE_BUTTON_TEXT = 'Browse...'
     OPTIONS_BOX_TEXT = 'Options'
     SCAN_RECURSIVE_CHECKBOX_TEXT = 'Recursively scan subfolders'
     USE_PATH_CHECKBOX_TEXT = 'Use path'
@@ -32,12 +31,12 @@ class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
     DEFAULT_WINDOW_HEIGHT = 600
     RULES_BOX_HEIGHT = 112
 
+    base_path_edited = pyqtSignal(str)
     scan_recursive_changed = pyqtSignal(bool)
     use_path_changed = pyqtSignal(bool)
     use_extension_changed = pyqtSignal(bool)
 
-    _base_path_editor = None
-    _browse_button = None
+    _base_path_panel = None
     _scan_recursive_checkbox = None
     _use_path_checkbox = None
     _use_extension_checkbox = None
@@ -57,23 +56,18 @@ class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
         self.resize(self.DEFAULT_WINDOW_WIDTH, self.DEFAULT_WINDOW_HEIGHT)
 
         main_layout = QVBoxLayout(self)
-        main_layout.addLayout(self._create_base_path_widgets())
+        main_layout.addWidget(self._create_base_path_panel())
         main_layout.addWidget(self._create_options_box())
         main_layout.addWidget(self._create_rules_box())
         main_layout.addWidget(self._create_files_box())
         main_layout.addWidget(self._create_status_box())
         main_layout.addWidget(self._create_dialog_buttons())
 
-    def _create_base_path_widgets(self):
-        self._base_path_editor = QLineEdit(self)
-        self._browse_button = QPushButton(self.BROWSE_BUTTON_TEXT, self)
+    def _create_base_path_panel(self):
+        self._base_path_panel = BasePathPanel(self)
+        self._base_path_panel.path_edited.connect(self.base_path_edited)
 
-        layout = QHBoxLayout()
-        layout.addWidget(QLabel(self.BASE_PATH_LABEL_TEXT, self))
-        layout.addWidget(self._base_path_editor)
-        layout.addWidget(self._browse_button)
-
-        return layout
+        return self._base_path_panel
 
     def _create_options_box(self):
         box = QGroupBox(self.OPTIONS_BOX_TEXT, self)
@@ -91,7 +85,7 @@ class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
         layout.addWidget(self._scan_recursive_checkbox)
         layout.addWidget(self._use_path_checkbox)
         layout.addWidget(self._use_extension_checkbox)
-        layout.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        layout.addStretch()
 
         return box
 
