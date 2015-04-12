@@ -109,7 +109,7 @@ class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
         box = QGroupBox(self.FILES_BOX_TEXT, self)
         box.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding))
 
-        self._files_display = FilesDisplay(self)
+        self._files_display = FilesDisplay(box)
 
         layout = QHBoxLayout(box)
         layout.addWidget(self._files_display)
@@ -119,7 +119,7 @@ class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
     def _create_status_box(self):
         box = QGroupBox(self.STATUS_BOX_TEXT, self)
 
-        self._status_label = QLabel(self)
+        self._status_label = QLabel(box)
         self._status_progressbar = QProgressBar(box)
         self._status_progressbar.setVisible(False)
 

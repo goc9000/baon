@@ -17,7 +17,7 @@ class FilesDisplay(QTableWidget):
     DEFAULT_ROW_HEIGHT = 20
 
     def __init__(self, parent):
-        QTableWidget.__init__(self, parent)
+        super().__init__(parent)
 
         self.setShowGrid(False)
         
