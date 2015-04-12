@@ -15,6 +15,7 @@ from baon.ui.qt_gui.utils.WindowWithCenterOnScreenTrait import WindowWithCenterO
 
 from baon.ui.qt_gui.widgets.BasePathPanel import BasePathPanel
 from baon.ui.qt_gui.widgets.FilesDisplay import FilesDisplay
+from baon.ui.qt_gui.widgets.RulesEditor import RulesEditor
 
 
 class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
@@ -93,12 +94,7 @@ class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
         box = QGroupBox(self.RULES_BOX_TEXT, self)
         box.setMaximumHeight(self.RULES_BOX_HEIGHT)
 
-        mono_font = QFont()
-        mono_font.setFixedPitch(True)
-
-        self._rules_editor = QTextEdit(box)
-        self._rules_editor.setFont(mono_font)
-        self._rules_editor.setAcceptRichText(False)
+        self._rules_editor = RulesEditor(box)
 
         layout = QHBoxLayout(box)
         layout.addWidget(self._rules_editor)
