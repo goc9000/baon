@@ -1,4 +1,4 @@
-# baon/gui/__tests__/test_qt_utils.py
+# baon/ui/qt_gui/utils/__tests__/test_parse_qcolor.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -9,10 +9,10 @@
 
 from unittest import TestCase
 
-from baon.gui.qt_utils import parse_qcolor
+from baon.ui.qt_gui.utils.parse_qcolor import parse_qcolor
 
 
-class TestQtUtilsPy(TestCase):
+class TestParseQColorPy(TestCase):
     def test_parse_qcolor(self):
         for spec, expected_rgba in (
             ((64, 128, 255), (64, 128, 255, 255)),
