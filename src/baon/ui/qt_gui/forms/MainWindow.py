@@ -8,17 +8,18 @@
 
 
 from PyQt4.QtCore import Qt, pyqtSignal
-from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QFont, QGroupBox, QHBoxLayout, QLabel, QProgressBar,\
-    QSizePolicy, QTextEdit, QVBoxLayout
+from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QGroupBox, QHBoxLayout, QLabel, QProgressBar,\
+    QSizePolicy, QVBoxLayout
 
 from baon.ui.qt_gui.utils.WindowWithCenterOnScreenTrait import WindowWithCenterOnScreenTrait
+from baon.ui.qt_gui.utils.WidgetWithSetupTabStopsTrait import WidgetWithSetupTabStopsTrait
 
 from baon.ui.qt_gui.widgets.BasePathPanel import BasePathPanel
 from baon.ui.qt_gui.widgets.FilesDisplay import FilesDisplay
 from baon.ui.qt_gui.widgets.RulesEditor import RulesEditor
 
 
-class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
+class MainWindow(WidgetWithSetupTabStopsTrait, WindowWithCenterOnScreenTrait, QDialog):
     WINDOW_TITLE_TEXT = 'BAON'
     OPTIONS_BOX_TEXT = 'Options'
     SCAN_RECURSIVE_CHECKBOX_TEXT = 'Recursively scan subfolders'
@@ -46,6 +47,7 @@ class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
     _files_display = None
     _status_label = None
     _status_progressbar = None
+    _dialog_button_box = None
 
     def __init__(self):
         QDialog.__init__(self)
@@ -64,6 +66,16 @@ class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
         main_layout.addWidget(self._create_files_box())
         main_layout.addWidget(self._create_status_box())
         main_layout.addWidget(self._create_dialog_buttons())
+
+        self.setup_tab_stops(
+            self._base_path_panel,
+            self._scan_recursive_checkbox,
+            self._use_path_checkbox,
+            self._use_extension_checkbox,
+            self._rules_editor,
+            self._files_display,
+            self._dialog_button_box,
+        )
 
     def _create_base_path_panel(self):
         self._base_path_panel = BasePathPanel(self)
@@ -128,9 +140,9 @@ class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
         return box
 
     def _create_dialog_buttons(self):
-        button_box = QDialogButtonBox(self)
-        button_box.setOrientation(Qt.Horizontal)
-        button_box.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
-        button_box.setCenterButtons(True)
+        self._dialog_button_box = QDialogButtonBox(self)
+        self._dialog_button_box.setOrientation(Qt.Horizontal)
+        self._dialog_button_box.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
+        self._dialog_button_box.setCenterButtons(True)
 
-        return button_box
+        return self._dialog_button_box
