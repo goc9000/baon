@@ -34,6 +34,7 @@ class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
 
     base_path_edited = pyqtSignal(str)
     scan_recursive_changed = pyqtSignal(bool)
+    rules_text_changed = pyqtSignal(str)
     use_path_changed = pyqtSignal(bool)
     use_extension_changed = pyqtSignal(bool)
 
@@ -95,6 +96,7 @@ class MainWindow(QDialog, WindowWithCenterOnScreenTrait):
         box.setMaximumHeight(self.RULES_BOX_HEIGHT)
 
         self._rules_editor = RulesEditor(box)
+        self._rules_editor.rules_edited.connect(self.rules_text_changed)
 
         layout = QHBoxLayout(box)
         layout.addWidget(self._rules_editor)
