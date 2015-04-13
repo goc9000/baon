@@ -9,8 +9,12 @@
 
 from PyQt4.QtGui import QFont, QTextEdit
 
+from baon.ui.qt_gui.widgets.RulesEditorHighlighter import RulesEditorHighlighter
+
 
 class RulesEditor(QTextEdit):
+    _highlighter = None
+
     def __init__(self, parent):
         super().__init__(parent)
 
@@ -19,3 +23,15 @@ class RulesEditor(QTextEdit):
 
         self.setFont(mono_font)
         self.setAcceptRichText(False)
+
+        self._highlighter = RulesEditorHighlighter(self.document())
+
+    def setDocument(self, document):
+        super().setDocument(document)
+        self._highlighter.setDocument(document)
+
+    def show_error(self, error_span):
+        self._highlighter.set_error_span(error_span)
+
+    def clear_error(self):
+        self._highlighter.set_error_span(None)
