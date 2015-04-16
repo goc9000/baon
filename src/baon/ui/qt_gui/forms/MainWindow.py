@@ -145,4 +145,6 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         self._dialog_button_box.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
         self._dialog_button_box.setCenterButtons(True)
 
+        self._dialog_button_box.rejected.connect(self.reject)
+
         return self._dialog_button_box

@@ -9,15 +9,51 @@
 
 import sys
 
+from PyQt4.QtCore import Qt, QThread, QMetaObject
 from PyQt4.QtGui import QApplication
 
+from baon.ui.qt_gui.BAONQtCore import BAONQtCore
 from baon.ui.qt_gui.forms.MainWindow import MainWindow
 
 
 class BAONQtApplication(QApplication):
-    main_window = None
+    _main_window = None
+    _core = None
+
+    _core_thread = None
 
     def __init__(self, args):
-        QApplication.__init__(self, sys.argv)
-        self.main_window = MainWindow()
-        self.main_window.show()
+        super().__init__(sys.argv)
+
+        # Actually we do quit when the last window is closed, but we need to do this in a more controlled way
+        self.setQuitOnLastWindowClosed(False)
+
+        self._init_threads()
+        self._init_main_objects(args)
+        self._connect_main_objects()
+        self._start_core()
+
+    def _init_threads(self):
+        self._core_thread = QThread()
+        self._core_thread.start()
+
+    def _init_main_objects(self, args):
+        self._main_window = MainWindow()
+
+        self._core = BAONQtCore(args)
+        self._core.moveToThread(self._core_thread)
+
+    def _connect_main_objects(self):
+        self.aboutToQuit.connect(self._on_quit)
+
+        self._core.ready.connect(self._main_window.show)
+        self._core.has_shutdown.connect(self.quit)
+
+        self._main_window.rejected.connect(self._core.shutdown)
+
+    def _start_core(self):
+        QMetaObject.invokeMethod(self._core, 'start', Qt.QueuedConnection)
+
+    def _on_quit(self):
+        self._core_thread.quit()
+        self._core_thread.wait()
