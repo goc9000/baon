@@ -38,7 +38,7 @@ class BAONQtApplication(QApplication):
         self._core_thread.start()
 
     def _init_main_objects(self, args):
-        self._main_window = MainWindow()
+        self._main_window = MainWindow(args)
 
         self._core = BAONQtCore(args)
         self._core.moveToThread(self._core_thread)

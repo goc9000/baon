@@ -49,10 +49,11 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     _status_progressbar = None
     _dialog_button_box = None
 
-    def __init__(self):
+    def __init__(self, args):
         super().__init__()
 
         self._init_ui()
+        self._fill_in_controls(args)
         self._center_on_screen()
 
     def _init_ui(self):
@@ -148,3 +149,15 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         self._dialog_button_box.rejected.connect(self.reject)
 
         return self._dialog_button_box
+
+    def _fill_in_controls(self, args):
+        if args.base_path is not None:
+            self._base_path_panel.set_base_path(args.base_path)
+        if args.scan_recursive is not None:
+            self._scan_recursive_checkbox.setChecked(args.scan_recursive)
+        if args.use_extension is not None:
+            self._use_extension_checkbox.setChecked(args.use_extension)
+        if args.use_path is not None:
+            self._use_path_checkbox.setChecked(args.use_path)
+        if args.rules_text is not None:
+            self._rules_editor.set_rules(args.rules_text)
