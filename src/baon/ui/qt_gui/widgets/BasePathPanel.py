@@ -10,10 +10,10 @@
 from PyQt4.QtCore import QTimer, pyqtSignal
 from PyQt4.QtGui import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
 
-from baon.ui.qt_gui.utils.WidgetWithSetupTabStopsTrait import WidgetWithSetupTabStopsTrait
+from baon.ui.qt_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
 
 
-class BasePathPanel(WidgetWithSetupTabStopsTrait, QWidget):
+class BasePathPanel(QWidget, SetupTabStopsMixin):
     BASE_PATH_LABEL_TEXT = 'Base Path'
     BROWSE_BUTTON_TEXT = 'Browse...'
     BROWSE_DIALOG_CAPTION_TEXT = 'Choose Base Directory'
@@ -51,7 +51,7 @@ class BasePathPanel(WidgetWithSetupTabStopsTrait, QWidget):
 
         self.setFocusProxy(self._base_path_editor)
 
-        self.setup_tab_stops(
+        self._setup_tab_stops(
             self._base_path_editor,
             self._browse_button,
         )

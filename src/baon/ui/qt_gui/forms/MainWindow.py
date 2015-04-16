@@ -11,15 +11,15 @@ from PyQt4.QtCore import Qt, pyqtSignal
 from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QGroupBox, QHBoxLayout, QLabel, QProgressBar,\
     QSizePolicy, QVBoxLayout
 
-from baon.ui.qt_gui.utils.WindowWithCenterOnScreenTrait import WindowWithCenterOnScreenTrait
-from baon.ui.qt_gui.utils.WidgetWithSetupTabStopsTrait import WidgetWithSetupTabStopsTrait
+from baon.ui.qt_gui.mixins.CenterOnScreenMixin import CenterOnScreenMixin
+from baon.ui.qt_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
 
 from baon.ui.qt_gui.widgets.BasePathPanel import BasePathPanel
 from baon.ui.qt_gui.widgets.FilesDisplay import FilesDisplay
 from baon.ui.qt_gui.widgets.RulesEditor import RulesEditor
 
 
-class MainWindow(WidgetWithSetupTabStopsTrait, WindowWithCenterOnScreenTrait, QDialog):
+class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     WINDOW_TITLE_TEXT = 'BAON'
     OPTIONS_BOX_TEXT = 'Options'
     SCAN_RECURSIVE_CHECKBOX_TEXT = 'Recursively scan subfolders'
@@ -50,12 +50,12 @@ class MainWindow(WidgetWithSetupTabStopsTrait, WindowWithCenterOnScreenTrait, QD
     _dialog_button_box = None
 
     def __init__(self):
-        QDialog.__init__(self)
+        super().__init__()
 
-        self.init_ui()
-        self.center_on_screen()
+        self._init_ui()
+        self._center_on_screen()
 
-    def init_ui(self):
+    def _init_ui(self):
         self.setWindowTitle(self.WINDOW_TITLE_TEXT)
         self.resize(self.DEFAULT_WINDOW_WIDTH, self.DEFAULT_WINDOW_HEIGHT)
 
@@ -67,7 +67,7 @@ class MainWindow(WidgetWithSetupTabStopsTrait, WindowWithCenterOnScreenTrait, QD
         main_layout.addWidget(self._create_status_box())
         main_layout.addWidget(self._create_dialog_buttons())
 
-        self.setup_tab_stops(
+        self._setup_tab_stops(
             self._base_path_panel,
             self._scan_recursive_checkbox,
             self._use_path_checkbox,

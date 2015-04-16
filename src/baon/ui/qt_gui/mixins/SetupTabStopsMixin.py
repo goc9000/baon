@@ -1,4 +1,4 @@
-# baon/ui/qt_gui/utils/WidgetWithSetupTabStopsTrait.py
+# baon/ui/qt_gui/mixins/SetupTabStopsMixin.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -11,8 +11,10 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QWidget
 
 
-class WidgetWithSetupTabStopsTrait(QWidget):
-    def setup_tab_stops(self, *items, focus_policy=Qt.StrongFocus):
+class SetupTabStopsMixin(object):
+    def _setup_tab_stops(self, *items, focus_policy=Qt.StrongFocus):
+        assert isinstance(self, QWidget)
+
         for item in items:
             item.setFocusPolicy(item.focusPolicy() | focus_policy)
 
