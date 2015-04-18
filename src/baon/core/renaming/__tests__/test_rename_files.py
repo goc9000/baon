@@ -364,12 +364,12 @@ class TestRenameFiles(ReportsProgressTestCase):
         )
 
     def test_reports_progress(self):
-        with self.verify_reported_progress() as progress_receiver:
+        with self.verify_reported_progress() as on_progress:
             self._test_rename_files(
                 input_description=(('FILE', 'file{0}.txt'.format(i)) for i in range(10)),
                 rules_text='"file" <<"0"',
                 expected_result=tuple(('FILE', 'file0{0}.txt'.format(i)) for i in range(10)),
-                progress_receiver=progress_receiver,
+                on_progress=on_progress,
             )
 
     def _test_rename_files(self, input_description, rules_text, expected_result, **options):

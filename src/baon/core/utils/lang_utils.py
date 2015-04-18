@@ -10,6 +10,7 @@
 import sys
 
 from collections import deque
+from itertools import tee
 from inspect import isabstract
 from contextlib import contextmanager
 
@@ -37,6 +38,10 @@ def is_dictish(x):
     return hasattr(x, '__getitem__') and hasattr(x, 'keys') and not is_string(x)
 
 
+def is_callable(x):
+    return hasattr(x, '__call__')
+
+
 @contextmanager
 def swallow_os_errors():
     try:
@@ -51,6 +56,13 @@ def swallow_all_errors():
         yield
     except:
         pass
+
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 
 def iter_non_abstract_descendants(cls):

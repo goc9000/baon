@@ -218,12 +218,12 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
                 scan_files(self.resolve_test_path('no_read_dir'))
 
     def test_reports_progress(self):
-        with self.verify_reported_progress() as progress_receiver:
+        with self.verify_reported_progress() as on_progress:
             with self.temp_file_structure('', self.BASIC_FILE_STRUCTURE):
                 scan_files(
                     base_path=self.resolve_test_path(''),
                     recursive=True,
-                    progress_receiver=progress_receiver,
+                    on_progress=on_progress,
                 )
 
     def _test_scan_files(self, setup_files=None, expected_result=None, **options):

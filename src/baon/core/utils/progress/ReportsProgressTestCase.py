@@ -9,52 +9,31 @@
 
 from contextlib import contextmanager
 
-from unittest import TestCase
+from baon.core.utils.lang_utils import pairwise
 
-from baon.core.utils.progress.ProgressReceiver import ProgressReceiver
+from unittest import TestCase
 
 
 class ReportsProgressTestCase(TestCase):
     @contextmanager
     def verify_reported_progress(self):
-        test = self
+        progress_events = []
 
-        class ProgressCollectorForTest(ProgressReceiver):
-
-            any_event_received = False
-            last_done = None
-            last_total = None
-            last_was_indeterminate = False
-
-            def on_progress(self, done, total):
-                test.assertGreaterEqual(done, 0)
-                test.assertGreaterEqual(total, 0)
-                test.assertLessEqual(done, total)
-
-                if self.last_done is None:
-                    test.assertEqual(done, 0)
-                if self.last_was_indeterminate:
-                    test.assertEqual(done, total, 'Only 100% progress can follow after indeterminate progress')
-                if self.last_done is not None:
-                    test.assertGreaterEqual(done, self.last_done)
-                    test.assertGreaterEqual(total, self.last_total)
-
-                self.last_done, self.last_total = done, total
-                self.any_event_received = True
-                self.last_was_indeterminate = False
-
-            def on_indeterminate_progress(self):
-                self.any_event_received = True
-                self.last_was_indeterminate = True
-
-            def do_final_checks(self):
-                test.assertTrue(self.any_event_received, 'No progress events received')
-
-                if not self.last_was_indeterminate and not self.last_done == self.last_total:
-                    test.fail('Last progress recorded should be 100% or indeterminate')
-
-        collector = ProgressCollectorForTest()
-
+        collector = lambda progress_info: progress_events.append(progress_info)
         yield collector
 
-        collector.do_final_checks()
+        self.assertTrue(len(progress_events) > 0, 'No progress events received')
+
+        first_non_indeterminate = next(filter(lambda event: not event.is_indeterminate(), progress_events), None)
+        if first_non_indeterminate is not None:
+            self.assertEqual(first_non_indeterminate.done, 0)
+
+        for a, b in pairwise(progress_events):
+            if a.is_indeterminate():
+                self.assertTrue(b.is_indeterminate() or b.is_complete())
+            elif not b.is_indeterminate():
+                self.assertGreaterEqual(b.done, a.done)
+                self.assertGreaterEqual(b.total, a.total)
+
+        last_event = progress_events[-1]
+        self.assertTrue(last_event.is_indeterminate() or last_event.is_complete())

@@ -59,8 +59,8 @@ class TestRenamePlanExecute(RenamePlanTestCaseBase, FileSystemTestCase, ReportsP
         self.assertEqual(self._rescan_files(), actual_initial_structure)
 
     def test_execute_progress(self):
-        with self.verify_reported_progress() as progress_receiver:
-            self._make_rename_plan().execute(progress_receiver=progress_receiver)
+        with self.verify_reported_progress() as on_progress:
+            self._make_rename_plan().execute(on_progress)
 
     def test_undo_full(self):
         """

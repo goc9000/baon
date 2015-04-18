@@ -12,7 +12,7 @@ import os
 
 from collections import defaultdict
 
-from baon.core.utils.progress.DummyProgressReceiver import DummyProgressReceiver
+from baon.core.utils.progress.ProgressTracker import ProgressTracker
 
 from baon.core.files.baon_paths import all_path_components, all_partial_paths, extend_path, split_path_and_filename
 
@@ -31,17 +31,17 @@ PROBLEM_CHARS_REGEX = re.compile(r'["*:<>?\\/]')
 ONLY_DOTS_REGEX = re.compile(r'^[.]+$')
 
 
-def rename_files(files, rule_set, use_path=False, use_extension=False, overrides=None, progress_receiver=None):
-    progress_receiver = progress_receiver or DummyProgressReceiver()
+def rename_files(files, rule_set, use_path=False, use_extension=False, overrides=None, on_progress=None):
+    progress_tracker = ProgressTracker(on_progress)
 
-    progress_receiver.on_more_total(len(files))
+    progress_tracker.report_more_total(len(files))
     renamed_files = []
 
     for file_ref in files:
         renamed_files.append(
             _rename_file(file_ref, rule_set, use_path=use_path, use_extension=use_extension, overrides=overrides)
         )
-        progress_receiver.on_more_done(1)
+        progress_tracker.report_more_done(1)
 
     _verify_renamed_files(renamed_files)
 

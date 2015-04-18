@@ -11,7 +11,7 @@ import os
 
 from collections import deque
 
-from baon.core.utils.progress.DummyProgressReceiver import DummyProgressReceiver
+from baon.core.utils.progress.ProgressTracker import ProgressTracker
 
 from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
     CannotExploreBasePathError
@@ -21,10 +21,10 @@ from baon.core.files.baon_paths import extend_path
 from baon.core.files.FileReference import FileReference
 
 
-def scan_files(base_path, recursive=True, progress_receiver=None):
-    progress_receiver = progress_receiver or DummyProgressReceiver()
+def scan_files(base_path, recursive=True, on_progress=None):
+    progress_tracker = ProgressTracker(on_progress)
 
-    progress_receiver.on_more_total(1)
+    progress_tracker.report_more_total(1)
 
     if not os.path.exists(base_path):
         raise BasePathDoesNotExistError(path=base_path)
@@ -52,7 +52,7 @@ def scan_files(base_path, recursive=True, progress_receiver=None):
             try:
                 files_in_dir = os.listdir(full_path)
                 scan_queue.extend(extend_path(relative_path, name) for name in files_in_dir)
-                progress_receiver.on_more_total(len(files_in_dir))
+                progress_tracker.report_more_total(len(files_in_dir))
                 directory_opened = True
             except OSError as e:
                 problems.append(CannotExploreDirectoryError(inner_error=e))
@@ -68,6 +68,6 @@ def scan_files(base_path, recursive=True, progress_receiver=None):
                 )
             )
 
-        progress_receiver.on_more_done(1)
+        progress_tracker.report_more_done(1)
 
     return sorted(files)
