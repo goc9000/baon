@@ -14,15 +14,19 @@ from collections import deque
 from baon.core.utils.progress.ProgressTracker import ProgressTracker
 
 from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
-    CannotExploreBasePathError
+    CannotExploreBasePathError, ScanFilesAbortedError
 from baon.core.files.__errors__.file_reference_errors import CannotExploreDirectoryError
+
+from baon.core.utils.lang_utils import is_callable
 
 from baon.core.files.baon_paths import extend_path
 from baon.core.files.FileReference import FileReference
 
 
-def scan_files(base_path, recursive=True, on_progress=None):
+def scan_files(base_path, recursive=True, on_progress=None, check_abort=None):
     progress_tracker = ProgressTracker(on_progress)
+
+    assert check_abort is None or is_callable(check_abort)
 
     progress_tracker.report_more_total(1)
 
@@ -39,6 +43,9 @@ def scan_files(base_path, recursive=True, on_progress=None):
     files = []
 
     while len(scan_queue) > 0:
+        if check_abort is not None and check_abort():
+            raise ScanFilesAbortedError()
+
         relative_path = scan_queue.popleft()
         full_path = os.path.join(base_path, relative_path)
 

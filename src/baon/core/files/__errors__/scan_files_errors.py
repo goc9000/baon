@@ -16,6 +16,11 @@ class ScanFilesError(BAONError, metaclass=ABCMeta):
     pass
 
 
+class ScanFilesAbortedError(ScanFilesError):
+    def _get_format_string(self):
+        return "The scanning operation was aborted"
+
+
 class BasePathDoesNotExistError(ScanFilesError):
     def __init__(self, path):
         super(BasePathDoesNotExistError, self).__init__(path=path)

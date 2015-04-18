@@ -13,6 +13,7 @@ import os
 from collections import defaultdict
 
 from baon.core.utils.progress.ProgressTracker import ProgressTracker
+from baon.core.utils.lang_utils import is_callable
 
 from baon.core.files.baon_paths import all_path_components, all_partial_paths, extend_path, split_path_and_filename
 
@@ -21,7 +22,7 @@ from baon.core.renaming.__errors__.rename_files_errors import UnprintableCharact
     FileCollidesWithDirectoryError, DirectoryCollidesWithFileError, WouldMergeImplicitlyWithOtherFoldersError,\
     ProblematicCharacterInFilenameWarning, PathComponentStartsWithSpaceWarning, PathComponentEndsWithSpaceWarning,\
     PathComponentContainsDoubleSpacesWarning, FilenameStartsWithSpaceWarning, BasenameEndsWithSpaceWarning,\
-    FilenameContainsDoubleSpacesWarning, ExtensionContainsSpacesWarning
+    FilenameContainsDoubleSpacesWarning, ExtensionContainsSpacesWarning, RenameFilesAbortedError
 
 from baon.core.renaming.RenamedFileReference import RenamedFileReference
 
@@ -31,13 +32,19 @@ PROBLEM_CHARS_REGEX = re.compile(r'["*:<>?\\/]')
 ONLY_DOTS_REGEX = re.compile(r'^[.]+$')
 
 
-def rename_files(files, rule_set, use_path=False, use_extension=False, overrides=None, on_progress=None):
+def rename_files(files, rule_set, use_path=False, use_extension=False, overrides=None, on_progress=None,
+                 check_abort=None):
     progress_tracker = ProgressTracker(on_progress)
+
+    assert check_abort is None or is_callable(check_abort)
 
     progress_tracker.report_more_total(len(files))
     renamed_files = []
 
     for file_ref in files:
+        if check_abort is not None and check_abort():
+            raise RenameFilesAbortedError()
+
         renamed_files.append(
             _rename_file(file_ref, rule_set, use_path=use_path, use_extension=use_extension, overrides=overrides)
         )

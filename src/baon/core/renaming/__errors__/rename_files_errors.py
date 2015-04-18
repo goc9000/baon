@@ -17,6 +17,11 @@ class RenameFilesError(BAONError, metaclass=ABCMeta):
     pass
 
 
+class RenameFilesAbortedError(RenameFilesError):
+    def _get_format_string(self):
+        return "The rename operation was aborted"
+
+
 class UnprintableCharacterInFilenameError(RenameFilesError):
     def __init__(self, character_code):
         super(UnprintableCharacterInFilenameError, self).__init__(character_code=character_code)

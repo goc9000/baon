@@ -8,11 +8,12 @@
 
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_links_support, requires_unicode_support
+from baon.core.__tests__.abort_test_utils import abort_after_n_calls
 
 from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
 from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
-    CannotExploreBasePathError
+    CannotExploreBasePathError, ScanFilesAbortedError
 
 from baon.core.files.scan_files import scan_files
 
@@ -224,6 +225,15 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
                     base_path=self.resolve_test_path(''),
                     recursive=True,
                     on_progress=on_progress,
+                )
+
+    def test_abort(self):
+        with self.assertRaises(ScanFilesAbortedError):
+            with self.temp_file_structure('', self.BASIC_FILE_STRUCTURE):
+                scan_files(
+                    base_path=self.resolve_test_path(''),
+                    recursive=True,
+                    check_abort=abort_after_n_calls(len(self.BASIC_FILE_STRUCTURE) // 2),
                 )
 
     def _test_scan_files(self, setup_files=None, expected_result=None, **options):

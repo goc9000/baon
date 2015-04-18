@@ -9,11 +9,15 @@
 
 import os
 
+from baon.core.__tests__.abort_test_utils import abort_after_n_calls
+
 from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
 from baon.core.files.FileReference import FileReference
 
 from baon.core.renaming.rename_files import rename_files
+from baon.core.renaming.__errors__.rename_files_errors import RenameFilesAbortedError
+
 from baon.core.parsing.parse_rules import parse_rules
 
 
@@ -370,6 +374,15 @@ class TestRenameFiles(ReportsProgressTestCase):
                 rules_text='"file" <<"0"',
                 expected_result=tuple(('FILE', 'file0{0}.txt'.format(i)) for i in range(10)),
                 on_progress=on_progress,
+            )
+
+    def test_abort(self):
+        with self.assertRaises(RenameFilesAbortedError):
+            self._test_rename_files(
+                input_description=(('FILE', 'file{0}.txt'.format(i)) for i in range(10)),
+                rules_text='"file" <<"0"',
+                expected_result=tuple(('FILE', 'file0{0}.txt'.format(i)) for i in range(10)),
+                check_abort=abort_after_n_calls(5),
             )
 
     def _test_rename_files(self, input_description, rules_text, expected_result, **options):
