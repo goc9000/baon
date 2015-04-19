@@ -7,9 +7,8 @@
 # Licensed under the GPL-3
 
 
-from PyQt4.QtCore import Qt, pyqtSignal
-from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QGroupBox, QHBoxLayout, QLabel, QProgressBar,\
-    QSizePolicy, QVBoxLayout
+from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QGroupBox, QHBoxLayout, QSizePolicy, QVBoxLayout
 
 from baon.ui.qt_gui.mixins.CenterOnScreenMixin import CenterOnScreenMixin
 from baon.ui.qt_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
@@ -17,6 +16,7 @@ from baon.ui.qt_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
 from baon.ui.qt_gui.widgets.BasePathPanel import BasePathPanel
 from baon.ui.qt_gui.widgets.FilesDisplay import FilesDisplay
 from baon.ui.qt_gui.widgets.RulesEditor import RulesEditor
+from baon.ui.qt_gui.widgets.StatusBox import StatusBox
 
 
 class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
@@ -27,7 +27,6 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     USE_EXTENSION_CHECKBOX_TEXT = 'Use extension'
     RULES_BOX_TEXT = 'Rename Rules'
     FILES_BOX_TEXT = 'Renamed Files'
-    STATUS_BOX_TEXT = 'Status'
 
     DEFAULT_WINDOW_WIDTH = 800
     DEFAULT_WINDOW_HEIGHT = 600
@@ -45,8 +44,7 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     _use_extension_checkbox = None
     _rules_editor = None
     _files_display = None
-    _status_label = None
-    _status_progressbar = None
+    _status_box = None
     _dialog_button_box = None
 
     def __init__(self, args):
@@ -128,17 +126,9 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         return box
 
     def _create_status_box(self):
-        box = QGroupBox(self.STATUS_BOX_TEXT, self)
+        self._status_box = StatusBox(self)
 
-        self._status_label = QLabel(box)
-        self._status_progressbar = QProgressBar(box)
-        self._status_progressbar.setVisible(False)
-
-        layout = QHBoxLayout(box)
-        layout.addWidget(self._status_label)
-        layout.addWidget(self._status_progressbar)
-
-        return box
+        return self._status_box
 
     def _create_dialog_buttons(self):
         self._dialog_button_box = QDialogButtonBox(self)
