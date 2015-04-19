@@ -19,13 +19,13 @@ from baon.core.utils.math_utils import clamp
 
 
 class RulesEditorHighlighter(QSyntaxHighlighter):
-    LITERAL_FORMAT = {'fg': (0, 0, 240), 'bg': (232, 232, 240)}
-    PATTERN_FORMAT = {'fg': (0, 174, 0)}
-    BETWEEN_FORMAT = {'fg': (0, 174, 0), 'bold': True}
+    LITERAL_FORMAT = {'fg': '#0000f0', 'bg': '#e8e8f0'}
+    PATTERN_FORMAT = {'fg': '#00ae00'}
+    BETWEEN_FORMAT = {'fg': '#00ae00', 'bold': True}
     OPERATOR_FORMAT = {}
     PARA_FORMAT = {'bold': True}
-    ID_FORMAT = {'fg': (96, 96, 128), 'bold': True}
-    ERROR_FORMAT = {'fg': (255, 0, 0), 'ul': 'spellcheck', 'ul_color': (255, 0, 0)}
+    ID_FORMAT = {'fg': '#606080', 'bold': True}
+    ERROR_FORMAT = {'fg': '#ff0000', 'ul': 'spellcheck', 'ul_color': '#ff0000'}
 
     _FORMAT_DICT = {
         'STRING_LITERAL': LITERAL_FORMAT,
