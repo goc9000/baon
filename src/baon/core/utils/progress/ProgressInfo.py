@@ -28,6 +28,12 @@ class ProgressInfo(object):
     def is_complete(self):
         return not self.is_indeterminate() and self.done == self.total
 
+    def test_repr(self):
+        if self.is_indeterminate():
+            return 'INDETERMINATE'
+        else:
+            return self.done, self.total
+
     @staticmethod
     def make_indeterminate():
         return ProgressInfo(None, None)
