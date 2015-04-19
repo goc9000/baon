@@ -7,7 +7,9 @@
 # Licensed under the GPL-3
 
 
-from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal
+from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal, QThread
+
+from baon.core.errors.BAONError import BAONError
 
 
 class BAONQtCore(QObject):
@@ -20,6 +22,9 @@ class BAONQtCore(QObject):
     _rules_text = ''
     _use_extension = False
     _use_path = False
+
+    # State
+    _worker_thread = None
 
     def __init__(self, args):
         super().__init__()
@@ -44,4 +49,36 @@ class BAONQtCore(QObject):
 
     @pyqtSlot()
     def shutdown(self):
+        self._stop_worker()
         self.has_shutdown.emit()
+
+    def _start_worker(self, work, on_finished, on_error):
+        self._stop_worker()
+
+        class WorkerThread(QThread):
+            should_abort = False
+
+            completed = pyqtSignal(object)
+            error = pyqtSignal(BAONError)
+
+            def run(self):
+                try:
+                    self.completed.emit(work())
+                except BAONError as error:
+                    self.error.emit(error)
+
+        self._worker_thread = WorkerThread(self)
+        self._worker_thread.completed.connect(on_finished)
+        self._worker_thread.error.connect(on_error)
+        self._worker_thread.start()
+
+    def _should_worker_abort(self):
+        return self._worker_thread.should_abort
+
+    def _stop_worker(self):
+        if self._worker_thread is None:
+            return
+
+        self._worker_thread.should_abort = True
+        self._worker_thread.wait()
+        self._worker_thread = None
