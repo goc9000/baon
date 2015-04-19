@@ -18,6 +18,10 @@ from baon.ui.qt_gui.widgets.FilesDisplay import FilesDisplay
 from baon.ui.qt_gui.widgets.RulesEditor import RulesEditor
 from baon.ui.qt_gui.widgets.StatusBox import StatusBox
 
+from baon.core.errors.BAONError import BAONError
+
+from baon.core.utils.progress.ProgressInfo import ProgressInfo
+
 
 class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     WINDOW_TITLE_TEXT = 'BAON'
@@ -27,6 +31,11 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     USE_EXTENSION_CHECKBOX_TEXT = 'Use extension'
     RULES_BOX_TEXT = 'Rename Rules'
     FILES_BOX_TEXT = 'Renamed Files'
+
+    BASE_PATH_REQUIRED_MESSAGE_TEXT = 'Fill in the base path to start scanning for files to be renamed.'
+    SCAN_FILES_PROGRESS_TEXT = 'Scanning files'
+    SCAN_FILES_ERROR_CAPTION_TEXT = 'Error scanning files'
+    READY_MESSAGE_TEXT = 'Ready.'
 
     DEFAULT_WINDOW_WIDTH = 800
     DEFAULT_WINDOW_HEIGHT = 600
@@ -151,3 +160,23 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
             self._use_path_checkbox.setChecked(args.use_path)
         if args.rules_text is not None:
             self._rules_editor.set_rules(args.rules_text)
+
+    @pyqtSlot()
+    def report_base_path_required(self):
+        self._status_box.show_message(self.BASE_PATH_REQUIRED_MESSAGE_TEXT)
+
+    @pyqtSlot(ProgressInfo)
+    def report_scan_files_progress(self, progress):
+        self._status_box.show_progress(progress, self.SCAN_FILES_PROGRESS_TEXT)
+
+    @pyqtSlot(BAONError)
+    def report_scan_files_error(self, error):
+        self._status_box.show_error(error, self.SCAN_FILES_ERROR_CAPTION_TEXT)
+
+    @pyqtSlot(list)
+    def update_scanned_files(self, files):
+        pass # TODO: show in Files display
+
+    @pyqtSlot()
+    def report_ready(self):
+        self._status_box.show_message(self.READY_MESSAGE_TEXT)
