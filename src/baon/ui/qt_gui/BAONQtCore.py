@@ -11,7 +11,7 @@ from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal
 
 
 class BAONQtCore(QObject):
-    ready = pyqtSignal()
+    prologue_finished = pyqtSignal()
     has_shutdown = pyqtSignal()
 
     def __init__(self, args):
@@ -19,7 +19,7 @@ class BAONQtCore(QObject):
 
     @pyqtSlot()
     def start(self):
-        self.ready.emit()
+        self.prologue_finished.emit()
 
     @pyqtSlot()
     def shutdown(self):

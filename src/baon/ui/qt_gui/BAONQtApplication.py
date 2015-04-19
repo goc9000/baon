@@ -46,7 +46,7 @@ class BAONQtApplication(QApplication):
     def _connect_main_objects(self):
         self.aboutToQuit.connect(self._on_quit)
 
-        self._core.ready.connect(self._main_window.show)
+        self._core.prologue_finished.connect(self._main_window.show)
         self._core.has_shutdown.connect(self.quit)
 
         self._main_window.rejected.connect(self._core.shutdown)
