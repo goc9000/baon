@@ -7,7 +7,8 @@
 # Licensed under the GPL-3
 
 
-from PyQt4.QtGui import QHeaderView, QTableWidget
+from PyQt4.QtCore import Qt, QFileInfo, QSize
+from PyQt4.QtGui import QFileIconProvider, QHeaderView, QTableWidget, QTableWidgetItem
 
 
 class FilesDisplay(QTableWidget):
@@ -15,6 +16,7 @@ class FilesDisplay(QTableWidget):
     TO_COLUMN_TEXT = 'To'
 
     DEFAULT_ROW_HEIGHT = 20
+    DEFAULT_ICON_SIZE = DEFAULT_ROW_HEIGHT - 2
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -28,3 +30,20 @@ class FilesDisplay(QTableWidget):
         
         self.verticalHeader().hide()
         self.verticalHeader().setDefaultSectionSize(self.DEFAULT_ROW_HEIGHT)
+
+        self.setIconSize(QSize(self.DEFAULT_ICON_SIZE, self.DEFAULT_ICON_SIZE))
+
+    def set_original_files(self, files):
+        self.setRowCount(len(files))
+
+        for row_index, file_ref in enumerate(files):
+            self.setItem(row_index, 0, OriginalFileItem(file_ref))
+            self.setItem(row_index, 1, OriginalFileItem(file_ref))
+
+
+class OriginalFileItem(QTableWidgetItem):
+    def __init__(self, file_ref):
+        QTableWidgetItem.__init__(self, file_ref.filename)
+
+        self.setFlags(Qt.ItemIsEnabled)
+        self.setIcon(QFileIconProvider().icon(QFileInfo(file_ref.full_path)))

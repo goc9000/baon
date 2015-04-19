@@ -175,7 +175,7 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
 
     @pyqtSlot(list)
     def update_scanned_files(self, files):
-        pass # TODO: show in Files display
+        self._files_display.set_original_files(files)
 
     @pyqtSlot()
     def report_ready(self):
