@@ -18,7 +18,6 @@ from baon.core.files.scan_files import scan_files
 
 class BAONQtCore(QObject):
     prologue_finished = pyqtSignal()
-    has_shutdown = pyqtSignal()
 
     base_path_required = pyqtSignal()
 
@@ -28,6 +27,8 @@ class BAONQtCore(QObject):
     scanned_files_updated = pyqtSignal(list)
 
     ready = pyqtSignal()
+
+    has_shutdown = pyqtSignal()
 
     # Inputs
     _base_path = ''
@@ -62,20 +63,19 @@ class BAONQtCore(QObject):
     @pyqtSlot()
     def start(self):
         self.prologue_finished.emit()
-        self.rescan_files()
+        self._rescan_files()
 
     @pyqtSlot(str)
     def update_base_path(self, base_path):
         self._base_path = base_path
-        self.rescan_files()
+        self._rescan_files()
 
     @pyqtSlot(bool)
     def update_scan_recursive(self, scan_recursive):
         self._scan_recursive = scan_recursive
-        self.rescan_files()
+        self._rescan_files()
 
-    @pyqtSlot()
-    def rescan_files(self):
+    def _rescan_files(self):
         self._scanned_files = []
         self.scanned_files_updated.emit([])
 
