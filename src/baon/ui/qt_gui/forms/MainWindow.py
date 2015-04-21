@@ -165,6 +165,10 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     def report_base_path_required(self):
         self._status_box.show_message(self.BASE_PATH_REQUIRED_MESSAGE_TEXT)
 
+    @pyqtSlot()
+    def report_started_scanning_files(self):
+        self._files_display.setEnabled(False)
+
     @pyqtSlot(ProgressInfo)
     def report_scan_files_progress(self, progress):
         self._status_box.show_progress(progress, self.SCAN_FILES_PROGRESS_TEXT)
@@ -175,6 +179,7 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
 
     @pyqtSlot(list)
     def update_scanned_files(self, files):
+        self._files_display.setEnabled(True)
         self._files_display.set_original_files(files)
 
     @pyqtSlot()

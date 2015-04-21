@@ -1,11 +1,13 @@
 # baon/ui/qt_gui/BAONQtCore.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
-# 
+#
 # This file is part of BAON.
 #
 # Licensed under the GPL-3
 
+
+from enum import Enum
 
 from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal, QThread
 
@@ -17,13 +19,19 @@ from baon.core.files.scan_files import scan_files
 
 
 class BAONQtCore(QObject):
+    class State(Enum):
+        NOT_STARTED = 'not_started'
+        READY = 'ready'
+        SCANNING_FILES = 'scanning_files'
+        SHUTDOWN = 'shutdown'
+
     prologue_finished = pyqtSignal()
 
     base_path_required = pyqtSignal()
 
+    started_scanning_files = pyqtSignal()
     scan_files_progress = pyqtSignal(ProgressInfo)
     scan_files_error = pyqtSignal(BAONError)
-
     scanned_files_updated = pyqtSignal(list)
 
     ready = pyqtSignal()
@@ -38,15 +46,17 @@ class BAONQtCore(QObject):
     _use_path = False
 
     # Intermediary data
-    _scanned_files = []
+    _scanned_files = None
 
     # State
+    _state = None
     _worker_thread = None
 
     def __init__(self, args):
         super().__init__()
 
         self._init_inputs(args)
+        self._state = self.State.NOT_STARTED
 
     def _init_inputs(self, args):
         if args.base_path is not None:
@@ -60,28 +70,41 @@ class BAONQtCore(QObject):
         if args.use_path is not None:
             self._use_path = args.use_path
 
+    def _switch_state(self, new_state):
+        self._state = new_state
+
     @pyqtSlot()
     def start(self):
+        assert self._state == self.State.NOT_STARTED
+
+        self._switch_state(self.State.READY)
         self.prologue_finished.emit()
         self._rescan_files()
 
     @pyqtSlot(str)
     def update_base_path(self, base_path):
         self._base_path = base_path
-        self._rescan_files()
+        self._on_scan_files_params_updated()
 
     @pyqtSlot(bool)
     def update_scan_recursive(self, scan_recursive):
         self._scan_recursive = scan_recursive
-        self._rescan_files()
+        self._on_scan_files_params_updated()
+
+    def _on_scan_files_params_updated(self):
+        if self._state in [self.State.READY, self.State.SCANNING_FILES]:
+            self._rescan_files()
 
     def _rescan_files(self):
-        self._scanned_files = []
-        self.scanned_files_updated.emit([])
+        self._scanned_files = None
 
         if self._base_path == '':
+            self.scanned_files_updated.emit([])
             self.base_path_required.emit()
             return
+
+        self._switch_state(self.State.SCANNING_FILES)
+        self.started_scanning_files.emit()
 
         self._start_worker(
             work=lambda: scan_files(
@@ -95,17 +118,21 @@ class BAONQtCore(QObject):
 
     @pyqtSlot(object)
     def _on_scan_files_finished(self, result):
-        if isinstance(result, BAONError):
-            self.scan_files_error.emit(result)
-            return
+        self._switch_state(self.State.READY)
 
-        self._scanned_files = result
-        self.scanned_files_updated.emit(result)
-        self.ready.emit()
+        if isinstance(result, BAONError):
+            self.scanned_files_updated.emit([])
+            self.scan_files_error.emit(result)
+        else:
+            self._scanned_files = result
+            self.scanned_files_updated.emit(result)
+            self.ready.emit()
+
 
     @pyqtSlot()
     def shutdown(self):
         self._stop_worker()
+        self._switch_state(self.State.SHUTDOWN)
         self.has_shutdown.emit()
 
     def _start_worker(self, work, on_finished):
