@@ -91,11 +91,14 @@ class BAONQtCore(QObject):
                 check_abort=lambda: self._should_worker_abort(),
             ),
             on_finished=self._on_scan_files_finished,
-            on_error=self.scan_files_error,
         )
 
     @pyqtSlot(object)
     def _on_scan_files_finished(self, result):
+        if isinstance(result, BAONError):
+            self.scan_files_error.emit(result)
+            return
+
         self._scanned_files = result
         self.scanned_files_updated.emit(result)
         self.ready.emit()
@@ -105,24 +108,25 @@ class BAONQtCore(QObject):
         self._stop_worker()
         self.has_shutdown.emit()
 
-    def _start_worker(self, work, on_finished, on_error):
+    def _start_worker(self, work, on_finished):
         self._stop_worker()
 
         class WorkerThread(QThread):
             should_abort = False
 
             completed = pyqtSignal(object)
-            error = pyqtSignal(BAONError)
 
             def run(self):
                 try:
-                    self.completed.emit(work())
+                    result = work()
                 except BAONError as error:
-                    self.error.emit(error)
+                    result = error
+
+                if not self.should_abort:
+                    self.completed.emit(result)
 
         self._worker_thread = WorkerThread(self)
         self._worker_thread.completed.connect(on_finished)
-        self._worker_thread.error.connect(on_error)
         self._worker_thread.start()
 
     def _should_worker_abort(self):
