@@ -83,17 +83,25 @@ class BAONQtCore(QObject):
 
     @pyqtSlot(str)
     def update_base_path(self, base_path):
+        assert self._state in [self.State.READY, self.State.SCANNING_FILES]
+
         self._base_path = base_path
-        self._on_scan_files_params_updated()
+        self._rescan_files()
 
     @pyqtSlot(bool)
     def update_scan_recursive(self, scan_recursive):
-        self._scan_recursive = scan_recursive
-        self._on_scan_files_params_updated()
+        assert self._state in [self.State.READY, self.State.SCANNING_FILES]
 
-    def _on_scan_files_params_updated(self):
-        if self._state in [self.State.READY, self.State.SCANNING_FILES]:
-            self._rescan_files()
+        self._scan_recursive = scan_recursive
+        self._rescan_files()
+
+    @pyqtSlot()
+    def shutdown(self):
+        assert self._state in [self.State.NOT_STARTED, self.State.READY, self.State.SCANNING_FILES]
+
+        self._stop_worker()
+        self._switch_state(self.State.SHUTDOWN)
+        self.has_shutdown.emit()
 
     def _rescan_files(self):
         self._scanned_files = None
@@ -126,13 +134,6 @@ class BAONQtCore(QObject):
             self._scanned_files = result
             self.scanned_files_updated.emit(result)
             self.ready.emit()
-
-
-    @pyqtSlot()
-    def shutdown(self):
-        self._stop_worker()
-        self._switch_state(self.State.SHUTDOWN)
-        self.has_shutdown.emit()
 
     def _start_worker(self, work, on_finished):
         self._stop_worker()
