@@ -7,16 +7,29 @@
 # Licensed under the GPL-3
 
 
+from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QGroupBox, QHBoxLayout, QLabel, QProgressBar
+
+from baon.core.errors.BAONError import BAONError
+
+from baon.core.utils.progress.ProgressInfo import ProgressInfo
 
 
 class StatusBox(QGroupBox):
     STATUS_BOX_TEXT = 'Status'
 
+    BASE_PATH_REQUIRED_MESSAGE_TEXT = 'Fill in the base path to start scanning for files to be renamed.'
+    SCAN_FILES_PROGRESS_TEXT = 'Scanning files'
+    SCAN_FILES_ERROR_CAPTION_TEXT = 'Error scanning files'
+    READY_MESSAGE_TEXT = 'Ready.'
+
     ERROR_COLOR = '#ff0000'
 
     _status_label = None
     _status_progressbar = None
+
+    _show_base_path_required = False
+    _scan_files_error = None
 
     def __init__(self, parent):
         super().__init__(self.STATUS_BOX_TEXT, parent)
@@ -30,13 +43,53 @@ class StatusBox(QGroupBox):
         layout.addWidget(self._status_label)
         layout.addWidget(self._status_progressbar)
 
-    def show_message(self, format_string, *args, **kwargs):
+        self._update_display()
+
+    @pyqtSlot(ProgressInfo)
+    def show_scan_files_progress(self, progress):
+        self._show_progress(progress, self.SCAN_FILES_PROGRESS_TEXT)
+
+    @pyqtSlot()
+    def show_base_path_required(self):
+        self._show_base_path_required = True
+        self._scan_files_error = None
+        self._update_display()
+
+    @pyqtSlot(BAONError)
+    def show_scan_files_error(self, error):
+        self._show_base_path_required = False
+        self._scan_files_error = error
+        self._update_display()
+
+    @pyqtSlot()
+    def clear_scan_files_error(self):
+        self._show_base_path_required = False
+        self._scan_files_error = None
+        self._update_display()
+
+    @pyqtSlot()
+    def stop_showing_progress(self):
+        self._status_progressbar.setVisible(False)
+        self._update_display()
+
+    def _update_display(self):
+        if self._status_progressbar.isVisible():
+            return
+
+        if self._scan_files_error is not None:
+            self._show_error(self._scan_files_error, self.SCAN_FILES_ERROR_CAPTION_TEXT)
+        elif self._show_base_path_required:
+            self._show_message(self.BASE_PATH_REQUIRED_MESSAGE_TEXT)
+        else:
+            self._show_message(self.READY_MESSAGE_TEXT)
+
+    def _show_message(self, format_string, *args, **kwargs):
         self._show_raw_message(format_string.format(*args, **kwargs))
 
-    def show_progress(self, progress, text):
+    def _show_progress(self, progress, text):
         self._show_raw_message(text, progress=progress)
 
-    def show_error(self, error, caption=None):
+    def _show_error(self, error, caption=None):
         text = str(error)
         if caption is not None:
             text = caption + ': ' + text

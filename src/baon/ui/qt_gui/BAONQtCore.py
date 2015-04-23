@@ -31,6 +31,7 @@ class BAONQtCore(QObject):
 
     started_scanning_files = pyqtSignal()
     scan_files_progress = pyqtSignal(ProgressInfo)
+    scan_files_ok = pyqtSignal()
     scan_files_error = pyqtSignal(BAONError)
     scanned_files_updated = pyqtSignal(list)
 
@@ -104,25 +105,28 @@ class BAONQtCore(QObject):
         self.has_shutdown.emit()
 
     def _rescan_files(self):
+        self._stop_worker()
+        self._switch_state(self.State.READY)
+
         self._scanned_files = None
 
         if self._base_path == '':
             self.scanned_files_updated.emit([])
             self.base_path_required.emit()
-            return
+            self._ready()
+        else:
+            self._switch_state(self.State.SCANNING_FILES)
+            self.started_scanning_files.emit()
 
-        self._switch_state(self.State.SCANNING_FILES)
-        self.started_scanning_files.emit()
-
-        self._start_worker(
-            work=lambda: scan_files(
-                self._base_path,
-                self._scan_recursive,
-                on_progress=lambda progress: self.scan_files_progress.emit(progress),
-                check_abort=lambda: self._should_worker_abort(),
-            ),
-            on_finished=self._on_scan_files_finished,
-        )
+            self._start_worker(
+                work=lambda: scan_files(
+                    self._base_path,
+                    self._scan_recursive,
+                    on_progress=lambda progress: self.scan_files_progress.emit(progress),
+                    check_abort=lambda: self._should_worker_abort(),
+                ),
+                on_finished=self._on_scan_files_finished,
+            )
 
     def _on_scan_files_finished(self, result):
         self._switch_state(self.State.READY)
@@ -133,6 +137,12 @@ class BAONQtCore(QObject):
         else:
             self._scanned_files = result
             self.scanned_files_updated.emit(result)
+            self.scan_files_ok.emit()
+
+        self._ready()
+
+    def _ready(self):
+        if self._state == self.State.READY:
             self.ready.emit()
 
     def _start_worker(self, work, on_finished):

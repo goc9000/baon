@@ -51,6 +51,7 @@ class BAONQtApplication(QApplication):
         self._core.base_path_required.connect(self._main_window.report_base_path_required)
         self._core.started_scanning_files.connect(self._main_window.report_started_scanning_files)
         self._core.scan_files_progress.connect(self._main_window.report_scan_files_progress)
+        self._core.scan_files_ok.connect(self._main_window.report_scan_files_ok)
         self._core.scan_files_error.connect(self._main_window.report_scan_files_error)
         self._core.scanned_files_updated.connect(self._main_window.update_scanned_files)
 

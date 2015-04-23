@@ -32,11 +32,6 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     RULES_BOX_TEXT = 'Rename Rules'
     FILES_BOX_TEXT = 'Renamed Files'
 
-    BASE_PATH_REQUIRED_MESSAGE_TEXT = 'Fill in the base path to start scanning for files to be renamed.'
-    SCAN_FILES_PROGRESS_TEXT = 'Scanning files'
-    SCAN_FILES_ERROR_CAPTION_TEXT = 'Error scanning files'
-    READY_MESSAGE_TEXT = 'Ready.'
-
     DEFAULT_WINDOW_WIDTH = 800
     DEFAULT_WINDOW_HEIGHT = 600
     RULES_BOX_HEIGHT = 112
@@ -163,7 +158,7 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
 
     @pyqtSlot()
     def report_base_path_required(self):
-        self._status_box.show_message(self.BASE_PATH_REQUIRED_MESSAGE_TEXT)
+        self._status_box.show_base_path_required()
 
     @pyqtSlot()
     def report_started_scanning_files(self):
@@ -171,17 +166,21 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
 
     @pyqtSlot(ProgressInfo)
     def report_scan_files_progress(self, progress):
-        self._status_box.show_progress(progress, self.SCAN_FILES_PROGRESS_TEXT)
+        self._status_box.show_scan_files_progress(progress)
+
+    @pyqtSlot()
+    def report_scan_files_ok(self):
+        self._status_box.clear_scan_files_error()
 
     @pyqtSlot(BAONError)
     def report_scan_files_error(self, error):
-        self._status_box.show_error(error, self.SCAN_FILES_ERROR_CAPTION_TEXT)
+        self._status_box.show_scan_files_error(error)
 
     @pyqtSlot(list)
     def update_scanned_files(self, files):
-        self._files_display.setEnabled(True)
         self._files_display.set_original_files(files)
 
     @pyqtSlot()
     def report_ready(self):
-        self._status_box.show_message(self.READY_MESSAGE_TEXT)
+        self._files_display.setEnabled(True)
+        self._status_box.stop_showing_progress()
