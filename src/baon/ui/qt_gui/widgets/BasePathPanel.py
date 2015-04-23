@@ -18,7 +18,7 @@ class BasePathPanel(QWidget, SetupTabStopsMixin):
     BROWSE_BUTTON_TEXT = 'Browse...'
     BROWSE_DIALOG_CAPTION_TEXT = 'Choose Base Directory'
 
-    BASE_PATH_EDITOR_QUIESCENCE_TIME_MSEC = 1500
+    BASE_PATH_EDITOR_QUIESCENCE_TIME_MSEC = 1000
 
     path_edited = pyqtSignal(str)
 

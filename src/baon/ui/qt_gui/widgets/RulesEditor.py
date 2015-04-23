@@ -14,7 +14,7 @@ from baon.ui.qt_gui.widgets.RulesEditorHighlighter import RulesEditorHighlighter
 
 
 class RulesEditor(QTextEdit):
-    QUIESCENCE_TIME_MSEC = 1500
+    QUIESCENCE_TIME_MSEC = 1000
 
     rules_edited = pyqtSignal(str)
 
