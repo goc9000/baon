@@ -181,6 +181,16 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         self._files_display.set_original_files(files)
 
     @pyqtSlot()
+    def report_rules_ok(self):
+        self._rules_editor.clear_error()
+        self._status_box.clear_rules_error()
+
+    @pyqtSlot(BAONError)
+    def report_rules_error(self, error):
+        self._rules_editor.show_error(error.source_span)
+        self._status_box.show_rules_error(error)
+
+    @pyqtSlot()
     def report_ready(self):
         self._files_display.setEnabled(True)
         self._status_box.stop_showing_progress()

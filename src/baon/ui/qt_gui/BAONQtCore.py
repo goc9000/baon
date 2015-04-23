@@ -16,6 +16,7 @@ from baon.core.errors.BAONError import BAONError
 from baon.core.utils.progress.ProgressInfo import ProgressInfo
 
 from baon.core.files.scan_files import scan_files
+from baon.core.parsing.parse_rules import parse_rules
 
 
 class BAONQtCore(QObject):
@@ -35,6 +36,9 @@ class BAONQtCore(QObject):
     scan_files_error = pyqtSignal(BAONError)
     scanned_files_updated = pyqtSignal(list)
 
+    rules_ok = pyqtSignal()
+    rules_error = pyqtSignal(BAONError)
+
     ready = pyqtSignal()
 
     has_shutdown = pyqtSignal()
@@ -48,6 +52,7 @@ class BAONQtCore(QObject):
 
     # Intermediary data
     _scanned_files = None
+    _rules = None
 
     # State
     _state = None
@@ -96,6 +101,13 @@ class BAONQtCore(QObject):
         self._scan_recursive = scan_recursive
         self._rescan_files()
 
+    @pyqtSlot(str)
+    def update_rules_text(self, rules_text):
+        assert self._state in [self.State.READY, self.State.SCANNING_FILES]
+
+        self._rules_text = rules_text
+        self._recompile_rules()
+
     @pyqtSlot()
     def shutdown(self):
         assert self._state in [self.State.NOT_STARTED, self.State.READY, self.State.SCANNING_FILES]
@@ -113,7 +125,7 @@ class BAONQtCore(QObject):
         if self._base_path == '':
             self.scanned_files_updated.emit([])
             self.base_path_required.emit()
-            self._ready()
+            self._recompile_rules()
         else:
             self._switch_state(self.State.SCANNING_FILES)
             self.started_scanning_files.emit()
@@ -138,6 +150,15 @@ class BAONQtCore(QObject):
             self._scanned_files = result
             self.scanned_files_updated.emit(result)
             self.scan_files_ok.emit()
+
+        self._recompile_rules()
+
+    def _recompile_rules(self):
+        try:
+            self._rules = parse_rules(self._rules_text)
+            self.rules_ok.emit()
+        except BAONError as error:
+            self.rules_error.emit(error)
 
         self._ready()
 

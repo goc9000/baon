@@ -55,12 +55,18 @@ class BAONQtApplication(QApplication):
         self._core.scan_files_error.connect(self._main_window.report_scan_files_error)
         self._core.scanned_files_updated.connect(self._main_window.update_scanned_files)
 
+        self._core.rules_ok.connect(self._main_window.report_rules_ok)
+        self._core.rules_error.connect(self._main_window.report_rules_error)
+
         self._core.ready.connect(self._main_window.report_ready)
 
         self._core.has_shutdown.connect(self.quit)
 
         self._main_window.base_path_edited.connect(self._core.update_base_path)
         self._main_window.scan_recursive_changed.connect(self._core.update_scan_recursive)
+
+        self._main_window.rules_text_changed.connect(self._core.update_rules_text)
+
         self._main_window.rejected.connect(self._core.shutdown)
 
     def _start_core(self):

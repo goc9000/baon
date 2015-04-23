@@ -21,6 +21,9 @@ class StatusBox(QGroupBox):
     BASE_PATH_REQUIRED_MESSAGE_TEXT = 'Fill in the base path to start scanning for files to be renamed.'
     SCAN_FILES_PROGRESS_TEXT = 'Scanning files'
     SCAN_FILES_ERROR_CAPTION_TEXT = 'Error scanning files'
+
+    RULES_ERROR_CAPTION_TEXT = 'Error in rules'
+
     READY_MESSAGE_TEXT = 'Ready.'
 
     ERROR_COLOR = '#ff0000'
@@ -30,6 +33,7 @@ class StatusBox(QGroupBox):
 
     _show_base_path_required = False
     _scan_files_error = None
+    _rules_error = None
 
     def __init__(self, parent):
         super().__init__(self.STATUS_BOX_TEXT, parent)
@@ -67,6 +71,15 @@ class StatusBox(QGroupBox):
         self._scan_files_error = None
         self._update_display()
 
+    @pyqtSlot(BAONError)
+    def show_rules_error(self, error):
+        self._rules_error = error
+        self._update_display()
+
+    def clear_rules_error(self):
+        self._rules_error = None
+        self._update_display()
+
     @pyqtSlot()
     def stop_showing_progress(self):
         self._status_progressbar.setVisible(False)
@@ -76,7 +89,9 @@ class StatusBox(QGroupBox):
         if self._status_progressbar.isVisible():
             return
 
-        if self._scan_files_error is not None:
+        if self._rules_error is not None:
+            self._show_error(self._rules_error, self.RULES_ERROR_CAPTION_TEXT)
+        elif self._scan_files_error is not None:
             self._show_error(self._scan_files_error, self.SCAN_FILES_ERROR_CAPTION_TEXT)
         elif self._show_base_path_required:
             self._show_message(self.BASE_PATH_REQUIRED_MESSAGE_TEXT)
