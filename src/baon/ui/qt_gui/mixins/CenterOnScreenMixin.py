@@ -11,6 +11,8 @@ from PyQt4.QtGui import QDesktopWidget, QWidget
 
 
 class CenterOnScreenMixin(object):
+    """Mixin that provides a method for windows and dialogs so that they can center themselves on the screen."""
+
     def _center_on_screen(self):
         assert isinstance(self, QWidget)
 

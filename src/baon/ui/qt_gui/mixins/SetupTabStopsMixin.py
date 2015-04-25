@@ -12,6 +12,8 @@ from PyQt4.QtGui import QWidget
 
 
 class SetupTabStopsMixin(object):
+    """Mixin that provides a method by which tab stops can be easily set up in a control."""
+
     def _setup_tab_stops(self, *items, focus_policy=Qt.StrongFocus):
         assert isinstance(self, QWidget)
 
