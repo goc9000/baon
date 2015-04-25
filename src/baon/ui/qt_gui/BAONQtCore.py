@@ -9,7 +9,9 @@
 
 from enum import Enum
 
-from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal, QThread
+from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal
+
+from baon.ui.qt_gui.mixins.CancellableWorkerMixin import CancellableWorkerMixin
 
 from baon.core.errors.BAONError import BAONError
 
@@ -19,7 +21,7 @@ from baon.core.files.scan_files import scan_files
 from baon.core.parsing.parse_rules import parse_rules
 
 
-class BAONQtCore(QObject):
+class BAONQtCore(CancellableWorkerMixin, QObject):
     class State(Enum):
         NOT_STARTED = 'not_started'
         READY = 'ready'
@@ -56,7 +58,6 @@ class BAONQtCore(QObject):
 
     # State
     _state = None
-    _worker_thread = None
 
     def __init__(self, args):
         super().__init__()
@@ -131,11 +132,11 @@ class BAONQtCore(QObject):
             self.started_scanning_files.emit()
 
             self._start_worker(
-                work=lambda: scan_files(
+                work=lambda check_abort: scan_files(
                     self._base_path,
                     self._scan_recursive,
                     on_progress=lambda progress: self.scan_files_progress.emit(progress),
-                    check_abort=lambda: self._should_worker_abort(),
+                    check_abort=check_abort,
                 ),
                 on_finished=self._on_scan_files_finished,
             )
@@ -165,42 +166,3 @@ class BAONQtCore(QObject):
     def _ready(self):
         if self._state == self.State.READY:
             self.ready.emit()
-
-    def _start_worker(self, work, on_finished):
-        self._stop_worker()
-
-        class WorkerThread(QThread):
-            should_abort = False
-            result = None
-            on_finished = None
-
-            def run(self):
-                try:
-                    self.result = work()
-                except BAONError as error:
-                    self.result = error
-
-        self._worker_thread = WorkerThread(self)
-        self._worker_thread.on_finished = on_finished
-        self._worker_thread.finished.connect(self._on_worker_finished)
-        self._worker_thread.start()
-
-    def _should_worker_abort(self):
-        return self._worker_thread.should_abort
-
-    @pyqtSlot()
-    def _on_worker_finished(self):
-        worker = self.sender()
-        if worker.should_abort or worker is not self._worker_thread:
-            return
-
-        self._worker_thread = None
-        worker.on_finished(worker.result)
-
-    def _stop_worker(self):
-        if self._worker_thread is None:
-            return
-
-        self._worker_thread.should_abort = True
-        self._worker_thread.wait()
-        self._worker_thread = None
