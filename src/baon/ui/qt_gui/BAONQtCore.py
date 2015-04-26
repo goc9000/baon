@@ -77,14 +77,14 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES]
 
         self._base_path = base_path
-        self._rescan_files()
+        self._on_scan_files_inputs_changed()
 
     @pyqtSlot(bool)
     def update_scan_recursive(self, scan_recursive):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES]
 
         self._scan_recursive = scan_recursive
-        self._rescan_files()
+        self._on_scan_files_inputs_changed()
 
     @pyqtSlot(str)
     def update_rules_text(self, rules_text):
@@ -135,16 +135,18 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         elif self._state == self.State.READY:
             self.ready.emit()
 
+    def _on_scan_files_inputs_changed(self):
+        self._rescan_files()
+
     def _rescan_files(self):
         self._stop_worker()
-        self._switch_state(self.State.READY)
 
         self._scanned_files = None
 
         if self._base_path == '':
+            self._switch_state(self.State.READY)
             self.scanned_files_updated.emit([])
             self.base_path_required.emit()
-            self._recompile_rules()
         else:
             self._switch_state(self.State.SCANNING_FILES)
             self._start_worker(
@@ -167,8 +169,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
             self._scanned_files = result
             self.scanned_files_updated.emit(result)
             self.scan_files_ok.emit()
-
-        self._recompile_rules()
+            self._on_rename_files_inputs_changed()
 
     def _recompile_rules(self):
         try:
@@ -176,3 +177,8 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
             self.rules_ok.emit()
         except BAONError as error:
             self.rules_error.emit(error)
+
+        self._on_rename_files_inputs_changed()
+
+    def _on_rename_files_inputs_changed(self):
+        pass
