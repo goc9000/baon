@@ -78,14 +78,33 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
             self._use_path = args.use_path
 
     def _switch_state(self, new_state):
+        if new_state == self._state:
+            return
+
+        self._on_exit_state(new_state)
+        old_state = self._state
         self._state = new_state
+        self._on_enter_state(old_state)
+
+    def _on_exit_state(self, new_state):
+        prologue_states = {self.State.NOT_STARTED}
+
+        if self._state in prologue_states and new_state not in prologue_states:
+            self.prologue_finished.emit()
+
+    def _on_enter_state(self, old_state):
+        if self._state == self.State.SHUTDOWN:
+            self.has_shutdown.emit()
+        elif self._state == self.State.SCANNING_FILES:
+            self.started_scanning_files.emit()
+        elif self._state == self.State.READY:
+            self.ready.emit()
 
     @pyqtSlot()
     def start(self):
         assert self._state == self.State.NOT_STARTED
 
         self._switch_state(self.State.READY)
-        self.prologue_finished.emit()
         self._rescan_files()
 
     @pyqtSlot(str)
@@ -115,7 +134,6 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
         self._stop_worker()
         self._switch_state(self.State.SHUTDOWN)
-        self.has_shutdown.emit()
 
     def _rescan_files(self):
         self._stop_worker()
@@ -129,8 +147,6 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
             self._recompile_rules()
         else:
             self._switch_state(self.State.SCANNING_FILES)
-            self.started_scanning_files.emit()
-
             self._start_worker(
                 work=lambda check_abort: scan_files(
                     self._base_path,
@@ -160,9 +176,3 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
             self.rules_ok.emit()
         except BAONError as error:
             self.rules_error.emit(error)
-
-        self._ready()
-
-    def _ready(self):
-        if self._state == self.State.READY:
-            self.ready.emit()
