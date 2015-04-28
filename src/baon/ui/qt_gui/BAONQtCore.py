@@ -141,35 +141,40 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
     def _rescan_files(self):
         self._stop_worker()
 
-        self._scanned_files = None
-
         if self._base_path == '':
-            self._switch_state(self.State.READY)
-            self.scanned_files_updated.emit([])
-            self.base_path_required.emit()
-        else:
-            self._switch_state(self.State.SCANNING_FILES)
-            self._start_worker(
-                work=lambda check_abort: scan_files(
-                    self._base_path,
-                    self._scan_recursive,
-                    on_progress=lambda progress: self.scan_files_progress.emit(progress),
-                    check_abort=check_abort,
-                ),
-                on_finished=self._on_scan_files_finished,
-            )
+            self._on_scan_files_finished(None)
+            return
+
+        self._switch_state(self.State.SCANNING_FILES)
+        self._start_worker(
+            work=lambda check_abort: scan_files(
+                self._base_path,
+                self._scan_recursive,
+                on_progress=lambda progress: self.scan_files_progress.emit(progress),
+                check_abort=check_abort,
+            ),
+            on_finished=self._on_scan_files_finished,
+        )
 
     def _on_scan_files_finished(self, result):
         self._switch_state(self.State.READY)
+        self._update_scanned_files(result)
 
-        if isinstance(result, BAONError):
+    def _update_scanned_files(self, result):
+        if result is None:
+            self._scanned_files = None
+            self.scanned_files_updated.emit([])
+            self.base_path_required.emit()
+        elif isinstance(result, BAONError):
+            self._scanned_files = None
             self.scanned_files_updated.emit([])
             self.scan_files_error.emit(result)
         else:
             self._scanned_files = result
             self.scanned_files_updated.emit(result)
             self.scan_files_ok.emit()
-            self._on_rename_files_inputs_changed()
+
+        self._on_rename_files_inputs_changed()
 
     def _recompile_rules(self):
         try:
