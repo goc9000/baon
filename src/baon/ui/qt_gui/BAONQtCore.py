@@ -97,7 +97,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
     @pyqtSlot()
     def shutdown(self):
-        assert self._state in [self.State.NOT_STARTED, self.State.READY, self.State.SCANNING_FILES]
+        assert self._state != self.State.SHUTDOWN
 
         self._stop_worker()
         self._switch_state(self.State.SHUTDOWN)
@@ -163,17 +163,18 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._update_scanned_files(result)
 
     def _update_scanned_files(self, result):
-        if result is None:
+        if result is not None and not isinstance(result, BAONError):
+            self._scanned_files = result
+        else:
             self._scanned_files = None
-            self.scanned_files_updated.emit([])
+
+        self.scanned_files_updated.emit(self._scanned_files if self._scanned_files is not None else [])
+
+        if result is None:
             self.base_path_required.emit()
         elif isinstance(result, BAONError):
-            self._scanned_files = None
-            self.scanned_files_updated.emit([])
             self.scan_files_error.emit(result)
         else:
-            self._scanned_files = result
-            self.scanned_files_updated.emit(result)
             self.scan_files_ok.emit()
 
         self._on_rename_files_inputs_changed()
