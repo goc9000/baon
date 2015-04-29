@@ -70,6 +70,8 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         assert self._state == self.State.NOT_STARTED
 
         self._switch_state(self.State.READY)
+
+        self._recompile_rules(isolated=True)
         self._rescan_files()
 
     @pyqtSlot(str)
@@ -176,14 +178,16 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
         self._on_rename_files_inputs_changed()
 
-    def _recompile_rules(self):
+    def _recompile_rules(self, isolated=False):
         try:
             self._rules = parse_rules(self._rules_text)
             self.rules_ok.emit()
         except BAONError as error:
+            self._rules = None
             self.rules_error.emit(error)
 
-        self._on_rename_files_inputs_changed()
+        if not isolated:
+            self._on_rename_files_inputs_changed()
 
     def _on_rename_files_inputs_changed(self):
         pass
