@@ -35,3 +35,7 @@ class FilesDisplay(QTableView):
     @pyqtSlot(list)
     def set_original_files(self, files):
         self.model().set_original_files(files)
+
+    @pyqtSlot(list)
+    def set_renamed_files(self, files):
+        self.model().set_renamed_files(files)
