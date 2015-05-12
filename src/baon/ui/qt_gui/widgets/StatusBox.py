@@ -24,6 +24,10 @@ class StatusBox(QGroupBox):
 
     RULES_ERROR_CAPTION_TEXT = 'Error in rules'
 
+    NO_FILES_TO_RENAME_MESSAGE_TEXT = 'No files to rename.'
+    RENAME_FILES_PROGRESS_TEXT = 'Renaming files'
+    RENAME_FILES_ERROR_CAPTION_TEXT = 'Error renaming files'
+
     READY_MESSAGE_TEXT = 'Ready.'
 
     ERROR_COLOR = '#ff0000'
@@ -34,6 +38,8 @@ class StatusBox(QGroupBox):
     _show_base_path_required = False
     _scan_files_error = None
     _rules_error = None
+    _show_no_files_to_rename = False
+    _rename_files_error = None
 
     def __init__(self, parent):
         super().__init__(self.STATUS_BOX_TEXT, parent)
@@ -76,8 +82,31 @@ class StatusBox(QGroupBox):
         self._rules_error = error
         self._update_display()
 
+    @pyqtSlot()
     def clear_rules_error(self):
         self._rules_error = None
+        self._update_display()
+
+    @pyqtSlot(ProgressInfo)
+    def show_rename_files_progress(self, progress):
+        self._show_progress(progress, self.RENAME_FILES_PROGRESS_TEXT)
+
+    @pyqtSlot()
+    def show_no_files_to_rename(self):
+        self._show_no_files_to_rename = True
+        self._rename_files_error = None
+        self._update_display()
+
+    @pyqtSlot(BAONError)
+    def show_rename_files_error(self, error):
+        self._show_no_files_to_rename = False
+        self._rename_files_error = error
+        self._update_display()
+
+    @pyqtSlot()
+    def clear_rename_files_error(self):
+        self._show_no_files_to_rename = False
+        self._rename_files_error = None
         self._update_display()
 
     @pyqtSlot()
@@ -95,6 +124,10 @@ class StatusBox(QGroupBox):
             self._show_error(self._scan_files_error, self.SCAN_FILES_ERROR_CAPTION_TEXT)
         elif self._show_base_path_required:
             self._show_message(self.BASE_PATH_REQUIRED_MESSAGE_TEXT)
+        elif self._rename_files_error is not None:
+            self._show_error(self._rename_files_error, self.RENAME_FILES_ERROR_CAPTION_TEXT)
+        elif self._show_no_files_to_rename:
+            self._show_message(self.NO_FILES_TO_RENAME_MESSAGE_TEXT)
         else:
             self._show_message(self.READY_MESSAGE_TEXT)
 
