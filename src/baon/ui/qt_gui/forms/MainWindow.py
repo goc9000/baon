@@ -14,7 +14,7 @@ from baon.ui.qt_gui.mixins.CenterOnScreenMixin import CenterOnScreenMixin
 from baon.ui.qt_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
 
 from baon.ui.qt_gui.widgets.BasePathPanel import BasePathPanel
-from baon.ui.qt_gui.widgets.FilesDisplay import FilesDisplay
+from baon.ui.qt_gui.widgets.files_display.FilesDisplay import FilesDisplay
 from baon.ui.qt_gui.widgets.RulesEditor import RulesEditor
 from baon.ui.qt_gui.widgets.StatusBox import StatusBox
 
