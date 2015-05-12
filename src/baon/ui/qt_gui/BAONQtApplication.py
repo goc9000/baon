@@ -58,6 +58,14 @@ class BAONQtApplication(QApplication):
         self._core.rules_ok.connect(self._main_window.report_rules_ok)
         self._core.rules_error.connect(self._main_window.report_rules_error)
 
+        self._core.not_ready_to_rename.connect(self._main_window.report_not_ready_to_rename)
+        self._core.no_files_to_rename.connect(self._main_window.report_no_files_to_rename)
+        self._core.started_renaming_files.connect(self._main_window.report_started_renaming_files)
+        self._core.rename_files_progress.connect(self._main_window.report_rename_files_progress)
+        self._core.rename_files_ok.connect(self._main_window.report_rename_files_ok)
+        self._core.rename_files_error.connect(self._main_window.report_rename_files_error)
+        self._core.renamed_files_updated.connect(self._main_window.update_renamed_files)
+
         self._core.ready.connect(self._main_window.report_ready)
 
         self._core.has_shutdown.connect(self.quit)
@@ -66,6 +74,8 @@ class BAONQtApplication(QApplication):
         self._main_window.scan_recursive_changed.connect(self._core.update_scan_recursive)
 
         self._main_window.rules_text_changed.connect(self._core.update_rules_text)
+        self._main_window.use_path_changed.connect(self._core.update_use_path)
+        self._main_window.use_extension_changed.connect(self._core.update_use_extension)
 
         self._main_window.rejected.connect(self._core.shutdown)
 

@@ -191,6 +191,34 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         self._status_box.show_rules_error(error)
 
     @pyqtSlot()
+    def report_not_ready_to_rename(self):
+        self._status_box.clear_rename_files_error()
+
+    @pyqtSlot()
+    def report_no_files_to_rename(self):
+        self._status_box.show_no_files_to_rename()
+
+    @pyqtSlot()
+    def report_started_renaming_files(self):
+        self._files_display.setEnabled(False)
+
+    @pyqtSlot(ProgressInfo)
+    def report_rename_files_progress(self, progress):
+        self._status_box.show_rename_files_progress(progress)
+
+    @pyqtSlot()
+    def report_rename_files_ok(self):
+        self._status_box.clear_rename_files_error()
+
+    @pyqtSlot(BAONError)
+    def report_rename_files_error(self, error):
+        self._status_box.show_rename_files_error(error)
+
+    @pyqtSlot(list)
+    def update_renamed_files(self, files):
+        self._files_display.set_renamed_files(files)
+
+    @pyqtSlot()
     def report_ready(self):
         self._files_display.setEnabled(True)
         self._status_box.stop_showing_progress()
