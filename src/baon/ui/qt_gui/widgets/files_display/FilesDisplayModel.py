@@ -8,7 +8,12 @@
 
 
 from PyQt4.QtCore import Qt, pyqtSlot, QAbstractTableModel, QFileInfo
-from PyQt4.QtGui import QFileIconProvider
+from PyQt4.QtGui import QFileIconProvider, QStyle, QApplication
+
+from baon.ui.qt_gui.utils.parse_qcolor import parse_qcolor
+from baon.ui.qt_gui.utils.make_qicon_with_overlay import make_qicon_with_overlay
+
+from baon.core.utils.grammar_utils import format_tally
 
 
 class FilesDisplayModel(QAbstractTableModel):
@@ -17,6 +22,14 @@ class FilesDisplayModel(QAbstractTableModel):
 
     FROM_COLUMN_TEXT = 'From'
     TO_COLUMN_TEXT = 'To'
+
+    ERROR_FOREGROUND_COLOR = parse_qcolor('#ff0000')
+    WARNING_FOREGROUND_COLOR = parse_qcolor('#d0b000')
+
+    ERROR_ITEM_NAME = 'Error'
+    ERROR_ITEM_NAME_PLURAL = 'Errors'
+    WARNING_ITEM_NAME = 'Warning'
+    WARNING_ITEM_NAME_PLURAL = 'Warnings'
 
     _original_files = None
     _renamed_files = None
@@ -94,7 +107,14 @@ class FilesDisplayModel(QAbstractTableModel):
         return original_file.filename
 
     def _get_original_icon(self, original_file, renamed_file):
-        return QFileIconProvider().icon(QFileInfo(original_file.full_path))
+        icon = QFileIconProvider().icon(QFileInfo(original_file.full_path))
+        return self._add_icon_overlay_for_problems(icon, original_file)
+
+    def _get_original_foreground(self, original_file, renamed_file):
+        return self._get_foreground_for_file_info(original_file)
+
+    def _get_original_tooltip(self, original_file, renamed_file):
+        return self._get_problems_tooltip(original_file)
 
     def _get_renamed_text(self, original_file, renamed_file):
         if renamed_file is None:
@@ -103,14 +123,94 @@ class FilesDisplayModel(QAbstractTableModel):
         return renamed_file.filename
 
     def _get_renamed_icon(self, original_file, renamed_file):
-        return QFileIconProvider().icon(QFileInfo(original_file.full_path))
+        icon = QFileIconProvider().icon(QFileInfo(original_file.full_path))
+        if renamed_file is not None:
+            return self._add_icon_overlay_for_problems(icon, renamed_file)
+
+        return icon
+
+    def _get_renamed_foreground(self, original_file, renamed_file):
+        if renamed_file is not None:
+            return self._get_foreground_for_file_info(renamed_file)
+
+        return None
+
+    def _get_renamed_tooltip(self, original_file, renamed_file):
+        if renamed_file is not None:
+            return self._get_problems_tooltip(renamed_file)
+
+        return None
 
     DATA_GETTERS = {
         (COL_INDEX_FROM, Qt.DisplayRole): _get_original_text,
         (COL_INDEX_FROM, Qt.DecorationRole): _get_original_icon,
+        (COL_INDEX_FROM, Qt.ForegroundRole): _get_original_foreground,
+        (COL_INDEX_FROM, Qt.ToolTipRole): _get_original_tooltip,
         (COL_INDEX_TO, Qt.DisplayRole): _get_renamed_text,
         (COL_INDEX_TO, Qt.DecorationRole): _get_renamed_icon,
+        (COL_INDEX_TO, Qt.ForegroundRole): _get_renamed_foreground,
+        (COL_INDEX_TO, Qt.ToolTipRole): _get_renamed_tooltip,
     }
+
+    def _add_icon_overlay_for_problems(self, icon, file_info):
+        if file_info.has_errors():
+            return make_qicon_with_overlay(
+                icon,
+                QApplication.style().standardIcon(QStyle.SP_MessageBoxCritical),
+            )
+        elif file_info.has_warnings():
+            return make_qicon_with_overlay(
+                icon,
+                QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning),
+            )
+        else:
+            return icon
+
+    def _get_foreground_for_file_info(self, file_info):
+        if file_info.has_errors():
+            return self.ERROR_FOREGROUND_COLOR
+        elif file_info.has_warnings():
+            return self.WARNING_FOREGROUND_COLOR
+        else:
+            return None
+
+    def _get_problems_tooltip(self, file_info):
+        title = format_tally(
+            counts=[file_info.error_count(), file_info.warning_count()],
+            names_singular=[self.ERROR_ITEM_NAME, self.WARNING_ITEM_NAME],
+            names_plural=[self.ERROR_ITEM_NAME_PLURAL, self.WARNING_ITEM_NAME_PLURAL],
+            and_word=None,
+            no_count_if_singleton=True,
+        )
+
+        if file_info.has_errors():
+            title_color = self.ERROR_FOREGROUND_COLOR
+        elif file_info.has_warnings():
+            title_color = self.WARNING_FOREGROUND_COLOR
+        else:
+            return None
+
+        header_html = '<b><font color="{0}">{1}</font></b><hr>'.format(title_color.name(), title)
+
+        return header_html + '<br>'.join(
+            self._get_problem_html(problem, no_heading=(len(file_info.problems) == 1))
+            for problem in file_info.problems
+        )
+
+    def _get_problem_html(self, problem, no_heading=False):
+        if isinstance(problem, Warning):
+            item_color = self.WARNING_FOREGROUND_COLOR
+            item_heading = self.WARNING_ITEM_NAME
+        else:
+            item_color = self.ERROR_FOREGROUND_COLOR
+            item_heading = self.ERROR_ITEM_NAME
+
+        if no_heading:
+            item_heading = ''
+        else:
+            item_heading = '- {0}: '.format(item_heading)
+
+        return '<font color="{0}">{1}{2}</font>'.format(item_color.name(), item_heading, str(problem))
 
     @staticmethod
     def _verify_renamed_files(original_files, renamed_files):

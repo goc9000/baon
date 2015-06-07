@@ -29,6 +29,27 @@ class FileReference(object):
     def __lt__(self, other):
         return self.compare(self, other) < 0
 
+    def has_problems(self):
+        return len(self.problems) > 0
+
+    def has_errors(self):
+        return self.error_count() > 0
+
+    def has_warnings(self):
+        return self.warning_count() > 0
+
+    def error_count(self):
+        return len(self.errors())
+
+    def warning_count(self):
+        return len(self.warnings())
+
+    def errors(self):
+        return [error for error in self.problems if not isinstance(error, Warning)]
+
+    def warnings(self):
+        return [warning for warning in self.problems if isinstance(warning, Warning)]
+
     def test_repr(self):
         type_str = 'DIR' if self.is_dir else 'FILE'
         if self.is_link:
