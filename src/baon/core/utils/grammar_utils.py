@@ -44,28 +44,44 @@ def plural(word):
     return word + "s"
 
 
-def format_numeral(item_name_singular, item_count):
-    name = item_name_singular if item_count == 1 else plural(item_name_singular)
-    
-    return "{0} {1}".format(item_count, name)
+def format_count(item_count, item_name_singular, item_name_plural=None):
+    if item_name_plural is None:
+        item_name_plural = plural(item_name_singular)
+
+    return "{0} {1}".format(item_count, item_name_singular if item_count == 1 else item_name_plural)
 
 
-def format_numerals(counts, omit_zero_entries=True, value_if_nothing='nothing'):
-    parts = []
-    
-    if omit_zero_entries:
-        counts = [item for item in counts if item[1] > 0]
-    
-    for i, item in enumerate(counts):
-        if i > 0:
-            parts.append(', ' if i != len(counts)-1 else ' and ')
-        
-        parts.append(format_numeral(item[0], item[1]))
-    
+def format_tally(
+        counts,
+        names_singular,
+        names_plural=None,
+        omit_zero_entries=True,
+        and_word=' and ',
+        value_if_nothing='nothing',
+        no_count_if_singleton=False,
+):
+    if names_plural is None:
+        names_plural = [plural(name) for name in names_singular]
+    if and_word is None:
+        and_word = ', '
+
+    assert len(counts) == len(names_singular) == len(names_plural)
+
+    if sum(counts) == 1 and no_count_if_singleton:
+        return next(name for item_count, name in zip(counts, names_singular) if item_count > 0)
+
+    parts = [
+        format_count(item_count, name_singular, name_plural)
+        for item_count, name_singular, name_plural in zip(counts, names_singular, names_plural)
+        if not (item_count == 0 and omit_zero_entries)
+    ]
+
     if len(parts) == 0:
         return value_if_nothing
-    
-    return ''.join(parts)
+    elif len(parts) == 1:
+        return parts[0]
+
+    return ', '.join(parts[:-1]) + and_word + parts[-1]
 
 
 def is_mac_name(word):
