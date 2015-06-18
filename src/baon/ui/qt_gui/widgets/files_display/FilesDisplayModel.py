@@ -13,6 +13,8 @@ from PyQt4.QtGui import QFileIconProvider, QStyle, QApplication
 from baon.ui.qt_gui.utils.parse_qcolor import parse_qcolor
 from baon.ui.qt_gui.utils.make_qicon_with_overlay import make_qicon_with_overlay
 
+from baon.core.renaming.RenamedFileReference import RenamedFileReference
+
 from baon.core.utils.grammar_utils import format_tally
 
 
@@ -25,6 +27,7 @@ class FilesDisplayModel(QAbstractTableModel):
 
     ERROR_FOREGROUND_COLOR = parse_qcolor('#ff0000')
     WARNING_FOREGROUND_COLOR = parse_qcolor('#d0b000')
+    CHANGED_FOREGROUND_COLOR = parse_qcolor('#0040e0')
 
     ERROR_ITEM_NAME = 'Error'
     ERROR_ITEM_NAME_PLURAL = 'Errors'
@@ -171,6 +174,8 @@ class FilesDisplayModel(QAbstractTableModel):
             return self.ERROR_FOREGROUND_COLOR
         elif file_info.has_warnings():
             return self.WARNING_FOREGROUND_COLOR
+        elif isinstance(file_info, RenamedFileReference) and file_info.is_changed():
+            return self.CHANGED_FOREGROUND_COLOR
         else:
             return None
 
