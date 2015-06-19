@@ -15,6 +15,7 @@ from baon.ui.qt_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
 
 from baon.ui.qt_gui.widgets.BasePathPanel import BasePathPanel
 from baon.ui.qt_gui.widgets.files_display.FilesDisplay import FilesDisplay
+from baon.ui.qt_gui.widgets.files_display.FilesDisplaySummaryPanel import FilesDisplaySummaryPanel
 from baon.ui.qt_gui.widgets.RulesEditor import RulesEditor
 from baon.ui.qt_gui.widgets.StatusBox import StatusBox
 
@@ -48,6 +49,7 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     _use_extension_checkbox = None
     _rules_editor = None
     _files_display = None
+    _files_display_summary_panel = None
     _status_box = None
     _dialog_button_box = None
 
@@ -77,6 +79,7 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
             self._use_extension_checkbox,
             self._rules_editor,
             self._files_display,
+            self._files_display_summary,
             self._dialog_button_box,
         )
 
@@ -123,9 +126,20 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         box.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding))
 
         self._files_display = FilesDisplay(box)
+        self._files_display_summary = FilesDisplaySummaryPanel(box)
 
-        layout = QHBoxLayout(box)
+        self._files_display.counts_changed.connect(self._files_display_summary.set_counts)
+        self._files_display.is_browsing_category_changed.connect(self._files_display_summary.set_is_browsing_category)
+        self._files_display.has_next_in_category_changed.connect(self._files_display_summary.set_has_next_in_category)
+        self._files_display.has_prev_in_category_changed.connect(self._files_display_summary.set_has_prev_in_category)
+
+        self._files_display_summary.start_browsing_category.connect(self._files_display.start_browsing_category)
+        self._files_display_summary.next_in_category.connect(self._files_display.next_in_category)
+        self._files_display_summary.prev_in_category.connect(self._files_display.prev_in_category)
+
+        layout = QVBoxLayout(box)
         layout.addWidget(self._files_display)
+        layout.addWidget(self._files_display_summary)
 
         return box
 

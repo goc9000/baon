@@ -7,7 +7,7 @@
 # Licensed under the GPL-3
 
 
-from PyQt4.QtCore import Qt, pyqtSlot, QAbstractTableModel, QFileInfo
+from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot, QAbstractTableModel, QFileInfo
 from PyQt4.QtGui import QFileIconProvider, QStyle, QApplication
 
 from baon.ui.qt_gui.utils.parse_qcolor import parse_qcolor
@@ -28,15 +28,19 @@ class FilesDisplayModel(QAbstractTableModel):
     ERROR_FOREGROUND_COLOR = parse_qcolor('#ff0000')
     WARNING_FOREGROUND_COLOR = parse_qcolor('#d0b000')
     CHANGED_FOREGROUND_COLOR = parse_qcolor('#0040e0')
+    HIGHLIGHT_BACKGROUND_COLOR = parse_qcolor('#ffff00')
 
     ERROR_ITEM_NAME = 'Error'
     ERROR_ITEM_NAME_PLURAL = 'Errors'
     WARNING_ITEM_NAME = 'Warning'
     WARNING_ITEM_NAME_PLURAL = 'Warnings'
 
+    counts_changed = pyqtSignal(dict)
+
     _original_files = None
     _renamed_files = None
     _data_cache = None
+    _highlighted_row = None
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -49,8 +53,12 @@ class FilesDisplayModel(QAbstractTableModel):
     def set_original_files(self, files):
         self.beginResetModel()
         self._original_files = files
+        self._renamed_files = []
+        self._highlighted_row = None
         self._clear_data_cache()
         self.endResetModel()
+
+        self._emit_new_counts()
 
     @pyqtSlot(list)
     def set_renamed_files(self, renamed_files):
@@ -58,8 +66,25 @@ class FilesDisplayModel(QAbstractTableModel):
 
         self.beginResetModel()
         self._renamed_files = renamed_files
+        self._highlighted_row = None
         self._clear_data_cache()
         self.endResetModel()
+
+        self._emit_new_counts()
+
+    @pyqtSlot(int)
+    def set_highlighted_row(self, row):
+        old_row = self._highlighted_row
+        self._highlighted_row = row
+
+        for changed_row in [old_row, row]:
+            if changed_row is not None:
+                self._data_cache.pop((self.index(changed_row, self.COL_INDEX_FROM), Qt.BackgroundRole), None)
+                self._data_cache.pop((self.index(changed_row, self.COL_INDEX_TO), Qt.BackgroundRole), None)
+                self.dataChanged.emit(
+                    self.index(changed_row, self.COL_INDEX_FROM),
+                    self.index(changed_row, self.COL_INDEX_TO),
+                )
 
     def rowCount(self, *args):
         return len(self._original_files)
@@ -93,6 +118,36 @@ class FilesDisplayModel(QAbstractTableModel):
 
         return super().headerData(index, orientation, role)
 
+    def categories_for_item_at(self, index):
+        original_file = self._original_files[index]
+        renamed_file = self._renamed_files[index] if len(self._renamed_files) > 0 else None
+
+        categories = {'all'}
+
+        if original_file.has_errors():
+            categories.add('scan_errors')
+        if original_file.has_warnings():
+            categories.add('scan_warnings')
+
+        if renamed_file is not None:
+            if renamed_file.has_errors():
+                categories.add('rename_errors')
+            if renamed_file.has_warnings():
+                categories.add('rename_warnings')
+            if renamed_file.is_changed():
+                categories.add('changed')
+
+        return categories
+
+    def _emit_new_counts(self):
+        counts = {}
+
+        for index in range(len(self._original_files)):
+            for category in self.categories_for_item_at(index):
+                counts[category] = 1 + counts.get(category, 0)
+
+        self.counts_changed.emit(counts)
+
     def _clear_data_cache(self):
         self._data_cache = {}
 
@@ -102,43 +157,49 @@ class FilesDisplayModel(QAbstractTableModel):
 
         key = (index.column(), role)
         if key in self.DATA_GETTERS:
-            return self.DATA_GETTERS[key](self, original_file, renamed_file)
+            return self.DATA_GETTERS[key](self, original_file, renamed_file, index.row())
 
         return None
 
-    def _get_original_text(self, original_file, renamed_file):
+    def _get_original_text(self, original_file, renamed_file, index):
         return original_file.filename
 
-    def _get_original_icon(self, original_file, renamed_file):
+    def _get_original_icon(self, original_file, renamed_file, index):
         icon = QFileIconProvider().icon(QFileInfo(original_file.full_path))
         return self._add_icon_overlay_for_problems(icon, original_file)
 
-    def _get_original_foreground(self, original_file, renamed_file):
+    def _get_original_foreground(self, original_file, renamed_file, index):
         return self._get_foreground_for_file_info(original_file)
 
-    def _get_original_tooltip(self, original_file, renamed_file):
+    def _get_original_background(self, original_file, renamed_file, index):
+        return  self.HIGHLIGHT_BACKGROUND_COLOR if index == self._highlighted_row else None
+
+    def _get_original_tooltip(self, original_file, renamed_file, index):
         return self._get_problems_tooltip(original_file)
 
-    def _get_renamed_text(self, original_file, renamed_file):
+    def _get_renamed_text(self, original_file, renamed_file, index):
         if renamed_file is None:
             return original_file.filename
 
         return renamed_file.filename
 
-    def _get_renamed_icon(self, original_file, renamed_file):
+    def _get_renamed_icon(self, original_file, renamed_file, index):
         icon = QFileIconProvider().icon(QFileInfo(original_file.full_path))
         if renamed_file is not None:
             return self._add_icon_overlay_for_problems(icon, renamed_file)
 
         return icon
 
-    def _get_renamed_foreground(self, original_file, renamed_file):
+    def _get_renamed_foreground(self, original_file, renamed_file, index):
         if renamed_file is not None:
             return self._get_foreground_for_file_info(renamed_file)
 
         return None
 
-    def _get_renamed_tooltip(self, original_file, renamed_file):
+    def _get_renamed_background(self, original_file, renamed_file, index):
+        return  self.HIGHLIGHT_BACKGROUND_COLOR if index == self._highlighted_row else None
+
+    def _get_renamed_tooltip(self, original_file, renamed_file, index):
         if renamed_file is not None:
             return self._get_problems_tooltip(renamed_file)
 
@@ -148,10 +209,12 @@ class FilesDisplayModel(QAbstractTableModel):
         (COL_INDEX_FROM, Qt.DisplayRole): _get_original_text,
         (COL_INDEX_FROM, Qt.DecorationRole): _get_original_icon,
         (COL_INDEX_FROM, Qt.ForegroundRole): _get_original_foreground,
+        (COL_INDEX_FROM, Qt.BackgroundRole): _get_original_background,
         (COL_INDEX_FROM, Qt.ToolTipRole): _get_original_tooltip,
         (COL_INDEX_TO, Qt.DisplayRole): _get_renamed_text,
         (COL_INDEX_TO, Qt.DecorationRole): _get_renamed_icon,
         (COL_INDEX_TO, Qt.ForegroundRole): _get_renamed_foreground,
+        (COL_INDEX_TO, Qt.BackgroundRole): _get_renamed_background,
         (COL_INDEX_TO, Qt.ToolTipRole): _get_renamed_tooltip,
     }
 
