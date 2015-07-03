@@ -18,7 +18,7 @@ class RenamePlanBackupError(BAONError, metaclass=ABCMeta):
 
 class CannotSaveRenamePlanBackupError(RenamePlanBackupError, metaclass=ABCMeta):
     def __init__(self):
-        super(CannotSaveRenamePlanBackupError, self).__init__()
+        super().__init__()
 
     def _get_format_string(self):
         return "Cannot save the rename plan backup. Is BAON installed and configured correctly?"
@@ -26,7 +26,7 @@ class CannotSaveRenamePlanBackupError(RenamePlanBackupError, metaclass=ABCMeta):
 
 class CannotLoadRenamePlanBackupError(RenamePlanBackupError, metaclass=ABCMeta):
     def __init__(self):
-        super(CannotLoadRenamePlanBackupError, self).__init__()
+        super().__init__()
 
     def _get_format_string(self):
         return "Cannot load the rename plan backup. The application directory may have been corrupted!"

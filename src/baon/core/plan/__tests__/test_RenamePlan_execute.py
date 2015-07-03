@@ -38,7 +38,7 @@ class TestRenamePlanExecute(RenamePlanTestCaseBase, FileSystemTestCase, ReportsP
     )
 
     def setUp(self):
-        super(TestRenamePlanExecute, self).setUp()
+        super().setUp()
 
         self.make_file_structure('', self.INITIAL_FILE_STRUCTURE)
 

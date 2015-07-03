@@ -19,7 +19,7 @@ class FileReferenceError(BAONError, metaclass=ABCMeta):
 
 class CannotExploreDirectoryError(FileReferenceError):
     def __init__(self, inner_error):
-        super(CannotExploreDirectoryError, self).__init__(inner_error=inner_error)
+        super().__init__(inner_error=inner_error)
 
     def _get_format_string(self):
         return 'Cannot open directory for exploration'

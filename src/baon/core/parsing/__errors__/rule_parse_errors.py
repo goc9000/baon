@@ -18,7 +18,7 @@ class RuleParseError(BAONErrorWithSourceSpan, metaclass=ABCMeta):
 
 class MissingFormatSpecifierError(RuleParseError):
     def __init__(self, source_span=None):
-        super(MissingFormatSpecifierError, self).__init__(source_span)
+        super().__init__(source_span)
 
     def _get_format_string(self):
         return 'Missing format specifier'
@@ -26,7 +26,7 @@ class MissingFormatSpecifierError(RuleParseError):
 
 class RuleSyntaxError(RuleParseError):
     def __init__(self, source_span=None):
-        super(RuleSyntaxError, self).__init__(source_span)
+        super().__init__(source_span)
 
     def _get_format_string(self):
         return 'Syntax error'
@@ -34,7 +34,7 @@ class RuleSyntaxError(RuleParseError):
 
 class StringLiteralNotQuotedProperlyError(RuleParseError):
     def __init__(self, source_span=None):
-        super(StringLiteralNotQuotedProperlyError, self).__init__(source_span)
+        super().__init__(source_span)
 
     def _get_format_string(self):
         return 'String literal not quoted properly'
@@ -42,7 +42,7 @@ class StringLiteralNotQuotedProperlyError(RuleParseError):
 
 class UnterminatedRegexError(RuleParseError):
     def __init__(self, source_span=None):
-        super(UnterminatedRegexError, self).__init__(source_span)
+        super().__init__(source_span)
 
     def _get_format_string(self):
         return 'Unterminated regex'
@@ -50,7 +50,7 @@ class UnterminatedRegexError(RuleParseError):
 
 class UnterminatedStringError(RuleParseError):
     def __init__(self, source_span=None):
-        super(UnterminatedStringError, self).__init__(source_span)
+        super().__init__(source_span)
 
     def _get_format_string(self):
         return 'Unterminated string'

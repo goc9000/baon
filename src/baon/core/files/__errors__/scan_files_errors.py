@@ -17,13 +17,16 @@ class ScanFilesError(BAONError, metaclass=ABCMeta):
 
 
 class ScanFilesAbortedError(ScanFilesError):
+    def __init__(self):
+        super().__init__()
+
     def _get_format_string(self):
         return "The scanning operation was aborted"
 
 
 class BasePathDoesNotExistError(ScanFilesError):
     def __init__(self, path):
-        super(BasePathDoesNotExistError, self).__init__(path=path)
+        super().__init__(path=path)
 
     def _get_format_string(self):
         return "Directory '{path}' does not exist"
@@ -31,7 +34,7 @@ class BasePathDoesNotExistError(ScanFilesError):
 
 class BasePathIsNotADirectoryError(ScanFilesError):
     def __init__(self, path):
-        super(BasePathIsNotADirectoryError, self).__init__(path=path)
+        super().__init__(path=path)
 
     def _get_format_string(self):
         return "'{path}' is not a directory"
@@ -39,7 +42,7 @@ class BasePathIsNotADirectoryError(ScanFilesError):
 
 class CannotExploreBasePathError(ScanFilesError):
     def __init__(self, path, inner_error):
-        super(CannotExploreBasePathError, self).__init__(path=path, inner_error=inner_error)
+        super().__init__(path=path, inner_error=inner_error)
 
     def _get_format_string(self):
         return "Cannot open directory '{path}' for exploration"

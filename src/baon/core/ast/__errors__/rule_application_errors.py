@@ -17,13 +17,16 @@ class RuleApplicationError(BAONError, metaclass=ABCMeta):
 
 
 class AliasDependenciesTooComplexError(RuleApplicationError):
+    def __init__(self):
+        super().__init__()
+
     def _get_format_string(self):
         return 'Dependencies of aliases are too complex'
 
 
 class SpecifierExpectsNumberError(RuleApplicationError):
     def __init__(self, specifier, received):
-        super(SpecifierExpectsNumberError, self).__init__(specifier=specifier, received=received)
+        super().__init__(specifier=specifier, received=received)
 
     def _get_format_string(self):
         return "%{specifier} expects a number, received '{received}'"

@@ -18,7 +18,7 @@ class RenamePlanActionError(BAONError, metaclass=ABCMeta):
 
 class CreateDirectoryActionError(RenamePlanActionError, metaclass=ABCMeta):
     def __init__(self, path, **extra_parameters):
-        super(CreateDirectoryActionError, self).__init__(path=path, **extra_parameters)
+        super().__init__(path=path, **extra_parameters)
 
     def _get_format_string(self):
         return "Cannot create directory '{path}' because " + self._get_reason_format_string(self)
@@ -30,7 +30,7 @@ class CreateDirectoryActionError(RenamePlanActionError, metaclass=ABCMeta):
 
 class CannotCreateDirAlreadyExistsError(CreateDirectoryActionError):
     def __init__(self, path):
-        super(CannotCreateDirAlreadyExistsError, self).__init__(path)
+        super().__init__(path)
 
     def _get_reason_format_string(self):
         return 'it already exists'
@@ -38,7 +38,7 @@ class CannotCreateDirAlreadyExistsError(CreateDirectoryActionError):
 
 class CannotCreateDirFileInWayError(CreateDirectoryActionError):
     def __init__(self, path):
-        super(CannotCreateDirFileInWayError, self).__init__(path)
+        super().__init__(path)
 
     def _get_reason_format_string(self):
         return 'a file by that name already exists'
@@ -46,7 +46,7 @@ class CannotCreateDirFileInWayError(CreateDirectoryActionError):
 
 class CannotCreateDirParentDoesNotExistError(CreateDirectoryActionError):
     def __init__(self, path):
-        super(CannotCreateDirParentDoesNotExistError, self).__init__(path)
+        super().__init__(path)
 
     def _get_reason_format_string(self):
         return 'the parent directory does not exist'
@@ -54,7 +54,7 @@ class CannotCreateDirParentDoesNotExistError(CreateDirectoryActionError):
 
 class CannotCreateDirParentNotADirectoryError(CreateDirectoryActionError):
     def __init__(self, path):
-        super(CannotCreateDirParentNotADirectoryError, self).__init__(path)
+        super().__init__(path)
 
     def _get_reason_format_string(self):
         return 'the parent entry is not a directory'
@@ -62,7 +62,7 @@ class CannotCreateDirParentNotADirectoryError(CreateDirectoryActionError):
 
 class CannotCreateDirNoPermissionsError(CreateDirectoryActionError):
     def __init__(self, path):
-        super(CannotCreateDirNoPermissionsError, self).__init__(path)
+        super().__init__(path)
 
     def _get_reason_format_string(self):
         return 'we do not have permission'
@@ -70,7 +70,7 @@ class CannotCreateDirNoPermissionsError(CreateDirectoryActionError):
 
 class CannotCreateDirOtherError(CreateDirectoryActionError):
     def __init__(self, path, os_error):
-        super(CannotCreateDirOtherError, self).__init__(path, os_error=os_error)
+        super().__init__(path, os_error=os_error)
 
     def _get_reason_format_string(self):
         return 'of a system error: {error.strerror}'
@@ -78,7 +78,7 @@ class CannotCreateDirOtherError(CreateDirectoryActionError):
 
 class DeleteDirectoryActionError(RenamePlanActionError, metaclass=ABCMeta):
     def __init__(self, path, **extra_parameters):
-        super(DeleteDirectoryActionError, self).__init__(path=path, **extra_parameters)
+        super().__init__(path=path, **extra_parameters)
 
     def _get_format_string(self):
         return "Cannot delete directory '{path}' because " + self._get_reason_format_string(self)
@@ -90,7 +90,7 @@ class DeleteDirectoryActionError(RenamePlanActionError, metaclass=ABCMeta):
 
 class CannotDeleteDirDoesNotExistError(DeleteDirectoryActionError):
     def __init__(self, path):
-        super(CannotDeleteDirDoesNotExistError, self).__init__(path)
+        super().__init__(path)
 
     def _get_reason_format_string(self):
         return 'it does not exist'
@@ -98,7 +98,7 @@ class CannotDeleteDirDoesNotExistError(DeleteDirectoryActionError):
 
 class CannotDeleteDirIsAFileError(DeleteDirectoryActionError):
     def __init__(self, path):
-        super(CannotDeleteDirIsAFileError, self).__init__(path)
+        super().__init__(path)
 
     def _get_reason_format_string(self):
         return 'it is actually a file'
@@ -106,7 +106,7 @@ class CannotDeleteDirIsAFileError(DeleteDirectoryActionError):
 
 class CannotDeleteDirNoPermissionsError(DeleteDirectoryActionError):
     def __init__(self, path):
-        super(CannotDeleteDirNoPermissionsError, self).__init__(path)
+        super().__init__(path)
 
     def _get_reason_format_string(self):
         return 'we do not have permission'
@@ -114,7 +114,7 @@ class CannotDeleteDirNoPermissionsError(DeleteDirectoryActionError):
 
 class CannotDeleteDirOtherError(DeleteDirectoryActionError):
     def __init__(self, path, os_error):
-        super(CannotDeleteDirOtherError, self).__init__(path, os_error=os_error)
+        super().__init__(path, os_error=os_error)
 
     def _get_reason_format_string(self):
         return 'of a system error: {error.strerror}'
@@ -122,7 +122,7 @@ class CannotDeleteDirOtherError(DeleteDirectoryActionError):
 
 class MoveFileActionError(RenamePlanActionError, metaclass=ABCMeta):
     def __init__(self, from_path, to_path, **extra_parameters):
-        super(MoveFileActionError, self).__init__(from_path=from_path, to_path=to_path, **extra_parameters)
+        super().__init__(from_path=from_path, to_path=to_path, **extra_parameters)
 
     def _get_format_string(self):
         return "Cannot move file '{from_path}' because " + self._get_reason_format_string(self)
@@ -134,7 +134,7 @@ class MoveFileActionError(RenamePlanActionError, metaclass=ABCMeta):
 
 class CannotMoveFileDoesNotExistError(MoveFileActionError):
     def __init__(self, from_path, to_path):
-        super(CannotMoveFileDoesNotExistError, self).__init__(from_path, to_path)
+        super().__init__(from_path, to_path)
 
     def _get_reason_format_string(self):
         return 'it does not exist'
@@ -142,7 +142,7 @@ class CannotMoveFileDoesNotExistError(MoveFileActionError):
 
 class CannotMoveFileDestinationExistsError(MoveFileActionError):
     def __init__(self, from_path, to_path):
-        super(CannotMoveFileDestinationExistsError, self).__init__(from_path, to_path)
+        super().__init__(from_path, to_path)
 
     def _get_reason_format_string(self):
         return "the destination '{to_path}' already exists"
@@ -150,7 +150,7 @@ class CannotMoveFileDestinationExistsError(MoveFileActionError):
 
 class CannotMoveFileNoPermissionsError(MoveFileActionError):
     def __init__(self, from_path, to_path):
-        super(CannotMoveFileNoPermissionsError, self).__init__(from_path, to_path)
+        super().__init__(from_path, to_path)
 
     def _get_reason_format_string(self):
         return 'we do not have permission'
@@ -158,7 +158,7 @@ class CannotMoveFileNoPermissionsError(MoveFileActionError):
 
 class CannotMoveFileOtherError(MoveFileActionError):
     def __init__(self, from_path, to_path, os_error):
-        super(CannotMoveFileOtherError, self).__init__(from_path, to_path, os_error=os_error)
+        super().__init__(from_path, to_path, os_error=os_error)
 
     def _get_reason_format_string(self):
         return 'of a system error: {error.strerror}'

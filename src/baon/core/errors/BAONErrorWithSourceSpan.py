@@ -17,11 +17,11 @@ class BAONErrorWithSourceSpan(BAONError, metaclass=ABCMeta):
     source_span = None
 
     def __init__(self, source_span=None, **error_parameters):
-        super(BAONErrorWithSourceSpan, self).__init__(**error_parameters)
+        super().__init__(**error_parameters)
         self.source_span = SourceSpan.copy(source_span)
 
     def test_repr(self):
-        base_tuple = super(BAONErrorWithSourceSpan, self).test_repr()
+        base_tuple = super().test_repr()
 
         if self.source_span is not None:
             base_tuple += (

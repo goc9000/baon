@@ -32,7 +32,7 @@ class FileSystemTestCase(TestCase):
     unicode_supported = None
 
     def setUp(self):
-        super(FileSystemTestCase, self).setUp()
+        super().setUp()
 
         self._test_dir_path = tempfile.mkdtemp()
 
@@ -42,7 +42,7 @@ class FileSystemTestCase(TestCase):
     def tearDown(self):
         self.cleanup_files(delete_root=True)
 
-        super(FileSystemTestCase, self).tearDown()
+        super().tearDown()
 
     def _check_links_supported(self):
         full_link_path = self.resolve_test_path('temp_link')
