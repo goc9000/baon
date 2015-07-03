@@ -22,7 +22,8 @@ from baon.core.renaming.__errors__.rename_files_errors import UnprintableCharact
     FileCollidesWithDirectoryError, DirectoryCollidesWithFileError, WouldMergeImplicitlyWithOtherFoldersError,\
     ProblematicCharacterInFilenameWarning, PathComponentStartsWithSpaceWarning, PathComponentEndsWithSpaceWarning,\
     PathComponentContainsDoubleSpacesWarning, FilenameStartsWithSpaceWarning, BasenameEndsWithSpaceWarning,\
-    FilenameContainsDoubleSpacesWarning, ExtensionContainsSpacesWarning, RenameFilesAbortedError
+    FilenameContainsDoubleSpacesWarning, ExtensionContainsSpacesWarning, RenameFilesAbortedError, \
+    NotRenamingFileWithErrorsWarning
 
 from baon.core.renaming.RenamedFileReference import RenamedFileReference
 
@@ -46,7 +47,13 @@ def rename_files(files, rule_set, use_path=False, use_extension=False, overrides
             raise RenameFilesAbortedError()
 
         renamed_files.append(
-            _rename_file(file_ref, rule_set, use_path=use_path, use_extension=use_extension, overrides=overrides)
+            _rename_file(
+                file_ref,
+                rule_set,
+                use_path=use_path,
+                use_extension=use_extension,
+                overrides=overrides,
+            )
         )
         progress_tracker.report_more_done(1)
 
@@ -58,16 +65,25 @@ def rename_files(files, rule_set, use_path=False, use_extension=False, overrides
 def _rename_file(file_ref, rule_set, use_path=False, use_extension=False, overrides=None):
     full_filename = file_ref.filename
     problems = []
+    extra = {}
 
-    if (overrides is not None) and (full_filename in overrides):
-        return RenamedFileReference(file_ref, overrides[full_filename], is_override=True)
+    if file_ref.has_errors():
+        problems.append(NotRenamingFileWithErrorsWarning())
+    elif (overrides is not None) and (full_filename in overrides):
+        full_filename = overrides[full_filename]
+        extra['is_override'] = True
+    else:
+        try:
+            full_filename = _get_renamed_filename(
+                full_filename,
+                rule_set,
+                use_path=use_path,
+                use_extension=use_extension,
+            )
+        except Exception as e:
+            problems.append(e)
 
-    try:
-        full_filename = _get_renamed_filename(full_filename, rule_set, use_path=use_path, use_extension=use_extension)
-    except Exception as e:
-        problems.append(e)
-
-    return RenamedFileReference(file_ref, full_filename, problems=problems)
+    return RenamedFileReference(file_ref, full_filename, problems=problems, **extra)
 
 
 def _get_renamed_filename(full_filename, rule_set, use_path, use_extension):

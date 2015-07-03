@@ -10,6 +10,7 @@
 from abc import ABCMeta
 
 from baon.core.errors.BAONError import BAONError
+from baon.core.errors.BAONWarning import BAONWarning
 
 
 class FileReferenceError(BAONError, metaclass=ABCMeta):
@@ -22,3 +23,23 @@ class CannotExploreDirectoryError(FileReferenceError):
 
     def _get_format_string(self):
         return 'Cannot open directory for exploration'
+
+
+class SyntheticFileError(FileReferenceError):
+    def __init__(self):
+        super().__init__()
+
+    def _get_format_string(self):
+        return 'Synthetic error (used in tests)'
+
+
+class FileReferenceWarning(BAONWarning):
+    pass
+
+
+class SyntheticFileWarning(FileReferenceWarning):
+    def __init__(self):
+        super().__init__()
+
+    def _get_format_string(self):
+        return 'Synthetic warning (used in tests)'

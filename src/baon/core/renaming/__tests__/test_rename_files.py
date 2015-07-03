@@ -14,6 +14,8 @@ from baon.core.__tests__.abort_test_utils import abort_after_n_calls
 from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
 from baon.core.files.FileReference import FileReference
+from baon.core.files.__errors__.file_reference_errors import SyntheticFileError, \
+    SyntheticFileWarning
 
 from baon.core.renaming.rename_files import rename_files
 from baon.core.renaming.__errors__.rename_files_errors import RenameFilesAbortedError
@@ -367,6 +369,36 @@ class TestRenameFiles(ReportsProgressTestCase):
             use_extension=True,
         )
 
+    def test_error_in_input_causes_warning(self):
+        self._test_rename_files(
+            input_description=(
+                ('FILE', 'file1'),
+                ('FILE', 'file2', ('SyntheticFileError',)),
+                ('FILE', 'file3'),
+            ),
+            rules_text="'file' <<'0'",
+            expected_result=(
+                ('FILE', 'file01'),
+                ('FILE', 'file2', ('NotRenamingFileWithErrorsWarning',)),
+                ('FILE', 'file03'),
+            ),
+        )
+
+    def test_warning_in_input_is_ignored(self):
+        self._test_rename_files(
+            input_description=(
+                ('FILE', 'file1'),
+                ('FILE', 'file2', ('SyntheticFileWarning',)),
+                ('FILE', 'file3'),
+            ),
+            rules_text="'file' <<'0'",
+            expected_result=(
+                ('FILE', 'file01'),
+                ('FILE', 'file02'),
+                ('FILE', 'file03'),
+            ),
+        )
+
     def test_reports_progress(self):
         with self.verify_reported_progress() as on_progress:
             self._test_rename_files(
@@ -386,15 +418,7 @@ class TestRenameFiles(ReportsProgressTestCase):
             )
 
     def _test_rename_files(self, input_description, rules_text, expected_result, **options):
-        files = [
-            FileReference(
-                os.path.join('/', 'base', 'path', path),
-                path,
-                file_type == 'DIR',
-            )
-            for file_type, path in input_description
-        ]
-
+        files = [self._file_from_test_repr(file_repr) for file_repr in input_description]
         rule_set = parse_rules(rules_text)
 
         renamed_files = rename_files(files, rule_set, **options)
@@ -403,3 +427,27 @@ class TestRenameFiles(ReportsProgressTestCase):
             tuple(f.test_repr() for f in renamed_files),
             expected_result,
         )
+
+    @staticmethod
+    def _file_from_test_repr(file_test_repr):
+        assert len(file_test_repr) >= 2
+
+        file_type, path = file_test_repr[:2]
+
+        file_ref = FileReference(
+            os.path.join('/', 'base', 'path', path),
+            path,
+            file_type == 'DIR',
+        )
+
+        if len(file_test_repr) >= 3:
+            for error_repr in file_test_repr[2]:
+                assert error_repr in ['SyntheticFileError', 'SyntheticFileWarning'],\
+                    'Only SyntheticFileError and SyntheticFileWarning are supported'
+
+                if error_repr == 'SyntheticFileError':
+                    file_ref.problems.append(SyntheticFileError())
+                elif error_repr == 'SyntheticFileWarning':
+                    file_ref.problems.append(SyntheticFileWarning())
+
+        return file_ref

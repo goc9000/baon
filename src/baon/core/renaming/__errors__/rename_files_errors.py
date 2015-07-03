@@ -74,6 +74,14 @@ class RenameFilesWarning(BAONWarning):
     pass
 
 
+class NotRenamingFileWithErrorsWarning(RenameFilesWarning):
+    def __init__(self):
+        super().__init__()
+
+    def _get_format_string(self):
+        return "Will not rename this as it has errors"
+
+
 class ProblematicCharacterInFilenameWarning(RenameFilesWarning):
     def __init__(self, character):
         super(ProblematicCharacterInFilenameWarning, self).__init__(character=character)
