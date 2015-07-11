@@ -23,7 +23,7 @@ from baon.core.renaming.__errors__.rename_files_errors import UnprintableCharact
     ProblematicCharacterInFilenameWarning, PathComponentStartsWithSpaceWarning, PathComponentEndsWithSpaceWarning,\
     PathComponentContainsDoubleSpacesWarning, FilenameStartsWithSpaceWarning, BasenameEndsWithSpaceWarning,\
     FilenameContainsDoubleSpacesWarning, ExtensionContainsSpacesWarning, RenameFilesAbortedError, \
-    CannotRenameFileWithErrorsError
+    CannotRenameFileWithErrorsError, RenameFilesError, RenameFilesWarning
 
 from baon.core.renaming.RenamedFileReference import RenamedFileReference
 
@@ -33,8 +33,7 @@ PROBLEM_CHARS_REGEX = re.compile(r'["*:<>?\\/]')
 ONLY_DOTS_REGEX = re.compile(r'^[.]+$')
 
 
-def rename_files(files, rule_set, use_path=False, use_extension=False, overrides=None, on_progress=None,
-                 check_abort=None):
+def rename_files(files, rule_set, use_path=False, use_extension=False, on_progress=None, check_abort=None):
     progress_tracker = ProgressTracker(on_progress)
 
     assert check_abort is None or is_callable(check_abort)
@@ -52,7 +51,6 @@ def rename_files(files, rule_set, use_path=False, use_extension=False, overrides
                 rule_set,
                 use_path=use_path,
                 use_extension=use_extension,
-                overrides=overrides,
             )
         )
         progress_tracker.report_more_done(1)
@@ -62,31 +60,29 @@ def rename_files(files, rule_set, use_path=False, use_extension=False, overrides
     return renamed_files
 
 
-def _rename_file(file_ref, rule_set, use_path=False, use_extension=False, overrides=None):
+def apply_rename_overrides(renamed_files, overrides):
+    renamed_files = [_maybe_apply_override(renamed_ref, overrides) for renamed_ref in renamed_files]
+
+    _verify_renamed_files(renamed_files)
+
+    return renamed_files
+
+
+def _rename_file(file_ref, rule_set, use_path=False, use_extension=False):
     full_filename = file_ref.filename
     problems = []
-    extra = {}
 
-    if (overrides is not None) and (full_filename in overrides):
-        full_filename = overrides[full_filename]
-        extra['is_override'] = True
-    else:
-        try:
-            full_filename = _get_renamed_filename(
-                full_filename,
-                rule_set,
-                use_path=use_path,
-                use_extension=use_extension,
-            )
-        except Exception as e:
-            problems.append(e)
+    try:
+        full_filename = _get_renamed_filename(
+            full_filename,
+            rule_set,
+            use_path=use_path,
+            use_extension=use_extension,
+        )
+    except Exception as e:
+        problems.append(e)
 
-    renamed = RenamedFileReference(file_ref, full_filename, problems=problems, **extra)
-
-    if renamed.is_changed() and file_ref.has_errors():
-        renamed.problems.append(CannotRenameFileWithErrorsError())
-
-    return renamed
+    return RenamedFileReference(file_ref, full_filename, problems=problems)
 
 
 def _get_renamed_filename(full_filename, rule_set, use_path, use_extension):
@@ -110,6 +106,15 @@ def _get_renamed_filename(full_filename, rule_set, use_path, use_extension):
     return output_text
 
 
+def _maybe_apply_override(renamed_ref, overrides):
+    new_filename = overrides.get(renamed_ref.old_file_ref.filename)
+
+    if new_filename is not None:
+        return RenamedFileReference(renamed_ref.old_file_ref, new_filename, is_override=True)
+    else:
+        return renamed_ref
+
+
 def _verify_renamed_files(renamed_files):
     """
     Performs verifications.
@@ -118,6 +123,8 @@ def _verify_renamed_files(renamed_files):
     not require further accesses to the filesystem. Errors that can only be
     detected by using such information will be caught in the planning phase.
     """
+
+    _clear_rename_errors(renamed_files)
 
     for renamed_fref in renamed_files:
         _check_for_intrinsic_errors(renamed_fref)
@@ -129,6 +136,9 @@ def _verify_renamed_files(renamed_files):
 def _check_for_intrinsic_errors(renamed_fref):
     full_filename = renamed_fref.filename
     problems = renamed_fref.problems
+
+    if renamed_fref.is_changed() and renamed_fref.old_file_ref.has_errors():
+        problems.append(CannotRenameFileWithErrorsError())
 
     m = NON_PRINTABLE_REGEX.search(full_filename)
     if m is not None:
@@ -205,3 +215,11 @@ def _check_for_collisions(renamed_files):
             elif (dir_path_use_counts[f.filename] > 0) or (f.filename in partial_dir_paths) or \
                     (f.filename in partial_dir_paths):
                 f.problems.append(FileCollidesWithDirectoryError())
+
+
+def _clear_rename_errors(renamed_files):
+    for f in renamed_files:
+        f.problems = [
+            problem for problem in f.problems
+            if not isinstance(problem, RenameFilesError) and not isinstance(problem, RenameFilesWarning)
+        ]

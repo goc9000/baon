@@ -17,7 +17,7 @@ from baon.core.files.FileReference import FileReference
 from baon.core.files.__errors__.file_reference_errors import SyntheticFileError, \
     SyntheticFileWarning
 
-from baon.core.renaming.rename_files import rename_files
+from baon.core.renaming.rename_files import rename_files, apply_rename_overrides
 from baon.core.renaming.__errors__.rename_files_errors import RenameFilesAbortedError
 
 from baon.core.parsing.parse_rules import parse_rules
@@ -436,7 +436,11 @@ class TestRenameFiles(ReportsProgressTestCase):
         files = [self._file_from_test_repr(file_repr) for file_repr in input_description]
         rule_set = parse_rules(rules_text)
 
-        renamed_files = rename_files(files, rule_set, **options)
+        rename_params = {key: value for key, value in options.items() if key != 'overrides'}
+        renamed_files = rename_files(files, rule_set, **rename_params)
+
+        if 'overrides' in options:
+            renamed_files = apply_rename_overrides(renamed_files, options['overrides'])
 
         self.assertEquals(
             tuple(f.test_repr() for f in renamed_files),
