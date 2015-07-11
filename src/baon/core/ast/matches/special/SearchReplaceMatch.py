@@ -36,8 +36,9 @@ class SearchReplaceMatch(Match):
             BetweenMatch(),
             EndAnchorMatch(),
         )
+        temp_context = context._replace(anchored=True)
 
-        solution = next(temp_match.execute(context), None)
+        solution = next(temp_match.execute(temp_context), None)
 
         if solution is not None:
             yield context._replace(
@@ -46,4 +47,4 @@ class SearchReplaceMatch(Match):
                 aliases=solution.aliases,
             )
         else:
-            yield context
+            yield context._replace(matched_text='')
