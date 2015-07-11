@@ -25,6 +25,14 @@ class RenameFilesAbortedError(RenameFilesError):
         return "The rename operation was aborted"
 
 
+class CannotRenameFileWithErrorsError(RenameFilesError):
+    def __init__(self):
+        super().__init__()
+
+    def _get_format_string(self):
+        return "Cannot rename item as it has errors"
+
+
 class UnprintableCharacterInFilenameError(RenameFilesError):
     def __init__(self, character_code):
         super().__init__(character_code=character_code)
@@ -99,14 +107,6 @@ class WouldMergeImplicitlyWithOtherFoldersError(RenameFilesError):
 
 class RenameFilesWarning(BAONWarning):
     pass
-
-
-class NotRenamingFileWithErrorsWarning(RenameFilesWarning):
-    def __init__(self):
-        super().__init__()
-
-    def _get_format_string(self):
-        return "Will not rename this as it has errors"
 
 
 class ProblematicCharacterInFilenameWarning(RenameFilesWarning):

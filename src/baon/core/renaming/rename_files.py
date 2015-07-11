@@ -23,7 +23,7 @@ from baon.core.renaming.__errors__.rename_files_errors import UnprintableCharact
     ProblematicCharacterInFilenameWarning, PathComponentStartsWithSpaceWarning, PathComponentEndsWithSpaceWarning,\
     PathComponentContainsDoubleSpacesWarning, FilenameStartsWithSpaceWarning, BasenameEndsWithSpaceWarning,\
     FilenameContainsDoubleSpacesWarning, ExtensionContainsSpacesWarning, RenameFilesAbortedError, \
-    NotRenamingFileWithErrorsWarning
+    CannotRenameFileWithErrorsError
 
 from baon.core.renaming.RenamedFileReference import RenamedFileReference
 
@@ -67,9 +67,7 @@ def _rename_file(file_ref, rule_set, use_path=False, use_extension=False, overri
     problems = []
     extra = {}
 
-    if file_ref.has_errors():
-        problems.append(NotRenamingFileWithErrorsWarning())
-    elif (overrides is not None) and (full_filename in overrides):
+    if (overrides is not None) and (full_filename in overrides):
         full_filename = overrides[full_filename]
         extra['is_override'] = True
     else:
@@ -82,6 +80,11 @@ def _rename_file(file_ref, rule_set, use_path=False, use_extension=False, overri
             )
         except Exception as e:
             problems.append(e)
+
+    is_changed = full_filename != file_ref.filename
+
+    if is_changed and file_ref.has_errors():
+        problems.append(CannotRenameFileWithErrorsError())
 
     return RenamedFileReference(file_ref, full_filename, problems=problems, **extra)
 

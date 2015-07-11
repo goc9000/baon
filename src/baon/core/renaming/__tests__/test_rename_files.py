@@ -369,7 +369,7 @@ class TestRenameFiles(ReportsProgressTestCase):
             use_extension=True,
         )
 
-    def test_error_in_input_causes_warning(self):
+    def test_error_in_input_causes_error_if_renamed(self):
         self._test_rename_files(
             input_description=(
                 ('FILE', 'file1'),
@@ -379,7 +379,22 @@ class TestRenameFiles(ReportsProgressTestCase):
             rules_text="'file' <<'0'",
             expected_result=(
                 ('FILE', 'file01'),
-                ('FILE', 'file2', ('NotRenamingFileWithErrorsWarning',)),
+                ('FILE', 'file02', ('CannotRenameFileWithErrorsError',)),
+                ('FILE', 'file03'),
+            ),
+        )
+
+    def test_error_in_input_is_ok_if_not_renamed(self):
+        self._test_rename_files(
+            input_description=(
+                ('FILE', 'file1'),
+                ('FILE', 'file2', ('SyntheticFileError',)),
+                ('FILE', 'file3'),
+            ),
+            rules_text="'file' <<'0' ('1'|'3')",
+            expected_result=(
+                ('FILE', 'file01'),
+                ('FILE', 'file2'),
                 ('FILE', 'file03'),
             ),
         )
