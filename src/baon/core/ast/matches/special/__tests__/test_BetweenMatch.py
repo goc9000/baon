@@ -16,6 +16,7 @@ from baon.core.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMatc
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
+from baon.core.ast.matches.special.SearchReplaceMatch import SearchReplaceMatch
 
 
 class TestBetweenMatch(MatchTestCase):
@@ -40,6 +41,15 @@ class TestBetweenMatch(MatchTestCase):
             anchored=False,
             expected_solution={'matched_text': '', 'position': 0})
 
+    def test_anchored_by_end_anchor_match(self):
+        self._test_unique_match(
+            text='Some text',
+            match=SequenceMatch(
+                BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                EndAnchorMatch(),
+            ),
+            expected_solution={'matched_text': '(Some text)', 'position': 9})
+
     def test_only_first_between_match_in_sequence_expands(self):
         self._test_unique_match(
             text='Some text',
@@ -51,7 +61,7 @@ class TestBetweenMatch(MatchTestCase):
             ),
             expected_solution={'matched_text': '(Some text)[]{}', 'position': 9})
 
-    def test_anchored_state_preserved_across_iterations(self):
+    def test_repeated_between_match(self):
         self._test_unique_match(
             text='Some text',
             match=SequenceMatch(
@@ -89,3 +99,58 @@ class TestBetweenMatch(MatchTestCase):
                 EndAnchorMatch(),
             ),
             expected_solution={'matched_text': '(abc)d[ef]g{hi}', 'position': 9})
+
+    def test_multiple_possible_anchors(self):
+        self._test_match(
+            text='abracadabra',
+            match=SequenceMatch(
+                LiteralMatch('a'),
+                BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                LiteralMatch('a'),
+            ),
+            expected_solutions=[
+                {'matched_text': 'a(br)a', 'position': 4},
+                {'matched_text': 'a(brac)a', 'position': 6},
+                {'matched_text': 'a(bracad)a', 'position': 8},
+                {'matched_text': 'a(bracadabr)a', 'position': 11},
+            ])
+
+    def test_anchor_may_not_match(self):
+        self._test_match(
+            text='aabbaaba',
+            match=SequenceMatch(
+                BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                RepeatMatch(
+                    LiteralMatch('b'),
+                    0,
+                    None,
+                ),
+            ),
+            expected_solutions=[
+                {'matched_text': '()', 'position': 0, 'anchored': False},
+                {'matched_text': '(a)', 'position': 1, 'anchored': False},
+                {'matched_text': '(aa)bb', 'position': 4, 'anchored': True},
+                {'matched_text': '(aab)b', 'position': 4, 'anchored': True},
+                {'matched_text': '(aabb)', 'position': 4, 'anchored': False},
+                {'matched_text': '(aabba)', 'position': 5, 'anchored': False},
+                {'matched_text': '(aabbaa)b', 'position': 7, 'anchored': True},
+                {'matched_text': '(aabbaab)', 'position': 7, 'anchored': False},
+                {'matched_text': '(aabbaaba)', 'position': 8, 'anchored': False},
+            ])
+
+    def test_between_match_before_search_replace(self):
+        self._test_match(
+            text='abracadabra',
+            match=SequenceMatch(
+                BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                SearchReplaceMatch(
+                    LiteralMatch('a').add_action(ApplyFunctionAction('braces')),
+                ),
+                LiteralMatch('r'),
+                BetweenMatch(),
+                EndAnchorMatch(),
+            ),
+            expected_solutions=[
+                {'matched_text': '(ab)r[a]c[a]d[a]br[a]', 'position': 19, 'text': 'abr[a]c[a]d[a]br[a]'},
+                {'matched_text': '(abracadab)r[a]', 'position': 13, 'text': 'abracadabr[a]'},
+            ])
