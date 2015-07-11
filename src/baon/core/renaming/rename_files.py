@@ -81,12 +81,12 @@ def _rename_file(file_ref, rule_set, use_path=False, use_extension=False, overri
         except Exception as e:
             problems.append(e)
 
-    is_changed = full_filename != file_ref.filename
+    renamed = RenamedFileReference(file_ref, full_filename, problems=problems, **extra)
 
-    if is_changed and file_ref.has_errors():
-        problems.append(CannotRenameFileWithErrorsError())
+    if renamed.is_changed() and file_ref.has_errors():
+        renamed.problems.append(CannotRenameFileWithErrorsError())
 
-    return RenamedFileReference(file_ref, full_filename, problems=problems, **extra)
+    return renamed
 
 
 def _get_renamed_filename(full_filename, rule_set, use_path, use_extension):
