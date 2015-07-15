@@ -79,8 +79,7 @@ class FilesDisplayModel(QAbstractTableModel):
 
         for changed_row in [old_row, row]:
             if changed_row is not None:
-                self._data_cache.pop((self.index(changed_row, self.COL_INDEX_FROM), Qt.BackgroundRole), None)
-                self._data_cache.pop((self.index(changed_row, self.COL_INDEX_TO), Qt.BackgroundRole), None)
+                self._clear_data_cache_for_row(changed_row, [Qt.BackgroundRole])
                 self.dataChanged.emit(
                     self.index(changed_row, self.COL_INDEX_FROM),
                     self.index(changed_row, self.COL_INDEX_TO),
@@ -104,7 +103,7 @@ class FilesDisplayModel(QAbstractTableModel):
     def flags(self, index):
         item_flags = Qt.ItemIsEnabled
 
-        if index.column() == self.COL_INDEX_TO:
+        if (index.column() == self.COL_INDEX_TO) and (len(self._renamed_files) > 0):
             item_flags |= Qt.ItemIsEditable
 
         return item_flags
@@ -150,6 +149,22 @@ class FilesDisplayModel(QAbstractTableModel):
 
     def _clear_data_cache(self):
         self._data_cache = {}
+
+    def _clear_data_cache_for_row(self, row, roles=None):
+        if roles is None:
+            roles = [
+                Qt.DisplayRole,
+                Qt.EditRole,
+                Qt.DecorationRole,
+                Qt.ForegroundRole,
+                Qt.FontRole,
+                Qt.BackgroundRole,
+                Qt.ToolTipRole,
+            ]
+
+        for role in roles:
+            self._data_cache.pop((self.index(row, self.COL_INDEX_FROM), role), None)
+            self._data_cache.pop((self.index(row, self.COL_INDEX_TO), role), None)
 
     def _data_impl(self, index, role):
         original_file = self._original_files[index.row()]
@@ -197,7 +212,7 @@ class FilesDisplayModel(QAbstractTableModel):
         return None
 
     def _get_renamed_background(self, original_file, renamed_file, index):
-        return  self.HIGHLIGHT_BACKGROUND_COLOR if index == self._highlighted_row else None
+        return self.HIGHLIGHT_BACKGROUND_COLOR if index == self._highlighted_row else None
 
     def _get_renamed_tooltip(self, original_file, renamed_file, index):
         if renamed_file is not None:
