@@ -43,6 +43,9 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     use_path_changed = pyqtSignal(bool)
     use_extension_changed = pyqtSignal(bool)
 
+    request_add_override = pyqtSignal(str, str)
+    request_remove_override = pyqtSignal(str)
+
     _base_path_panel = None
     _scan_recursive_checkbox = None
     _use_path_checkbox = None
@@ -127,6 +130,9 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
 
         self._files_display = FilesDisplay(box)
         self._files_display_summary = FilesDisplaySummaryPanel(box)
+
+        self._files_display.request_add_override.connect(self.request_add_override)
+        self._files_display.request_remove_override.connect(self.request_remove_override)
 
         self._files_display.counts_changed.connect(self._files_display_summary.set_counts)
         self._files_display.is_browsing_category_changed.connect(self._files_display_summary.set_is_browsing_category)

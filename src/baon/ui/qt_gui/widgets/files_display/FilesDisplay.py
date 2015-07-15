@@ -24,6 +24,9 @@ class FilesDisplay(QTableView):
     has_next_in_category_changed = pyqtSignal(bool)
     has_prev_in_category_changed = pyqtSignal(bool)
 
+    request_add_override = pyqtSignal(str, str)
+    request_remove_override = pyqtSignal(str)
+
     _is_browsing_category = False
     _indexes_in_category = None
     _category_cursor = None
@@ -34,6 +37,8 @@ class FilesDisplay(QTableView):
 
         model = FilesDisplayModel(self)
         model.counts_changed.connect(self.counts_changed)
+        model.request_add_override.connect(self.request_add_override)
+        model.request_remove_override.connect(self.request_remove_override)
 
         self.setModel(model)
         self.setSelectionMode(QAbstractItemView.NoSelection)

@@ -77,6 +77,9 @@ class BAONQtApplication(QApplication):
         self._main_window.use_path_changed.connect(self._core.update_use_path)
         self._main_window.use_extension_changed.connect(self._core.update_use_extension)
 
+        self._main_window.request_add_override.connect(self._core.add_override)
+        self._main_window.request_remove_override.connect(self._core.remove_override)
+
         self._main_window.rejected.connect(self._core.shutdown)
 
     def _start_core(self):

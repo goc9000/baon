@@ -123,6 +123,16 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._use_extension = use_extension
         self._on_rename_files_inputs_changed()
 
+    @pyqtSlot(str, str)
+    def add_override(self, original_path, explicit_name):
+        self._overrides[original_path] = explicit_name
+        self._on_apply_overrides_inputs_changed()
+
+    @pyqtSlot(str)
+    def remove_override(self, original_path):
+        self._overrides.pop(original_path, None)
+        self._on_apply_overrides_inputs_changed()
+
     @pyqtSlot()
     def shutdown(self):
         assert self._state != self.State.SHUTDOWN

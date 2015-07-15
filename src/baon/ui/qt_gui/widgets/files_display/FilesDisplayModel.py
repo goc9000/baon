@@ -37,6 +37,9 @@ class FilesDisplayModel(QAbstractTableModel):
 
     counts_changed = pyqtSignal(dict)
 
+    request_add_override = pyqtSignal(str, str)
+    request_remove_override = pyqtSignal(str)
+
     _original_files = None
     _renamed_files = None
     _data_cache = None
@@ -99,6 +102,19 @@ class FilesDisplayModel(QAbstractTableModel):
         self._data_cache[(index, role)] = value
 
         return value
+
+    def setData(self, index, value, role=Qt.EditRole):
+        if role != Qt.EditRole:
+            return super().setData(index, value, role)
+
+        original_path = self._original_files[index.row()].filename
+
+        if value != '':
+            self.request_add_override.emit(original_path, value)
+        else:
+            self.request_remove_override.emit(original_path)
+
+        return True
 
     def flags(self, index):
         item_flags = Qt.ItemIsEnabled
@@ -238,6 +254,7 @@ class FilesDisplayModel(QAbstractTableModel):
         (COL_INDEX_FROM, Qt.BackgroundRole): _get_original_background,
         (COL_INDEX_FROM, Qt.ToolTipRole): _get_original_tooltip,
         (COL_INDEX_TO, Qt.DisplayRole): _get_renamed_text,
+        (COL_INDEX_TO, Qt.EditRole): _get_renamed_text,
         (COL_INDEX_TO, Qt.DecorationRole): _get_renamed_icon,
         (COL_INDEX_TO, Qt.ForegroundRole): _get_renamed_foreground,
         (COL_INDEX_TO, Qt.FontRole): _get_renamed_font,
