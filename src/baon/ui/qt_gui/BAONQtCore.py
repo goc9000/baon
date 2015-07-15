@@ -19,7 +19,7 @@ from baon.core.utils.progress.ProgressInfo import ProgressInfo
 
 from baon.core.files.scan_files import scan_files
 from baon.core.parsing.parse_rules import parse_rules
-from baon.core.renaming.rename_files import rename_files
+from baon.core.renaming.rename_files import rename_files, apply_rename_overrides
 
 
 class BAONQtCore(CancellableWorkerMixin, QObject):
@@ -66,6 +66,9 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
     # Intermediary data
     _scanned_files = None
     _rules = None
+    _renamed_files_before_overrides = None
+    _overrides = None
+    _renamed_files = None
 
     # State
     _state = None
@@ -139,6 +142,8 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         if args.use_path is not None:
             self._use_path = args.use_path
 
+        self._overrides = args.overrides if args.overrides is not None else {}
+
     def _switch_state(self, new_state):
         if new_state == self._state:
             return
@@ -165,6 +170,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
             self.ready.emit()
 
     def _on_scan_files_inputs_changed(self):
+        self._overrides = {}
         self._rescan_files()
 
     def _rescan_files(self):
@@ -246,15 +252,15 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
     def _on_rename_files_finished(self, result):
         self._switch_state(self.State.READY)
-        self._update_renamed_files(result)
+        self._update_renamed_files_before_overrides(result)
 
-    def _update_renamed_files(self, result):
+    def _update_renamed_files_before_overrides(self, result):
         if result is not None and not isinstance(result, BAONError) and len(result) > 0:
-            self._renamed_files = result
+            self._renamed_files_before_overrides = result
         else:
-            self._renamed_files = None
+            self._renamed_files_before_overrides = None
 
-        self.renamed_files_updated.emit(self._renamed_files if self._renamed_files is not None else [])
+        self._on_apply_overrides_inputs_changed()
 
         if result is None:
             self.not_ready_to_rename.emit()
@@ -264,3 +270,16 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
             self.no_files_to_rename.emit()
         else:
             self.rename_files_ok.emit()
+
+    def _on_apply_overrides_inputs_changed(self):
+        if self._renamed_files_before_overrides is not None:
+            renamed_files = apply_rename_overrides(self._renamed_files_before_overrides, self._overrides)
+        else:
+            renamed_files = None
+
+        self._update_renamed_files(renamed_files)
+
+    def _update_renamed_files(self, renamed_files):
+        self._renamed_files = renamed_files
+
+        self.renamed_files_updated.emit(self._renamed_files if self._renamed_files is not None else [])
