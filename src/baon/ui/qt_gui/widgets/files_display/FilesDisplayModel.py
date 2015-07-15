@@ -135,6 +135,8 @@ class FilesDisplayModel(QAbstractTableModel):
                 categories.add('rename_warnings')
             if renamed_file.is_changed():
                 categories.add('changed')
+            if renamed_file.is_override:
+                categories.add('overrides')
 
         return categories
 

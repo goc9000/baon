@@ -28,6 +28,8 @@ class FilesDisplaySummaryPanel(QWidget, SetupTabStopsMixin):
     RENAME_WARNING_TEXT_PLURAL = '{0} have rename warnings'
     CHANGED_TEXT = '{0} changed'
     CHANGED_TEXT_PLURAL = '{0} changed'
+    OVERRIDE_TEXT = '{0} override'
+    OVERRIDE_TEXT_PLURAL = '{0} overrides'
 
     PREVIOUS_LINK_TEXT = 'Prev'
     NEXT_LINK_TEXT = 'Next'
@@ -35,6 +37,7 @@ class FilesDisplaySummaryPanel(QWidget, SetupTabStopsMixin):
     ERROR_COLOR = parse_qcolor('#ff0000')
     WARNING_COLOR = parse_qcolor('#d0b000')
     CHANGED_COLOR = parse_qcolor('#0040e0')
+    OVERRIDE_COLOR = parse_qcolor('#000000')
 
     CATEGORY_RENDERING = [
         {
@@ -81,6 +84,15 @@ class FilesDisplaySummaryPanel(QWidget, SetupTabStopsMixin):
             'text_plural': CHANGED_TEXT_PLURAL,
             'style': {
                 'color': CHANGED_COLOR.name(),
+            },
+        },
+        {
+            'category': 'overrides',
+            'text': OVERRIDE_TEXT,
+            'text_plural': OVERRIDE_TEXT_PLURAL,
+            'style': {
+                'color': OVERRIDE_COLOR.name(),
+                'font-weight': 'bold',
             },
         },
     ]
