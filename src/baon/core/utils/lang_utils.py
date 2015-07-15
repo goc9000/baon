@@ -10,7 +10,7 @@
 import sys
 
 from collections import deque
-from itertools import tee
+from itertools import tee, zip_longest
 from inspect import isabstract
 from contextlib import contextmanager
 
@@ -59,10 +59,16 @@ def swallow_all_errors():
 
 
 def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    """s -> (s0,s1), (s1,s2), (s2, s3), ..."""
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
+
+
+def chunked(iterable, n, fill_value=None):
+    """chunked('ABCDEFG', 3, 'x') -> ABC DEF Gxx"""
+    args = [iter(iterable)] * n
+    return zip_longest(*args, fillvalue=fill_value)
 
 
 def iter_non_abstract_descendants(cls):
