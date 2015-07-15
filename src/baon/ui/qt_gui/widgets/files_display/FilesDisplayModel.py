@@ -7,8 +7,8 @@
 # Licensed under the GPL-3
 
 
-from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot, QAbstractTableModel, QFileInfo
-from PyQt4.QtGui import QFileIconProvider, QStyle, QApplication
+from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot, QAbstractTableModel, QFileInfo, QObject
+from PyQt4.QtGui import QFileIconProvider, QFont, QStyle, QApplication
 
 from baon.ui.qt_gui.utils.parse_qcolor import parse_qcolor
 from baon.ui.qt_gui.utils.make_qicon_with_overlay import make_qicon_with_overlay
@@ -214,6 +214,15 @@ class FilesDisplayModel(QAbstractTableModel):
     def _get_renamed_background(self, original_file, renamed_file, index):
         return self.HIGHLIGHT_BACKGROUND_COLOR if index == self._highlighted_row else None
 
+    def _get_renamed_font(self, original_file, renamed_file, index):
+        if renamed_file is not None and renamed_file.is_override:
+            table = QObject.parent(self)
+            font = table.font()
+
+            return QFont(font.family(), font.pointSize(), QFont.Bold)
+
+        return None
+
     def _get_renamed_tooltip(self, original_file, renamed_file, index):
         if renamed_file is not None:
             return self._get_problems_tooltip(renamed_file)
@@ -229,6 +238,7 @@ class FilesDisplayModel(QAbstractTableModel):
         (COL_INDEX_TO, Qt.DisplayRole): _get_renamed_text,
         (COL_INDEX_TO, Qt.DecorationRole): _get_renamed_icon,
         (COL_INDEX_TO, Qt.ForegroundRole): _get_renamed_foreground,
+        (COL_INDEX_TO, Qt.FontRole): _get_renamed_font,
         (COL_INDEX_TO, Qt.BackgroundRole): _get_renamed_background,
         (COL_INDEX_TO, Qt.ToolTipRole): _get_renamed_tooltip,
     }
