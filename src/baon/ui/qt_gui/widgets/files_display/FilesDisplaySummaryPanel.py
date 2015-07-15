@@ -47,31 +47,41 @@ class FilesDisplaySummaryPanel(QWidget, SetupTabStopsMixin):
             'category': 'scan_errors',
             'text': SCAN_ERROR_TEXT,
             'text_plural': SCAN_ERROR_TEXT_PLURAL,
-            'color': ERROR_COLOR,
+            'style': {
+                'color': ERROR_COLOR.name(),
+            },
         },
         {
             'category': 'scan_warnings',
             'text': SCAN_WARNING_TEXT,
             'text_plural': SCAN_WARNING_TEXT_PLURAL,
-            'color': WARNING_COLOR,
+            'style': {
+                'color': WARNING_COLOR.name(),
+            },
         },
         {
             'category': 'rename_errors',
             'text': RENAME_ERROR_TEXT,
             'text_plural': RENAME_ERROR_TEXT_PLURAL,
-            'color': ERROR_COLOR,
+            'style': {
+                'color': ERROR_COLOR.name(),
+            },
         },
         {
             'category': 'rename_warnings',
             'text': RENAME_WARNING_TEXT,
             'text_plural': RENAME_WARNING_TEXT_PLURAL,
-            'color': WARNING_COLOR,
+            'style': {
+                'color': WARNING_COLOR.name(),
+            },
         },
         {
             'category': 'changed',
             'text': CHANGED_TEXT,
             'text_plural': CHANGED_TEXT_PLURAL,
-            'color': CHANGED_COLOR,
+            'style': {
+                'color': CHANGED_COLOR.name(),
+            },
         },
     ]
 
@@ -142,15 +152,9 @@ class FilesDisplaySummaryPanel(QWidget, SetupTabStopsMixin):
             part_html = category_setup['text' if item_count == 1 else 'text_plural'].format(item_count)
 
             if category_setup.get('show_link', True):
-                style = None
-                if 'color' in category_setup:
-                    style = 'color: {0}'.format(category_setup['color'].name())
+                style = '; '.join("{0}: {1}".format(k, v) for k, v in category_setup.get('style', {}).items())
 
-                part_html = '<a href="#{0}"{1}>{2}</a>'.format(
-                    category_setup['category'],
-                    ' style="{0}"'.format(style) if style is not None else '',
-                    part_html,
-                )
+                part_html = '<a href="#{0}" style="{1}">{2}</a>'.format(category_setup['category'], style, part_html)
 
             parts.append(part_html)
 
