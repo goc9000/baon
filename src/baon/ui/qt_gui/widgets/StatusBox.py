@@ -10,8 +10,6 @@
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QGroupBox, QHBoxLayout, QLabel, QProgressBar
 
-from baon.core.errors.BAONError import BAONError
-
 from baon.core.utils.progress.ProgressInfo import ProgressInfo
 
 
@@ -65,7 +63,7 @@ class StatusBox(QGroupBox):
         self._scan_files_error = None
         self._update_display()
 
-    @pyqtSlot(BAONError)
+    @pyqtSlot(Exception)
     def show_scan_files_error(self, error):
         self._show_base_path_required = False
         self._scan_files_error = error
@@ -77,7 +75,7 @@ class StatusBox(QGroupBox):
         self._scan_files_error = None
         self._update_display()
 
-    @pyqtSlot(BAONError)
+    @pyqtSlot(Exception)
     def show_rules_error(self, error):
         self._rules_error = error
         self._update_display()
@@ -97,7 +95,7 @@ class StatusBox(QGroupBox):
         self._rename_files_error = None
         self._update_display()
 
-    @pyqtSlot(BAONError)
+    @pyqtSlot(Exception)
     def show_rename_files_error(self, error):
         self._show_no_files_to_rename = False
         self._rename_files_error = error

@@ -13,8 +13,6 @@ from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal
 
 from baon.ui.qt_gui.mixins.CancellableWorkerMixin import CancellableWorkerMixin
 
-from baon.core.errors.BAONError import BAONError
-
 from baon.core.utils.progress.ProgressInfo import ProgressInfo
 
 from baon.core.files.scan_files import scan_files
@@ -37,11 +35,11 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
     started_scanning_files = pyqtSignal()
     scan_files_progress = pyqtSignal(ProgressInfo)
     scan_files_ok = pyqtSignal()
-    scan_files_error = pyqtSignal(BAONError)
+    scan_files_error = pyqtSignal(Exception)
     scanned_files_updated = pyqtSignal(list)
 
     rules_ok = pyqtSignal()
-    rules_error = pyqtSignal(BAONError)
+    rules_error = pyqtSignal(Exception)
 
     not_ready_to_rename = pyqtSignal()
     no_files_to_rename = pyqtSignal()
@@ -49,7 +47,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
     started_renaming_files = pyqtSignal()
     rename_files_progress = pyqtSignal(ProgressInfo)
     rename_files_ok = pyqtSignal()
-    rename_files_error = pyqtSignal(BAONError)
+    rename_files_error = pyqtSignal(Exception)
     renamed_files_updated = pyqtSignal(list)
 
     ready = pyqtSignal()
@@ -206,7 +204,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._update_scanned_files(result)
 
     def _update_scanned_files(self, result):
-        if result is not None and not isinstance(result, BAONError):
+        if result is not None and not isinstance(result, Exception):
             self._scanned_files = result
         else:
             self._scanned_files = None
@@ -215,7 +213,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
         if result is None:
             self.base_path_required.emit()
-        elif isinstance(result, BAONError):
+        elif isinstance(result, Exception):
             self.scan_files_error.emit(result)
         else:
             self.scan_files_ok.emit()
@@ -226,7 +224,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         try:
             self._rules = parse_rules(self._rules_text)
             self.rules_ok.emit()
-        except BAONError as error:
+        except Exception as error:
             self._rules = None
             self.rules_error.emit(error)
 
@@ -265,7 +263,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._update_renamed_files_before_overrides(result)
 
     def _update_renamed_files_before_overrides(self, result):
-        if result is not None and not isinstance(result, BAONError) and len(result) > 0:
+        if result is not None and not isinstance(result, Exception) and len(result) > 0:
             self._renamed_files_before_overrides = result
         else:
             self._renamed_files_before_overrides = None
@@ -274,7 +272,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
         if result is None:
             self.not_ready_to_rename.emit()
-        elif isinstance(result, BAONError):
+        elif isinstance(result, Exception):
             self.rename_files_error.emit(result)
         elif len(result) == 0:
             self.no_files_to_rename.emit()

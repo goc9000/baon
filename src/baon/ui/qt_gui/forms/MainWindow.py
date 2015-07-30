@@ -19,8 +19,6 @@ from baon.ui.qt_gui.widgets.files_display.FilesDisplaySummaryPanel import FilesD
 from baon.ui.qt_gui.widgets.RulesEditor import RulesEditor
 from baon.ui.qt_gui.widgets.StatusBox import StatusBox
 
-from baon.core.errors.BAONError import BAONError
-
 from baon.core.utils.progress.ProgressInfo import ProgressInfo
 
 
@@ -192,7 +190,7 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     def report_scan_files_ok(self):
         self._status_box.clear_scan_files_error()
 
-    @pyqtSlot(BAONError)
+    @pyqtSlot(Exception)
     def report_scan_files_error(self, error):
         self._status_box.show_scan_files_error(error)
 
@@ -205,7 +203,7 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         self._rules_editor.clear_error()
         self._status_box.clear_rules_error()
 
-    @pyqtSlot(BAONError)
+    @pyqtSlot(Exception)
     def report_rules_error(self, error):
         self._rules_editor.show_error(error.source_span)
         self._status_box.show_rules_error(error)
@@ -230,7 +228,7 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     def report_rename_files_ok(self):
         self._status_box.clear_rename_files_error()
 
-    @pyqtSlot(BAONError)
+    @pyqtSlot(Exception)
     def report_rename_files_error(self, error):
         self._status_box.show_rename_files_error(error)
 
