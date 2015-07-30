@@ -148,9 +148,51 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._overrides = DataFlowNode(self, args.overrides or {}, 'overrides')
 
         self._scanned_files = DataFlowNode(self, None, 'scanned files')
+        self._scanned_files.value_updated.connect(self._on_scanned_files_updated)
+
         self._rules = DataFlowNode(self, None, 'rules')
+        self._rules.value_updated.connect(self._on_rules_updated)
+
         self._renamed_files_before_overrides = DataFlowNode(self, None, 'renamed files w/o override')
         self._renamed_files = DataFlowNode(self, None, 'renamed files')
+        self._renamed_files.value_updated.connect(self._on_renamed_files_updated)
+
+    @pyqtSlot()
+    def _on_scanned_files_updated(self):
+        value = self._scanned_files.value()
+
+        if value is None:
+            self.base_path_required.emit()
+        elif isinstance(value, Exception):
+            self.scan_files_error.emit(value)
+        else:
+            self.scan_files_ok.emit()
+
+        self.scanned_files_updated.emit(value if self._scanned_files.valid_value() else [])
+
+    @pyqtSlot()
+    def _on_rules_updated(self):
+        value = self._rules.value()
+
+        if isinstance(value, Exception):
+            self.rules_error.emit(value)
+        else:
+            self.rules_ok.emit()
+
+    @pyqtSlot()
+    def _on_renamed_files_updated(self):
+        value = self._renamed_files.value()
+
+        if value is None:
+            self.not_ready_to_rename.emit()
+        elif isinstance(value, Exception):
+            self.rename_files_error.emit(value)
+        elif len(value) == 0:
+            self.no_files_to_rename.emit()
+        else:
+            self.rename_files_ok.emit()
+
+        self.renamed_files_updated.emit(value if self._renamed_files.valid_value() else [])
 
     def _switch_state(self, new_state):
         if new_state == self._state:
@@ -205,24 +247,13 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
     def _update_scanned_files(self, result):
         self._scanned_files.update_value(result)
-        self.scanned_files_updated.emit(self._scanned_files.value() if self._scanned_files.valid_value() else [])
-
-        if result is None:
-            self.base_path_required.emit()
-        elif isinstance(result, Exception):
-            self.scan_files_error.emit(result)
-        else:
-            self.scan_files_ok.emit()
-
         self._on_rename_files_inputs_changed()
 
     def _recompile_rules(self, isolated=False):
         try:
             self._rules.update_value(parse_rules(self._rules_text.value()))
-            self.rules_ok.emit()
         except Exception as error:
             self._rules.update_value(error)
-            self.rules_error.emit(error)
 
         if not isolated:
             self._on_rename_files_inputs_changed()
@@ -262,24 +293,13 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._renamed_files_before_overrides.update_value(result)
         self._on_apply_overrides_inputs_changed()
 
-        if result is None:
-            self.not_ready_to_rename.emit()
-        elif isinstance(result, Exception):
-            self.rename_files_error.emit(result)
-        elif len(result) == 0:
-            self.no_files_to_rename.emit()
-        else:
-            self.rename_files_ok.emit()
-
     def _on_apply_overrides_inputs_changed(self):
         if self._renamed_files_before_overrides.valid_value():
             renamed_files = apply_rename_overrides(self._renamed_files_before_overrides.value(), self._overrides.value())
         else:
-            renamed_files = None
+            renamed_files = self._renamed_files_before_overrides.value()
 
         self._update_renamed_files(renamed_files)
 
     def _update_renamed_files(self, renamed_files):
         self._renamed_files.update_value(renamed_files)
-
-        self.renamed_files_updated.emit(self._renamed_files.value() if self._renamed_files.valid_value() else [])

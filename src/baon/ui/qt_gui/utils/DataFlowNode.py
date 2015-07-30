@@ -7,10 +7,12 @@
 # Licensed under the GPL-3
 
 
-from PyQt4.QtCore import QObject, pyqtSlot
+from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal
 
 
 class DataFlowNode(QObject):
+    value_updated = pyqtSignal()
+
     _value = None
     _debug_name = None
 
@@ -23,6 +25,8 @@ class DataFlowNode(QObject):
     @pyqtSlot(object)
     def update_value(self, new_value):
         self._value = new_value
+
+        self.value_updated.emit()
 
     def value(self):
         return self._value
