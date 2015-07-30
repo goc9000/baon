@@ -11,6 +11,7 @@ from enum import Enum
 
 from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal
 
+from baon.ui.qt_gui.utils.DataFlowNode import DataFlowNode
 from baon.ui.qt_gui.mixins.CancellableWorkerMixin import CancellableWorkerMixin
 
 from baon.core.utils.progress.ProgressInfo import ProgressInfo
@@ -55,17 +56,17 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
     has_shutdown = pyqtSignal()
 
     # Inputs
-    _base_path = ''
-    _scan_recursive = False
-    _rules_text = ''
-    _use_extension = False
-    _use_path = False
+    _base_path = None
+    _scan_recursive = None
+    _rules_text = None
+    _use_extension = None
+    _use_path = None
+    _overrides = None
 
     # Intermediary data
     _scanned_files = None
     _rules = None
     _renamed_files_before_overrides = None
-    _overrides = None
     _renamed_files = None
 
     # State
@@ -74,7 +75,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
     def __init__(self, args):
         super().__init__()
 
-        self._init_inputs(args)
+        self._init_data_nodes(args)
         self._state = self.State.NOT_STARTED
 
     @pyqtSlot()
@@ -90,45 +91,45 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
     def update_base_path(self, base_path):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES, self.State.RENAMING_FILES]
 
-        self._base_path = base_path
+        self._base_path.update_value(base_path)
         self._on_scan_files_inputs_changed()
 
     @pyqtSlot(bool)
     def update_scan_recursive(self, scan_recursive):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES, self.State.RENAMING_FILES]
 
-        self._scan_recursive = scan_recursive
+        self._scan_recursive.update_value(scan_recursive)
         self._on_scan_files_inputs_changed()
 
     @pyqtSlot(str)
     def update_rules_text(self, rules_text):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES, self.State.RENAMING_FILES]
 
-        self._rules_text = rules_text
+        self._rules_text.update_value(rules_text)
         self._recompile_rules()
 
     @pyqtSlot(bool)
     def update_use_path(self, use_path):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES, self.State.RENAMING_FILES]
 
-        self._use_path = use_path
+        self._use_path.update_value(use_path)
         self._on_rename_files_inputs_changed()
 
     @pyqtSlot(bool)
     def update_use_extension(self, use_extension):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES, self.State.RENAMING_FILES]
 
-        self._use_extension = use_extension
+        self._use_extension.update_value(use_extension)
         self._on_rename_files_inputs_changed()
 
     @pyqtSlot(str, str)
     def add_override(self, original_path, explicit_name):
-        self._overrides[original_path] = explicit_name
+        self._overrides.update_value(dict(list(self._overrides.value().items()) + [(original_path, explicit_name)]))
         self._on_apply_overrides_inputs_changed()
 
     @pyqtSlot(str)
     def remove_override(self, original_path):
-        self._overrides.pop(original_path, None)
+        self._overrides.update_value({k: v for k, v in self._overrides.value().items() if k != original_path})
         self._on_apply_overrides_inputs_changed()
 
     @pyqtSlot()
@@ -138,19 +139,18 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._stop_worker()
         self._switch_state(self.State.SHUTDOWN)
 
-    def _init_inputs(self, args):
-        if args.base_path is not None:
-            self._base_path = args.base_path
-        if args.scan_recursive is not None:
-            self._scan_recursive = args.scan_recursive
-        if args.rules_text is not None:
-            self._rules_text = args.rules_text
-        if args.use_extension is not None:
-            self._use_extension = args.use_extension
-        if args.use_path is not None:
-            self._use_path = args.use_path
+    def _init_data_nodes(self, args):
+        self._base_path = DataFlowNode(self, args.base_path or '', 'base path')
+        self._scan_recursive = DataFlowNode(self, args.scan_recursive or False, 'scan recursive')
+        self._rules_text = DataFlowNode(self, args.rules_text or '', 'rules text')
+        self._use_extension = DataFlowNode(self, args.use_extension or False, 'use extension')
+        self._use_path = DataFlowNode(self, args.use_path or False, 'use path')
+        self._overrides = DataFlowNode(self, args.overrides or {}, 'overrides')
 
-        self._overrides = args.overrides if args.overrides is not None else {}
+        self._scanned_files = DataFlowNode(self, None, 'scanned files')
+        self._rules = DataFlowNode(self, None, 'rules')
+        self._renamed_files_before_overrides = DataFlowNode(self, None, 'renamed files w/o override')
+        self._renamed_files = DataFlowNode(self, None, 'renamed files')
 
     def _switch_state(self, new_state):
         if new_state == self._state:
@@ -178,21 +178,21 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
             self.ready.emit()
 
     def _on_scan_files_inputs_changed(self):
-        self._overrides = {}
+        self._overrides.update_value({})
         self._rescan_files()
 
     def _rescan_files(self):
         self._stop_worker()
 
-        if self._base_path == '':
+        if self._base_path.value() == '':
             self._on_scan_files_finished(None)
             return
 
         self._switch_state(self.State.SCANNING_FILES)
         self._start_worker(
             work=lambda check_abort: scan_files(
-                self._base_path,
-                self._scan_recursive,
+                self._base_path.value(),
+                self._scan_recursive.value(),
                 on_progress=lambda progress: self.scan_files_progress.emit(progress),
                 check_abort=check_abort,
             ),
@@ -205,11 +205,11 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
     def _update_scanned_files(self, result):
         if result is not None and not isinstance(result, Exception):
-            self._scanned_files = result
+            self._scanned_files.update_value(result)
         else:
-            self._scanned_files = None
+            self._scanned_files.update_value(None)
 
-        self.scanned_files_updated.emit(self._scanned_files if self._scanned_files is not None else [])
+        self.scanned_files_updated.emit(self._scanned_files.value() if self._scanned_files.value() is not None else [])
 
         if result is None:
             self.base_path_required.emit()
@@ -222,10 +222,10 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
     def _recompile_rules(self, isolated=False):
         try:
-            self._rules = parse_rules(self._rules_text)
+            self._rules.update_value(parse_rules(self._rules_text.value()))
             self.rules_ok.emit()
         except Exception as error:
-            self._rules = None
+            self._rules.update_value(None)
             self.rules_error.emit(error)
 
         if not isolated:
@@ -238,20 +238,20 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._rename_files()
 
     def _rename_files(self):
-        if self._scanned_files is None or self._rules is None:
+        if self._scanned_files.value() is None or self._rules.value() is None:
             self._on_rename_files_finished(None)
             return
-        if len(self._scanned_files) == 0:
+        if len(self._scanned_files.value()) == 0:
             self._on_rename_files_finished([])
             return
 
         self._switch_state(self.State.RENAMING_FILES)
         self._start_worker(
             work=lambda check_abort: rename_files(
-                self._scanned_files,
-                self._rules,
-                use_path=self._use_path,
-                use_extension=self._use_extension,
+                self._scanned_files.value(),
+                self._rules.value(),
+                use_path=self._use_path.value(),
+                use_extension=self._use_extension.value(),
                 on_progress=lambda progress: self.rename_files_progress.emit(progress),
                 check_abort=check_abort,
             ),
@@ -264,9 +264,9 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
     def _update_renamed_files_before_overrides(self, result):
         if result is not None and not isinstance(result, Exception) and len(result) > 0:
-            self._renamed_files_before_overrides = result
+            self._renamed_files_before_overrides.update_value(result)
         else:
-            self._renamed_files_before_overrides = None
+            self._renamed_files_before_overrides.update_value(None)
 
         self._on_apply_overrides_inputs_changed()
 
@@ -280,14 +280,14 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
             self.rename_files_ok.emit()
 
     def _on_apply_overrides_inputs_changed(self):
-        if self._renamed_files_before_overrides is not None:
-            renamed_files = apply_rename_overrides(self._renamed_files_before_overrides, self._overrides)
+        if self._renamed_files_before_overrides.value() is not None:
+            renamed_files = apply_rename_overrides(self._renamed_files_before_overrides.value(), self._overrides.value())
         else:
             renamed_files = None
 
         self._update_renamed_files(renamed_files)
 
     def _update_renamed_files(self, renamed_files):
-        self._renamed_files = renamed_files
+        self._renamed_files.update_value(renamed_files)
 
-        self.renamed_files_updated.emit(self._renamed_files if self._renamed_files is not None else [])
+        self.renamed_files_updated.emit(self._renamed_files.value() if self._renamed_files.value() is not None else [])
