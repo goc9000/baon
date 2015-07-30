@@ -26,3 +26,6 @@ class DataFlowNode(QObject):
 
     def value(self):
         return self._value
+
+    def valid_value(self):
+        return self._value is not None and not isinstance(self._value, Exception)
