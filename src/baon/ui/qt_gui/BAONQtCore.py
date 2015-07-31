@@ -75,7 +75,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
     def __init__(self, args):
         super().__init__()
 
-        self._init_data_nodes(args)
+        self._init_data_flow(args)
         self._state = self.State.NOT_STARTED
 
     @pyqtSlot()
@@ -84,7 +84,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
         self._switch_state(self.State.READY)
 
-        self._recompile_rules(isolated=True)
+        self._on_rules_inputs_changed()
         self._rescan_files()
 
     @pyqtSlot(str)
@@ -92,45 +92,42 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES, self.State.RENAMING_FILES]
 
         self._base_path.update_value(base_path)
-        self._on_scan_files_inputs_changed()
 
     @pyqtSlot(bool)
     def update_scan_recursive(self, scan_recursive):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES, self.State.RENAMING_FILES]
 
         self._scan_recursive.update_value(scan_recursive)
-        self._on_scan_files_inputs_changed()
 
     @pyqtSlot(str)
     def update_rules_text(self, rules_text):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES, self.State.RENAMING_FILES]
 
         self._rules_text.update_value(rules_text)
-        self._recompile_rules()
 
     @pyqtSlot(bool)
     def update_use_path(self, use_path):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES, self.State.RENAMING_FILES]
 
         self._use_path.update_value(use_path)
-        self._on_rename_files_inputs_changed()
 
     @pyqtSlot(bool)
     def update_use_extension(self, use_extension):
         assert self._state in [self.State.READY, self.State.SCANNING_FILES, self.State.RENAMING_FILES]
 
         self._use_extension.update_value(use_extension)
-        self._on_rename_files_inputs_changed()
 
     @pyqtSlot(str, str)
     def add_override(self, original_path, explicit_name):
+        assert self._state in [self.State.READY]
+
         self._overrides.update_value(dict(list(self._overrides.value().items()) + [(original_path, explicit_name)]))
-        self._on_apply_overrides_inputs_changed()
 
     @pyqtSlot(str)
     def remove_override(self, original_path):
+        assert self._state in [self.State.READY]
+
         self._overrides.update_value({k: v for k, v in self._overrides.value().items() if k != original_path})
-        self._on_apply_overrides_inputs_changed()
 
     @pyqtSlot()
     def shutdown(self):
@@ -139,21 +136,36 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._stop_worker()
         self._switch_state(self.State.SHUTDOWN)
 
-    def _init_data_nodes(self, args):
+    def _init_data_flow(self, args):
         self._base_path = DataFlowNode(self, args.base_path or '', 'base path')
+        self._base_path.value_updated.connect(self._on_scan_files_inputs_changed)
+
         self._scan_recursive = DataFlowNode(self, args.scan_recursive or False, 'scan recursive')
+        self._scan_recursive.value_updated.connect(self._on_scan_files_inputs_changed)
+
         self._rules_text = DataFlowNode(self, args.rules_text or '', 'rules text')
+        self._rules_text.value_updated.connect(self._on_rules_inputs_changed)
+
         self._use_extension = DataFlowNode(self, args.use_extension or False, 'use extension')
+        self._use_extension.value_updated.connect(self._on_rename_files_inputs_changed)
+
         self._use_path = DataFlowNode(self, args.use_path or False, 'use path')
+        self._use_path.value_updated.connect(self._on_rename_files_inputs_changed)
+
         self._overrides = DataFlowNode(self, args.overrides or {}, 'overrides')
+        self._overrides.value_updated.connect(self._on_apply_overrides_inputs_changed)
 
         self._scanned_files = DataFlowNode(self, None, 'scanned files')
+        self._scanned_files.value_updated.connect(self._on_rename_files_inputs_changed)
         self._scanned_files.value_updated.connect(self._on_scanned_files_updated)
 
         self._rules = DataFlowNode(self, None, 'rules')
         self._rules.value_updated.connect(self._on_rules_updated)
+        self._rules.value_updated.connect(self._on_rename_files_inputs_changed)
 
         self._renamed_files_before_overrides = DataFlowNode(self, None, 'renamed files w/o override')
+        self._renamed_files_before_overrides.value_updated.connect(self._on_apply_overrides_inputs_changed)
+
         self._renamed_files = DataFlowNode(self, None, 'renamed files')
         self._renamed_files.value_updated.connect(self._on_renamed_files_updated)
 
@@ -219,6 +231,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         elif self._state == self.State.READY:
             self.ready.emit()
 
+    @pyqtSlot()
     def _on_scan_files_inputs_changed(self):
         self._overrides.update_value({})
         self._rescan_files()
@@ -243,21 +256,16 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
     def _on_scan_files_finished(self, result):
         self._switch_state(self.State.READY)
-        self._update_scanned_files(result)
-
-    def _update_scanned_files(self, result):
         self._scanned_files.update_value(result)
-        self._on_rename_files_inputs_changed()
 
-    def _recompile_rules(self, isolated=False):
+    @pyqtSlot()
+    def _on_rules_inputs_changed(self):
         try:
             self._rules.update_value(parse_rules(self._rules_text.value()))
         except Exception as error:
             self._rules.update_value(error)
 
-        if not isolated:
-            self._on_rename_files_inputs_changed()
-
+    @pyqtSlot()
     def _on_rename_files_inputs_changed(self):
         if self._state == self.State.SCANNING_FILES:
             return
@@ -287,19 +295,13 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
     def _on_rename_files_finished(self, result):
         self._switch_state(self.State.READY)
-        self._update_renamed_files_before_overrides(result)
-
-    def _update_renamed_files_before_overrides(self, result):
         self._renamed_files_before_overrides.update_value(result)
-        self._on_apply_overrides_inputs_changed()
 
+    @pyqtSlot()
     def _on_apply_overrides_inputs_changed(self):
         if self._renamed_files_before_overrides.valid_value():
             renamed_files = apply_rename_overrides(self._renamed_files_before_overrides.value(), self._overrides.value())
         else:
             renamed_files = self._renamed_files_before_overrides.value()
 
-        self._update_renamed_files(renamed_files)
-
-    def _update_renamed_files(self, renamed_files):
         self._renamed_files.update_value(renamed_files)
