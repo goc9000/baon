@@ -11,7 +11,6 @@ from enum import Enum
 
 from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal
 
-from baon.ui.qt_gui.utils.DataFlowNode import DataFlowNode
 from baon.ui.qt_gui.mixins.CancellableWorkerMixin import CancellableWorkerMixin
 
 from baon.core.utils.progress.ProgressInfo import ProgressInfo
@@ -305,3 +304,28 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
             renamed_files = self._renamed_files_before_overrides.value()
 
         self._renamed_files.update_value(renamed_files)
+
+
+class DataFlowNode(QObject):
+    value_updated = pyqtSignal()
+
+    _value = None
+    _debug_name = None
+
+    def __init__(self, parent, value=None, debug_name=None):
+        super().__init__(parent)
+
+        self._value = value
+        self._debug_name = debug_name
+
+    @pyqtSlot(object)
+    def update_value(self, new_value):
+        self._value = new_value
+
+        self.value_updated.emit()
+
+    def value(self):
+        return self._value
+
+    def valid_value(self):
+        return self._value is not None and not isinstance(self._value, Exception)
