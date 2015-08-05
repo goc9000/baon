@@ -48,25 +48,9 @@ class BAONQtApplication(QApplication):
 
         self._core.prologue_finished.connect(self._main_window.show)
 
-        self._core.base_path_required.connect(self._main_window.report_base_path_required)
-        self._core.started_scanning_files.connect(self._main_window.report_started_scanning_files)
-        self._core.scan_files_progress.connect(self._main_window.report_scan_files_progress)
-        self._core.scan_files_ok.connect(self._main_window.report_scan_files_ok)
-        self._core.scan_files_error.connect(self._main_window.report_scan_files_error)
+        self._core.status_changed.connect(self._main_window.report_status)
         self._core.scanned_files_updated.connect(self._main_window.update_scanned_files)
-
-        self._core.rules_ok.connect(self._main_window.report_rules_ok)
-        self._core.rules_error.connect(self._main_window.report_rules_error)
-
-        self._core.not_ready_to_rename.connect(self._main_window.report_not_ready_to_rename)
-        self._core.no_files_to_rename.connect(self._main_window.report_no_files_to_rename)
-        self._core.started_renaming_files.connect(self._main_window.report_started_renaming_files)
-        self._core.rename_files_progress.connect(self._main_window.report_rename_files_progress)
-        self._core.rename_files_ok.connect(self._main_window.report_rename_files_ok)
-        self._core.rename_files_error.connect(self._main_window.report_rename_files_error)
         self._core.renamed_files_updated.connect(self._main_window.update_renamed_files)
-
-        self._core.ready.connect(self._main_window.report_ready)
 
         self._core.has_shutdown.connect(self.quit)
 

@@ -13,13 +13,13 @@ from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QGroupBox, QHBoxLa
 from baon.ui.qt_gui.mixins.CenterOnScreenMixin import CenterOnScreenMixin
 from baon.ui.qt_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
 
+from baon.ui.qt_gui.BAONStatus import BAONStatus
+
 from baon.ui.qt_gui.widgets.BasePathPanel import BasePathPanel
 from baon.ui.qt_gui.widgets.files_display.FilesDisplay import FilesDisplay
 from baon.ui.qt_gui.widgets.files_display.FilesDisplaySummaryPanel import FilesDisplaySummaryPanel
 from baon.ui.qt_gui.widgets.RulesEditor import RulesEditor
 from baon.ui.qt_gui.widgets.StatusBox import StatusBox
-
-from baon.core.utils.progress.ProgressInfo import ProgressInfo
 
 
 class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
@@ -174,69 +174,25 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         if args.rules_text is not None:
             self._rules_editor.set_rules(args.rules_text)
 
-    @pyqtSlot()
-    def report_base_path_required(self):
-        self._status_box.show_base_path_required()
+    @pyqtSlot(BAONStatus)
+    def report_status(self, status):
+        files_busy = \
+            status.scan_status in [BAONStatus.IN_PROGRESS, BAONStatus.PENDING] or \
+            status.rename_status in [BAONStatus.IN_PROGRESS, BAONStatus.PENDING]
 
-    @pyqtSlot()
-    def report_started_scanning_files(self):
-        self._files_display.setEnabled(False)
+        self._files_display.setEnabled(not files_busy)
 
-    @pyqtSlot(ProgressInfo)
-    def report_scan_files_progress(self, progress):
-        self._status_box.show_scan_files_progress(progress)
+        if status.rules_status == BAONStatus.ERROR:
+            self._rules_editor.show_error(status.rules_status_extra.source_span)
+        else:
+            self._rules_editor.clear_error()
 
-    @pyqtSlot()
-    def report_scan_files_ok(self):
-        self._status_box.clear_scan_files_error()
-
-    @pyqtSlot(Exception)
-    def report_scan_files_error(self, error):
-        self._status_box.show_scan_files_error(error)
+        self._status_box.show_status(status)
 
     @pyqtSlot(list)
     def update_scanned_files(self, files):
         self._files_display.set_original_files(files)
 
-    @pyqtSlot()
-    def report_rules_ok(self):
-        self._rules_editor.clear_error()
-        self._status_box.clear_rules_error()
-
-    @pyqtSlot(Exception)
-    def report_rules_error(self, error):
-        self._rules_editor.show_error(error.source_span)
-        self._status_box.show_rules_error(error)
-
-    @pyqtSlot()
-    def report_not_ready_to_rename(self):
-        self._status_box.clear_rename_files_error()
-
-    @pyqtSlot()
-    def report_no_files_to_rename(self):
-        self._status_box.show_no_files_to_rename()
-
-    @pyqtSlot()
-    def report_started_renaming_files(self):
-        self._files_display.setEnabled(False)
-
-    @pyqtSlot(ProgressInfo)
-    def report_rename_files_progress(self, progress):
-        self._status_box.show_rename_files_progress(progress)
-
-    @pyqtSlot()
-    def report_rename_files_ok(self):
-        self._status_box.clear_rename_files_error()
-
-    @pyqtSlot(Exception)
-    def report_rename_files_error(self, error):
-        self._status_box.show_rename_files_error(error)
-
     @pyqtSlot(list)
     def update_renamed_files(self, files):
         self._files_display.set_renamed_files(files)
-
-    @pyqtSlot()
-    def report_ready(self):
-        self._files_display.setEnabled(True)
-        self._status_box.stop_showing_progress()

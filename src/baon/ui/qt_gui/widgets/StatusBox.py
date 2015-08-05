@@ -10,7 +10,7 @@
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QGroupBox, QHBoxLayout, QLabel, QProgressBar
 
-from baon.core.utils.progress.ProgressInfo import ProgressInfo
+from baon.ui.qt_gui.BAONStatus import BAONStatus
 
 
 class StatusBox(QGroupBox):
@@ -33,12 +33,6 @@ class StatusBox(QGroupBox):
     _status_label = None
     _status_progressbar = None
 
-    _show_base_path_required = False
-    _scan_files_error = None
-    _rules_error = None
-    _show_no_files_to_rename = False
-    _rename_files_error = None
-
     def __init__(self, parent):
         super().__init__(self.STATUS_BOX_TEXT, parent)
 
@@ -51,81 +45,20 @@ class StatusBox(QGroupBox):
         layout.addWidget(self._status_label)
         layout.addWidget(self._status_progressbar)
 
-        self._update_display()
-
-    @pyqtSlot(ProgressInfo)
-    def show_scan_files_progress(self, progress):
-        self._show_progress(progress, self.SCAN_FILES_PROGRESS_TEXT)
-
-    @pyqtSlot()
-    def show_base_path_required(self):
-        self._show_base_path_required = True
-        self._scan_files_error = None
-        self._update_display()
-
-    @pyqtSlot(Exception)
-    def show_scan_files_error(self, error):
-        self._show_base_path_required = False
-        self._scan_files_error = error
-        self._update_display()
-
-    @pyqtSlot()
-    def clear_scan_files_error(self):
-        self._show_base_path_required = False
-        self._scan_files_error = None
-        self._update_display()
-
-    @pyqtSlot(Exception)
-    def show_rules_error(self, error):
-        self._rules_error = error
-        self._update_display()
-
-    @pyqtSlot()
-    def clear_rules_error(self):
-        self._rules_error = None
-        self._update_display()
-
-    @pyqtSlot(ProgressInfo)
-    def show_rename_files_progress(self, progress):
-        self._show_progress(progress, self.RENAME_FILES_PROGRESS_TEXT)
-
-    @pyqtSlot()
-    def show_no_files_to_rename(self):
-        self._show_no_files_to_rename = True
-        self._rename_files_error = None
-        self._update_display()
-
-    @pyqtSlot(Exception)
-    def show_rename_files_error(self, error):
-        self._show_no_files_to_rename = False
-        self._rename_files_error = error
-        self._update_display()
-
-    @pyqtSlot()
-    def clear_rename_files_error(self):
-        self._show_no_files_to_rename = False
-        self._rename_files_error = None
-        self._update_display()
-
-    @pyqtSlot()
-    def stop_showing_progress(self):
-        self._status_progressbar.setVisible(False)
-        self._update_display()
-
-    def _update_display(self):
-        if self._status_progressbar.isVisible():
-            return
-
-        if self._rules_error is not None:
-            self._show_error(self._rules_error, self.RULES_ERROR_CAPTION_TEXT)
-        elif self._scan_files_error is not None:
-            self._show_error(self._scan_files_error, self.SCAN_FILES_ERROR_CAPTION_TEXT)
-        elif self._show_base_path_required:
+    @pyqtSlot(BAONStatus)
+    def show_status(self, status):
+        if status.scan_status == BAONStatus.IN_PROGRESS:
+            self._show_progress(status.scan_status_extra, self.SCAN_FILES_PROGRESS_TEXT)
+        elif status.rename_status == BAONStatus.IN_PROGRESS:
+            self._show_progress(status.rename_status_extra, self.RENAME_FILES_PROGRESS_TEXT)
+        elif status.scan_status == BAONStatus.ERROR:
+            self._show_error(status.scan_status_extra, self.SCAN_FILES_ERROR_CAPTION_TEXT)
+        elif status.rules_status == BAONStatus.ERROR:
+            self._show_error(status.rules_status_extra, self.RULES_ERROR_CAPTION_TEXT)
+        elif status.rename_status == BAONStatus.ERROR:
+            self._show_error(status.rename_status_extra, self.RENAME_FILES_ERROR_CAPTION_TEXT)
+        elif status.scan_status == BAONStatus.NOT_AVAILABLE:
             self._show_message(self.BASE_PATH_REQUIRED_MESSAGE_TEXT)
-        elif self._rename_files_error is not None:
-            self._show_error(self._rename_files_error, self.RENAME_FILES_ERROR_CAPTION_TEXT)
-        elif self._show_no_files_to_rename:
-            self._show_message(self.NO_FILES_TO_RENAME_MESSAGE_TEXT)
         else:
             self._show_message(self.READY_MESSAGE_TEXT)
 
