@@ -234,13 +234,12 @@ class DataFlowNode(QObject):
                 self._recompute_async()
 
     def _handle_inputs_not_ready(self):
-        for input_node in self._inputs:
-            if input_node.status() in [BAONStatus.IN_PROGRESS, BAONStatus.PENDING]:
-                self._update(status=BAONStatus.PENDING)
-                return True
-            elif input_node.status() in [BAONStatus.ERROR, BAONStatus.NOT_AVAILABLE]:
-                self._update(status=BAONStatus.NOT_AVAILABLE)
-                return True
+        if any(input_node.status() in [BAONStatus.IN_PROGRESS, BAONStatus.PENDING] for input_node in self._inputs):
+            self._update(status=BAONStatus.PENDING)
+            return True
+        if any(input_node.status() in [BAONStatus.ERROR, BAONStatus.NOT_AVAILABLE] for input_node in self._inputs):
+            self._update(status=BAONStatus.NOT_AVAILABLE)
+            return True
 
         return False
 
@@ -263,7 +262,7 @@ class DataFlowNode(QObject):
         raise NotImplementedError()
 
     def _recompute_async_impl(self, *args):
-        return None
+        raise NotImplementedError()
 
     def _on_async_progress(self, progress):
         self._update(status=BAONStatus.IN_PROGRESS, data=progress)
