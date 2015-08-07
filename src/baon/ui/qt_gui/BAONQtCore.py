@@ -103,12 +103,12 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self.has_shutdown.emit()
 
     def _init_data_flow(self):
-        self._base_path = DataFlowNode(self, '', debug_name='base path')
-        self._scan_recursive = DataFlowNode(self, False, debug_name='scan recursive')
-        self._rules_text = DataFlowNode(self, '', debug_name='rules text')
-        self._use_extension = DataFlowNode(self, False, debug_name='use extension')
-        self._use_path = DataFlowNode(self, False, debug_name='use path')
-        self._overrides = DataFlowNode(self, {}, debug_name='overrides')
+        self._base_path = InputNode(self, '', debug_name='base path')
+        self._scan_recursive = InputNode(self, False, debug_name='scan recursive')
+        self._rules_text = InputNode(self, '', debug_name='rules text')
+        self._use_extension = InputNode(self, False, debug_name='use extension')
+        self._use_path = InputNode(self, False, debug_name='use path')
+        self._overrides = InputNode(self, {}, debug_name='overrides')
 
         self._scanned_files = ScannedFilesNode(self, self._base_path, self._scan_recursive)
         self._scanned_files.updated.connect(self._on_scanned_files_updated)
@@ -267,6 +267,11 @@ class DataFlowNode(QObject):
 
     def _on_async_progress(self, progress):
         self._update(status=BAONStatus.IN_PROGRESS, data=progress)
+
+
+class InputNode(DataFlowNode):
+    def __init__(self, parent, data=None, status=BAONStatus.NOT_AVAILABLE, debug_name=None):
+        super().__init__(parent, inputs=[], data=data, status=status, debug_name=debug_name)
 
 
 class RulesNode(DataFlowNode):
