@@ -16,6 +16,11 @@ class MakeRenamePlanError(BAONError, metaclass=ABCMeta):
     pass
 
 
+class RenamedFilesListHasErrorsError(MakeRenamePlanError):
+    def _get_format_string(self):
+        return "Some of the files to be renamed have errors"
+
+
 class CannotCreateDestinationDirError(MakeRenamePlanError, metaclass=ABCMeta):
     def __init__(self, destination_dir, **extra_parameters):
         super().__init__(destination_dir=destination_dir, **extra_parameters)

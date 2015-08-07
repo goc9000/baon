@@ -63,7 +63,8 @@ class TestMakeRenamePlan(FileSystemTestCase):
                 ('FILE', 'entry'),
             ),
             '"file2"->"entry/file"',
-            ('CannotCreateDestinationDirFileInTheWayWillNotMoveError', {'destination_dir': 'entry'}))
+            ('CannotCreateDestinationDirFileInTheWayWillNotMoveError', {'destination_dir': 'entry'}),
+            filter_scanned_files=lambda file_ref: file_ref.filename != 'entry')
 
     def test_file_in_way_will_move_find_free_name(self):
         self._test_make_rename_plan(
@@ -139,9 +140,32 @@ class TestMakeRenamePlan(FileSystemTestCase):
                 ('MoveFile', 'file3_1', 'file4')
             ))
 
-    def _test_make_rename_plan(self, files_repr, rules_text, expected_result):
+    def test_fail_if_renamed_files_have_errors(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'file1'),
+                ('FILE', 'file2'),
+            ),
+            '"file2"->"file1"',
+            ('RenamedFilesListHasErrorsError',))
+
+    def test_ok_if_renamed_files_have_warnings(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'file1'),
+                ('FILE', 'file2'),
+            ),
+            '"file2"->"file  2"',
+            (
+                ('MoveFile', 'file2', 'file  2'),
+            ))
+
+    def _test_make_rename_plan(self, files_repr, rules_text, expected_result, filter_scanned_files=None):
         with self.temp_file_structure('', files_repr):
             files = scan_files(self.resolve_test_path(''), recursive=True)
+            if filter_scanned_files is not None:
+                files = [file_ref for file_ref in files if filter_scanned_files(file_ref)]
+
             rule_set = parse_rules(rules_text)
             renamed_files = rename_files(files, rule_set, use_path=False, use_extension=False)
 

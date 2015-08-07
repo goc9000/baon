@@ -15,6 +15,7 @@ from itertools import count
 from baon.core.files.baon_paths import all_partial_paths, split_path_and_filename, extend_path
 
 from baon.core.plan.__errors__.make_rename_plan_errors import \
+    RenamedFilesListHasErrorsError, \
     CannotCreateDestinationDirInaccessibleParentError, \
     CannotCreateDestinationDirUnexpectedNonDirParentError, \
     CannotCreateDestinationDirNoReadPermissionForParentError, \
@@ -32,6 +33,9 @@ from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryI
 
 
 def make_rename_plan(base_path, renamed_files):
+    if any(renamed_fref.has_errors() for renamed_fref in renamed_files):
+        raise RenamedFilesListHasErrorsError()
+
     taken_names_by_dir = _compute_taken_names_by_dir(renamed_files)
 
     steps, created_dirs, nudges = _plan_creating_destination_dirs(base_path, renamed_files, taken_names_by_dir)
