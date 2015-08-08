@@ -40,7 +40,7 @@ def make_rename_plan(base_path, renamed_files):
 
     steps, created_dirs, nudges = _plan_creating_destination_dirs(base_path, renamed_files, taken_names_by_dir)
     steps += _plan_moving_files(base_path, renamed_files, taken_names_by_dir, created_dirs, nudges)
-    steps += _plan_deleting_source_dirs(renamed_files)
+    steps += _plan_deleting_source_dirs(renamed_files, base_path)
 
     return RenamePlan(steps)
 
@@ -70,9 +70,9 @@ def _plan_creating_destination_dirs(base_path, renamed_files, taken_names_by_dir
 
     for path in sorted(all_destination_dirs):
         parent_path, dir_name = split_path_and_filename(path)
+        real_path = os.path.join(base_path, path)
 
         if parent_path not in created_dirs:
-            real_path = os.path.join(base_path, path)
             real_parent_path = os.path.join(base_path, parent_path)
 
             if not os.path.exists(real_parent_path):
@@ -102,7 +102,7 @@ def _plan_creating_destination_dirs(base_path, renamed_files, taken_names_by_dir
 
                 actions.append(_move_file(path, new_path, base_path, created_dirs))
 
-        actions.append(CreateDirectoryAction(path))
+        actions.append(CreateDirectoryAction(real_path))
         created_dirs.add(path)
 
     return actions, created_dirs, nudges
@@ -139,7 +139,7 @@ def _move_file(from_path, to_path, base_path, created_dirs):
         if not os.access(os.path.join(base_path, parent_path), os.W_OK):
             raise CannotMoveFileNoWritePermissionForDirError(from_path, to_path, parent_path)
 
-    return MoveFileAction(from_path, to_path)
+    return MoveFileAction(os.path.join(base_path, from_path), os.path.join(base_path, to_path))
 
 
 def _plan_moving_files(base_path, renamed_files, taken_names_by_dir, created_dirs, nudges):
@@ -230,9 +230,9 @@ def _resolve_cycles(cycle_nodes, reverse_arcs, base_path, taken_names_by_dir, cr
     return actions
 
 
-def _plan_deleting_source_dirs(renamed_files):
+def _plan_deleting_source_dirs(renamed_files, base_path):
     all_source_dirs = set()
     for renamed_ref in renamed_files:
         all_source_dirs.update(all_partial_paths(renamed_ref.old_file_ref.filename)[:-1])
 
-    return [DeleteDirectoryIfEmptyAction(path) for path in reversed(sorted(all_source_dirs))]
+    return [DeleteDirectoryIfEmptyAction(os.path.join(base_path, path)) for path in reversed(sorted(all_source_dirs))]
