@@ -21,7 +21,7 @@ class CreateDirectoryActionError(RenamePlanActionError, metaclass=ABCMeta):
         super().__init__(path=path, **extra_parameters)
 
     def _get_format_string(self):
-        return "Cannot create directory '{path}' because " + self._get_reason_format_string(self)
+        return "Cannot create directory '{path}' because " + self._get_reason_format_string()
 
     @abstractmethod
     def _get_reason_format_string(self):
@@ -81,7 +81,7 @@ class DeleteDirectoryActionError(RenamePlanActionError, metaclass=ABCMeta):
         super().__init__(path=path, **extra_parameters)
 
     def _get_format_string(self):
-        return "Cannot delete directory '{path}' because " + self._get_reason_format_string(self)
+        return "Cannot delete directory '{path}' because " + self._get_reason_format_string()
 
     @abstractmethod
     def _get_reason_format_string(self):
@@ -125,7 +125,7 @@ class MoveFileActionError(RenamePlanActionError, metaclass=ABCMeta):
         super().__init__(from_path=from_path, to_path=to_path, **extra_parameters)
 
     def _get_format_string(self):
-        return "Cannot move file '{from_path}' because " + self._get_reason_format_string(self)
+        return "Cannot move file '{from_path}' because " + self._get_reason_format_string()
 
     @abstractmethod
     def _get_reason_format_string(self):

@@ -115,7 +115,7 @@ class RenamePlan(object):
         comment = None
         if 'comment' in json_repr:
             if not is_string(json_repr['comment']):
-                raise ValueError("Expected stirng for 'comment' field")
+                raise ValueError("Expected string for 'comment' field")
             comment = json_repr['comment']
 
         return RenamePlan(steps, comment)
