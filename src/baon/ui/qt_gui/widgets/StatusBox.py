@@ -10,6 +10,8 @@
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QGroupBox, QHBoxLayout, QLabel, QProgressBar
 
+from baon.core.plan.__errors__.make_rename_plan_errors import MakeRenamePlanError
+
 from baon.ui.qt_gui.BAONStatus import BAONStatus
 
 
@@ -25,6 +27,14 @@ class StatusBox(QGroupBox):
     NO_FILES_TO_RENAME_MESSAGE_TEXT = 'No files to rename.'
     RENAME_FILES_PROGRESS_TEXT = 'Renaming files'
     RENAME_FILES_ERROR_CAPTION_TEXT = 'Error renaming files'
+
+    NO_FILES_RENAMED_MESSAGE_TEXT = 'No files changed.'
+    READY_TO_RENAME_MESSAGE_TEXT = 'Ready to rename.'
+    RENAME_PROGRESS_TEXT = 'Executing rename'
+    PLANNING_RENAME_ERROR_CAPTION_TEXT = 'Error while planning rename'
+    RENAME_ERROR_CAPTION_TEXT = 'Error while executing rename'
+
+    RENAME_COMPLETE_MESSAGE_TEXT = 'Rename completed.'
 
     READY_MESSAGE_TEXT = 'Ready.'
 
@@ -51,14 +61,29 @@ class StatusBox(QGroupBox):
             self._show_progress(status.scan_status_extra, self.SCAN_FILES_PROGRESS_TEXT)
         elif status.rename_status == BAONStatus.IN_PROGRESS:
             self._show_progress(status.rename_status_extra, self.RENAME_FILES_PROGRESS_TEXT)
+        elif status.execute_status == BAONStatus.IN_PROGRESS:
+            self._show_progress(status.execute_status_extra, self.RENAME_PROGRESS_TEXT)
         elif status.scan_status == BAONStatus.ERROR:
             self._show_error(status.scan_status_extra, self.SCAN_FILES_ERROR_CAPTION_TEXT)
         elif status.rules_status == BAONStatus.ERROR:
             self._show_error(status.rules_status_extra, self.RULES_ERROR_CAPTION_TEXT)
         elif status.rename_status == BAONStatus.ERROR:
             self._show_error(status.rename_status_extra, self.RENAME_FILES_ERROR_CAPTION_TEXT)
+        elif status.execute_status == BAONStatus.ERROR:
+            if isinstance(status.execute_status_extra, MakeRenamePlanError):
+                self._show_error(status.execute_status_extra, self.PLANNING_RENAME_ERROR_CAPTION_TEXT)
+            else:
+                self._show_error(status.execute_status_extra, self.RENAME_ERROR_CAPTION_TEXT)
         elif status.scan_status == BAONStatus.NOT_AVAILABLE:
             self._show_message(self.BASE_PATH_REQUIRED_MESSAGE_TEXT)
+        elif status.rename_status == BAONStatus.NOT_AVAILABLE:
+            self._show_message(self.NO_FILES_TO_RENAME_MESSAGE_TEXT)
+        elif status.execute_status == BAONStatus.NOT_AVAILABLE:
+            self._show_message(self.NO_FILES_RENAMED_MESSAGE_TEXT)
+        elif status.execute_status == BAONStatus.WAITING_FOR_USER:
+            self._show_message(self.READY_TO_RENAME_MESSAGE_TEXT)
+        elif status.execute_status == BAONStatus.AVAILABLE:
+            self._show_message(self.RENAME_COMPLETE_MESSAGE_TEXT)
         else:
             self._show_message(self.READY_MESSAGE_TEXT)
 

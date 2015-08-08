@@ -16,6 +16,7 @@ class BAONStatus:
     PENDING = symbol('pending')
     ERROR = symbol('error')
     NOT_AVAILABLE = symbol('not_available')
+    WAITING_FOR_USER = symbol('waiting_for_user')
 
     scan_status = None
     scan_status_extra = None
@@ -23,3 +24,5 @@ class BAONStatus:
     rules_status_extra = None
     rename_status = None
     rename_status_extra = None
+    execute_status = None
+    execute_status_extra = None

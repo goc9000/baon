@@ -8,7 +8,8 @@
 
 
 from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot
-from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QGroupBox, QHBoxLayout, QSizePolicy, QVBoxLayout
+from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QGroupBox, QHBoxLayout, QSizePolicy, QVBoxLayout,\
+    QMessageBox
 
 from baon.ui.qt_gui.mixins.CenterOnScreenMixin import CenterOnScreenMixin
 from baon.ui.qt_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
@@ -31,6 +32,10 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     RULES_BOX_TEXT = 'Rename Rules'
     FILES_BOX_TEXT = 'Renamed Files'
 
+    RENAME_COMPLETE_DIALOG_CAPTION = 'Rename Complete'
+    RENAME_COMPLETE_DIALOG_TEXT =\
+        'The files have been renamed successfully. Do you wish to perform another rename operation?'
+
     DEFAULT_WINDOW_WIDTH = 800
     DEFAULT_WINDOW_HEIGHT = 600
     RULES_BOX_HEIGHT = 112
@@ -43,6 +48,10 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
 
     request_add_override = pyqtSignal(str, str)
     request_remove_override = pyqtSignal(str)
+
+    request_do_rename = pyqtSignal()
+
+    request_rescan = pyqtSignal()
 
     _base_path_panel = None
     _scan_recursive_checkbox = None
@@ -158,6 +167,7 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         self._dialog_button_box.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
         self._dialog_button_box.setCenterButtons(True)
 
+        self._dialog_button_box.accepted.connect(self.request_do_rename)
         self._dialog_button_box.rejected.connect(self.reject)
 
         return self._dialog_button_box
@@ -189,6 +199,13 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
 
         self._status_box.show_status(status)
 
+        self._dialog_button_box.button(QDialogButtonBox.Ok).setEnabled(
+            status.execute_status in [BAONStatus.WAITING_FOR_USER, BAONStatus.ERROR]
+        )
+
+        if status.execute_status == BAONStatus.AVAILABLE:
+            self._on_rename_completed()
+
     @pyqtSlot(list)
     def update_scanned_files(self, files):
         self._files_display.set_original_files(files)
@@ -196,3 +213,17 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     @pyqtSlot(list)
     def update_renamed_files(self, files):
         self._files_display.set_renamed_files(files)
+
+    def _on_rename_completed(self):
+        answer = QMessageBox.question(
+            self,
+            self.RENAME_COMPLETE_DIALOG_CAPTION,
+            self.RENAME_COMPLETE_DIALOG_TEXT,
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if answer == QMessageBox.Yes:
+            self.request_rescan.emit()
+            self._rules_editor.clear()
+        else:
+            self.reject()

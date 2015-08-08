@@ -64,6 +64,9 @@ class BAONQtApplication(QApplication):
         self._main_window.request_add_override.connect(self._core.add_override)
         self._main_window.request_remove_override.connect(self._core.remove_override)
 
+        self._main_window.request_do_rename.connect(self._core.do_rename)
+        self._main_window.request_rescan.connect(self._core.rescan)
+
         self._main_window.rejected.connect(self._core.shutdown)
 
     def _start_core(self):

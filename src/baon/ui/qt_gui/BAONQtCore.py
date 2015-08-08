@@ -18,6 +18,8 @@ from baon.core.utils.progress.ProgressInfo import ProgressInfo
 from baon.core.files.scan_files import scan_files
 from baon.core.parsing.parse_rules import parse_rules
 from baon.core.renaming.rename_files import rename_files, apply_rename_overrides
+from baon.core.plan.make_rename_plan import make_rename_plan
+from baon.core.plan.__errors__.make_rename_plan_errors import RenamedFilesListHasErrorsError
 
 
 class BAONQtCore(CancellableWorkerMixin, QObject):
@@ -36,12 +38,14 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
     _use_extension = None
     _use_path = None
     _overrides = None
+    _start_renaming = None
 
     # Intermediary data
     _scanned_files = None
     _rules = None
     _renamed_files_before_overrides = None
     _renamed_files = None
+    _execute_rename = None
 
     # Other state
     _args = None
@@ -60,6 +64,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         status.scan_status, status.scan_status_extra = self._scanned_files.extended_status()
         status.rules_status, status.rules_status_extra = self._rules.extended_status()
         status.rename_status, status.rename_status_extra = self._renamed_files_before_overrides.extended_status()
+        status.execute_status, status.execute_status_extra = self._execute_rename.extended_status()
 
         return status
 
@@ -98,6 +103,15 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._overrides.set_data({k: v for k, v in self._overrides.value().items() if k != original_path})
 
     @pyqtSlot()
+    def do_rename(self):
+        if self._execute_rename.status() == BAONStatus.WAITING_FOR_USER:
+            self._start_renaming.trigger()
+
+    @pyqtSlot()
+    def rescan(self):
+        self._scanned_files.recompute()
+
+    @pyqtSlot()
     def shutdown(self):
         self._stop_worker()
         self.has_shutdown.emit()
@@ -109,6 +123,8 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._use_extension = InputNode(self, False, debug_name='use extension')
         self._use_path = InputNode(self, False, debug_name='use path')
         self._overrides = InputNode(self, {}, debug_name='overrides')
+
+        self._start_renaming = TriggerNode(self, debug_name='start_renaming')
 
         self._scanned_files = ScannedFilesNode(self, self._base_path, self._scan_recursive)
         self._scanned_files.updated.connect(self._on_scanned_files_updated)
@@ -124,6 +140,9 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._renamed_files = RenamedFilesNode(self, self._renamed_files_before_overrides, self._overrides)
         self._renamed_files.updated.connect(self._on_renamed_files_updated)
         self._renamed_files.updated.connect(self._report_updated_status)
+
+        self._execute_rename = ExecuteRenameNode(self, self._base_path, self._renamed_files, self._start_renaming)
+        self._execute_rename.updated.connect(self._report_updated_status)
 
     @pyqtSlot()
     def _report_updated_status(self):
@@ -190,7 +209,7 @@ class DataFlowNode(QObject):
         self._status = status
 
         for input_node in self._inputs:
-            input_node.updated.connect(self._recompute)
+            input_node.updated.connect(self.recompute)
 
     def data(self):
         return self._data
@@ -207,6 +226,12 @@ class DataFlowNode(QObject):
     @pyqtSlot(object)
     def set_data(self, data):
         self._update(data=data, status=BAONStatus.ERROR if isinstance(data, Exception) else BAONStatus.AVAILABLE)
+
+    @pyqtSlot()
+    def recompute(self):
+        if not self._handle_inputs_not_ready():
+            if not self._recompute_sync():
+                self._recompute_async()
 
     def _update(self, data=None, status=None):
         if data is None:
@@ -226,12 +251,6 @@ class DataFlowNode(QObject):
 
     def _input_values(self):
         return [input_node.data() for input_node in self._inputs]
-
-    @pyqtSlot()
-    def _recompute(self):
-        if not self._handle_inputs_not_ready():
-            if not self._recompute_sync():
-                self._recompute_async()
 
     def _handle_inputs_not_ready(self):
         if any(input_node.status() in [BAONStatus.IN_PROGRESS, BAONStatus.PENDING] for input_node in self._inputs):
@@ -271,6 +290,20 @@ class DataFlowNode(QObject):
 class InputNode(DataFlowNode):
     def __init__(self, parent, data=None, status=BAONStatus.NOT_AVAILABLE, debug_name=None):
         super().__init__(parent, inputs=[], data=data, status=status, debug_name=debug_name)
+
+
+class TriggerNode(InputNode):
+    def __init__(self, parent, debug_name=None):
+        super().__init__(parent, data=False, status=BAONStatus.AVAILABLE, debug_name=debug_name)
+
+    @pyqtSlot()
+    def trigger(self):
+        self.set_data(True)
+        QMetaObject.invokeMethod(self, '_untrigger', Qt.QueuedConnection)
+
+    @pyqtSlot()
+    def _untrigger(self):
+        self._data = False
 
 
 class RulesNode(DataFlowNode):
@@ -341,4 +374,35 @@ class RenamedFilesNode(DataFlowNode):
             status=BAONStatus.AVAILABLE,
             data=apply_rename_overrides(renamed_files_before_overrides, overrides)
         )
+        return True
+
+
+class ExecuteRenameNode(DataFlowNode):
+    def __init__(self, parent, base_path_node, renamed_files_node, start_planning_node):
+        super().__init__(
+            parent,
+            inputs=[base_path_node, renamed_files_node, start_planning_node],
+            debug_name='execute_rename'
+        )
+
+    def _recompute_sync_impl(self, base_path, renamed_files, start_planning):
+        if not any(file_ref.is_changed() for file_ref in renamed_files):
+            self._update(status=BAONStatus.NOT_AVAILABLE)
+            return True
+        if any(file_ref.has_errors() for file_ref in renamed_files):
+            self.set_data(RenamedFilesListHasErrorsError())
+            return True
+
+        if not start_planning:
+            self._update(status=BAONStatus.WAITING_FOR_USER)
+            return True
+
+        return False
+
+    def _recompute_async_impl(self, check_abort, base_path, renamed_files, start_planning):
+        self._on_async_progress(ProgressInfo.make_indeterminate())
+
+        rename_plan = make_rename_plan(base_path, renamed_files)
+        rename_plan.execute(self._on_async_progress)
+
         return True
