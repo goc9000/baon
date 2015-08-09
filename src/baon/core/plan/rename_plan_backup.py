@@ -30,7 +30,9 @@ def save_rename_plan_backup(rename_plan):
     try:
         full_filename = get_rename_plan_backup_filename()
         base_dir, _ = os.path.split(full_filename)
-        os.makedirs(base_dir, exist_ok=True)
+
+        if not os.path.isdir(base_dir):
+            os.makedirs(base_dir)
 
         rename_plan.save_to_file(full_filename)
     except Exception:
