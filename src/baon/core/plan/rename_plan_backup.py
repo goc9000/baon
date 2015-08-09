@@ -12,10 +12,8 @@ import os
 
 from baon.app_metadata import APP_NAME, APP_AUTHOR
 
-from baon.core.utils.lang_utils import swallow_os_errors
-
 from baon.core.plan.__errors__.rename_plan_backup_errors import CannotSaveRenamePlanBackupError,\
-    CannotLoadRenamePlanBackupError
+    CannotLoadRenamePlanBackupError, CannotDeleteRenamePlanBackupError
 
 from baon.core.plan.RenamePlan import RenamePlan
 
@@ -47,5 +45,9 @@ def load_rename_plan_backup():
 
 
 def delete_rename_plan_backup():
-    with swallow_os_errors():
-        os.remove(get_rename_plan_backup_filename())
+    try:
+        filename = get_rename_plan_backup_filename()
+        if os.path.exists(filename):
+            os.remove(filename)
+    except Exception:
+        raise CannotDeleteRenamePlanBackupError() from None
