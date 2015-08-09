@@ -19,10 +19,18 @@ from baon.core.files.scan_files import scan_files
 from baon.core.parsing.parse_rules import parse_rules
 from baon.core.renaming.rename_files import rename_files, apply_rename_overrides
 from baon.core.plan.make_rename_plan import make_rename_plan
+from baon.core.plan.rename_plan_backup import rename_plan_backup_exists, load_rename_plan_backup,\
+    save_rename_plan_backup, delete_rename_plan_backup
 from baon.core.plan.__errors__.make_rename_plan_errors import RenamedFilesListHasErrorsError
 
 
 class BAONQtCore(CancellableWorkerMixin, QObject):
+    request_backup_decision = pyqtSignal()
+    reverted_backup = pyqtSignal(bool)
+    revert_backup_error = pyqtSignal(Exception)
+    deleted_backup = pyqtSignal()
+    delete_backup_error = pyqtSignal(Exception)
+
     prologue_finished = pyqtSignal()
 
     status_changed = pyqtSignal(BAONStatus)
@@ -70,9 +78,27 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
     @pyqtSlot()
     def start(self):
-        self.prologue_finished.emit()
+        self._run_prologue()
 
-        self._feed_initial_data()
+    @pyqtSlot()
+    def revert_backup(self):
+        try:
+            plan = load_rename_plan_backup()
+            complete_success = plan.undo_partial_execution()
+            delete_rename_plan_backup()
+            self.reverted_backup.emit(complete_success)
+            self._prologue_finished()
+        except Exception as exc:
+            self.revert_backup_error.emit(exc)
+
+    @pyqtSlot()
+    def delete_backup(self):
+        try:
+            delete_rename_plan_backup()
+            self.deleted_backup.emit()
+            self._prologue_finished()
+        except Exception as exc:
+            self.delete_backup_error.emit(exc)
 
     @pyqtSlot(str)
     def update_base_path(self, base_path):
@@ -143,6 +169,16 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
         self._execute_rename = ExecuteRenameNode(self, self._base_path, self._renamed_files, self._start_renaming)
         self._execute_rename.updated.connect(self._report_updated_status)
+
+    def _run_prologue(self):
+        if rename_plan_backup_exists():
+            self.request_backup_decision.emit()
+        else:
+            self._prologue_finished()
+
+    def _prologue_finished(self):
+        self.prologue_finished.emit()
+        self._feed_initial_data()
 
     @pyqtSlot()
     def _report_updated_status(self):
@@ -403,6 +439,12 @@ class ExecuteRenameNode(DataFlowNode):
         self._on_async_progress(ProgressInfo.make_indeterminate())
 
         rename_plan = make_rename_plan(base_path, renamed_files)
-        rename_plan.execute(self._on_async_progress)
+
+        save_rename_plan_backup(rename_plan)
+
+        try:
+            rename_plan.execute(self._on_async_progress)
+        finally:
+            delete_rename_plan_backup()
 
         return True
