@@ -57,6 +57,9 @@ class FilesDisplay(QTableView):
         self._clear_highlight_timer.setInterval(self.HIGHLIGHT_TIME_MSEC)
         self._clear_highlight_timer.timeout.connect(self._on_clear_highlight_timer_timeout)
 
+    def has_rename_warnings(self):
+        return self.model().has_rename_warnings()
+
     @pyqtSlot(list)
     def set_original_files(self, files):
         self.stop_browsing_category()

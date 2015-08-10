@@ -135,6 +135,9 @@ class FilesDisplayModel(QAbstractTableModel):
 
         return super().headerData(index, orientation, role)
 
+    def has_rename_warnings(self):
+        return any(file_ref.has_warnings() for file_ref in self._renamed_files)
+
     def categories_for_item_at(self, index):
         original_file = self._original_files[index]
         renamed_file = self._renamed_files[index] if len(self._renamed_files) > 0 else None

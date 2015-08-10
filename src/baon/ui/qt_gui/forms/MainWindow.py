@@ -32,6 +32,9 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     RULES_BOX_TEXT = 'Rename Rules'
     FILES_BOX_TEXT = 'Renamed Files'
 
+    RENAME_WARNINGS_DIALOG_CAPTION = 'Please Confirm'
+    RENAME_WARNINGS_DIALOG_TEXT = 'There are warnings for some of the files. Proceed with the rename operation anyway?'
+
     RENAME_COMPLETE_DIALOG_CAPTION = 'Rename Complete'
     RENAME_COMPLETE_DIALOG_TEXT =\
         'The files have been renamed successfully. Do you wish to perform another rename operation?'
@@ -167,7 +170,7 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         self._dialog_button_box.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
         self._dialog_button_box.setCenterButtons(True)
 
-        self._dialog_button_box.accepted.connect(self.request_do_rename)
+        self._dialog_button_box.accepted.connect(self._confirm_rename)
         self._dialog_button_box.rejected.connect(self.reject)
 
         return self._dialog_button_box
@@ -213,6 +216,21 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     @pyqtSlot(list)
     def update_renamed_files(self, files):
         self._files_display.set_renamed_files(files)
+
+    @pyqtSlot()
+    def _confirm_rename(self):
+        if self._files_display.has_rename_warnings():
+            answer = QMessageBox.question(
+                self,
+                self.RENAME_WARNINGS_DIALOG_CAPTION,
+                self.RENAME_WARNINGS_DIALOG_TEXT,
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No,
+            )
+            if answer != QMessageBox.Yes:
+                return
+
+        self.request_do_rename.emit()
 
     def _on_rename_completed(self):
         answer = QMessageBox.question(
