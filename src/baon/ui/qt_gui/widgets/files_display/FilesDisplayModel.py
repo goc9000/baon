@@ -13,6 +13,8 @@ from PyQt4.QtGui import QFileIconProvider, QFont, QStyle, QApplication
 from baon.ui.qt_gui.utils.parse_qcolor import parse_qcolor
 from baon.ui.qt_gui.utils.make_qicon_with_overlay import make_qicon_with_overlay
 
+from baon.core.files.baon_paths import all_path_components_no_empty
+
 from baon.core.renaming.RenamedFileReference import RenamedFileReference
 
 from baon.core.utils.grammar_utils import format_tally
@@ -208,7 +210,7 @@ class FilesDisplayModel(QAbstractTableModel):
         return  self.HIGHLIGHT_BACKGROUND_COLOR if index == self._highlighted_row else None
 
     def _get_original_tooltip(self, original_file, renamed_file, index):
-        return self._get_problems_tooltip(original_file)
+        return self._get_file_tooltip(original_file.filename, original_file.problems)
 
     def _get_renamed_text(self, original_file, renamed_file, index):
         if renamed_file is None:
@@ -243,9 +245,9 @@ class FilesDisplayModel(QAbstractTableModel):
 
     def _get_renamed_tooltip(self, original_file, renamed_file, index):
         if renamed_file is not None:
-            return self._get_problems_tooltip(renamed_file)
-
-        return None
+            return self._get_file_tooltip(renamed_file.filename, renamed_file.problems)
+        else:
+            return self._get_file_tooltip(original_file.filename)
 
     DATA_GETTERS = {
         (COL_INDEX_FROM, Qt.DisplayRole): _get_original_text,
@@ -286,27 +288,40 @@ class FilesDisplayModel(QAbstractTableModel):
         else:
             return None
 
-    def _get_problems_tooltip(self, file_info):
+    def _get_file_tooltip(self, filename, problems=None):
+        if problems is None:
+            problems = []
+
+        filename_html = '<tt>{0}</tt>'.format('/</tt><br><tt>'.join(
+            component.replace(' ', '&nbsp;') for component in all_path_components_no_empty(filename)
+        ))
+
+        return filename_html + ('<hr>' + self._get_problems_html(problems) if len(problems) > 0 else '')
+
+    def _get_problems_html(self, problems):
+        num_warnings = len([problem for problem in problems if isinstance(problem, Warning)])
+        num_errors = len(problems) - num_warnings
+
         title = format_tally(
-            counts=[file_info.error_count(), file_info.warning_count()],
+            counts=[num_errors, num_warnings],
             names_singular=[self.ERROR_ITEM_NAME, self.WARNING_ITEM_NAME],
             names_plural=[self.ERROR_ITEM_NAME_PLURAL, self.WARNING_ITEM_NAME_PLURAL],
             and_word=None,
             no_count_if_singleton=True,
         )
 
-        if file_info.has_errors():
+        if num_errors > 0:
             title_color = self.ERROR_FOREGROUND_COLOR
-        elif file_info.has_warnings():
+        elif num_warnings > 0:
             title_color = self.WARNING_FOREGROUND_COLOR
         else:
             return None
 
-        header_html = '<b><font color="{0}">{1}</font></b><hr>'.format(title_color.name(), title)
+        header_html = '<b><font color="{0}">{1}</font></b><br><br>'.format(title_color.name(), title)
 
         return header_html + '<br>'.join(
-            self._get_problem_html(problem, no_heading=(len(file_info.problems) == 1))
-            for problem in file_info.problems
+            self._get_problem_html(problem, no_heading=(len(problems) == 1))
+            for problem in problems
         )
 
     def _get_problem_html(self, problem, no_heading=False):
