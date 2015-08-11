@@ -210,7 +210,7 @@ class FilesDisplayModel(QAbstractTableModel):
         return self._get_foreground_for_file_info(original_file)
 
     def _get_original_background(self, original_file, renamed_file, index):
-        return  self.HIGHLIGHT_BACKGROUND_COLOR if index == self._highlighted_row else None
+        return self.HIGHLIGHT_BACKGROUND_COLOR if index == self._highlighted_row else None
 
     def _get_original_tooltip(self, original_file, renamed_file, index):
         return self._get_file_tooltip(original_file.filename, original_file.problems)

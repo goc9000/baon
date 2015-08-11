@@ -15,7 +15,7 @@ _MODES = [QIcon.Normal, QIcon.Disabled, QIcon.Active, QIcon.Selected]
 _STATES = [QIcon.On, QIcon.Off]
 
 
-def make_qicon_with_overlay(base_icon, overlay_icon, align=Qt.AlignRight|Qt.AlignBottom, relative_size=0.75):
+def make_qicon_with_overlay(base_icon, overlay_icon, align=Qt.AlignRight | Qt.AlignBottom, relative_size=0.75):
     overlay_aspect_ratio = _get_qicon_aspect_ratio(overlay_icon)
 
     new_icon = QIcon()
