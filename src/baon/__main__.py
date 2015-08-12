@@ -1,6 +1,4 @@
-#!/usr/bin/python3
-
-# baon.py
+# baon/__main__.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
