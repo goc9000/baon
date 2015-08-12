@@ -23,10 +23,22 @@ BAONArguments = namedtuple('BAONArguments', [
     'use_extension',
     'use_path',
     'overrides',
+    'ui',
 ])
 
 
-def parse_app_args():
+def parse_app_args(ui_info):
+    assert len(ui_info) > 0
+
+    known_uis = [ui.name for ui in ui_info]
+    uis_help = 'The user interface to use, from among these choices: ' + ', '.join(
+        "'{0}' ({1}{2})".format(
+            ui.name,
+            ui.description,
+            '; NOT AVAILABLE' if not ui.is_available else '',
+        ) for ui in ui_info
+    )
+
     parser = argparse.ArgumentParser(description=APP_DESCRIPTION)
     parser.add_argument('base_path', metavar='<base path>', nargs='?',
                         help='A path to the files that are to be renamed')
@@ -37,6 +49,8 @@ def parse_app_args():
     parser.add_argument('-p', '--use-path', action='store_true', help='Include full path in renaming process')
     parser.add_argument('-o', '--override', action='append', nargs='+', metavar='<from> <to>', dest='overrides',
                         help='Override the rename result for certain files')
+    parser.add_argument('-u', '--ui', choices=known_uis, metavar='<ui>', dest='ui', default=ui_info[0].name,
+                        help=uis_help)
 
     raw_args = parser.parse_args(sys.argv[1:])
 
@@ -46,7 +60,8 @@ def parse_app_args():
         scan_recursive=raw_args.scan_recursive,
         use_extension=raw_args.use_extension,
         use_path=raw_args.use_path,
-        overrides=_process_overrides_param(parser, raw_args.overrides)
+        overrides=_process_overrides_param(parser, raw_args.overrides),
+        ui=raw_args.ui,
     )
 
 
