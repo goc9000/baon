@@ -45,9 +45,6 @@ def discover_uis():
 
         all_uis.append(ui_info)
 
-    all_uis.append(UIInfo(name='fake_a', description='Fake A', is_available=False, reason_not_available='lupa', priority=5, start_function=None))
-    all_uis.append(UIInfo(name='fake_b', description='Fake B', is_available=False, reason_not_available='lupa', priority=15, start_function=None))
-
     all_uis.sort(key=lambda ui: (not ui.is_available, -ui.priority))
 
     return all_uis
