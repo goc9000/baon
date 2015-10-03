@@ -122,11 +122,11 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
 
     @pyqtSlot(str, str)
     def add_override(self, original_path, explicit_name):
-        self._overrides.set_data(dict(list(self._overrides.value().items()) + [(original_path, explicit_name)]))
+        self._overrides.set_data(dict(list(self._overrides.data().items()) + [(original_path, explicit_name)]))
 
     @pyqtSlot(str)
     def remove_override(self, original_path):
-        self._overrides.set_data({k: v for k, v in self._overrides.value().items() if k != original_path})
+        self._overrides.set_data({k: v for k, v in self._overrides.data().items() if k != original_path})
 
     @pyqtSlot()
     def do_rename(self):
