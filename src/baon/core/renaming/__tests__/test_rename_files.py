@@ -46,7 +46,7 @@ class TestRenameFiles(RenameFilesTestCase):
             rules_text='..->paras',
             expected_result=(
                 ('DIR', '(dir1)'),
-                ('DIR', '(dir2).d'),
+                ('DIR', '(dir2.d)'),  # Directories always include the extension
                 ('FILE', '(file1).txt'),
                 ('FILE', '(file2).txt'),
                 ('FILE', '(file3)'),

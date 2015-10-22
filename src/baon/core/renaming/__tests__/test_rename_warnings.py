@@ -83,12 +83,32 @@ class TestRenameWarnings(RenameFilesTestCase):
                 ('FILE', 'dir1/dir2/file1'),
                 ('FILE', 'dir1/dir2/file2.txt'),
                 ('FILE', 'dir1/dir2/file3.txt'),
+                ('FILE', 'dir1/dir2/file4.txt'),
             ),
-            rules_text='@"file1"->"fi le1";@"file2.txt"->"file2. txt";"file3.txt"->"file3.tx t"',
+            rules_text='@"file1"->"fi le1";@"2.txt"->"2. txt";@"3.txt"->"3.tx t";@"4.txt"->"4.txt "',
             expected_result=(
                 ('FILE', 'dir1/dir2/fi le1'),
                 ('FILE', 'dir1/dir2/file2. txt', ('ExtensionContainsSpacesWarning',)),
                 ('FILE', 'dir1/dir2/file3.tx t', ('ExtensionContainsSpacesWarning',)),
+                ('FILE', 'dir1/dir2/file4.txt ', ('ExtensionContainsSpacesWarning',)),
+            ),
+            use_extension=True,
+        )
+
+    def test_warning_spaces_in_extension_different_rules_for_dirs(self):
+        self._test_rename_files(
+            input_description=(
+                ('DIR', 'dir1/dir2/dir1'),
+                ('DIR', 'dir1/dir2/dir2.old'),
+                ('DIR', 'dir1/dir2/dir3.old'),
+                ('DIR', 'dir1/dir2/dir4.old'),
+            ),
+            rules_text='"dir1"->"new dir";"dir2.old"->"01. title";"dir3.old"->"02.b. a b";"dir4.old"->"03. dir "',
+            expected_result=(
+                ('DIR', 'dir1/dir2/new dir'),
+                ('DIR', 'dir1/dir2/01. title'),
+                ('DIR', 'dir1/dir2/02.b. a b'),
+                ('DIR', 'dir1/dir2/03. dir ', ('BasenameEndsWithSpaceWarning',)),
             ),
             use_extension=True,
         )

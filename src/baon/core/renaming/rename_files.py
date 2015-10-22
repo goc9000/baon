@@ -77,7 +77,7 @@ def _rename_file(file_ref, rule_set, use_path=False, use_extension=False):
             full_filename,
             rule_set,
             use_path=use_path,
-            use_extension=use_extension,
+            use_extension=(use_extension or file_ref.is_dir),
         )
     except Exception as e:
         problems.append(e)
@@ -177,7 +177,7 @@ def _check_for_intrinsic_warnings(renamed_fref):
         if '  ' in component:
             problems.append(PathComponentContainsDoubleSpacesWarning(component=component))
 
-    basename, extension = os.path.splitext(filename)
+    basename, extension = os.path.splitext(filename) if not renamed_fref.is_dir else (filename, '')
 
     if basename.startswith(' '):
         problems.append(FilenameStartsWithSpaceWarning())
