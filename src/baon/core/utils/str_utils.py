@@ -9,3 +9,10 @@
 
 def is_quoted_string(s):
     return (len(s) >= 2) and (s[0] == s[-1]) and (s[0] in ['"', "'"])
+
+
+def remove_prefix(s, prefix):
+    if s.startswith(prefix):
+        return s[len(prefix):]
+    else:
+        return s

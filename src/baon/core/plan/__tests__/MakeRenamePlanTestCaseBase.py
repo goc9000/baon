@@ -7,8 +7,6 @@
 # Licensed under the GPL-3
 
 
-import os
-
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
 from baon.core.parsing.parse_rules import parse_rules
 from baon.core.files.scan_files import scan_files
@@ -18,16 +16,14 @@ from baon.core.plan.__errors__.make_rename_plan_errors import MakeRenamePlanErro
 
 from baon.core.plan.make_rename_plan import make_rename_plan
 
-from baon.core.utils.lang_utils import is_arrayish, is_string
+from baon.core.utils.lang_utils import is_arrayish, is_dictish, is_string
+from baon.core.utils.str_utils import remove_prefix
 
 
 class MakeRenamePlanTestCaseBase(FileSystemTestCase):
 
     def _test_make_rename_plan(self, files_repr, rules_text, expected_result, filter_scanned_files=None):
         base_path = self.resolve_test_path('')
-
-        if len(expected_result) > 0 and is_arrayish(expected_result[0]):
-            expected_result = _apply_base_path_to_expected_result(expected_result, base_path)
 
         with self.temp_file_structure('', files_repr):
             files = scan_files(base_path, recursive=True)
@@ -43,17 +39,24 @@ class MakeRenamePlanTestCaseBase(FileSystemTestCase):
             except MakeRenamePlanError as e:
                 result = e.test_repr()
 
+            result = _relativize_result_paths(result, base_path)
+
             self.assertEquals(
                 result,
                 expected_result,
             )
 
 
-def _apply_base_path_to_expected_result(expected_result, base_path):
-    return tuple(_apply_base_path_to_action_repr(action_repr, base_path) for action_repr in expected_result)
+def _relativize_result_paths(result, base_path):
 
+    def recurse(item):
+        if is_string(item):
+            return remove_prefix(item, base_path)
+        elif is_arrayish(item):
+            return tuple(recurse(subitem) for subitem in item)
+        elif is_dictish(item):
+            return {key: recurse(value) for key, value in item.items()}
+        else:
+            return item
 
-def _apply_base_path_to_action_repr(action_repr, base_path):
-    return (action_repr[0],) + tuple(
-        os.path.join(base_path, value) if is_string(value) else value for value in action_repr[1:]
-    )
+    return recurse(result)
