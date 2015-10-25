@@ -7,6 +7,7 @@
 # Licensed under the GPL-3
 
 
+import os
 import itertools
 
 from baon.core.files.baon_paths import all_path_components
@@ -19,9 +20,11 @@ class FileReference(object):
     is_link = None
     problems = None
     
-    def __init__(self, full_path, filename, is_dir, is_link=False, problems=None):
-        self.full_path = full_path
-        self.filename = filename
+    def __init__(self, path, is_dir, is_link=False, problems=None):
+        # TODO: remove this when we switch to a full BAONPath field
+        self.full_path = os.path.join(path.base_path) if not path.is_virtual() else path.path_text()
+        self.filename = path.path_text()
+
         self.is_dir = is_dir
         self.is_link = is_link
         self.problems = list() if problems is None else problems

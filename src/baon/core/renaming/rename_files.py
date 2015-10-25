@@ -15,6 +15,7 @@ from collections import defaultdict
 from baon.core.utils.progress.ProgressTracker import ProgressTracker
 from baon.core.utils.lang_utils import is_callable
 
+from baon.core.files.BAONPath import BAONPath
 from baon.core.files.baon_paths import all_path_components, all_partial_paths, extend_path, split_path_and_filename
 
 from baon.core.renaming.__errors__.rename_files_errors import UnprintableCharacterInFilenameError, EmptyFilenameError,\
@@ -82,7 +83,9 @@ def _rename_file(file_ref, rule_set, use_path=False, use_extension=False):
     except Exception as e:
         problems.append(e)
 
-    return RenamedFileReference(file_ref, full_filename, problems=problems)
+    base_path = file_ref.full_path[:-(len(file_ref.filename) + 1)]
+
+    return RenamedFileReference(file_ref, BAONPath.from_path_text(base_path, full_filename), problems=problems)
 
 
 def _get_renamed_filename(full_filename, rule_set, use_path, use_extension):
@@ -110,7 +113,13 @@ def _maybe_apply_override(renamed_ref, overrides):
     new_filename = overrides.get(renamed_ref.old_file_ref.filename)
 
     if new_filename is not None:
-        return RenamedFileReference(renamed_ref.old_file_ref, new_filename, is_override=True)
+        base_path = renamed_ref.full_path[:-(len(renamed_ref.filename) + 1)]
+
+        return RenamedFileReference(
+            renamed_ref.old_file_ref,
+            BAONPath.from_path_text(base_path, new_filename),
+            is_override=True
+        )
     else:
         return renamed_ref
 

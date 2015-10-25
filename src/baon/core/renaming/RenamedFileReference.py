@@ -14,14 +14,9 @@ class RenamedFileReference(FileReference):
     old_file_ref = None
     is_override = False
     
-    def __init__(self, old_file_ref, new_filename, problems=None, is_override=False):
-        path_length = len(old_file_ref.full_path) - len(old_file_ref.filename)
-        new_full_path = old_file_ref.full_path[:path_length] + new_filename
-
-        FileReference.__init__(
-            self,
-            new_full_path,
-            new_filename,
+    def __init__(self, old_file_ref, new_path, problems=None, is_override=False):
+        super().__init__(
+            new_path,
             old_file_ref.is_dir,
             old_file_ref.is_link,
             problems,
@@ -34,7 +29,7 @@ class RenamedFileReference(FileReference):
         return self.filename != self.old_file_ref.filename
 
     def test_repr(self):
-        result = FileReference.test_repr(self)
+        result = super().test_repr()
 
         if self.is_override:
             result += 'OVERRIDE',

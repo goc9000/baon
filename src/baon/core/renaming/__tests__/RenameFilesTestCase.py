@@ -11,6 +11,7 @@ import os
 
 from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
+from baon.core.files.BAONPath import BAONPath
 from baon.core.files.FileReference import FileReference
 from baon.core.files.__errors__.file_reference_errors import SyntheticFileError, \
     SyntheticFileWarning
@@ -44,8 +45,7 @@ class RenameFilesTestCase(ReportsProgressTestCase):
         file_type, path = file_test_repr[:2]
 
         file_ref = FileReference(
-            os.path.join('/', 'base', 'path', path),
-            path,
+            BAONPath.from_test_repr(None, path),
             file_type == 'DIR',
         )
 

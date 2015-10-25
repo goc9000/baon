@@ -66,8 +66,7 @@ def scan_files(base_path, recursive=True, on_progress=None, check_abort=None):
         if not directory_opened:
             files.append(
                 FileReference(
-                    path.real_path(),
-                    path.real_relative_path(),
+                    path,
                     is_dir,
                     is_link,
                     problems,
