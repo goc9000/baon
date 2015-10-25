@@ -19,7 +19,7 @@ from baon.core.files.__errors__.file_reference_errors import CannotExploreDirect
 
 from baon.core.utils.lang_utils import is_callable
 
-from baon.core.files.baon_paths import extend_path
+from baon.core.files.BAONPath import BAONPath
 from baon.core.files.FileReference import FileReference
 
 
@@ -39,26 +39,25 @@ def scan_files(base_path, recursive=True, on_progress=None, check_abort=None):
     except OSError as e:
         raise CannotExploreBasePathError(path=base_path, inner_error=e) from None
 
-    scan_queue = deque([''])
+    scan_queue = deque([BAONPath(base_path)])
     files = []
 
     while len(scan_queue) > 0:
         if check_abort is not None and check_abort():
             raise ScanFilesAbortedError()
 
-        relative_path = scan_queue.popleft()
-        full_path = os.path.join(base_path, relative_path)
+        path = scan_queue.popleft()
 
         problems = []
 
-        is_link = os.path.islink(full_path)
-        is_dir = os.path.isdir(full_path)
+        is_link = os.path.islink(path.real_path())
+        is_dir = os.path.isdir(path.real_path())
 
         directory_opened = False
-        if is_dir and not is_link and (recursive or relative_path == ''):
+        if is_dir and not is_link and (recursive or path.is_root()):
             try:
-                files_in_dir = os.listdir(full_path)
-                scan_queue.extend(extend_path(relative_path, name) for name in files_in_dir)
+                files_in_dir = os.listdir(path.real_path())
+                scan_queue.extend(path.extend(name) for name in files_in_dir)
                 progress_tracker.report_more_total(len(files_in_dir))
                 directory_opened = True
             except OSError as e:
@@ -67,8 +66,8 @@ def scan_files(base_path, recursive=True, on_progress=None, check_abort=None):
         if not directory_opened:
             files.append(
                 FileReference(
-                    full_path,
-                    relative_path,
+                    path.real_path(),
+                    path.real_relative_path(),
                     is_dir,
                     is_link,
                     problems,
