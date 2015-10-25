@@ -15,6 +15,8 @@ from baon.ui.qt_gui.BAONStatus import BAONStatus
 
 from baon.core.utils.progress.ProgressInfo import ProgressInfo
 
+from baon.core.files.BAONPath import BAONPath
+
 from baon.core.files.scan_files import scan_files
 from baon.core.parsing.parse_rules import parse_rules
 from baon.core.renaming.rename_files import rename_files, apply_rename_overrides
@@ -120,11 +122,11 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
     def update_use_extension(self, use_extension):
         self._use_extension.set_data(use_extension)
 
-    @pyqtSlot(str, str)
-    def add_override(self, original_path, explicit_name):
-        self._overrides.set_data(dict(list(self._overrides.data().items()) + [(original_path, explicit_name)]))
+    @pyqtSlot(BAONPath, BAONPath)
+    def add_override(self, original_path, new_path):
+        self._overrides.set_data(dict(list(self._overrides.data().items()) + [(original_path, new_path)]))
 
-    @pyqtSlot(str)
+    @pyqtSlot(BAONPath)
     def remove_override(self, original_path):
         self._overrides.set_data({k: v for k, v in self._overrides.data().items() if k != original_path})
 

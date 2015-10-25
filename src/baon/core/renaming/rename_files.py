@@ -108,14 +108,10 @@ def _get_renamed_filename(full_filename, rule_set, use_path, use_extension):
 
 
 def _maybe_apply_override(renamed_ref, overrides):
-    new_filename = overrides.get(renamed_ref.old_file_ref.filename)
+    new_path = overrides.get(renamed_ref.old_file_ref.path)
 
-    if new_filename is not None:
-        return RenamedFileReference(
-            renamed_ref.old_file_ref,
-            renamed_ref.old_file_ref.path.replace_path_text(new_filename),
-            is_override=True
-        )
+    if new_path is not None:
+        return RenamedFileReference(renamed_ref.old_file_ref, new_path, is_override=True)
     else:
         return renamed_ref
 

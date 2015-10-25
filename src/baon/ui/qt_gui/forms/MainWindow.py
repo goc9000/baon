@@ -23,6 +23,9 @@ from baon.ui.qt_gui.widgets.RulesEditor import RulesEditor
 from baon.ui.qt_gui.widgets.StatusBox import StatusBox
 
 
+from baon.core.files.BAONPath import BAONPath
+
+
 class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     WINDOW_TITLE_TEXT = 'BAON'
     OPTIONS_BOX_TEXT = 'Options'
@@ -49,8 +52,8 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     use_path_changed = pyqtSignal(bool)
     use_extension_changed = pyqtSignal(bool)
 
-    request_add_override = pyqtSignal(str, str)
-    request_remove_override = pyqtSignal(str)
+    request_add_override = pyqtSignal(BAONPath, BAONPath)
+    request_remove_override = pyqtSignal(BAONPath)
 
     request_do_rename = pyqtSignal()
 

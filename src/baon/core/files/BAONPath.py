@@ -28,6 +28,9 @@ class BAONPath(object):
         self.assert_compatible_with(other)
         return self.components == other.components
 
+    def __hash__(self):
+        return self.path_text().__hash__()
+
     def is_root(self):
         return len(self.components) == 0
 

@@ -13,7 +13,7 @@ from PyQt4.QtGui import QFileIconProvider, QFont, QStyle, QApplication
 from baon.ui.qt_gui.utils.parse_qcolor import parse_qcolor
 from baon.ui.qt_gui.utils.make_qicon_with_overlay import make_qicon_with_overlay
 
-from baon.core.files.baon_paths import all_path_components_no_empty
+from baon.core.files.BAONPath import BAONPath
 
 from baon.core.renaming.RenamedFileReference import RenamedFileReference
 
@@ -39,8 +39,8 @@ class FilesDisplayModel(QAbstractTableModel):
 
     counts_changed = pyqtSignal(dict)
 
-    request_add_override = pyqtSignal(str, str)
-    request_remove_override = pyqtSignal(str)
+    request_add_override = pyqtSignal(BAONPath, BAONPath)
+    request_remove_override = pyqtSignal(BAONPath)
 
     _original_files = None
     _renamed_files = None
@@ -109,10 +109,10 @@ class FilesDisplayModel(QAbstractTableModel):
         if role != Qt.EditRole:
             return super().setData(index, value, role)
 
-        original_path = self._original_files[index.row()].filename
+        original_path = self._original_files[index.row()].path
 
         if value != '':
-            self.request_add_override.emit(original_path, value)
+            self.request_add_override.emit(original_path, original_path.replace_path_text(value))
         else:
             self.request_remove_override.emit(original_path)
 
@@ -200,7 +200,7 @@ class FilesDisplayModel(QAbstractTableModel):
         return None
 
     def _get_original_text(self, original_file, renamed_file, index):
-        return original_file.filename
+        return original_file.path.path_text()
 
     def _get_original_icon(self, original_file, renamed_file, index):
         icon = QFileIconProvider().icon(QFileInfo(original_file.path.real_path()))
@@ -213,13 +213,13 @@ class FilesDisplayModel(QAbstractTableModel):
         return self.HIGHLIGHT_BACKGROUND_COLOR if index == self._highlighted_row else None
 
     def _get_original_tooltip(self, original_file, renamed_file, index):
-        return self._get_file_tooltip(original_file.filename, original_file.problems)
+        return self._get_file_tooltip(original_file.path, original_file.problems)
 
     def _get_renamed_text(self, original_file, renamed_file, index):
         if renamed_file is None:
-            return original_file.filename
+            return original_file.path.path_text()
 
-        return renamed_file.filename
+        return renamed_file.path.path_text()
 
     def _get_renamed_icon(self, original_file, renamed_file, index):
         icon = QFileIconProvider().icon(QFileInfo(original_file.path.real_path()))
@@ -248,9 +248,9 @@ class FilesDisplayModel(QAbstractTableModel):
 
     def _get_renamed_tooltip(self, original_file, renamed_file, index):
         if renamed_file is not None:
-            return self._get_file_tooltip(renamed_file.filename, renamed_file.problems)
+            return self._get_file_tooltip(renamed_file.path, renamed_file.problems)
         else:
-            return self._get_file_tooltip(original_file.filename)
+            return self._get_file_tooltip(original_file.path)
 
     DATA_GETTERS = {
         (COL_INDEX_FROM, Qt.DisplayRole): _get_original_text,
@@ -291,12 +291,12 @@ class FilesDisplayModel(QAbstractTableModel):
         else:
             return None
 
-    def _get_file_tooltip(self, filename, problems=None):
+    def _get_file_tooltip(self, path, problems=None):
         if problems is None:
             problems = []
 
         filename_html = '<tt>{0}</tt>'.format('/</tt><br><tt>'.join(
-            component.replace(' ', '&nbsp;') for component in all_path_components_no_empty(filename)
+            component.replace(' ', '&nbsp;') for component in path.components
         ))
 
         return filename_html + ('<hr>' + self._get_problems_html(problems) if len(problems) > 0 else '')

@@ -7,9 +7,8 @@
 # Licensed under the GPL-3
 
 
-import os
-
 from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
+from baon.core.utils.baon_utils import convert_raw_overrides
 
 from baon.core.files.BAONPath import BAONPath
 from baon.core.files.FileReference import FileReference
@@ -31,7 +30,7 @@ class RenameFilesTestCase(ReportsProgressTestCase):
         renamed_files = rename_files(files, rule_set, **rename_params)
 
         if 'overrides' in options:
-            renamed_files = apply_rename_overrides(renamed_files, options['overrides'])
+            renamed_files = apply_rename_overrides(renamed_files, convert_raw_overrides(options['overrides'], None))
 
         self.assertEquals(
             tuple(f.test_repr() for f in renamed_files),

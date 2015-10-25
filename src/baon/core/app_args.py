@@ -13,6 +13,7 @@ import argparse
 from collections import namedtuple
 
 from baon.core.utils.lang_utils import chunked
+from baon.core.utils.baon_utils import convert_raw_overrides
 from baon.app_metadata import APP_DESCRIPTION
 
 
@@ -60,12 +61,12 @@ def parse_app_args(ui_info):
         scan_recursive=raw_args.scan_recursive,
         use_extension=raw_args.use_extension,
         use_path=raw_args.use_path,
-        overrides=_process_overrides_param(parser, raw_args.overrides),
+        overrides=_process_overrides_param(parser, raw_args.overrides, raw_args.base_path),
         ui=raw_args.ui,
     )
 
 
-def _process_overrides_param(parser, raw_value):
+def _process_overrides_param(parser, raw_value, base_path):
     result = {}
 
     if raw_value is None:
@@ -80,4 +81,4 @@ def _process_overrides_param(parser, raw_value):
             else:
                 result[filename_from] = filename_to
 
-    return result
+    return convert_raw_overrides(result, base_path)

@@ -12,6 +12,8 @@ from PyQt4.QtGui import QAbstractItemView, QHeaderView, QTableView
 
 from baon.ui.qt_gui.widgets.files_display.FilesDisplayModel import FilesDisplayModel
 
+from baon.core.files.BAONPath import BAONPath
+
 
 class FilesDisplay(QTableView):
     DEFAULT_ROW_HEIGHT = 20
@@ -24,8 +26,8 @@ class FilesDisplay(QTableView):
     has_next_in_category_changed = pyqtSignal(bool)
     has_prev_in_category_changed = pyqtSignal(bool)
 
-    request_add_override = pyqtSignal(str, str)
-    request_remove_override = pyqtSignal(str)
+    request_add_override = pyqtSignal(BAONPath, BAONPath)
+    request_remove_override = pyqtSignal(BAONPath)
 
     _is_browsing_category = False
     _indexes_in_category = None

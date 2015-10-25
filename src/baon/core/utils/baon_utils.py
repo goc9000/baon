@@ -9,6 +9,7 @@
 
 import string
 
+from baon.core.files.BAONPath import BAONPath
 from baon.core.utils.str_utils import is_quoted_string
 from baon.core.parsing.__errors__.rule_parse_errors import StringLiteralNotQuotedProperlyError
 
@@ -66,3 +67,12 @@ def decode_baon_string_literal(literal):
     output_parts.append(literal[pos:])
 
     return ''.join(output_parts)
+
+
+def convert_raw_overrides(raw_overrides, base_path):
+    """Converts a dict of str->str to a dict of BAONPath->BAONPath"""
+
+    return {
+        BAONPath.from_path_text(base_path, path_from): BAONPath.from_path_text(base_path, path_to)
+        for path_from, path_to in raw_overrides.items()
+    }
