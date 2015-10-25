@@ -45,6 +45,9 @@ class BAONPath(object):
     def path_text(self):
         return os.path.sep.join(self.components)
 
+    def test_repr(self):
+        return '/'.join(self.components)
+
     def extend(self, component):
         return BAONPath(self.base_path, self.components + [component])
 

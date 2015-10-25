@@ -7,10 +7,7 @@
 # Licensed under the GPL-3
 
 
-import os
 import itertools
-
-from baon.core.files.baon_paths import all_path_components
 
 
 class FileReference(object):
@@ -61,7 +58,7 @@ class FileReference(object):
         if self.is_link:
             type_str = 'LINK:' + type_str
 
-        repr_tuple = type_str, self.filename
+        repr_tuple = type_str, self.path.test_repr()
 
         if len(self.problems) > 0:
             repr_tuple += tuple(problem.__class__.__name__ for problem in self.problems),
@@ -70,8 +67,8 @@ class FileReference(object):
 
     @staticmethod
     def compare(ref_a, ref_b):
-        a_components = all_path_components(ref_a.filename)
-        b_components = all_path_components(ref_b.filename)
+        a_components = ref_a.path.components
+        b_components = ref_b.path.components
 
         for i in itertools.count():
             a_head = a_components[i] if i < len(a_components) else None
