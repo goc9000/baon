@@ -203,7 +203,7 @@ class FilesDisplayModel(QAbstractTableModel):
         return original_file.filename
 
     def _get_original_icon(self, original_file, renamed_file, index):
-        icon = QFileIconProvider().icon(QFileInfo(original_file.full_path))
+        icon = QFileIconProvider().icon(QFileInfo(original_file.path.real_path()))
         return self._add_icon_overlay_for_problems(icon, original_file)
 
     def _get_original_foreground(self, original_file, renamed_file, index):
@@ -222,7 +222,7 @@ class FilesDisplayModel(QAbstractTableModel):
         return renamed_file.filename
 
     def _get_renamed_icon(self, original_file, renamed_file, index):
-        icon = QFileIconProvider().icon(QFileInfo(original_file.full_path))
+        icon = QFileIconProvider().icon(QFileInfo(original_file.path.real_path()))
         if renamed_file is not None:
             return self._add_icon_overlay_for_problems(icon, renamed_file)
 

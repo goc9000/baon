@@ -83,9 +83,7 @@ def _rename_file(file_ref, rule_set, use_path=False, use_extension=False):
     except Exception as e:
         problems.append(e)
 
-    base_path = file_ref.full_path[:-(len(file_ref.filename) + 1)]
-
-    return RenamedFileReference(file_ref, BAONPath.from_path_text(base_path, full_filename), problems=problems)
+    return RenamedFileReference(file_ref, file_ref.path.replace_path_text(full_filename), problems=problems)
 
 
 def _get_renamed_filename(full_filename, rule_set, use_path, use_extension):
@@ -113,11 +111,9 @@ def _maybe_apply_override(renamed_ref, overrides):
     new_filename = overrides.get(renamed_ref.old_file_ref.filename)
 
     if new_filename is not None:
-        base_path = renamed_ref.full_path[:-(len(renamed_ref.filename) + 1)]
-
         return RenamedFileReference(
             renamed_ref.old_file_ref,
-            BAONPath.from_path_text(base_path, new_filename),
+            renamed_ref.old_file_ref.path.replace_path_text(new_filename),
             is_override=True
         )
     else:

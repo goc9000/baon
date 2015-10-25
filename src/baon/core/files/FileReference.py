@@ -14,20 +14,23 @@ from baon.core.files.baon_paths import all_path_components
 
 
 class FileReference(object):
-    full_path = None
-    filename = None
+    path = None
     is_dir = None
     is_link = None
     problems = None
     
     def __init__(self, path, is_dir, is_link=False, problems=None):
-        # TODO: remove this when we switch to a full BAONPath field
-        self.full_path = os.path.join(path.base_path) if not path.is_virtual() else path.path_text()
-        self.filename = path.path_text()
-
+        self.path = path
         self.is_dir = is_dir
         self.is_link = is_link
         self.problems = list() if problems is None else problems
+
+    def __getattr__(self, item):
+        # TODO: remove this hack once all references to .filename are eliminated
+        if item == 'filename':
+            return self.path.path_text()
+        else:
+            return super().__getattribute__(item)
 
     def __lt__(self, other):
         return self.compare(self, other) < 0

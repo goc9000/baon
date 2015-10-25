@@ -48,6 +48,9 @@ class BAONPath(object):
     def extend(self, component):
         return BAONPath(self.base_path, self.components + [component])
 
+    def replace_path_text(self, path_text):
+        return BAONPath.from_path_text(self.base_path, path_text)
+
     @staticmethod
     def from_path_text(base_path, path_text):
         return BAONPath(base_path, path_text.split(os.path.sep))
