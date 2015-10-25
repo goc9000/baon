@@ -15,6 +15,8 @@ class RenamedFileReference(FileReference):
     is_override = False
     
     def __init__(self, old_file_ref, new_path, problems=None, is_override=False):
+        old_file_ref.path.assert_compatible_with(new_path)
+
         super().__init__(
             new_path,
             old_file_ref.is_dir,
@@ -26,7 +28,7 @@ class RenamedFileReference(FileReference):
         self.is_override = is_override
 
     def is_changed(self):
-        return self.filename != self.old_file_ref.filename
+        return self.path != self.old_file_ref.path
 
     def test_repr(self):
         result = super().test_repr()

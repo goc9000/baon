@@ -24,6 +24,10 @@ class BAONPath(object):
         self.base_path = base_path
         self.components = components or []
 
+    def __eq__(self, other):
+        self.assert_compatible_with(other)
+        return self.components == other.components
+
     def is_root(self):
         return len(self.components) == 0
 
@@ -47,6 +51,9 @@ class BAONPath(object):
 
     def test_repr(self):
         return '/'.join(self.components)
+
+    def assert_compatible_with(self, other):
+        assert self.base_path == other.base_path, 'Paths defined on different base paths are incompatible'
 
     def extend(self, component):
         return BAONPath(self.base_path, self.components + [component])
