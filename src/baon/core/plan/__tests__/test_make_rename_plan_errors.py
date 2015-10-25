@@ -21,7 +21,7 @@ class TestMakeRenamePlanErrors(MakeRenamePlanTestCaseBase):
             ),
             '"file2"->"entry/file"',
             ('CannotCreateDestinationDirFileInTheWayWillNotMoveError', {'destination_dir': 'entry'}),
-            filter_scanned_files=lambda file_ref: file_ref.filename != 'entry')
+            filter_scanned_files=lambda file_ref: file_ref.path.basename() != 'entry')
 
     def test_fail_if_renamed_files_have_errors(self):
         self._test_make_rename_plan(
