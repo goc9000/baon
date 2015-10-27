@@ -15,6 +15,8 @@ from collections import defaultdict
 from baon.core.utils.progress.ProgressTracker import ProgressTracker
 from baon.core.utils.lang_utils import is_callable
 
+from baon.core.errors.BAONError import BAONError
+
 from baon.core.files.BAONPath import BAONPath
 from baon.core.files.baon_paths import all_path_components, all_partial_paths, extend_path, split_path_and_filename
 
@@ -70,41 +72,30 @@ def apply_rename_overrides(renamed_files, overrides):
 
 
 def _rename_file(file_ref, rule_set, use_path=False, use_extension=False):
-    full_filename = file_ref.filename
-    problems = []
-
     try:
-        full_filename = _get_renamed_filename(
-            full_filename,
-            rule_set,
-            use_path=use_path,
-            use_extension=(use_extension or file_ref.is_dir),
-        )
-    except Exception as e:
-        problems.append(e)
+        if use_path:
+            input_text = file_ref.path.path_text()
+        else:
+            input_text = file_ref.path.basename()
 
-    return RenamedFileReference(file_ref, file_ref.path.replace_path_text(full_filename), problems=problems)
+        saved_extension = None
+        if not (use_extension or file_ref.is_dir):
+            input_text, saved_extension = os.path.splitext(input_text)
 
+        rename_result = rule_set.apply_on(input_text)
+        output_text = rename_result.text
 
-def _get_renamed_filename(full_filename, rule_set, use_path, use_extension):
-    input_text = full_filename
-    path = ''
-    extension = ''
+        if saved_extension is not None:
+            output_text += saved_extension
 
-    if not use_path:
-        path, input_text = split_path_and_filename(input_text)
-    if not use_extension:
-        input_text, extension = os.path.splitext(input_text)
+        if use_path:
+            renamed_path = file_ref.path.replace_path_text(output_text)
+        else:
+            renamed_path = file_ref.path.replace_basename(output_text)
 
-    rename_result = rule_set.apply_on(input_text)
-    output_text = rename_result.text
-
-    if not use_extension:
-        output_text += extension
-    if not use_path:
-        output_text = extend_path(path, output_text)
-
-    return output_text
+        return RenamedFileReference(file_ref, renamed_path)
+    except BAONError as e:
+        return RenamedFileReference(file_ref, file_ref.path, problems=[e])
 
 
 def _maybe_apply_override(renamed_ref, overrides):

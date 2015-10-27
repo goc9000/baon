@@ -65,8 +65,12 @@ class BAONPath(object):
     def extend(self, component):
         return BAONPath(self.base_path, self.components + [component])
 
-    def replace_path_text(self, path_text):
-        return BAONPath.from_path_text(self.base_path, path_text)
+    def replace_path_text(self, new_path_text):
+        return BAONPath.from_path_text(self.base_path, new_path_text)
+
+    def replace_basename(self, new_basename):
+        assert not self.is_root(), 'Basename is not defined for root path'
+        return BAONPath(self.base_path, self.components[:-1] + [new_basename])
 
     @staticmethod
     def from_path_text(base_path, path_text):
