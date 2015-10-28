@@ -149,7 +149,7 @@ class FilenameStartsWithSpaceWarning(RenameFilesWarning):
         return 'Filename starts with spaces'
 
 
-class BasenameEndsWithSpaceWarning(RenameFilesWarning):
+class FilenameEndsWithSpaceWarning(RenameFilesWarning):
     def __init__(self):
         super().__init__()
 

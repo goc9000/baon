@@ -61,7 +61,7 @@ class TestRenameWarnings(RenameFilesTestCase):
         self._test_rename_files(
             input_description=(('FILE', 'dir1/dir2/file.txt'),),
             rules_text='@("file" <<" ")',
-            expected_result=(('FILE', 'dir1/dir2/file .txt', ('BasenameEndsWithSpaceWarning',)),),
+            expected_result=(('FILE', 'dir1/dir2/file .txt', ('FilenameEndsWithSpaceWarning',)),),
         )
 
     def test_warning_double_spaces_in_filename(self):
@@ -108,7 +108,7 @@ class TestRenameWarnings(RenameFilesTestCase):
                 ('DIR', 'dir1/dir2/new dir'),
                 ('DIR', 'dir1/dir2/01. title'),
                 ('DIR', 'dir1/dir2/02.b. a b'),
-                ('DIR', 'dir1/dir2/03. dir ', ('BasenameEndsWithSpaceWarning',)),
+                ('DIR', 'dir1/dir2/03. dir ', ('FilenameEndsWithSpaceWarning',)),
             ),
             use_extension=True,
         )

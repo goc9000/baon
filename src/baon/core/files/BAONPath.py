@@ -47,6 +47,10 @@ class BAONPath(object):
         assert not self.is_root(), 'Basename is not defined for root path'
         return self.components[-1]
 
+    def parent_paths(self):
+        for i in range(1, len(self.components)):
+            yield BAONPath(self.base_path, self.components[:i])
+
     def real_path(self):
         assert not self.is_virtual(), 'Cannot materialize virtual path'
         assert self.is_sane(), 'Path fails sanity check before materialization' + repr(self.components)
