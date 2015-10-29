@@ -47,13 +47,18 @@ class BAONPath(object):
         assert not self.is_root(), 'Basename is not defined for root path'
         return self.components[-1]
 
+    def parent_path(self):
+        assert not self.is_root(), 'Parent paths are not defined for root path'
+        return BAONPath(self.base_path, self.components[:-1])
+
     def parent_paths(self):
+        assert not self.is_root(), 'Parent paths are not defined for root path'
         for i in range(1, len(self.components)):
             yield BAONPath(self.base_path, self.components[:i])
 
     def real_path(self):
         assert not self.is_virtual(), 'Cannot materialize virtual path'
-        assert self.is_sane(), 'Path fails sanity check before materialization' + repr(self.components)
+        assert self.is_sane(), 'Path fails sanity check before materialization: ' + repr(self.components)
 
         return os.path.join(self.base_path, *self.components)
 
@@ -67,13 +72,20 @@ class BAONPath(object):
         assert self.base_path == other.base_path, 'Paths defined on different base paths are incompatible'
 
     def extend(self, component):
+        assert os.path.sep not in component, 'Attempt to extend with path text instead of single component'
+
         return BAONPath(self.base_path, self.components + [component])
+
+    def extend_with_path_text(self, path_text):
+        return BAONPath(self.base_path, self.components + path_text.split(os.path.sep))
 
     def replace_path_text(self, new_path_text):
         return BAONPath.from_path_text(self.base_path, new_path_text)
 
     def replace_basename(self, new_basename):
         assert not self.is_root(), 'Basename is not defined for root path'
+        assert os.path.sep not in new_basename, 'Attempt to replace basename with path text instead of single component'
+
         return BAONPath(self.base_path, self.components[:-1] + [new_basename])
 
     @staticmethod

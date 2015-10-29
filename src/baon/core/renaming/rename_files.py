@@ -88,7 +88,7 @@ def _rename_file(file_ref, rule_set, use_path=False, use_extension=False):
         if use_path:
             renamed_path = file_ref.path.replace_path_text(output_text)
         else:
-            renamed_path = file_ref.path.replace_basename(output_text)
+            renamed_path = file_ref.path.parent_path().extend_with_path_text(output_text)
 
         return RenamedFileReference(file_ref, renamed_path)
     except BAONError as e:
@@ -132,7 +132,7 @@ def _check_for_intrinsic_errors(renamed_fref):
     if m is not None:
         problems.append(UnprintableCharacterInFilenameError(ord(m.group(0))))
 
-    path_components = renamed_fref.path.components[:-1]
+    path_components = renamed_fref.path.parent_path().components
     basename = renamed_fref.path.basename()
 
     if basename == '':
@@ -152,7 +152,7 @@ def _check_for_intrinsic_warnings(renamed_fref):
     if m is not None:
         problems.append(ProblematicCharacterInFilenameWarning(character=m.group(0)))
 
-    for component in renamed_fref.path.components[:-1]:
+    for component in renamed_fref.path.parent_path().components:
         if component.startswith(' '):
             problems.append(PathComponentStartsWithSpaceWarning(component=component))
         if component.endswith(' '):
