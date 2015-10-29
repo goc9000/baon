@@ -9,7 +9,10 @@
 
 import itertools
 
+from functools import total_ordering
 
+
+@total_ordering
 class FileReference(object):
     path = None
     is_dir = None
@@ -22,15 +25,11 @@ class FileReference(object):
         self.is_link = is_link
         self.problems = list() if problems is None else problems
 
-    def __getattr__(self, item):
-        # TODO: remove this hack once all references to .filename are eliminated
-        if item == 'filename':
-            return self.path.path_text()
-        else:
-            return super().__getattribute__(item)
-
     def __lt__(self, other):
         return self.compare(self, other) < 0
+
+    def __eq__(self, other):
+        return self.compare(self, other) == 0
 
     def has_problems(self):
         return len(self.problems) > 0

@@ -10,9 +10,7 @@
 import os
 
 from collections import defaultdict
-from itertools import count
-
-from baon.core.files.baon_paths import all_partial_paths, split_path_and_filename, extend_path
+from itertools import count, chain
 
 from baon.core.plan.__errors__.make_rename_plan_errors import \
     RenamedFilesListHasErrorsError, \
@@ -38,9 +36,9 @@ def make_rename_plan(base_path, renamed_files):
 
     taken_names_by_dir = _compute_taken_names_by_dir(renamed_files)
 
-    steps, created_dirs, nudges = _plan_creating_destination_dirs(base_path, renamed_files, taken_names_by_dir)
-    steps += _plan_moving_files(base_path, renamed_files, taken_names_by_dir, created_dirs, nudges)
-    steps += _plan_deleting_source_dirs(renamed_files, base_path)
+    steps, created_dirs, nudges = _plan_creating_destination_dirs(renamed_files, taken_names_by_dir)
+    steps += _plan_moving_files(renamed_files, taken_names_by_dir, created_dirs, nudges)
+    steps += _plan_deleting_source_dirs(renamed_files)
 
     return RenamePlan(steps)
 
@@ -49,58 +47,57 @@ def _compute_taken_names_by_dir(renamed_files):
     taken_names_by_dir = defaultdict(set)
 
     for f in renamed_files:
-        for partial_path in all_partial_paths(f.filename) + all_partial_paths(f.old_file_ref.filename):
-            dest_dir, new_entry = split_path_and_filename(partial_path)
-            taken_names_by_dir[dest_dir].add(new_entry)
+        for path in chain(f.path.parent_paths_including_self(), f.old_file_ref.path.parent_paths_including_self()):
+            taken_names_by_dir[path.parent_path()].add(path.basename())
 
     return taken_names_by_dir
 
 
-def _plan_creating_destination_dirs(base_path, renamed_files, taken_names_by_dir):
-    initial_paths = set([f.old_file_ref.filename for f in renamed_files])
-    final_paths = set([f.filename for f in renamed_files])
+def _plan_creating_destination_dirs(renamed_files, taken_names_by_dir):
+    initial_paths = set([f.old_file_ref.path for f in renamed_files])
+    final_paths = set([f.path for f in renamed_files])
 
     all_destination_dirs = set()
     for renamed_ref in renamed_files:
-        all_destination_dirs.update(all_partial_paths(renamed_ref.filename)[:-1])
+        all_destination_dirs.update(renamed_ref.path.parent_paths())
 
     actions = []
     created_dirs = set()
     nudges = dict()
 
     for path in sorted(all_destination_dirs):
-        parent_path, dir_name = split_path_and_filename(path)
-        real_path = os.path.join(base_path, path)
+        parent_path, dir_name = path.parent_path(), path.basename()
+        real_path = path.real_path()
 
         if parent_path not in created_dirs:
-            real_parent_path = os.path.join(base_path, parent_path)
+            real_parent_path = parent_path.real_path()
 
             if not os.path.exists(real_parent_path):
-                raise CannotCreateDestinationDirInaccessibleParentError(path)
+                raise CannotCreateDestinationDirInaccessibleParentError(path.path_text())
             if not os.path.isdir(real_parent_path):
-                raise CannotCreateDestinationDirUnexpectedNonDirParentError(path)
+                raise CannotCreateDestinationDirUnexpectedNonDirParentError(path.path_text())
             if not os.access(real_parent_path, os.R_OK):
-                raise CannotCreateDestinationDirNoReadPermissionForParentError(path)
+                raise CannotCreateDestinationDirNoReadPermissionForParentError(path.path_text())
             if not os.access(real_parent_path, os.X_OK):
-                raise CannotCreateDestinationDirNoTraversePermissionForParentError(path)
+                raise CannotCreateDestinationDirNoTraversePermissionForParentError(path.path_text())
 
             if os.path.exists(real_path) and os.path.isdir(real_path):
                 continue
 
             if not os.access(real_parent_path, os.W_OK):
-                raise CannotCreateDestinationDirNoWritePermissionForParentError(path)
+                raise CannotCreateDestinationDirNoWritePermissionForParentError(path.path_text())
 
             if os.path.exists(real_path) and not os.path.isdir(real_path):
                 # A file is in the way. If it is scheduled to move, we will nudge it, i.e.
                 # move it to a temporary alternate name in the same directory
                 will_move = path in initial_paths and path not in final_paths
                 if not will_move:
-                    raise CannotCreateDestinationDirFileInTheWayWillNotMoveError(path)
+                    raise CannotCreateDestinationDirFileInTheWayWillNotMoveError(path.path_text())
 
-                new_path = _nudge_file(path, base_path, taken_names_by_dir)
+                new_path = _nudge_file(path, taken_names_by_dir)
                 nudges[path] = new_path
 
-                actions.append(_move_file(path, new_path, base_path, created_dirs))
+                actions.append(_move_file(path, new_path, created_dirs))
 
         actions.append(CreateDirectoryAction(real_path))
         created_dirs.add(path)
@@ -108,14 +105,14 @@ def _plan_creating_destination_dirs(base_path, renamed_files, taken_names_by_dir
     return actions, created_dirs, nudges
 
 
-def _nudge_file(path, base_path, taken_names_by_dir):
-    parent_path, current_name = split_path_and_filename(path)
+def _nudge_file(path, taken_names_by_dir):
+    parent_path, current_name = path.parent_path(), path.basename()
 
-    taken_names = set(os.listdir(os.path.join(base_path, parent_path)))
+    taken_names = set(os.listdir(parent_path.real_path()))
     taken_names.update(taken_names_by_dir[parent_path])
 
     new_name = _coin_temporary_name(current_name, taken_names)
-    new_path = extend_path(parent_path, new_name)
+    new_path = path.replace_basename(new_name)
 
     taken_names_by_dir[parent_path].add(new_name)
 
@@ -130,23 +127,27 @@ def _coin_temporary_name(current_name, taken_names):
             return new_name
 
 
-def _move_file(from_path, to_path, base_path, created_dirs):
+def _move_file(from_path, to_path, created_dirs):
     for path in [from_path, to_path]:
-        parent_path, _ = split_path_and_filename(path)
+        parent_path = path.parent_path()
 
         if parent_path in created_dirs:
             continue
-        if not os.access(os.path.join(base_path, parent_path), os.W_OK):
-            raise CannotMoveFileNoWritePermissionForDirError(from_path, to_path, parent_path)
+        if not os.access(parent_path.real_path(), os.W_OK):
+            raise CannotMoveFileNoWritePermissionForDirError(
+                from_path.path_text(),
+                to_path.path_text(),
+                parent_path.path_text(),
+            )
 
-    return MoveFileAction(os.path.join(base_path, from_path), os.path.join(base_path, to_path))
+    return MoveFileAction(from_path.real_path(), to_path.real_path())
 
 
-def _plan_moving_files(base_path, renamed_files, taken_names_by_dir, created_dirs, nudges):
+def _plan_moving_files(renamed_files, taken_names_by_dir, created_dirs, nudges):
     direct_arcs, reverse_arcs = _create_rename_graph(renamed_files, nudges)
 
-    actions, cycle_nodes = _resolve_rename_chains(direct_arcs, reverse_arcs, base_path, created_dirs)
-    actions += _resolve_cycles(cycle_nodes, reverse_arcs, base_path, taken_names_by_dir, created_dirs)
+    actions, cycle_nodes = _resolve_rename_chains(direct_arcs, reverse_arcs, created_dirs)
+    actions += _resolve_cycles(cycle_nodes, reverse_arcs, taken_names_by_dir, created_dirs)
 
     return actions
 
@@ -163,11 +164,11 @@ def _create_rename_graph(renamed_files, nudges):
     reverse_arcs = dict()
 
     for f in renamed_files:
-        source = f.old_file_ref.filename
+        source = f.old_file_ref.path
         if source in nudges:
             source = nudges[source]
 
-        destination = f.filename
+        destination = f.path
 
         if source == destination:
             continue
@@ -176,9 +177,17 @@ def _create_rename_graph(renamed_files, nudges):
         current_source = reverse_arcs.get(destination)
 
         if current_dest is not None and current_dest != destination:
-            raise RenamedFilesListInvalidMultipleDestinationsError(source, destination, current_dest)
+            raise RenamedFilesListInvalidMultipleDestinationsError(
+                source.path_text(),
+                destination.path_text(),
+                current_dest.path_text(),
+            )
         if current_source is not None and current_source != source:
-            raise RenamedFilesListInvalidSameDestinationError(destination, source, current_source)
+            raise RenamedFilesListInvalidSameDestinationError(
+                destination.path_text(),
+                source.path_text(),
+                current_source.path_text(),
+            )
 
         direct_arcs[source] = destination
         reverse_arcs[destination] = source
@@ -186,7 +195,7 @@ def _create_rename_graph(renamed_files, nudges):
     return direct_arcs, reverse_arcs
 
 
-def _resolve_rename_chains(direct_arcs, reverse_arcs, base_path, created_dirs):
+def _resolve_rename_chains(direct_arcs, reverse_arcs, created_dirs):
     middle_nodes = set(a for a, b in direct_arcs.items() if a in reverse_arcs)
     end_nodes = set(b for a, b in direct_arcs.items() if b not in direct_arcs)
 
@@ -196,14 +205,14 @@ def _resolve_rename_chains(direct_arcs, reverse_arcs, base_path, created_dirs):
     for end_node in sorted(end_nodes):
         node = end_node
         while node in reverse_arcs:
-            actions.append(_move_file(reverse_arcs[node], node, base_path, created_dirs))
+            actions.append(_move_file(reverse_arcs[node], node, created_dirs))
             middle_nodes.discard(reverse_arcs[node])
             node = reverse_arcs[node]
 
     return actions, middle_nodes
 
 
-def _resolve_cycles(cycle_nodes, reverse_arcs, base_path, taken_names_by_dir, created_dirs):
+def _resolve_cycles(cycle_nodes, reverse_arcs, taken_names_by_dir, created_dirs):
     actions = []
 
     resolved_nodes = set()
@@ -213,26 +222,26 @@ def _resolve_cycles(cycle_nodes, reverse_arcs, base_path, taken_names_by_dir, cr
         if start_node in resolved_nodes:
             continue
 
-        temp_node = _nudge_file(start_node, base_path, taken_names_by_dir)
-        actions.append(_move_file(start_node, temp_node, base_path, created_dirs))
+        temp_node = _nudge_file(start_node, taken_names_by_dir)
+        actions.append(_move_file(start_node, temp_node, created_dirs))
 
         node = start_node
         while reverse_arcs[node] != start_node:
             parent_node = reverse_arcs[node]
             resolved_nodes.add(parent_node)
 
-            actions.append(_move_file(parent_node, node, base_path, created_dirs))
+            actions.append(_move_file(parent_node, node, created_dirs))
 
             node = parent_node
 
-        actions.append(_move_file(temp_node, node, base_path, created_dirs))
+        actions.append(_move_file(temp_node, node, created_dirs))
 
     return actions
 
 
-def _plan_deleting_source_dirs(renamed_files, base_path):
+def _plan_deleting_source_dirs(renamed_files):
     all_source_dirs = set()
     for renamed_ref in renamed_files:
-        all_source_dirs.update(all_partial_paths(renamed_ref.old_file_ref.filename)[:-1])
+        all_source_dirs.update(renamed_ref.old_file_ref.path.parent_paths())
 
-    return [DeleteDirectoryIfEmptyAction(os.path.join(base_path, path)) for path in reversed(sorted(all_source_dirs))]
+    return [DeleteDirectoryIfEmptyAction(path.real_path()) for path in reversed(sorted(all_source_dirs))]

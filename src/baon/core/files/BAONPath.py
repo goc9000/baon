@@ -10,7 +10,10 @@
 import os
 import re
 
+from functools import total_ordering
 
+
+@total_ordering
 class BAONPath(object):
     """
     Paths for scanned files in BAON have slightly different processing rules to those in os.path, enough to warrant
@@ -27,6 +30,10 @@ class BAONPath(object):
     def __eq__(self, other):
         self.assert_compatible_with(other)
         return self.components == other.components
+
+    def __lt__(self, other):
+        self.assert_compatible_with(other)
+        return self.components < other.components
 
     def __hash__(self):
         return self.path_text().__hash__()
@@ -55,6 +62,12 @@ class BAONPath(object):
         assert not self.is_root(), 'Parent paths are not defined for root path'
         for i in range(1, len(self.components)):
             yield BAONPath(self.base_path, self.components[:i])
+
+    def parent_paths_including_self(self):
+        for path in self.parent_paths():
+            yield path
+
+        yield self
 
     def real_path(self):
         assert not self.is_virtual(), 'Cannot materialize virtual path'
