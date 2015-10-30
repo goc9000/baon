@@ -17,14 +17,14 @@ from baon.core.files.__errors__.file_reference_errors import SyntheticFileError,
 
 from baon.core.renaming.rename_files import rename_files, apply_rename_overrides
 
-from baon.core.parsing.parse_rules import parse_rules
+from baon.core.rules.RuleSet import RuleSet
 
 
 class RenameFilesTestCase(ReportsProgressTestCase):
 
     def _test_rename_files(self, input_description, rules_text, expected_result, **options):
         files = [self._file_from_test_repr(file_repr) for file_repr in input_description]
-        rule_set = parse_rules(rules_text)
+        rule_set = RuleSet.from_source(rules_text)
 
         rename_params = {key: value for key, value in options.items() if key != 'overrides'}
         renamed_files = rename_files(files, rule_set, **rename_params)

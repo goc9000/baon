@@ -17,8 +17,9 @@ from baon.core.utils.progress.ProgressInfo import ProgressInfo
 
 from baon.core.files.BAONPath import BAONPath
 
+from baon.core.rules.RuleSet import RuleSet
+
 from baon.core.files.scan_files import scan_files
-from baon.core.parsing.parse_rules import parse_rules
 from baon.core.renaming.rename_files import rename_files, apply_rename_overrides
 from baon.core.plan.make_rename_plan import make_rename_plan
 from baon.core.plan.rename_plan_backup import rename_plan_backup_exists, load_rename_plan_backup,\
@@ -349,7 +350,7 @@ class RulesNode(DataFlowNode):
         super().__init__(parent, inputs=[rules_text_node], debug_name='rules')
 
     def _recompute_sync_impl(self, rules_text):
-        self.set_data(parse_rules(rules_text))
+        self.set_data(RuleSet.from_source(rules_text))
         return True
 
 

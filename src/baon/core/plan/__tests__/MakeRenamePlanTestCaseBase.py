@@ -8,9 +8,10 @@
 
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
-from baon.core.parsing.parse_rules import parse_rules
 from baon.core.files.scan_files import scan_files
 from baon.core.renaming.rename_files import rename_files
+
+from baon.core.rules.RuleSet import RuleSet
 
 from baon.core.plan.__errors__.make_rename_plan_errors import MakeRenamePlanError
 
@@ -30,7 +31,7 @@ class MakeRenamePlanTestCaseBase(FileSystemTestCase):
             if filter_scanned_files is not None:
                 files = [file_ref for file_ref in files if filter_scanned_files(file_ref)]
 
-            rule_set = parse_rules(rules_text)
+            rule_set = RuleSet.from_source(rules_text)
             renamed_files = rename_files(files, rule_set, use_path=False, use_extension=False)
 
             try:
