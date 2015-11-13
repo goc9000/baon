@@ -11,7 +11,6 @@ from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QGroupBox, QHBoxLayout, QLabel, QProgressBar
 
 from baon.core.plan.__errors__.make_rename_plan_errors import MakeRenamePlanError
-
 from baon.ui.qt_gui.BAONStatus import BAONStatus
 
 

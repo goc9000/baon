@@ -9,22 +9,17 @@
 
 from PyQt4.QtCore import Qt, QObject, QMetaObject, pyqtSlot, pyqtSignal
 
-from baon.ui.qt_gui.mixins.CancellableWorkerMixin import CancellableWorkerMixin
-
-from baon.ui.qt_gui.BAONStatus import BAONStatus
-
-from baon.core.utils.progress.ProgressInfo import ProgressInfo
-
 from baon.core.files.BAONPath import BAONPath
-
-from baon.core.rules.RuleSet import RuleSet
-
 from baon.core.files.scan_files import scan_files
-from baon.core.renaming.rename_files import rename_files, apply_rename_overrides
+from baon.core.plan.__errors__.make_rename_plan_errors import RenamedFilesListHasErrorsError
 from baon.core.plan.make_rename_plan import make_rename_plan
 from baon.core.plan.rename_plan_backup import rename_plan_backup_exists, load_rename_plan_backup,\
     save_rename_plan_backup, delete_rename_plan_backup
-from baon.core.plan.__errors__.make_rename_plan_errors import RenamedFilesListHasErrorsError
+from baon.core.renaming.rename_files import rename_files, apply_rename_overrides
+from baon.core.rules.RuleSet import RuleSet
+from baon.core.utils.progress.ProgressInfo import ProgressInfo
+from baon.ui.qt_gui.BAONStatus import BAONStatus
+from baon.ui.qt_gui.mixins.CancellableWorkerMixin import CancellableWorkerMixin
 
 
 class BAONQtCore(CancellableWorkerMixin, QObject):

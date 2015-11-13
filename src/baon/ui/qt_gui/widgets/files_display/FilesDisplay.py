@@ -10,9 +10,8 @@
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, QSize, QTimer
 from PyQt4.QtGui import QAbstractItemView, QHeaderView, QTableView
 
-from baon.ui.qt_gui.widgets.files_display.FilesDisplayModel import FilesDisplayModel
-
 from baon.core.files.BAONPath import BAONPath
+from baon.ui.qt_gui.widgets.files_display.FilesDisplayModel import FilesDisplayModel
 
 
 class FilesDisplay(QTableView):

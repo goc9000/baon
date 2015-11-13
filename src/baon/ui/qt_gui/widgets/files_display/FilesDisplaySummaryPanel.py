@@ -10,8 +10,8 @@
 from PyQt4.QtCore import pyqtSignal, pyqtSlot
 from PyQt4.QtGui import QHBoxLayout, QLabel, QWidget
 
-from baon.ui.qt_gui.utils.parse_qcolor import parse_qcolor
 from baon.ui.qt_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
+from baon.ui.qt_gui.utils.parse_qcolor import parse_qcolor
 
 
 class FilesDisplaySummaryPanel(QWidget, SetupTabStopsMixin):

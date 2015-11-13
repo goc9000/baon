@@ -11,11 +11,10 @@ from collections import defaultdict
 
 from PyQt4.QtGui import QSyntaxHighlighter
 
-from baon.ui.qt_gui.utils.mk_txt_fmt import mk_txt_fmt
-
-from baon.core.parsing.tokenize_rules import tokenize_rules
 from baon.core.parsing.SourceSpan import SourceSpan
+from baon.core.parsing.tokenize_rules import tokenize_rules
 from baon.core.utils.math_utils import clamp
+from baon.ui.qt_gui.utils.mk_txt_fmt import mk_txt_fmt
 
 
 class RulesEditorHighlighter(QSyntaxHighlighter):

@@ -13,7 +13,6 @@ from PyQt4.QtCore import Qt, QThread, QUrl, QMetaObject, pyqtSlot, pyqtSignal
 from PyQt4.QtGui import QApplication, QMessageBox, QProgressDialog, QDesktopServices
 
 from baon.core.plan.rename_plan_backup import get_rename_plan_backup_filename
-
 from baon.ui.qt_gui.BAONQtCore import BAONQtCore
 from baon.ui.qt_gui.forms.MainWindow import MainWindow
 

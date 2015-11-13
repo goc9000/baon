@@ -10,14 +10,11 @@
 from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot, QAbstractTableModel, QFileInfo, QObject
 from PyQt4.QtGui import QFileIconProvider, QFont, QStyle, QApplication
 
-from baon.ui.qt_gui.utils.parse_qcolor import parse_qcolor
-from baon.ui.qt_gui.utils.make_qicon_with_overlay import make_qicon_with_overlay
-
 from baon.core.files.BAONPath import BAONPath
-
 from baon.core.renaming.RenamedFileReference import RenamedFileReference
-
 from baon.core.utils.grammar_utils import format_tally
+from baon.ui.qt_gui.utils.make_qicon_with_overlay import make_qicon_with_overlay
+from baon.ui.qt_gui.utils.parse_qcolor import parse_qcolor
 
 
 class FilesDisplayModel(QAbstractTableModel):

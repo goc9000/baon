@@ -11,19 +11,15 @@ from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QGroupBox, QHBoxLayout, QSizePolicy, QVBoxLayout,\
     QMessageBox
 
+from baon.core.files.BAONPath import BAONPath
+from baon.ui.qt_gui.BAONStatus import BAONStatus
 from baon.ui.qt_gui.mixins.CenterOnScreenMixin import CenterOnScreenMixin
 from baon.ui.qt_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
-
-from baon.ui.qt_gui.BAONStatus import BAONStatus
-
 from baon.ui.qt_gui.widgets.BasePathPanel import BasePathPanel
-from baon.ui.qt_gui.widgets.files_display.FilesDisplay import FilesDisplay
-from baon.ui.qt_gui.widgets.files_display.FilesDisplaySummaryPanel import FilesDisplaySummaryPanel
 from baon.ui.qt_gui.widgets.RulesEditor import RulesEditor
 from baon.ui.qt_gui.widgets.StatusBox import StatusBox
-
-
-from baon.core.files.BAONPath import BAONPath
+from baon.ui.qt_gui.widgets.files_display.FilesDisplay import FilesDisplay
+from baon.ui.qt_gui.widgets.files_display.FilesDisplaySummaryPanel import FilesDisplaySummaryPanel
 
 
 class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):

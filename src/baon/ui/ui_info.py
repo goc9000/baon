@@ -8,10 +8,9 @@
 
 
 import pkgutil
+from collections import namedtuple
 
 import baon.ui
-
-from collections import namedtuple
 
 
 UIInfo = namedtuple('UIInfo', [
