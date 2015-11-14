@@ -7,11 +7,10 @@
 # Licensed under the GPL-3
 
 
-from baon.core.plan.actions.__tests__.RenamePlanActionTestCase import RenamePlanActionTestCase
+from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryIfEmptyAction
 from baon.core.plan.actions.__errors__.plan_action_errors import CannotDeleteDirDoesNotExistError,\
     CannotDeleteDirIsAFileError, CannotDeleteDirNoPermissionsError
-
-from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryIfEmptyAction
+from baon.core.plan.actions.__tests__.RenamePlanActionTestCase import RenamePlanActionTestCase
 
 
 class TestDeleteDirectoryIfEmptyAction(RenamePlanActionTestCase):

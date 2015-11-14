@@ -7,9 +7,8 @@
 # Licensed under the GPL-3
 
 
-from baon.core.utils.progress.ProgressInfo import ProgressInfo
-
 from baon.core.utils.lang_utils import is_callable
+from baon.core.utils.progress.ProgressInfo import ProgressInfo
 
 
 class ProgressTracker(object):

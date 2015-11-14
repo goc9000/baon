@@ -7,12 +7,11 @@
 # Licensed under the GPL-3
 
 
-from baon.core.plan.actions.__tests__.RenamePlanActionTestCase import RenamePlanActionTestCase
+from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
 from baon.core.plan.actions.__errors__.plan_action_errors import CannotCreateDirAlreadyExistsError, \
     CannotCreateDirFileInWayError, CannotCreateDirParentDoesNotExistError, CannotCreateDirParentNotADirectoryError,\
     CannotCreateDirNoPermissionsError
-
-from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
+from baon.core.plan.actions.__tests__.RenamePlanActionTestCase import RenamePlanActionTestCase
 
 
 class TestCreateDirectoryAction(RenamePlanActionTestCase):

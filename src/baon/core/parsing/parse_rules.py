@@ -10,32 +10,30 @@
 from ply import yacc
 from ply.yacc import NullLogger
 
-from baon.core.ast.rules.RuleSet import RuleSet
-from baon.core.ast.rules.Rule import Rule
+from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
+from baon.core.ast.actions.ApplyRuleSetAction import ApplyRuleSetAction
+from baon.core.ast.actions.DeleteAction import DeleteAction
+from baon.core.ast.actions.ReformatAction import ReformatAction
+from baon.core.ast.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
+from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
 from baon.core.ast.matches.control.AlternativesMatch import AlternativesMatch
-from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.control.RepeatMatch import RepeatMatch
-from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
-from baon.core.ast.matches.special.SearchReplaceMatch import SearchReplaceMatch
+from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
+from baon.core.ast.matches.insertion.InsertAliasMatch import InsertAliasMatch
+from baon.core.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMatch
+from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.matches.pattern.RegexMatch import RegexMatch
-from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
 from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
 from baon.core.ast.matches.positional.StartAnchorMatch import StartAnchorMatch
-from baon.core.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMatch
-from baon.core.ast.matches.insertion.InsertAliasMatch import InsertAliasMatch
-from baon.core.ast.actions.DeleteAction import DeleteAction
-from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
-from baon.core.ast.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
-from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
-from baon.core.ast.actions.ReformatAction import ReformatAction
-from baon.core.ast.actions.ApplyRuleSetAction import ApplyRuleSetAction
-
+from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
+from baon.core.ast.matches.special.SearchReplaceMatch import SearchReplaceMatch
+from baon.core.ast.rules.Rule import Rule
+from baon.core.ast.rules.RuleSet import RuleSet
+from baon.core.parsing.SourceSpan import SourceSpan
 from baon.core.parsing.__errors__.rule_parse_errors import MissingFormatSpecifierError, UnterminatedStringError, \
     UnterminatedRegexError, RuleSyntaxError
-
 from baon.core.parsing.tokenize_rules import tokenize_rules, tokens
-from baon.core.parsing.SourceSpan import SourceSpan
 
 
 # Ensure tokens is not seen as unused and removed by the IDE

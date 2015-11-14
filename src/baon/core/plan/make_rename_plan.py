@@ -8,10 +8,10 @@
 
 
 import os
-
 from collections import defaultdict
 from itertools import count, chain
 
+from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.__errors__.make_rename_plan_errors import \
     RenamedFilesListHasErrorsError, \
     CannotCreateDestinationDirInaccessibleParentError, \
@@ -23,11 +23,9 @@ from baon.core.plan.__errors__.make_rename_plan_errors import \
     RenamedFilesListInvalidMultipleDestinationsError, \
     RenamedFilesListInvalidSameDestinationError, \
     CannotMoveFileNoWritePermissionForDirError
-
-from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
-from baon.core.plan.actions.MoveFileAction import MoveFileAction
 from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryIfEmptyAction
+from baon.core.plan.actions.MoveFileAction import MoveFileAction
 
 
 def make_rename_plan(base_path, renamed_files):

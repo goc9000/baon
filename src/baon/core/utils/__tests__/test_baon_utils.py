@@ -9,9 +9,8 @@
 
 from unittest import TestCase
 
-from baon.core.utils.baon_utils import decode_baon_string_literal
-
 from baon.core.parsing.__errors__.rule_parse_errors import StringLiteralNotQuotedProperlyError
+from baon.core.utils.baon_utils import decode_baon_string_literal
 
 
 class TestBaonUtilsPy(TestCase):

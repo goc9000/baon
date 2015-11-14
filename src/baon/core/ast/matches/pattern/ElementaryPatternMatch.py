@@ -8,11 +8,9 @@
 
 
 import re
-
 from abc import abstractmethod
 
 from baon.core.ast.__errors__.rule_check_errors import ErrorInRegularExpressionError
-
 from baon.core.ast.matches.MatchWithActions import MatchWithActions
 
 

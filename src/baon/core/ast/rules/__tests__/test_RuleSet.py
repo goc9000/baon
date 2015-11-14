@@ -13,8 +13,8 @@ from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
 from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
 from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.insertion.InsertAliasMatch import InsertAliasMatch
-from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
+from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.rules.Rule import Rule
 from baon.core.ast.rules.RuleSet import RuleSet
 

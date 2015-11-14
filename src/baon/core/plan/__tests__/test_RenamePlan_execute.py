@@ -10,17 +10,14 @@
 import os
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
-from baon.core.plan.__tests__.RenamePlanTestCaseBase import RenamePlanTestCaseBase
-from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
-
-from baon.core.plan.__errors__.rename_plan_errors import RenamePlanExecuteFailedBecauseActionFailedError
-
 from baon.core.files.scan_files import scan_files
-
 from baon.core.plan.RenamePlan import RenamePlan
+from baon.core.plan.__errors__.rename_plan_errors import RenamePlanExecuteFailedBecauseActionFailedError
+from baon.core.plan.__tests__.RenamePlanTestCaseBase import RenamePlanTestCaseBase
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
-from baon.core.plan.actions.MoveFileAction import MoveFileAction
 from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryIfEmptyAction
+from baon.core.plan.actions.MoveFileAction import MoveFileAction
+from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
 
 class TestRenamePlanExecute(RenamePlanTestCaseBase, FileSystemTestCase, ReportsProgressTestCase):

@@ -10,13 +10,11 @@
 import os
 import re
 
+from baon.core.ast.ASTNode import ast_node_field
 from baon.core.ast.__errors__.rule_check_errors import UnrecognizedFormatSpecifierError, \
     WidthMustBeAtLeast1ForSpecifierError, WidthInapplicableToSpecifierError, \
     Leading0sInapplicableToSpecifierError, InvalidWidthForSpecifierError
-
 from baon.core.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
-from baon.core.ast.ASTNode import ast_node_field
-
 
 FORMAT_DICT = {
     'ws':         (r'(\s##)', '*'),

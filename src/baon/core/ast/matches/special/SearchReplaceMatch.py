@@ -10,8 +10,8 @@
 from baon.core.ast.ASTNode import ast_node_child
 from baon.core.ast.matches.Match import Match
 from baon.core.ast.matches.control.AlternativesMatch import AlternativesMatch
-from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.control.RepeatMatch import RepeatMatch
+from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
 

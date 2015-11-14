@@ -9,11 +9,9 @@
 
 import os
 
+from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
 from baon.core.plan.actions.__errors__.plan_action_errors import CannotMoveFileDoesNotExistError,\
     CannotMoveFileDestinationExistsError, CannotMoveFileNoPermissionsError, CannotMoveFileOtherError
-
-from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
-
 from baon.core.utils.lang_utils import is_arrayish
 
 

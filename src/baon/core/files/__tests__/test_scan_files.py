@@ -9,13 +9,10 @@
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_links_support, requires_unicode_support
 from baon.core.__tests__.abort_test_utils import abort_after_n_calls
-
-from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
-
 from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
     CannotExploreBasePathError, ScanFilesAbortedError
-
 from baon.core.files.scan_files import scan_files
+from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
 
 class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):

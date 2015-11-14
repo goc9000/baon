@@ -7,11 +7,10 @@
 # Licensed under the GPL-3
 
 
-from baon.core.ast.matches.MatchWithActions import MatchWithActions
 from baon.core.ast.ASTNode import ast_node_field, ast_node_child
-
 from baon.core.ast.__errors__.rule_check_errors import MinimumMatchesNotSpecifiedError, MinimumMatchesNegativeError, \
     MaximumMatchesZeroOrNegativeError, MinimumMatchesGreaterThanMaximumError
+from baon.core.ast.matches.MatchWithActions import MatchWithActions
 
 
 class RepeatMatch(MatchWithActions):

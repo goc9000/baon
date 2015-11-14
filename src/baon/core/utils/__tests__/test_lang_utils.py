@@ -7,8 +7,8 @@
 # Licensed under the GPL-3
 
 
-from unittest import TestCase
 from itertools import count
+from unittest import TestCase
 
 from baon.core.utils.lang_utils import is_string, is_arrayish, is_dictish
 

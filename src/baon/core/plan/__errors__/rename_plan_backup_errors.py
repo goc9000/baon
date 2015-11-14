@@ -7,7 +7,7 @@
 # Licensed under the GPL-3
 
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
 from baon.core.errors.BAONError import BAONError
 

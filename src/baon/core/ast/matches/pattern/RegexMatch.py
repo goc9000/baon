@@ -9,9 +9,8 @@
 
 import re
 
-from baon.core.ast.__errors__.rule_check_errors import ErrorInRegularExpressionError, InvalidRegexFlagError
-
 from baon.core.ast.ASTNode import ast_node_field
+from baon.core.ast.__errors__.rule_check_errors import ErrorInRegularExpressionError, InvalidRegexFlagError
 from baon.core.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
 
 

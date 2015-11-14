@@ -8,11 +8,10 @@
 
 
 import sys
-
 from collections import deque
-from itertools import tee, zip_longest
-from inspect import isabstract
 from contextlib import contextmanager
+from inspect import isabstract
+from itertools import tee, zip_longest
 
 
 def is_python3():

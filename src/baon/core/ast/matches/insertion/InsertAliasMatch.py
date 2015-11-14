@@ -7,8 +7,8 @@
 # Licensed under the GPL-3
 
 
-from baon.core.ast.matches.insertion.InsertionMatch import InsertionMatch
 from baon.core.ast.ASTNode import ast_node_field
+from baon.core.ast.matches.insertion.InsertionMatch import InsertionMatch
 
 
 class InsertAliasMatch(InsertionMatch):

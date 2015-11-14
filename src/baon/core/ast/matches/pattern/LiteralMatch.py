@@ -9,9 +9,8 @@
 
 import re
 
-from baon.core.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
-
 from baon.core.ast.ASTNode import ast_node_field
+from baon.core.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
 
 
 class LiteralMatch(ElementaryPatternMatch):

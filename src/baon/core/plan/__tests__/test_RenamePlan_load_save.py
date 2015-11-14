@@ -8,14 +8,11 @@
 
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
-
+from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.__errors__.rename_plan_errors import CannotSaveRenamePlanFailedWritingFileError,\
     CannotSaveRenamePlanPermissionsError, CannotLoadRenamePlanFailedReadingFileError, \
     CannotLoadRenamePlanInvalidFormatError, CannotLoadRenamePlanPermissionsError
-
 from baon.core.plan.__tests__.RenamePlanTestCaseBase import RenamePlanTestCaseBase
-
-from baon.core.plan.RenamePlan import RenamePlan
 
 
 class TestRenamePlanLoadSave(RenamePlanTestCaseBase, FileSystemTestCase):

@@ -7,16 +7,12 @@
 # Licensed under the GPL-3
 
 
-import re
 import os
-
+import re
 from collections import defaultdict
 
-from baon.core.utils.progress.ProgressTracker import ProgressTracker
-from baon.core.utils.lang_utils import is_callable
-
 from baon.core.errors.BAONError import BAONError
-
+from baon.core.renaming.RenamedFileReference import RenamedFileReference
 from baon.core.renaming.__errors__.rename_files_errors import UnprintableCharacterInFilenameError, EmptyFilenameError,\
     OnlyDotsFilenameError, EmptyPathComponentError, OnlyDotsPathComponentError, FileCollidesWithFileError,\
     FileCollidesWithDirectoryError, DirectoryCollidesWithFileError, WouldMergeImplicitlyWithOtherFoldersError,\
@@ -24,8 +20,8 @@ from baon.core.renaming.__errors__.rename_files_errors import UnprintableCharact
     PathComponentContainsDoubleSpacesWarning, FilenameStartsWithSpaceWarning, FilenameEndsWithSpaceWarning,\
     FilenameContainsDoubleSpacesWarning, ExtensionContainsSpacesWarning, RenameFilesAbortedError, \
     CannotRenameFileWithErrorsError, RenameFilesError, RenameFilesWarning
-
-from baon.core.renaming.RenamedFileReference import RenamedFileReference
+from baon.core.utils.lang_utils import is_callable
+from baon.core.utils.progress.ProgressTracker import ProgressTracker
 
 
 NON_PRINTABLE_REGEX = re.compile(r'[\u0000-\u001f]')

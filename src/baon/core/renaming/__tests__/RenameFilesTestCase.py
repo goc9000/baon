@@ -7,17 +7,14 @@
 # Licensed under the GPL-3
 
 
-from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
-from baon.core.utils.baon_utils import convert_raw_overrides
-
 from baon.core.files.BAONPath import BAONPath
 from baon.core.files.FileReference import FileReference
 from baon.core.files.__errors__.file_reference_errors import SyntheticFileError, \
     SyntheticFileWarning
-
 from baon.core.renaming.rename_files import rename_files, apply_rename_overrides
-
 from baon.core.rules.RuleSet import RuleSet
+from baon.core.utils.baon_utils import convert_raw_overrides
+from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
 
 class RenameFilesTestCase(ReportsProgressTestCase):

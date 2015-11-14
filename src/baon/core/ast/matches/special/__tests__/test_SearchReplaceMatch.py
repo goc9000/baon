@@ -7,15 +7,15 @@
 # Licensed under the GPL-3
 
 
-from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
-from baon.core.ast.actions.DeleteAction import DeleteAction
 from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
+from baon.core.ast.actions.DeleteAction import DeleteAction
 from baon.core.ast.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
 from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
+from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
 from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
-from baon.core.ast.matches.special.SearchReplaceMatch import SearchReplaceMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
+from baon.core.ast.matches.special.SearchReplaceMatch import SearchReplaceMatch
 
 
 class TestSearchReplaceMatch(MatchTestCase):

@@ -8,19 +8,15 @@
 
 
 import os
-
 from collections import deque
-
-from baon.core.utils.progress.ProgressTracker import ProgressTracker
-
-from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
-    CannotExploreBasePathError, ScanFilesAbortedError
-from baon.core.files.__errors__.file_reference_errors import CannotExploreDirectoryError
-
-from baon.core.utils.lang_utils import is_callable
 
 from baon.core.files.BAONPath import BAONPath
 from baon.core.files.FileReference import FileReference
+from baon.core.files.__errors__.file_reference_errors import CannotExploreDirectoryError
+from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
+    CannotExploreBasePathError, ScanFilesAbortedError
+from baon.core.utils.lang_utils import is_callable
+from baon.core.utils.progress.ProgressTracker import ProgressTracker
 
 
 def scan_files(base_path, recursive=True, on_progress=None, check_abort=None):

@@ -10,7 +10,6 @@
 from unittest import TestCase
 
 from baon.core.parsing.__errors__.rule_parse_errors import RuleParseError
-
 from baon.core.parsing.parse_rules import parse_rules
 
 

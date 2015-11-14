@@ -7,15 +7,14 @@
 # Licensed under the GPL-3
 
 
-import appdirs
 import os
 
-from baon.app_metadata import APP_NAME, APP_AUTHOR
+import appdirs
 
+from baon.app_metadata import APP_NAME, APP_AUTHOR
+from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.__errors__.rename_plan_backup_errors import CannotSaveRenamePlanBackupError,\
     CannotLoadRenamePlanBackupError, CannotDeleteRenamePlanBackupError
-
-from baon.core.plan.RenamePlan import RenamePlan
 
 
 def get_rename_plan_backup_filename():

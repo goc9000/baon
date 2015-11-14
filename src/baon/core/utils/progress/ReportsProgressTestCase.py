@@ -8,10 +8,9 @@
 
 
 from contextlib import contextmanager
+from unittest import TestCase
 
 from baon.core.utils.lang_utils import pairwise
-
-from unittest import TestCase
 
 
 class ReportsProgressTestCase(TestCase):

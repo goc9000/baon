@@ -8,9 +8,8 @@
 
 
 from baon.core.__tests__.abort_test_utils import abort_after_n_calls
-
-from baon.core.renaming.__tests__.RenameFilesTestCase import RenameFilesTestCase
 from baon.core.renaming.__errors__.rename_files_errors import RenameFilesAbortedError
+from baon.core.renaming.__tests__.RenameFilesTestCase import RenameFilesTestCase
 
 
 class TestRenameFiles(RenameFilesTestCase):

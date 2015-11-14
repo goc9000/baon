@@ -10,7 +10,6 @@
 from unittest import TestCase
 
 from baon.core.ast.__errors__.rule_check_errors import RuleCheckError
-
 from baon.core.rules.RuleSet import RuleSet
 
 

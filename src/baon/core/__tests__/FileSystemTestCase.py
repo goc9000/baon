@@ -7,13 +7,12 @@
 # Licensed under the GPL-3
 
 
+import os
+import stat
+import tempfile
+from contextlib import contextmanager
 from unittest import TestCase
 
-import os
-import tempfile
-import stat
-
-from contextlib import contextmanager
 from decorator import decorator
 
 from baon.core.utils.lang_utils import swallow_os_errors

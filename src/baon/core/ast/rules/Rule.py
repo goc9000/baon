@@ -7,16 +7,13 @@
 # Licensed under the GPL-3
 
 
-from baon.core.ast.__errors__.rule_application_errors import AliasDependenciesTooComplexError
-
 from baon.core.ast.ASTNode import ASTNode, ast_node_child
-
+from baon.core.ast.__errors__.rule_application_errors import AliasDependenciesTooComplexError
 from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
-
-from baon.core.rules.MatchContext import MatchContext
 from baon.core.rules.ApplyRuleResult import ApplyRuleResult
+from baon.core.rules.MatchContext import MatchContext
 
 
 MAX_ITERATIONS = 10

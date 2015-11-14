@@ -7,11 +7,10 @@
 # Licensed under the GPL-3
 
 
-from baon.core.plan.actions.__tests__.RenamePlanActionTestCase import RenamePlanActionTestCase
+from baon.core.plan.actions.MoveFileAction import MoveFileAction
 from baon.core.plan.actions.__errors__.plan_action_errors import CannotMoveFileDoesNotExistError,\
     CannotMoveFileDestinationExistsError, CannotMoveFileNoPermissionsError
-
-from baon.core.plan.actions.MoveFileAction import MoveFileAction
+from baon.core.plan.actions.__tests__.RenamePlanActionTestCase import RenamePlanActionTestCase
 
 
 class TestMoveFileAction(RenamePlanActionTestCase):

@@ -11,8 +11,8 @@ from unittest import TestCase
 
 from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
-from baon.core.plan.actions.MoveFileAction import MoveFileAction
 from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryIfEmptyAction
+from baon.core.plan.actions.MoveFileAction import MoveFileAction
 
 
 class RenamePlanTestCaseBase(TestCase):

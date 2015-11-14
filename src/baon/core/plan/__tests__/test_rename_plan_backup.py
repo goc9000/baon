@@ -10,9 +10,7 @@
 from unittest.mock import patch
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
-
 from baon.core.plan.__tests__.RenamePlanTestCaseBase import RenamePlanTestCaseBase
-
 from baon.core.plan.rename_plan_backup import rename_plan_backup_exists, save_rename_plan_backup,\
     load_rename_plan_backup, delete_rename_plan_backup
 

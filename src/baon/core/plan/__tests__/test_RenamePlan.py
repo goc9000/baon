@@ -7,9 +7,8 @@
 # Licensed under the GPL-3
 
 
-from baon.core.plan.__tests__.RenamePlanTestCaseBase import RenamePlanTestCaseBase
-
 from baon.core.plan.RenamePlan import RenamePlan
+from baon.core.plan.__tests__.RenamePlanTestCaseBase import RenamePlanTestCaseBase
 
 
 class TestRenamePlan(RenamePlanTestCaseBase):

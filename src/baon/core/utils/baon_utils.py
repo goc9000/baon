@@ -10,8 +10,8 @@
 import string
 
 from baon.core.files.BAONPath import BAONPath
-from baon.core.utils.str_utils import is_quoted_string
 from baon.core.parsing.__errors__.rule_parse_errors import StringLiteralNotQuotedProperlyError
+from baon.core.utils.str_utils import is_quoted_string
 
 
 SIMPLE_ESCAPES = {

@@ -8,7 +8,6 @@
 
 
 import re
-
 from abc import ABCMeta, abstractmethod
 
 from baon.core.utils.lang_utils import is_arrayish, iter_non_abstract_descendants

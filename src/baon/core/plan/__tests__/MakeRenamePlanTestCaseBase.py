@@ -9,14 +9,10 @@
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
 from baon.core.files.scan_files import scan_files
-from baon.core.renaming.rename_files import rename_files
-
-from baon.core.rules.RuleSet import RuleSet
-
 from baon.core.plan.__errors__.make_rename_plan_errors import MakeRenamePlanError
-
 from baon.core.plan.make_rename_plan import make_rename_plan
-
+from baon.core.renaming.rename_files import rename_files
+from baon.core.rules.RuleSet import RuleSet
 from baon.core.utils.lang_utils import is_arrayish, is_dictish, is_string
 from baon.core.utils.str_utils import remove_prefix
 

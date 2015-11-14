@@ -7,21 +7,17 @@
 # Licensed under the GPL-3
 
 
-import os
 import json
+import os
 
 from baon.core.plan.__errors__.rename_plan_errors import CannotSaveRenamePlanFailedWritingFileError,\
     CannotSaveRenamePlanPermissionsError, CannotSaveRenamePlanOtherError, CannotLoadRenamePlanFailedReadingFileError,\
     CannotLoadRenamePlanInvalidFormatError, CannotLoadRenamePlanPermissionsError, CannotLoadRenamePlanOtherError, \
     RenamePlanExecuteFailedBecauseActionFailedError, RenamePlanExecuteFailedBecauseOtherError
-
-from baon.core.plan.actions.__errors__.plan_action_errors import RenamePlanActionError
-
 from baon.core.plan.actions.RenamePlanAction import RenamePlanAction
-
-from baon.core.utils.progress.ProgressTracker import ProgressTracker
-
+from baon.core.plan.actions.__errors__.plan_action_errors import RenamePlanActionError
 from baon.core.utils.lang_utils import is_arrayish, is_dictish, is_string, swallow_os_errors, swallow_all_errors
+from baon.core.utils.progress.ProgressTracker import ProgressTracker
 
 
 class RenamePlan(object):

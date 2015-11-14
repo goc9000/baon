@@ -7,14 +7,13 @@
 # Licensed under the GPL-3
 
 
-import sys
 import argparse
-
+import sys
 from collections import namedtuple
 
-from baon.core.utils.lang_utils import chunked
-from baon.core.utils.baon_utils import convert_raw_overrides
 from baon.app_metadata import APP_DESCRIPTION
+from baon.core.utils.baon_utils import convert_raw_overrides
+from baon.core.utils.lang_utils import chunked
 
 
 BAONArguments = namedtuple('BAONArguments', [

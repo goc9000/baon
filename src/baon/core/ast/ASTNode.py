@@ -9,13 +9,11 @@
 
 import inspect
 
-from baon.core.parsing.SourceSpan import SourceSpan
-
-from baon.core.ast.__errors__.rule_check_errors import RuleCheckError
-
-from baon.core.ast.ASTNodeField import ASTNodeField
-from baon.core.ast.ASTNodeChildRef import ASTNodeChildRef
 from baon.core.ast.ASTNodeChildList import ASTNodeChildList
+from baon.core.ast.ASTNodeChildRef import ASTNodeChildRef
+from baon.core.ast.ASTNodeField import ASTNodeField
+from baon.core.ast.__errors__.rule_check_errors import RuleCheckError
+from baon.core.parsing.SourceSpan import SourceSpan
 
 
 def ast_node_field(*args, **kwargs):
