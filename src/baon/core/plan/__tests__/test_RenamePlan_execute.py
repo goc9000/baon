@@ -49,7 +49,7 @@ class TestRenamePlanExecute(RenamePlanTestCaseBase, FileSystemTestCase, ReportsP
         self.make_file('file02')
         actual_initial_structure = self._rescan_files()
 
-        with self.assertRaises(RenamePlanExecuteFailedBecauseActionFailedError) as e:
+        with self.assertRaises(RenamePlanExecuteFailedBecauseActionFailedError):
             self._make_rename_plan().execute()
 
         # Files should have been rolled back
