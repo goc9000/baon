@@ -22,9 +22,14 @@ setup(
           'baon.core.parsing.__errors__', 'baon.core.renaming', 'baon.core.renaming.__tests__',
           'baon.core.renaming.__errors__', 'baon.core.__tests__'],
     package_dir={'': 'src'},
+    requires=[
+        'appdirs',
+        'decorator',
+        'ply',
+    ],
     url='https://github.com/goc9000/baon',
     license='GPL-3',
     author='Cristian Dinu',
     author_email='goc9000@gmail.com',
-    description='Mass file renamer with ANTLR-like syntax'
+    description='Mass file renamer with ANTLR-like syntax',
 )
