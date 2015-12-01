@@ -165,7 +165,7 @@ class BAONQtCore(CancellableWorkerMixin, QObject):
         self._renamed_files.updated.connect(self._on_renamed_files_updated)
         self._renamed_files.updated.connect(self._report_updated_status)
 
-        self._execute_rename = ExecuteRenameNode(self, self._base_path, self._renamed_files, self._start_renaming)
+        self._execute_rename = ExecuteRenameNode(self, self._renamed_files, self._start_renaming)
         self._execute_rename.updated.connect(self._report_updated_status)
 
     def _run_prologue(self):
@@ -412,14 +412,14 @@ class RenamedFilesNode(DataFlowNode):
 
 
 class ExecuteRenameNode(DataFlowNode):
-    def __init__(self, parent, base_path_node, renamed_files_node, start_planning_node):
+    def __init__(self, parent, renamed_files_node, start_planning_node):
         super().__init__(
             parent,
-            inputs=[base_path_node, renamed_files_node, start_planning_node],
+            inputs=[renamed_files_node, start_planning_node],
             debug_name='execute_rename'
         )
 
-    def _recompute_sync_impl(self, base_path, renamed_files, start_planning):
+    def _recompute_sync_impl(self, renamed_files, start_planning):
         if not any(file_ref.is_changed() for file_ref in renamed_files):
             self._update(status=BAONStatus.NOT_AVAILABLE)
             return True
@@ -433,10 +433,10 @@ class ExecuteRenameNode(DataFlowNode):
 
         return False
 
-    def _recompute_async_impl(self, check_abort, base_path, renamed_files, start_planning):
+    def _recompute_async_impl(self, check_abort, renamed_files, start_planning):
         self._on_async_progress(ProgressInfo.make_indeterminate())
 
-        rename_plan = make_rename_plan(base_path, renamed_files)
+        rename_plan = make_rename_plan(renamed_files)
 
         save_rename_plan_backup(rename_plan)
 

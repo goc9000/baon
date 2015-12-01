@@ -28,7 +28,7 @@ from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryI
 from baon.core.plan.actions.MoveFileAction import MoveFileAction
 
 
-def make_rename_plan(base_path, renamed_files):
+def make_rename_plan(renamed_files):
     if any(renamed_fref.has_errors() for renamed_fref in renamed_files):
         raise RenamedFilesListHasErrorsError()
 

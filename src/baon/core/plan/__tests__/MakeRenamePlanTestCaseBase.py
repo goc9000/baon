@@ -31,7 +31,7 @@ class MakeRenamePlanTestCaseBase(FileSystemTestCase):
             renamed_files = rename_files(files, rule_set, use_path=False, use_extension=False)
 
             try:
-                plan = make_rename_plan(base_path, renamed_files)
+                plan = make_rename_plan(renamed_files)
                 result = plan.test_repr()
             except MakeRenamePlanError as e:
                 result = e.test_repr()
