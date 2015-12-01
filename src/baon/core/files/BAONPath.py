@@ -60,14 +60,16 @@ class BAONPath(object):
 
     def parent_paths(self):
         assert not self.is_root(), 'Parent paths are not defined for root path'
-        for i in range(1, len(self.components)):
-            yield BAONPath(self.base_path, self.components[:i])
 
-    def parent_paths_including_self(self):
-        for path in self.parent_paths():
+        for path in self.subpaths(exclude_self=True):
             yield path
 
-        yield self
+    def subpaths(self, exclude_self=False, exclude_root=False):
+        range_start = 1 if exclude_root else 0
+        range_end = len(self.components) + (0 if exclude_self else 1)
+
+        for i in range(range_start, range_end):
+            yield BAONPath(self.base_path, self.components[:i])
 
     def real_path(self):
         assert not self.is_virtual(), 'Cannot materialize virtual path'

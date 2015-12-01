@@ -45,7 +45,7 @@ def _compute_taken_names_by_dir(renamed_files):
     taken_names_by_dir = defaultdict(set)
 
     for f in renamed_files:
-        for path in chain(f.path.parent_paths_including_self(), f.old_file_ref.path.parent_paths_including_self()):
+        for path in chain(f.path.subpaths(exclude_root=True), f.old_file_ref.path.subpaths(exclude_root=True)):
             taken_names_by_dir[path.parent_path()].add(path.basename())
 
     return taken_names_by_dir
@@ -64,6 +64,9 @@ def _plan_creating_destination_dirs(renamed_files, taken_names_by_dir):
     nudges = dict()
 
     for path in sorted(all_destination_dirs):
+        if path.is_root():
+            continue
+
         parent_path, dir_name = path.parent_path(), path.basename()
         real_path = path.real_path()
 
@@ -242,4 +245,8 @@ def _plan_deleting_source_dirs(renamed_files):
     for renamed_ref in renamed_files:
         all_source_dirs.update(renamed_ref.old_file_ref.path.parent_paths())
 
-    return [DeleteDirectoryIfEmptyAction(path.real_path()) for path in reversed(sorted(all_source_dirs))]
+    return [
+        DeleteDirectoryIfEmptyAction(path.real_path())
+        for path in reversed(sorted(all_source_dirs))
+        if not path.is_root()
+    ]
