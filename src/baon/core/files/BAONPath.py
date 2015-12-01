@@ -110,3 +110,8 @@ class BAONPath(object):
     @staticmethod
     def from_test_repr(base_path, path_repr):
         return BAONPath(base_path, path_repr.split('/'))
+
+    @staticmethod
+    def assert_all_compatible(*paths):
+        for path in paths:
+            paths[0].assert_compatible_with(path)

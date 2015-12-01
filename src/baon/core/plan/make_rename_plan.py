@@ -11,6 +11,7 @@ import os
 from collections import defaultdict
 from itertools import count, chain
 
+from baon.core.files.BAONPath import BAONPath
 from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.__errors__.make_rename_plan_errors import \
     RenamedFilesListHasErrorsError, \
@@ -29,8 +30,7 @@ from baon.core.plan.actions.MoveFileAction import MoveFileAction
 
 
 def make_rename_plan(renamed_files):
-    if any(renamed_fref.has_errors() for renamed_fref in renamed_files):
-        raise RenamedFilesListHasErrorsError()
+    _check_renamed_files_list(renamed_files)
 
     taken_names_by_dir = _compute_taken_names_by_dir(renamed_files)
 
@@ -39,6 +39,13 @@ def make_rename_plan(renamed_files):
     steps += _plan_deleting_source_dirs(renamed_files)
 
     return RenamePlan(steps)
+
+
+def _check_renamed_files_list(renamed_files):
+    BAONPath.assert_all_compatible(*(renamed_fref.path for renamed_fref in renamed_files))
+
+    if any(renamed_fref.has_errors() for renamed_fref in renamed_files):
+        raise RenamedFilesListHasErrorsError()
 
 
 def _compute_taken_names_by_dir(renamed_files):
