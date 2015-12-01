@@ -21,6 +21,30 @@ class RenamedFilesListHasErrorsError(MakeRenamePlanError):
         return "Some of the files to be renamed have errors"
 
 
+class CannotRenameBasePathNotFoundError(MakeRenamePlanError):
+    def __init__(self, base_path):
+        super().__init__(base_path=base_path)
+
+    def _get_format_string(self):
+        return "The base directory '{base_path}' does not exist"
+
+
+class CannotRenameBasePathNotADirError(MakeRenamePlanError):
+    def __init__(self, base_path):
+        super().__init__(base_path=base_path)
+
+    def _get_format_string(self):
+        return "The base path '{base_path}' is a file, not a directory"
+
+
+class CannotRenameNoPermissionsForBasePathError(MakeRenamePlanError):
+    def __init__(self, base_path):
+        super().__init__(base_path=base_path)
+
+    def _get_format_string(self):
+        return "BAON requires read and write permissions on the base path '{base_path}'"
+
+
 class CannotCreateDestinationDirError(MakeRenamePlanError, metaclass=ABCMeta):
     def __init__(self, destination_dir, **extra_parameters):
         super().__init__(destination_dir=destination_dir, **extra_parameters)
