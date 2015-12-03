@@ -8,28 +8,25 @@
 
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
-from baon.core.files.scan_files import scan_files
 from baon.core.plan.__errors__.make_rename_plan_errors import MakeRenamePlanError
 from baon.core.plan.make_rename_plan import make_rename_plan
-from baon.core.renaming.rename_files import rename_files
-from baon.core.rules.RuleSet import RuleSet
+from baon.core.renaming.RenamedFileReference import RenamedFileReference
 from baon.core.utils.lang_utils import is_arrayish, is_dictish, is_string
 from baon.core.utils.str_utils import remove_prefix
 
 
 class MakeRenamePlanTestCaseBase(FileSystemTestCase):
 
-    def _test_make_rename_plan(self, files_repr, rules_text, expected_result, filter_scanned_files=None):
+    def _test_make_rename_plan(self, renamed_files_repr, expected_result, actual_files=None):
         base_path = self.resolve_test_path('')
+        renamed_files = [RenamedFileReference.from_test_repr(file_repr, base_path) for file_repr in renamed_files_repr]
 
-        with self.temp_file_structure('', files_repr):
-            files = scan_files(base_path, recursive=True)
-            if filter_scanned_files is not None:
-                files = [file_ref for file_ref in files if filter_scanned_files(file_ref)]
+        if actual_files is None:
+            actual_files_repr = [file_ref.old_file_ref.test_repr() for file_ref in renamed_files]
+        else:
+            actual_files_repr = actual_files
 
-            rule_set = RuleSet.from_source(rules_text)
-            renamed_files = rename_files(files, rule_set, use_path=False, use_extension=False)
-
+        with self.temp_file_structure('', actual_files_repr):
             try:
                 plan = make_rename_plan(renamed_files)
                 result = plan.test_repr()

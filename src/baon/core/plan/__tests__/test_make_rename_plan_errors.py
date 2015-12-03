@@ -16,29 +16,32 @@ class TestMakeRenamePlanErrors(MakeRenamePlanTestCaseBase):
         self._test_make_rename_plan(
             (
                 ('FILE', 'file1'),
+                ('FILE', 'file2', 'entry/file'),
+            ),
+            ('CannotCreateDestinationDirFileInTheWayWillNotMoveError', {'destination_dir': 'entry'}),
+            actual_files=(
+                ('FILE', 'file1'),
                 ('FILE', 'file2'),
                 ('FILE', 'entry'),
             ),
-            '"file2"->"entry/file"',
-            ('CannotCreateDestinationDirFileInTheWayWillNotMoveError', {'destination_dir': 'entry'}),
-            filter_scanned_files=lambda file_ref: file_ref.path.basename() != 'entry')
+        )
 
     def test_fail_if_renamed_files_have_errors(self):
         self._test_make_rename_plan(
             (
                 ('FILE', 'file1'),
-                ('FILE', 'file2'),
+                ('FILE', 'file2', 'file1', ('SyntheticFileError',)),
             ),
-            '"file2"->"file1"',
-            ('RenamedFilesListHasErrorsError',))
+            ('RenamedFilesListHasErrorsError',),
+        )
 
     def test_ok_if_renamed_files_have_warnings(self):
         self._test_make_rename_plan(
             (
                 ('FILE', 'file1'),
-                ('FILE', 'file2'),
+                ('FILE', 'file2', 'file  2', ('SyntheticFileWarning',)),
             ),
-            '"file2"->"file  2"',
             (
                 ('MoveFile', 'file2', 'file  2'),
-            ))
+            ),
+        )
