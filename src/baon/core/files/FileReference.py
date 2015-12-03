@@ -8,8 +8,11 @@
 
 
 import itertools
-
 from functools import total_ordering
+
+from baon.core.errors.BAONError import BAONError
+from baon.core.files.BAONPath import BAONPath
+from baon.core.utils.lang_utils import is_arrayish
 
 
 @total_ordering
@@ -85,3 +88,18 @@ class FileReference(object):
                 return -1 if a_head_is_dir else 1
             if a_head != b_head:
                 return -1 if a_head < b_head else 1
+
+    @staticmethod
+    def from_test_repr(file_test_repr, base_path=None):
+        assert is_arrayish(file_test_repr)
+        assert len(file_test_repr) >= 2
+
+        file_type, path, *errors = file_test_repr
+
+        file_ref = FileReference(
+            BAONPath.from_test_repr(base_path, path),
+            file_type == 'DIR',
+            problems=[BAONError.from_test_repr(error_repr) for error_repr in errors],
+        )
+
+        return file_ref
