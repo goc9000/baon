@@ -8,6 +8,7 @@
 
 
 import os
+from itertools import count
 
 from baon.core.files.BAONPath import BAONPath
 from baon.core.plan.RenamePlan import RenamePlan
@@ -18,13 +19,24 @@ from baon.core.plan.__errors__.make_rename_plan_errors import \
     CannotRenameNoPermissionsForBasePathError
 
 
+STAGING_DIR_PATTERN = 'TMP_BAON_STAGING{0}'
+
+
 def make_rename_plan(renamed_files):
     return MakeRenamePlanInstance(renamed_files).run()
+
+
+def staging_dir_variants():
+    yield STAGING_DIR_PATTERN.format('')
+
+    for x in count(1):
+        yield STAGING_DIR_PATTERN.format(x)
 
 
 class MakeRenamePlanInstance(object):
     renamed_files = None
     base_path = None
+    staging_dir = None
     steps = []
 
     def __init__(self, renamed_files):
@@ -36,6 +48,8 @@ class MakeRenamePlanInstance(object):
             self._check_renamed_files_list()
             self._compute_base_path()
             self._check_base_path()
+
+            self._choose_name_for_staging_dir()
 
         return RenamePlan(self.steps)
 
@@ -58,3 +72,18 @@ class MakeRenamePlanInstance(object):
             raise CannotRenameBasePathNotADirError(self.base_path)
         if not os.access(self.base_path, os.R_OK | os.W_OK | os.X_OK):
             raise CannotRenameNoPermissionsForBasePathError(self.base_path)
+
+    def _choose_name_for_staging_dir(self):
+        taken_names_in_base = set(
+            os.listdir(self.base_path) +
+            [f.path.components[0] for f in self.renamed_files] +
+            [f.old_file_ref.path.components[0] for f in self.renamed_files]
+        )
+
+        # fold case to account for case-insensitive filesystems
+        taken_names_in_base = set(x.lower() for x in taken_names_in_base)
+
+        for staging_dir in staging_dir_variants():
+            if staging_dir.lower() not in taken_names_in_base:
+                self.staging_dir = staging_dir
+                return
