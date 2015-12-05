@@ -11,4 +11,17 @@ from baon.core.plan.__tests__.MakeRenamePlanNewTestCaseBase import MakeRenamePla
 
 
 class TestMakeRenamePlan(MakeRenamePlanNewTestCaseBase):
-    pass
+
+    def test_empty_plan_if_no_files(self):
+        self._test_make_rename_plan(
+            (),
+            (),
+        )
+
+    def test_empty_plan_if_no_changes(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'unchanged'),
+            ),
+            (),
+        )
