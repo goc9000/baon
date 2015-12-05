@@ -18,6 +18,7 @@ from baon.core.plan.__errors__.make_rename_plan_errors import \
     CannotRenameBasePathNotADirError,\
     CannotRenameNoPermissionsForBasePathError
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
+from baon.core.plan.actions.DeleteEmptyDirectoryAction import DeleteEmptyDirectoryAction
 
 
 STAGING_DIR_PATTERN = 'TMP_BAON_STAGING{0}'
@@ -55,6 +56,7 @@ class MakeRenamePlanInstance(object):
             self._choose_name_for_staging_dir()
 
             self._phase1_create_staging_structure()
+            self._phase6_tear_down_staging_structure()
 
         return RenamePlan(self.steps)
 
@@ -101,3 +103,6 @@ class MakeRenamePlanInstance(object):
         )
 
         self.steps.extend(CreateDirectoryAction(path.real_path()) for path in self.staging_structure)
+
+    def _phase6_tear_down_staging_structure(self):
+        self.steps.extend(DeleteEmptyDirectoryAction(path.real_path()) for path in reversed(self.staging_structure))

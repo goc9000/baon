@@ -112,6 +112,14 @@ class CannotDeleteDirNoPermissionsError(DeleteDirectoryActionError):
         return 'we do not have permission'
 
 
+class CannotDeleteDirNotEmptyError(DeleteDirectoryActionError):
+    def __init__(self, path):
+        super().__init__(path)
+
+    def _get_reason_format_string(self):
+        return 'it is unexpectedly not empty'
+
+
 class CannotDeleteDirOtherError(DeleteDirectoryActionError):
     def __init__(self, path, os_error):
         super().__init__(path, os_error=os_error)
