@@ -17,6 +17,7 @@ from baon.core.plan.__errors__.make_rename_plan_errors import \
     CannotRenameBasePathNotFoundError,\
     CannotRenameBasePathNotADirError,\
     CannotRenameNoPermissionsForBasePathError
+from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
 
 
 STAGING_DIR_PATTERN = 'TMP_BAON_STAGING{0}'
@@ -37,10 +38,12 @@ class MakeRenamePlanInstance(object):
     renamed_files = None
     base_path = None
     staging_dir = None
-    steps = []
+    staging_structure = None
+    steps = None
 
     def __init__(self, renamed_files):
         self.renamed_files = renamed_files
+        self.steps = []
 
     def run(self):
         self._keep_only_changed_files()
@@ -50,6 +53,8 @@ class MakeRenamePlanInstance(object):
             self._check_base_path()
 
             self._choose_name_for_staging_dir()
+
+            self._phase1_create_staging_structure()
 
         return RenamePlan(self.steps)
 
@@ -87,3 +92,12 @@ class MakeRenamePlanInstance(object):
             if staging_dir.lower() not in taken_names_in_base:
                 self.staging_dir = staging_dir
                 return
+
+    def _phase1_create_staging_structure(self):
+        all_destination_parent_paths = set.union(*(set(f.path.parent_paths()) for f in self.renamed_files))
+        self.staging_structure = sorted(
+            BAONPath(path.base_path, [self.staging_dir] + path.components)
+            for path in all_destination_parent_paths
+        )
+
+        self.steps.extend(CreateDirectoryAction(path.real_path()) for path in self.staging_structure)

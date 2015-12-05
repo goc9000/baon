@@ -7,9 +7,11 @@
 # Licensed under the GPL-3
 
 
+import re
+
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
 from baon.core.plan.__errors__.make_rename_plan_errors import MakeRenamePlanError
-from baon.core.plan.make_rename_plan_new import make_rename_plan
+from baon.core.plan.make_rename_plan_new import make_rename_plan, staging_dir_variants
 from baon.core.renaming.RenamedFileReference import RenamedFileReference
 from baon.core.utils.lang_utils import is_arrayish, is_dictish, is_string
 from baon.core.utils.str_utils import remove_prefix
@@ -35,15 +37,17 @@ class MakeRenamePlanNewTestCaseBase(FileSystemTestCase):
             except MakeRenamePlanError as e:
                 result = e.test_repr()
 
-            result = _relativize_result_paths(result, test_root)
-
             self.assertEquals(
-                result,
-                expected_result,
+                _normalize_actual_result(result, test_root),
+                _normalize_expected_result(expected_result),
             )
 
 
-def _relativize_result_paths(result, base_path):
+def _normalize_actual_result(result, base_path):
+    """
+    Normalizes the actual result by relativizing the absolute paths such that they can be compared with the
+    necessarily relative paths in the expected result
+    """
 
     def recurse(item):
         if is_string(item):
@@ -56,3 +60,23 @@ def _relativize_result_paths(result, base_path):
             return item
 
     return recurse(result)
+
+
+def _normalize_expected_result(expected_result):
+    """
+    Normalizes the expected result by replacing placeholders like <STAGING_DIR> with the actual directory name.
+    """
+
+    base_staging_dir = next(staging_dir_variants())
+
+    def recurse(item):
+        if is_string(item):
+            return re.sub('^<STAGING_DIR>', base_staging_dir, item)
+        elif is_arrayish(item):
+            return tuple(recurse(subitem) for subitem in item)
+        elif is_dictish(item):
+            return {key: recurse(value) for key, value in item.items()}
+        else:
+            return item
+
+    return recurse(expected_result)
