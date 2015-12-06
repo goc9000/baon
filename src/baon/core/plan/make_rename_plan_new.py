@@ -14,6 +14,8 @@ from baon.core.files.BAONPath import BAONPath
 from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.__errors__.make_rename_plan_errors import \
     RenamedFilesListHasErrorsError,\
+    RenamedFilesListInvalidMultipleDestinationsError,\
+    RenamedFilesListInvalidSameDestinationError,\
     CannotRenameBasePathNotFoundError,\
     CannotRenameBasePathNotADirError,\
     CannotRenameNoPermissionsForBasePathError
@@ -68,6 +70,29 @@ class MakeRenamePlanInstance(object):
 
         if any(renamed_fref.has_errors() for renamed_fref in self.renamed_files):
             raise RenamedFilesListHasErrorsError()
+
+        by_source = {}
+        by_destination = {}
+
+        for renamed_fref in self.renamed_files:
+            source = renamed_fref.old_file_ref.path
+            destination = renamed_fref.path
+
+            if source in by_source:
+                raise RenamedFilesListInvalidMultipleDestinationsError(
+                    source.path_text(),
+                    by_source[source].path_text(),
+                    destination.path_text(),
+                )
+            if destination in by_destination:
+                raise RenamedFilesListInvalidSameDestinationError(
+                    destination.path_text(),
+                    by_destination[destination].path_text(),
+                    source.path_text(),
+                )
+
+            by_source[source] = destination
+            by_destination[destination] = source
 
     def _compute_base_path(self):
         self.base_path = self.renamed_files[0].path.base_path
