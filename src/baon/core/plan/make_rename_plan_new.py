@@ -18,9 +18,11 @@ from baon.core.plan.__errors__.make_rename_plan_errors import \
     RenamedFilesListInvalidSameDestinationError,\
     CannotRenameBasePathNotFoundError,\
     CannotRenameBasePathNotADirError,\
-    CannotRenameNoPermissionsForBasePathError
+    CannotRenameNoPermissionsForBasePathError,\
+    CannotMoveFileNoWritePermissionForDirError
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
 from baon.core.plan.actions.DeleteEmptyDirectoryAction import DeleteEmptyDirectoryAction
+from baon.core.plan.actions.MoveFileAction import MoveFileAction
 
 
 STAGING_DIR_PATTERN = 'TMP_BAON_STAGING{0}'
@@ -58,6 +60,7 @@ class MakeRenamePlanInstance(object):
             self._choose_name_for_staging_dir()
 
             self._phase1_create_staging_structure()
+            self._phase2_move_files_to_staging()
             self._phase6_tear_down_staging_structure()
 
         return RenamePlan(self.steps)
@@ -122,12 +125,26 @@ class MakeRenamePlanInstance(object):
 
     def _phase1_create_staging_structure(self):
         all_destination_parent_paths = set.union(*(set(f.path.parent_paths()) for f in self.renamed_files))
-        self.staging_structure = sorted(
-            BAONPath(path.base_path, [self.staging_dir] + path.components)
-            for path in all_destination_parent_paths
-        )
+        self.staging_structure = sorted(self._path_to_staging_dir(path) for path in all_destination_parent_paths)
 
         self.steps.extend(CreateDirectoryAction(path.real_path()) for path in self.staging_structure)
+
+    def _path_to_staging_dir(self, path):
+        return BAONPath(path.base_path, [self.staging_dir] + path.components)
+
+    def _phase2_move_files_to_staging(self):
+        for renamed_fref in self.renamed_files:
+            from_path = renamed_fref.old_file_ref.path
+            to_path = self._path_to_staging_dir(renamed_fref.path)
+
+            if not os.access(from_path.parent_path().real_path(), os.W_OK):
+                raise CannotMoveFileNoWritePermissionForDirError(
+                    from_path.path_text(),
+                    to_path.path_text(),
+                    from_path.parent_path().path_text(),
+                )
+
+            self.steps.append(MoveFileAction(from_path.real_path(), to_path.real_path()))
 
     def _phase6_tear_down_staging_structure(self):
         self.steps.extend(DeleteEmptyDirectoryAction(path.real_path()) for path in reversed(self.staging_structure))

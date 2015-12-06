@@ -19,6 +19,7 @@ class TestMakeRenamePlan(MakeRenamePlanNewTestCaseBase):
             ),
             (
                 ('CreateDirectory', '<STAGING_DIR>'),
+                ('MoveFile', 'old_file', '<STAGING_DIR>/new_file'),
                 # TODO: complete test
                 ('DeleteEmptyDirectory', '<STAGING_DIR>'),
             ),
@@ -38,6 +39,9 @@ class TestMakeRenamePlan(MakeRenamePlanNewTestCaseBase):
                 ('CreateDirectory', '<STAGING_DIR>'),
                 ('CreateDirectory', '<STAGING_DIR>/dir1'),
                 ('CreateDirectory', '<STAGING_DIR>/dir1/dir3'),
+                ('MoveFile', 'dir1/file11.txt', '<STAGING_DIR>/dir1/file41.txt'),
+                ('MoveFile', 'dir1/file12', '<STAGING_DIR>/dir1/dir3/file42'),
+                ('MoveFile', 'file1', '<STAGING_DIR>/file4'),
                 # TODO: complete test
                 ('DeleteEmptyDirectory', '<STAGING_DIR>/dir1/dir3'),
                 ('DeleteEmptyDirectory', '<STAGING_DIR>/dir1'),
