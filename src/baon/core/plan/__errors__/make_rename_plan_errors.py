@@ -40,6 +40,14 @@ class NoPermissionsForBasePathError(MakeRenamePlanError):
         return "BAON requires read and write permissions on the base path '{base_path}'"
 
 
+class CannotScanDirectoryError(MakeRenamePlanError):
+    def __init__(self, dir):
+        super().__init__(dir=dir)
+
+    def _get_format_string(self):
+        return "Cannot establish rename plan as the directory '{dir}' cannot be scanned"
+
+
 class CannotCreateDestinationDirError(MakeRenamePlanError, metaclass=ABCMeta):
     def __init__(self, destination_dir, **extra_parameters):
         super().__init__(destination_dir=destination_dir, **extra_parameters)
