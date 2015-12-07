@@ -14,16 +14,16 @@ from itertools import count, chain
 from baon.core.files.BAONPath import BAONPath
 from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.__errors__.make_rename_plan_errors import \
-    RenamedFilesListHasErrorsError, \
-    CannotRenameBasePathNotFoundError, \
-    CannotRenameBasePathNotADirError, \
-    CannotRenameNoPermissionsForBasePathError, \
+    BasePathNotFoundError, \
+    BasePathNotADirError, \
+    NoPermissionsForBasePathError, \
     CannotCreateDestinationDirInaccessibleParentError, \
     CannotCreateDestinationDirUnexpectedNonDirParentError, \
     CannotCreateDestinationDirNoReadPermissionForParentError, \
     CannotCreateDestinationDirNoTraversePermissionForParentError, \
     CannotCreateDestinationDirNoWritePermissionForParentError, \
     CannotCreateDestinationDirFileInTheWayWillNotMoveError, \
+    RenamedFilesListHasErrorsError, \
     RenamedFilesListInvalidMultipleDestinationsError, \
     RenamedFilesListInvalidSameDestinationError, \
     CannotMoveFileNoWritePermissionForDirError
@@ -60,11 +60,11 @@ def _check_base_path(renamed_files):
     base_path = renamed_files[0].path.base_path
 
     if not os.path.exists(base_path):
-        raise CannotRenameBasePathNotFoundError(base_path)
+        raise BasePathNotFoundError(base_path)
     if not os.path.isdir(base_path):
-        raise CannotRenameBasePathNotADirError(base_path)
+        raise BasePathNotADirError(base_path)
     if not os.access(base_path, os.R_OK | os.W_OK | os.X_OK):
-        raise CannotRenameNoPermissionsForBasePathError(base_path)
+        raise NoPermissionsForBasePathError(base_path)
 
 
 def _compute_taken_names_by_dir(renamed_files):

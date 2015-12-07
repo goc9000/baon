@@ -16,12 +16,7 @@ class MakeRenamePlanError(BAONError, metaclass=ABCMeta):
     pass
 
 
-class RenamedFilesListHasErrorsError(MakeRenamePlanError):
-    def _get_format_string(self):
-        return "Some of the files to be renamed have errors"
-
-
-class CannotRenameBasePathNotFoundError(MakeRenamePlanError):
+class BasePathNotFoundError(MakeRenamePlanError):
     def __init__(self, base_path):
         super().__init__(base_path=base_path)
 
@@ -29,7 +24,7 @@ class CannotRenameBasePathNotFoundError(MakeRenamePlanError):
         return "The base directory '{base_path}' does not exist"
 
 
-class CannotRenameBasePathNotADirError(MakeRenamePlanError):
+class BasePathNotADirError(MakeRenamePlanError):
     def __init__(self, base_path):
         super().__init__(base_path=base_path)
 
@@ -37,7 +32,7 @@ class CannotRenameBasePathNotADirError(MakeRenamePlanError):
         return "The base path '{base_path}' is a file, not a directory"
 
 
-class CannotRenameNoPermissionsForBasePathError(MakeRenamePlanError):
+class NoPermissionsForBasePathError(MakeRenamePlanError):
     def __init__(self, base_path):
         super().__init__(base_path=base_path)
 
@@ -104,6 +99,11 @@ class CannotCreateDestinationDirFileInTheWayWillNotMoveError(CannotCreateDestina
 
     def _get_reason_format_string(self):
         return 'a file of the same name is in the way and it is not part of the move'
+
+
+class RenamedFilesListHasErrorsError(MakeRenamePlanError):
+    def _get_format_string(self):
+        return "Some of the files to be renamed have errors"
 
 
 class RenamedFilesListInvalidMultipleDestinationsError(MakeRenamePlanError):

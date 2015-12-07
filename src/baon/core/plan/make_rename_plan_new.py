@@ -13,13 +13,13 @@ from itertools import count
 from baon.core.files.BAONPath import BAONPath
 from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.__errors__.make_rename_plan_errors import \
-    RenamedFilesListHasErrorsError,\
-    RenamedFilesListInvalidMultipleDestinationsError,\
-    RenamedFilesListInvalidSameDestinationError,\
-    CannotRenameBasePathNotFoundError,\
-    CannotRenameBasePathNotADirError,\
-    CannotRenameNoPermissionsForBasePathError,\
-    CannotMoveFileNoWritePermissionForDirError
+    BasePathNotFoundError, \
+    BasePathNotADirError, \
+    NoPermissionsForBasePathError, \
+    CannotMoveFileNoWritePermissionForDirError, \
+    RenamedFilesListHasErrorsError, \
+    RenamedFilesListInvalidMultipleDestinationsError, \
+    RenamedFilesListInvalidSameDestinationError
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
 from baon.core.plan.actions.DeleteEmptyDirectoryAction import DeleteEmptyDirectoryAction
 from baon.core.plan.actions.MoveFileAction import MoveFileAction
@@ -103,11 +103,11 @@ class MakeRenamePlanInstance(object):
 
     def _check_base_path(self):
         if not os.path.exists(self.base_path):
-            raise CannotRenameBasePathNotFoundError(self.base_path)
+            raise BasePathNotFoundError(self.base_path)
         if not os.path.isdir(self.base_path):
-            raise CannotRenameBasePathNotADirError(self.base_path)
+            raise BasePathNotADirError(self.base_path)
         if not os.access(self.base_path, os.R_OK | os.W_OK | os.X_OK):
-            raise CannotRenameNoPermissionsForBasePathError(self.base_path)
+            raise NoPermissionsForBasePathError(self.base_path)
 
     def _choose_name_for_staging_dir(self):
         taken_names_in_base = set(

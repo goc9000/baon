@@ -19,7 +19,7 @@ class TestMakeRenamePlanErrors(MakeRenamePlanNewTestCaseBase):
             ),
             actual_files=(),
             base_path_override='non_existent',
-            expected_result=('CannotRenameBasePathNotFoundError', {'base_path': 'non_existent'}),
+            expected_result=('BasePathNotFoundError', {'base_path': 'non_existent'}),
         )
 
     def test_base_path_not_a_dir(self):
@@ -31,7 +31,7 @@ class TestMakeRenamePlanErrors(MakeRenamePlanNewTestCaseBase):
                 ('FILE', 'not_a_dir'),
             ),
             base_path_override='not_a_dir',
-            expected_result=('CannotRenameBasePathNotADirError', {'base_path': 'not_a_dir'}),
+            expected_result=('BasePathNotADirError', {'base_path': 'not_a_dir'}),
         )
 
     def test_base_path_no_permissions(self):
@@ -46,7 +46,7 @@ class TestMakeRenamePlanErrors(MakeRenamePlanNewTestCaseBase):
                         ('FILE', 'locked/dummy'),
                     ),
                     base_path_override='locked',
-                    expected_result=('CannotRenameNoPermissionsForBasePathError', {'base_path': 'locked'}),
+                    expected_result=('NoPermissionsForBasePathError', {'base_path': 'locked'}),
                 )
 
     def test_fail_if_renamed_files_have_errors(self):
