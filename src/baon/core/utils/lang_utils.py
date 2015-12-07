@@ -70,6 +70,10 @@ def chunked(iterable, n, fill_value=None):
     return zip_longest(*args, fillvalue=fill_value)
 
 
+def sets_union(iterable_of_iterables):
+    return set.union(*(set(iterable) for iterable in iterable_of_iterables))
+
+
 def iter_non_abstract_descendants(cls):
     q = deque()
     q.append(cls)

@@ -23,6 +23,7 @@ from baon.core.plan.__errors__.make_rename_plan_errors import \
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
 from baon.core.plan.actions.DeleteEmptyDirectoryAction import DeleteEmptyDirectoryAction
 from baon.core.plan.actions.MoveFileAction import MoveFileAction
+from baon.core.utils.lang_utils import sets_union
 
 
 STAGING_DIR_PATTERN = 'TMP_BAON_STAGING{0}'
@@ -124,8 +125,8 @@ class MakeRenamePlanInstance(object):
                 return
 
     def _phase1_create_staging_structure(self):
-        all_destination_parent_paths = set.union(*(set(f.path.parent_paths()) for f in self.renamed_files))
-        self.staging_structure = sorted(self._path_to_staging_dir(path) for path in all_destination_parent_paths)
+        destination_parent_paths = sets_union(f.path.parent_paths() for f in self.renamed_files)
+        self.staging_structure = sorted(self._path_to_staging_dir(path) for path in destination_parent_paths)
 
         self.steps.extend(CreateDirectoryAction(path.real_path()) for path in self.staging_structure)
 
