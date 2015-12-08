@@ -110,8 +110,11 @@ class MakeRenamePlanInstance(object):
             raise BasePathNotFoundError(self.base_path)
         if not os.path.isdir(self.base_path):
             raise BasePathNotADirError(self.base_path)
-        if not os.access(self.base_path, os.R_OK | os.W_OK | os.X_OK):
+        if not self._has_permissions(self.base_path):
             raise NoPermissionsForBasePathError(self.base_path)
+
+    def _has_permissions(self, real_path):
+        return os.access(real_path, os.R_OK | os.W_OK | os.X_OK)
 
     def _choose_name_for_staging_dir(self):
         taken_names_in_base = set(
@@ -150,7 +153,7 @@ class MakeRenamePlanInstance(object):
             from_path = renamed_fref.old_file_ref.path
             to_path = self._path_to_staging_dir(renamed_fref.path)
 
-            if not os.access(from_path.parent_path().real_path(), os.W_OK):
+            if not self._has_permissions(from_path.parent_path().real_path()):
                 raise CannotMoveFileNoWritePermissionForDirError(
                     from_path.path_text(),
                     to_path.path_text(),
@@ -176,7 +179,7 @@ class MakeRenamePlanInstance(object):
             if path in self.removed_files_by_path:
                 files_in_dir -= self.removed_files_by_path[path]
 
-            if len(files_in_dir) == 0 and os.access(path.parent_path().real_path(), os.W_OK):
+            if len(files_in_dir) == 0 and self._has_permissions(path.parent_path().real_path()):
                 self.steps.append(DeleteEmptyDirectoryAction(path.real_path()))
             else:
                 undeletable_dirs |= set(path.subpaths(exclude_root=True, exclude_self=True))
