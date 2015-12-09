@@ -19,6 +19,11 @@ from baon.core.plan.__errors__.make_rename_plan_errors import \
     NoPermissionsForBasePathError, \
     CannotScanDirectoryError, \
     CannotMoveFileNoWritePermissionForDirError, \
+    CannotCreateDestinationDirInaccessibleParentError, \
+    CannotCreateDestinationDirUnexpectedNonDirParentError, \
+    CannotCreateDestinationDirNoReadPermissionForParentError, \
+    CannotCreateDestinationDirNoWritePermissionForParentError, \
+    CannotCreateDestinationDirFileInTheWayWillNotMoveError, \
     RenamedFilesListHasErrorsError, \
     RenamedFilesListInvalidMultipleDestinationsError, \
     RenamedFilesListInvalidSameDestinationError
@@ -46,8 +51,9 @@ class MakeRenamePlanInstance(object):
     renamed_files = None
     base_path = None
     staging_dir = None
+    destination_dirs = None
     staging_structure = None
-    removed_files_by_path = None
+    removed_entries_by_path = None
     steps = None
 
     def __init__(self, renamed_files):
@@ -66,6 +72,7 @@ class MakeRenamePlanInstance(object):
             self._phase1_create_staging_structure()
             self._phase2_move_files_to_staging()
             self._phase3_delete_emptied_directories()
+            self._phase4_create_destination_directories()
             self._phase6_tear_down_staging_structure()
 
         return RenamePlan(self.steps)
@@ -110,11 +117,8 @@ class MakeRenamePlanInstance(object):
             raise BasePathNotFoundError(self.base_path)
         if not os.path.isdir(self.base_path):
             raise BasePathNotADirError(self.base_path)
-        if not self._has_permissions(self.base_path):
+        if not os.access(self.base_path, os.R_OK | os.W_OK | os.X_OK):
             raise NoPermissionsForBasePathError(self.base_path)
-
-    def _has_permissions(self, real_path):
-        return os.access(real_path, os.R_OK | os.W_OK | os.X_OK)
 
     def _choose_name_for_staging_dir(self):
         taken_names_in_base = set(
@@ -138,8 +142,8 @@ class MakeRenamePlanInstance(object):
             raise CannotScanDirectoryError(real_path) from e
 
     def _phase1_create_staging_structure(self):
-        destination_parent_paths = sets_union(f.path.parent_paths() for f in self.renamed_files)
-        self.staging_structure = sorted(self._path_to_staging_dir(path) for path in destination_parent_paths)
+        self.destination_dirs = sorted(sets_union(f.path.parent_paths() for f in self.renamed_files))
+        self.staging_structure = sorted(self._path_to_staging_dir(path) for path in self.destination_dirs)
 
         self.steps.extend(CreateDirectoryAction(path.real_path()) for path in self.staging_structure)
 
@@ -147,13 +151,13 @@ class MakeRenamePlanInstance(object):
         return BAONPath(path.base_path, [self.staging_dir] + path.components)
 
     def _phase2_move_files_to_staging(self):
-        self.removed_files_by_path = defaultdict(set)
+        self.removed_entries_by_path = defaultdict(set)
 
         for renamed_fref in self.renamed_files:
             from_path = renamed_fref.old_file_ref.path
             to_path = self._path_to_staging_dir(renamed_fref.path)
 
-            if not self._has_permissions(from_path.parent_path().real_path()):
+            if not os.access(from_path.parent_path().real_path(), os.R_OK | os.W_OK | os.X_OK):
                 raise CannotMoveFileNoWritePermissionForDirError(
                     from_path.path_text(),
                     to_path.path_text(),
@@ -161,7 +165,7 @@ class MakeRenamePlanInstance(object):
                 )
 
             self.steps.append(MoveFileAction(from_path.real_path(), to_path.real_path()))
-            self.removed_files_by_path[from_path.parent_path()].add(from_path.basename())
+            self.removed_entries_by_path[from_path.parent_path()].add(from_path.basename())
 
     def _phase3_delete_emptied_directories(self):
         source_parent_paths = sets_union(
@@ -176,13 +180,50 @@ class MakeRenamePlanInstance(object):
                 continue
 
             files_in_dir = set(self._list_dir(path.real_path()))
-            if path in self.removed_files_by_path:
-                files_in_dir -= self.removed_files_by_path[path]
+            if path in self.removed_entries_by_path:
+                files_in_dir -= self.removed_entries_by_path[path]
 
-            if len(files_in_dir) == 0 and self._has_permissions(path.parent_path().real_path()):
+            if len(files_in_dir) == 0 and os.access(path.parent_path().real_path(), os.R_OK | os.W_OK | os.X_OK):
                 self.steps.append(DeleteEmptyDirectoryAction(path.real_path()))
+                self.removed_entries_by_path[path.parent_path()].add(path.basename())
             else:
                 undeletable_dirs |= set(path.subpaths(exclude_root=True, exclude_self=True))
+
+    def _phase4_create_destination_directories(self):
+        created_dirs = set()
+
+        for path in self.destination_dirs:
+            if path.is_root():
+                continue
+
+            if path.is_root() or path.parent_path() in created_dirs:
+                pass
+            elif self._is_path_removed(path.parent_path()) or not os.path.exists(path.parent_path().real_path()):
+                raise CannotCreateDestinationDirInaccessibleParentError(path.path_text())
+            elif not os.path.isdir(path.parent_path().real_path()):
+                raise CannotCreateDestinationDirUnexpectedNonDirParentError(path.path_text())
+            elif not os.access(path.parent_path().real_path(), os.R_OK | os.X_OK):
+                raise CannotCreateDestinationDirNoReadPermissionForParentError(path.path_text())
+
+            if self._is_path_removed(path) or not os.path.exists(path.real_path()):
+                if not os.access(path.parent_path().real_path(), os.W_OK):
+                    raise CannotCreateDestinationDirNoWritePermissionForParentError(path.path_text())
+
+                self.steps.append(CreateDirectoryAction(path.real_path()))
+                created_dirs.add(path)
+                continue
+
+            if path in created_dirs or os.path.isdir(path.real_path()):
+                continue  # already created
+
+            raise CannotCreateDestinationDirFileInTheWayWillNotMoveError(path.path_text())
+
+    def _is_path_removed(self, path):
+        return (
+            (not path.is_root()) and
+            (path.parent_path() in self.removed_entries_by_path) and
+            (path.basename() in self.removed_entries_by_path[path.parent_path()])
+        )
 
     def _phase6_tear_down_staging_structure(self):
         self.steps.extend(DeleteEmptyDirectoryAction(path.real_path()) for path in reversed(self.staging_structure))
