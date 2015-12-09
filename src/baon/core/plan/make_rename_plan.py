@@ -20,7 +20,6 @@ from baon.core.plan.__errors__.make_rename_plan_errors import \
     CannotCreateDestinationDirInaccessibleParentError, \
     CannotCreateDestinationDirUnexpectedNonDirParentError, \
     CannotCreateDestinationDirNoReadPermissionForParentError, \
-    CannotCreateDestinationDirNoTraversePermissionForParentError, \
     CannotCreateDestinationDirNoWritePermissionForParentError, \
     CannotCreateDestinationDirFileInTheWayWillNotMoveError, \
     RenamedFilesListHasErrorsError, \
@@ -103,10 +102,8 @@ def _plan_creating_destination_dirs(renamed_files, taken_names_by_dir):
                 raise CannotCreateDestinationDirInaccessibleParentError(path.path_text())
             if not os.path.isdir(real_parent_path):
                 raise CannotCreateDestinationDirUnexpectedNonDirParentError(path.path_text())
-            if not os.access(real_parent_path, os.R_OK):
+            if not os.access(real_parent_path, os.R_OK | os.X_OK):
                 raise CannotCreateDestinationDirNoReadPermissionForParentError(path.path_text())
-            if not os.access(real_parent_path, os.X_OK):
-                raise CannotCreateDestinationDirNoTraversePermissionForParentError(path.path_text())
 
             if os.path.exists(real_path) and os.path.isdir(real_path):
                 continue

@@ -85,14 +85,6 @@ class CannotCreateDestinationDirNoReadPermissionForParentError(CannotCreateDesti
         return 'we do not have read permission on the parent directory'
 
 
-class CannotCreateDestinationDirNoTraversePermissionForParentError(CannotCreateDestinationDirError):
-    def __init__(self, destination_dir):
-        super().__init__(destination_dir)
-
-    def _get_reason_format_string(self):
-        return 'we do not have traverse permission on the parent directory'
-
-
 class CannotCreateDestinationDirNoWritePermissionForParentError(CannotCreateDestinationDirError):
     def __init__(self, destination_dir):
         super().__init__(destination_dir)
@@ -107,6 +99,14 @@ class CannotCreateDestinationDirFileInTheWayWillNotMoveError(CannotCreateDestina
 
     def _get_reason_format_string(self):
         return 'a file of the same name is in the way and it is not part of the move'
+
+
+class CannotMoveFileNoWritePermissionForDirError(MakeRenamePlanError):
+    def __init__(self, source, destination, directory):
+        super().__init__(source=source, destination=destination, directory=directory)
+
+    def _get_format_string(self):
+        return "Cannot rename '{source}' to '{destination}' as we do not have write permission on '{directory}'"
 
 
 class RenamedFilesListHasErrorsError(MakeRenamePlanError):
@@ -128,11 +128,3 @@ class RenamedFilesListInvalidSameDestinationError(MakeRenamePlanError):
 
     def _get_format_string(self):
         return "Rename list is invalid: Both '{source_1}' and '{source_2}' are renamed to '{destination}'"
-
-
-class CannotMoveFileNoWritePermissionForDirError(MakeRenamePlanError):
-    def __init__(self, source, destination, directory):
-        super().__init__(source=source, destination=destination, directory=directory)
-
-    def _get_format_string(self):
-        return "Cannot rename '{source}' to '{destination}' as we do not have write permission on '{directory}'"
