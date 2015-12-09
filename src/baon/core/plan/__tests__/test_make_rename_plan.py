@@ -1,4 +1,4 @@
-# baon/core/plan/__tests__/test_make_rename_plan_new.py
+# baon/core/plan/__tests__/test_make_rename_plan.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -7,10 +7,10 @@
 # Licensed under the GPL-3
 
 
-from baon.core.plan.__tests__.MakeRenamePlanNewTestCaseBase import MakeRenamePlanNewTestCaseBase
+from baon.core.plan.__tests__.MakeRenamePlanTestCaseBase import MakeRenamePlanTestCaseBase
 
 
-class TestMakeRenamePlan(MakeRenamePlanNewTestCaseBase):
+class TestMakeRenamePlan(MakeRenamePlanTestCaseBase):
 
     def test_trivial(self):
         self._test_make_rename_plan(

@@ -1,4 +1,4 @@
-# baon/core/plan/__tests__/MakeRenamePlanNewTestCaseBase.py
+# baon/core/plan/__tests__/MakeRenamePlanTestCaseBase.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -9,13 +9,13 @@
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
 from baon.core.plan.__errors__.make_rename_plan_errors import MakeRenamePlanError
-from baon.core.plan.make_rename_plan_new import make_rename_plan, staging_dir_variants
+from baon.core.plan.make_rename_plan import make_rename_plan, staging_dir_variants
 from baon.core.renaming.RenamedFileReference import RenamedFileReference
 from baon.core.utils.lang_utils import is_arrayish, is_dictish, is_string
 from baon.core.utils.str_utils import remove_prefix
 
 
-class MakeRenamePlanNewTestCaseBase(FileSystemTestCase):
+class MakeRenamePlanTestCaseBase(FileSystemTestCase):
 
     def _test_make_rename_plan(self, renamed_files_repr, expected_result, actual_files=None, base_path_override=None):
         base_path = self.resolve_test_path('' if base_path_override is None else base_path_override)
