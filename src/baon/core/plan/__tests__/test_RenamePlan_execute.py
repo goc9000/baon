@@ -15,7 +15,7 @@ from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.__errors__.rename_plan_errors import RenamePlanExecuteFailedBecauseActionFailedError
 from baon.core.plan.__tests__.RenamePlanTestCaseBase import RenamePlanTestCaseBase
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
-from baon.core.plan.actions.DeleteDirectoryIfEmptyAction import DeleteDirectoryIfEmptyAction
+from baon.core.plan.actions.DeleteEmptyDirectoryAction import DeleteEmptyDirectoryAction
 from baon.core.plan.actions.MoveFileAction import MoveFileAction
 from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
@@ -167,7 +167,7 @@ class TestRenamePlanExecute(RenamePlanTestCaseBase, FileSystemTestCase, ReportsP
             MoveFileAction(self.resolve_test_path('dir1/file1'), self.resolve_test_path('file01')),
             MoveFileAction(self.resolve_test_path('file2'), self.resolve_test_path('file02')),
             MoveFileAction(self.resolve_test_path('file3'), self.resolve_test_path('dir3/file03')),
-            DeleteDirectoryIfEmptyAction(self.resolve_test_path('dir1')),
+            DeleteEmptyDirectoryAction(self.resolve_test_path('dir1')),
         ])
 
     def _rescan_files(self):

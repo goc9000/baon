@@ -21,7 +21,7 @@ class TestRenamePlan(RenamePlanTestCaseBase):
             (
                 ('CreateDirectory', '/base/dest_dir'),
                 ('MoveFile', '/base/src_dir/file1', '/base/dest_dir/file2'),
-                ('DeleteDirectoryIfEmpty', '/base/src_dir'),
+                ('DeleteEmptyDirectory', '/base/src_dir'),
             )
         )
 
