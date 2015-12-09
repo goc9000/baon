@@ -7,8 +7,6 @@
 # Licensed under the GPL-3
 
 
-import re
-
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
 from baon.core.plan.__errors__.make_rename_plan_errors import MakeRenamePlanError
 from baon.core.plan.make_rename_plan_new import make_rename_plan, staging_dir_variants
@@ -23,12 +21,15 @@ class MakeRenamePlanNewTestCaseBase(FileSystemTestCase):
         base_path = self.resolve_test_path('' if base_path_override is None else base_path_override)
         test_root = self.resolve_test_path('')
 
-        renamed_files = [RenamedFileReference.from_test_repr(file_repr, base_path) for file_repr in renamed_files_repr]
+        renamed_files = [
+            RenamedFileReference.from_test_repr(file_repr, base_path)
+            for file_repr in _normalize_input_files(renamed_files_repr)
+        ]
 
         if actual_files is None:
             actual_files_repr = [file_ref.old_file_ref.test_repr() for file_ref in renamed_files]
         else:
-            actual_files_repr = actual_files
+            actual_files_repr = _normalize_input_files(actual_files)
 
         with self.temp_file_structure('', actual_files_repr):
             try:
@@ -43,40 +44,40 @@ class MakeRenamePlanNewTestCaseBase(FileSystemTestCase):
             )
 
 
+dir_variants = staging_dir_variants()
+base_staging_dir = next(dir_variants)
+alt_staging_dir = next(dir_variants)
+
+
+def _replace_staging_dir_placeholders(path_text):
+    return path_text.replace('<STAGING_DIR>', base_staging_dir).replace('<ALTERNATE_STAGING_DIR>', alt_staging_dir)
+
+
+def _replace_recursive(value, scalar_replace_function):
+        if is_string(value):
+            return scalar_replace_function(value)
+        elif is_arrayish(value):
+            return tuple(_replace_recursive(subitem, scalar_replace_function) for subitem in value)
+        elif is_dictish(value):
+            return {key: _replace_recursive(value, scalar_replace_function) for key, value in value.items()}
+        else:
+            return value
+
+
+def _normalize_input_files(files_repr):
+    return _replace_recursive(files_repr, _replace_staging_dir_placeholders)
+
+
 def _normalize_actual_result(result, base_path):
     """
     Normalizes the actual result by relativizing the absolute paths such that they can be compared with the
     necessarily relative paths in the expected result
     """
-
-    def recurse(item):
-        if is_string(item):
-            return remove_prefix(item, base_path)
-        elif is_arrayish(item):
-            return tuple(recurse(subitem) for subitem in item)
-        elif is_dictish(item):
-            return {key: recurse(value) for key, value in item.items()}
-        else:
-            return item
-
-    return recurse(result)
+    return _replace_recursive(result, lambda item: remove_prefix(item, base_path))
 
 
 def _normalize_expected_result(expected_result):
     """
     Normalizes the expected result by replacing placeholders like <STAGING_DIR> with the actual directory name.
     """
-
-    base_staging_dir = next(staging_dir_variants())
-
-    def recurse(item):
-        if is_string(item):
-            return re.sub('^<STAGING_DIR>', base_staging_dir, item)
-        elif is_arrayish(item):
-            return tuple(recurse(subitem) for subitem in item)
-        elif is_dictish(item):
-            return {key: recurse(value) for key, value in item.items()}
-        else:
-            return item
-
-    return recurse(expected_result)
+    return _replace_recursive(expected_result, _replace_staging_dir_placeholders)

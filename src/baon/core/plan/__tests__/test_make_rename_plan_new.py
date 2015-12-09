@@ -165,3 +165,32 @@ class TestMakeRenamePlan(MakeRenamePlanNewTestCaseBase):
                 ('DeleteEmptyDirectory', '<STAGING_DIR>'),
             ),
         )
+
+    def test_change_case(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'file', 'FILE'),
+            ),
+            (
+                ('CreateDirectory', '<STAGING_DIR>'),
+                ('MoveFile', 'file', '<STAGING_DIR>/FILE'),
+                ('MoveFile', '<STAGING_DIR>/FILE', 'FILE'),
+                ('DeleteEmptyDirectory', '<STAGING_DIR>'),
+            ),
+        )
+
+    def test_staging_dir_already_exists(self):
+        self._test_make_rename_plan(
+            (
+                ('DIR', '<STAGING_DIR>'),
+                ('FILE', 'file', '<STAGING_DIR>/file'),
+            ),
+            (
+                ('CreateDirectory', '<ALTERNATE_STAGING_DIR>'),
+                ('CreateDirectory', '<ALTERNATE_STAGING_DIR>/<STAGING_DIR>'),
+                ('MoveFile', 'file', '<ALTERNATE_STAGING_DIR>/<STAGING_DIR>/file'),
+                ('MoveFile', '<ALTERNATE_STAGING_DIR>/<STAGING_DIR>/file', '<STAGING_DIR>/file'),
+                ('DeleteEmptyDirectory', '<ALTERNATE_STAGING_DIR>/<STAGING_DIR>'),
+                ('DeleteEmptyDirectory', '<ALTERNATE_STAGING_DIR>'),
+            ),
+        )
