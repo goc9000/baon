@@ -67,3 +67,101 @@ class TestMakeRenamePlan(MakeRenamePlanNewTestCaseBase):
             ),
             (),
         )
+
+    def test_file_in_way_will_move(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'file1'),
+                ('FILE', 'file2', 'entry/file'),
+                ('FILE', 'entry', 'moved'),
+            ),
+            (
+                ('CreateDirectory', '<STAGING_DIR>'),
+                ('CreateDirectory', '<STAGING_DIR>/entry'),
+                ('MoveFile', 'file2', '<STAGING_DIR>/entry/file'),
+                ('MoveFile', 'entry', '<STAGING_DIR>/moved'),
+                ('CreateDirectory', 'entry'),
+                ('MoveFile', '<STAGING_DIR>/entry/file', 'entry/file'),
+                ('MoveFile', '<STAGING_DIR>/moved', 'moved'),
+                ('DeleteEmptyDirectory', '<STAGING_DIR>/entry'),
+                ('DeleteEmptyDirectory', '<STAGING_DIR>'),
+            ),
+        )
+
+    def test_chain(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'file1', 'file2'),
+                ('FILE', 'file2', 'file3'),
+                ('FILE', 'file3', 'file4'),
+                ('FILE', 'file4', 'file5'),
+            ),
+            (
+                ('CreateDirectory', '<STAGING_DIR>'),
+                ('MoveFile', 'file1', '<STAGING_DIR>/file2'),
+                ('MoveFile', 'file2', '<STAGING_DIR>/file3'),
+                ('MoveFile', 'file3', '<STAGING_DIR>/file4'),
+                ('MoveFile', 'file4', '<STAGING_DIR>/file5'),
+                ('MoveFile', '<STAGING_DIR>/file2', 'file2'),
+                ('MoveFile', '<STAGING_DIR>/file3', 'file3'),
+                ('MoveFile', '<STAGING_DIR>/file4', 'file4'),
+                ('MoveFile', '<STAGING_DIR>/file5', 'file5'),
+                ('DeleteEmptyDirectory', '<STAGING_DIR>'),
+            ),
+        )
+
+    def test_circular(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'file1', 'file2'),
+                ('FILE', 'file2', 'file3'),
+                ('FILE', 'file3', 'file4'),
+                ('FILE', 'file4', 'file1'),
+            ),
+            (
+                ('CreateDirectory', '<STAGING_DIR>'),
+                ('MoveFile', 'file1', '<STAGING_DIR>/file2'),
+                ('MoveFile', 'file2', '<STAGING_DIR>/file3'),
+                ('MoveFile', 'file3', '<STAGING_DIR>/file4'),
+                ('MoveFile', 'file4', '<STAGING_DIR>/file1'),
+                ('MoveFile', '<STAGING_DIR>/file2', 'file2'),
+                ('MoveFile', '<STAGING_DIR>/file3', 'file3'),
+                ('MoveFile', '<STAGING_DIR>/file4', 'file4'),
+                ('MoveFile', '<STAGING_DIR>/file1', 'file1'),
+                ('DeleteEmptyDirectory', '<STAGING_DIR>'),
+            ),
+        )
+
+    def test_complex_permutation(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'file1', 'file2'),
+                ('FILE', 'file2', 'file10'),
+                ('FILE', 'file3', 'file4'),
+                ('FILE', 'file4', 'file5'),
+                ('FILE', 'file5', 'file3'),
+                ('FILE', 'file6', 'file7'),
+                ('FILE', 'file7', 'file8'),
+                ('FILE', 'file8', 'file9'),
+            ),
+            (
+                ('CreateDirectory', '<STAGING_DIR>'),
+                ('MoveFile', 'file1', '<STAGING_DIR>/file2'),
+                ('MoveFile', 'file2', '<STAGING_DIR>/file10'),
+                ('MoveFile', 'file3', '<STAGING_DIR>/file4'),
+                ('MoveFile', 'file4', '<STAGING_DIR>/file5'),
+                ('MoveFile', 'file5', '<STAGING_DIR>/file3'),
+                ('MoveFile', 'file6', '<STAGING_DIR>/file7'),
+                ('MoveFile', 'file7', '<STAGING_DIR>/file8'),
+                ('MoveFile', 'file8', '<STAGING_DIR>/file9'),
+                ('MoveFile', '<STAGING_DIR>/file2', 'file2'),
+                ('MoveFile', '<STAGING_DIR>/file10', 'file10'),
+                ('MoveFile', '<STAGING_DIR>/file4', 'file4'),
+                ('MoveFile', '<STAGING_DIR>/file5', 'file5'),
+                ('MoveFile', '<STAGING_DIR>/file3', 'file3'),
+                ('MoveFile', '<STAGING_DIR>/file7', 'file7'),
+                ('MoveFile', '<STAGING_DIR>/file8', 'file8'),
+                ('MoveFile', '<STAGING_DIR>/file9', 'file9'),
+                ('DeleteEmptyDirectory', '<STAGING_DIR>'),
+            ),
+        )
