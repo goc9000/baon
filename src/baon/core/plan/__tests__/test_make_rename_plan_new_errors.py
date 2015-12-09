@@ -57,3 +57,31 @@ class TestMakeRenamePlanErrors(MakeRenamePlanNewTestCaseBase):
             ),
             ('RenamedFilesListHasErrorsError',),
         )
+
+    def test_ok_if_renamed_files_have_warnings(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'file1'),
+                ('FILE', 'file2', 'file  2', ('SyntheticFileWarning',)),
+            ),
+            (
+                ('CreateDirectory', '<STAGING_DIR>'),
+                ('MoveFile', 'file2', '<STAGING_DIR>/file  2'),
+                ('MoveFile', '<STAGING_DIR>/file  2', 'file  2'),
+                ('DeleteEmptyDirectory', '<STAGING_DIR>'),
+            ),
+        )
+
+    def test_file_in_way_will_not_move(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'file1'),
+                ('FILE', 'file2', 'entry/file'),
+            ),
+            ('CannotCreateDestinationDirFileInTheWayWillNotMoveError', {'destination_dir': 'entry'}),
+            actual_files=(
+                ('FILE', 'file1'),
+                ('FILE', 'file2'),
+                ('FILE', 'entry'),
+            ),
+        )
