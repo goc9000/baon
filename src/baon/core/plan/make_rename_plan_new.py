@@ -54,6 +54,7 @@ class MakeRenamePlanInstance(object):
     destination_dirs = None
     staging_structure = None
     removed_entries_by_path = None
+    created_dirs = None
     steps = None
 
     def __init__(self, renamed_files):
@@ -73,6 +74,7 @@ class MakeRenamePlanInstance(object):
             self._phase2_move_files_to_staging()
             self._phase3_delete_emptied_directories()
             self._phase4_create_destination_directories()
+            self._phase5_move_files_to_final_destination()
             self._phase6_tear_down_staging_structure()
 
         return RenamePlan(self.steps)
@@ -190,13 +192,13 @@ class MakeRenamePlanInstance(object):
                 undeletable_dirs |= set(path.subpaths(exclude_root=True, exclude_self=True))
 
     def _phase4_create_destination_directories(self):
-        created_dirs = set()
+        self.created_dirs = set()
 
         for path in self.destination_dirs:
             if path.is_root():
                 continue
 
-            if path.is_root() or path.parent_path() in created_dirs:
+            if path.is_root() or path.parent_path() in self.created_dirs:
                 pass
             elif self._is_path_removed(path.parent_path()) or not os.path.exists(path.parent_path().real_path()):
                 raise CannotCreateDestinationDirInaccessibleParentError(path.path_text())
@@ -210,10 +212,11 @@ class MakeRenamePlanInstance(object):
                     raise CannotCreateDestinationDirNoWritePermissionForParentError(path.path_text())
 
                 self.steps.append(CreateDirectoryAction(path.real_path()))
-                created_dirs.add(path)
+                self.created_dirs.add(path)
+                self.removed_entries_by_path[path.parent_path()].discard(path.basename())
                 continue
 
-            if path in created_dirs or os.path.isdir(path.real_path()):
+            if path in self.created_dirs or os.path.isdir(path.real_path()):
                 continue  # already created
 
             raise CannotCreateDestinationDirFileInTheWayWillNotMoveError(path.path_text())
@@ -224,6 +227,24 @@ class MakeRenamePlanInstance(object):
             (path.parent_path() in self.removed_entries_by_path) and
             (path.basename() in self.removed_entries_by_path[path.parent_path()])
         )
+
+    def _phase5_move_files_to_final_destination(self):
+        for renamed_fref in self.renamed_files:
+            from_path = self._path_to_staging_dir(renamed_fref.path)
+            to_path = renamed_fref.path
+
+            if (
+                (not to_path.is_root()) and
+                (to_path.parent_path() not in self.created_dirs) and
+                (not os.access(to_path.parent_path().real_path(), os.W_OK))
+            ):
+                raise CannotMoveFileNoWritePermissionForDirError(
+                    from_path.path_text(),
+                    to_path.path_text(),
+                    from_path.parent_path().path_text(),
+                )
+
+            self.steps.append(MoveFileAction(from_path.real_path(), to_path.real_path()))
 
     def _phase6_tear_down_staging_structure(self):
         self.steps.extend(DeleteEmptyDirectoryAction(path.real_path()) for path in reversed(self.staging_structure))
