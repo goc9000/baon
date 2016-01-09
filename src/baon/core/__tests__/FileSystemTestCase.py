@@ -29,6 +29,7 @@ class FileSystemTestCase(TestCase):
 
     links_supported = None
     unicode_supported = None
+    case_insensitive_filesystem = None
 
     def setUp(self):
         super().setUp()
@@ -37,6 +38,7 @@ class FileSystemTestCase(TestCase):
 
         self.links_supported = self._check_links_supported()
         self.unicode_supported = os.path.supports_unicode_filenames
+        self.case_insensitive_filesystem = self._check_case_insensitive_filesystem()
 
     def tearDown(self):
         self.cleanup_files(delete_root=True)
@@ -55,6 +57,18 @@ class FileSystemTestCase(TestCase):
         os.unlink(full_link_path)
 
         return True
+
+    def _check_case_insensitive_filesystem(self):
+        full_path = self.resolve_test_path('test_file')
+
+        with open(full_path, 'w+') as _:
+            pass
+
+        is_case_insensitive = os.path.exists(self.resolve_test_path('TEST_FILE'))
+
+        os.unlink(full_path)
+
+        return is_case_insensitive
 
     def resolve_test_path(self, relative_path):
         return os.path.join(self._test_dir_path, relative_path)
@@ -212,6 +226,17 @@ def requires_unicode_support(test_method, cls_or_self=None):
     if not cls_or_self.links_supported:
         cls_or_self.skipTest(
             'Skipping {0}: Unicode filenames are not supported on this platform'.format(test_method.__name__))
+    else:
+        test_method(cls_or_self)
+
+
+@decorator
+def requires_case_insensitive_filesystem(test_method, cls_or_self=None):
+    assert cls_or_self is not None, 'This decorator can only be used on a class or instance method'
+
+    if not cls_or_self.case_insensitive_filesystem:
+        cls_or_self.skipTest(
+            'Skipping {0}: Test requires case insensitive filesystem'.format(test_method.__name__))
     else:
         test_method(cls_or_self)
 

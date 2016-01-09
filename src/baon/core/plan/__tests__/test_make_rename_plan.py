@@ -166,19 +166,6 @@ class TestMakeRenamePlan(MakeRenamePlanTestCaseBase):
             ),
         )
 
-    def test_change_case(self):
-        self._test_make_rename_plan(
-            (
-                ('FILE', 'file', 'FILE'),
-            ),
-            (
-                ('CreateDirectory', '<STAGING_DIR>'),
-                ('MoveFile', 'file', '<STAGING_DIR>/FILE'),
-                ('MoveFile', '<STAGING_DIR>/FILE', 'FILE'),
-                ('DeleteEmptyDirectory', '<STAGING_DIR>'),
-            ),
-        )
-
     def test_staging_dir_already_exists(self):
         self._test_make_rename_plan(
             (
