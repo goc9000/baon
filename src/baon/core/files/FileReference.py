@@ -96,6 +96,8 @@ class FileReference(object):
 
         file_type, path, *errors = file_test_repr
 
+        assert file_type in ['FILE', 'DIR']
+
         file_ref = FileReference(
             BAONPath.from_test_repr(base_path, path),
             file_type == 'DIR',

@@ -143,6 +143,8 @@ class FileSystemTestCase(TestCase):
                 self.make_dir(full_path1, **other_params)
             elif kind == 'LINK':
                 self.make_link(full_path1, full_path2, **other_params)
+            else:
+                raise AssertionError('Unrecognized file type {0}'.format(kind))
 
             rights = {k: v for k, v in params.items() if k in {'read', 'write', 'execute'}}
             if len(rights) > 0:
