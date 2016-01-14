@@ -15,6 +15,7 @@ from unittest import TestCase
 
 from decorator import decorator
 
+from baon.core.utils.file_utils import check_filesystem_at_path_case_insensitive
 from baon.core.utils.lang_utils import swallow_os_errors
 
 
@@ -59,16 +60,7 @@ class FileSystemTestCase(TestCase):
         return True
 
     def _check_case_insensitive_filesystem(self):
-        full_path = self.resolve_test_path('test_file')
-
-        with open(full_path, 'w+') as _:
-            pass
-
-        is_case_insensitive = os.path.exists(self.resolve_test_path('TEST_FILE'))
-
-        os.unlink(full_path)
-
-        return is_case_insensitive
+        return check_filesystem_at_path_case_insensitive(self._test_dir_path)
 
     def resolve_test_path(self, relative_path):
         return os.path.join(self._test_dir_path, relative_path)
