@@ -17,7 +17,14 @@ from baon.core.utils.str_utils import remove_prefix
 
 class MakeRenamePlanTestCaseBase(FileSystemTestCase):
 
-    def _test_make_rename_plan(self, renamed_files_repr, expected_result, actual_files=None, base_path_override=None):
+    def _test_make_rename_plan(
+        self,
+        renamed_files_repr,
+        expected_result,
+        actual_files=None,
+        base_path_override=None,
+        case_insensitive_override=None,
+    ):
         base_path = self.resolve_test_path('' if base_path_override is None else base_path_override)
         test_root = self.resolve_test_path('')
 
@@ -33,7 +40,7 @@ class MakeRenamePlanTestCaseBase(FileSystemTestCase):
 
         with self.temp_file_structure('', actual_files_repr):
             try:
-                plan = make_rename_plan(renamed_files)
+                plan = make_rename_plan(renamed_files, case_insensitive_filesystem=case_insensitive_override)
                 result = plan.test_repr()
             except MakeRenamePlanError as e:
                 result = e.test_repr()

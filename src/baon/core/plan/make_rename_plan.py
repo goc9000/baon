@@ -26,18 +26,20 @@ from baon.core.plan.__errors__.make_rename_plan_errors import \
     CannotCreateDestinationDirFileInTheWayWillNotMoveError, \
     RenamedFilesListHasErrorsError, \
     RenamedFilesListInvalidMultipleDestinationsError, \
-    RenamedFilesListInvalidSameDestinationError
+    RenamedFilesListInvalidSameDestinationError, \
+    CaseInsensitiveConflictInSourcePathsError, \
+    CaseInsensitiveConflictInDestinationPathsError
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
 from baon.core.plan.actions.DeleteEmptyDirectoryAction import DeleteEmptyDirectoryAction
 from baon.core.plan.actions.MoveFileAction import MoveFileAction
-from baon.core.utils.lang_utils import sets_union
-
+from baon.core.utils.file_utils import check_filesystem_at_path_case_insensitive
+from baon.core.utils.lang_utils import sets_union, pairwise
 
 STAGING_DIR_PATTERN = 'TMP_BAON_STAGING{0}'
 
 
-def make_rename_plan(renamed_files):
-    return MakeRenamePlanInstance(renamed_files).run()
+def make_rename_plan(*args, **kwargs):
+    return MakeRenamePlanInstance(*args, **kwargs).run()
 
 
 def staging_dir_variants():
@@ -48,25 +50,33 @@ def staging_dir_variants():
 
 
 class MakeRenamePlanInstance(object):
+    # Inputs
     renamed_files = None
+    case_insensitive_filesystem = None
+
+    # Cached
     base_path = None
     staging_dir = None
     destination_dirs = None
     staging_structure = None
     removed_entries_by_path = None
     created_dirs = None
+
+    # Outputs
     steps = None
 
-    def __init__(self, renamed_files):
+    def __init__(self, renamed_files, case_insensitive_filesystem=None):
         self.renamed_files = renamed_files
+        self.case_insensitive_filesystem = case_insensitive_filesystem
         self.steps = []
 
     def run(self):
         self._keep_only_changed_files()
         if len(self.renamed_files) > 0:
-            self._check_renamed_files_list()
             self._compute_base_path()
             self._check_base_path()
+            self._set_case_insensitive()
+            self._check_renamed_files_list()
 
             self._choose_name_for_staging_dir()
 
@@ -88,6 +98,12 @@ class MakeRenamePlanInstance(object):
         if any(renamed_fref.has_errors() for renamed_fref in self.renamed_files):
             raise RenamedFilesListHasErrorsError()
 
+        self._check_case_sensitive_sources_destinations()
+
+        if self.case_insensitive_filesystem:
+            self._check_case_insensitive_sources_destinations()
+
+    def _check_case_sensitive_sources_destinations(self):
         by_source = {}
         by_destination = {}
 
@@ -111,6 +127,19 @@ class MakeRenamePlanInstance(object):
             by_source[source] = destination
             by_destination[destination] = source
 
+    def _check_case_insensitive_sources_destinations(self):
+        key_getter = lambda path: ([component.lower() for component in path.components], path)
+
+        source_paths = sets_union([f.old_file_ref.path.subpaths(exclude_root=True) for f in self.renamed_files])
+        for path_a, path_b in pairwise(sorted(source_paths, key=key_getter)):
+            if path_a.equals_ignore_case(path_b):
+                raise CaseInsensitiveConflictInSourcePathsError(path_a.path_text(), path_b.path_text())
+
+        destination_paths = sets_union([f.path.subpaths(exclude_root=True) for f in self.renamed_files])
+        for path_a, path_b in pairwise(sorted(destination_paths, key=key_getter)):
+            if path_a.equals_ignore_case(path_b):
+                raise CaseInsensitiveConflictInDestinationPathsError(path_a.path_text(), path_b.path_text())
+
     def _compute_base_path(self):
         self.base_path = self.renamed_files[0].path.base_path
 
@@ -121,6 +150,10 @@ class MakeRenamePlanInstance(object):
             raise BasePathNotADirError(self.base_path)
         if not os.access(self.base_path, os.R_OK | os.W_OK | os.X_OK):
             raise NoPermissionsForBasePathError(self.base_path)
+
+    def _set_case_insensitive(self):
+        if self.case_insensitive_filesystem is None:
+            self.case_insensitive_filesystem = check_filesystem_at_path_case_insensitive(self.base_path)
 
     def _choose_name_for_staging_dir(self):
         taken_names_in_base = set(

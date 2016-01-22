@@ -128,3 +128,21 @@ class RenamedFilesListInvalidSameDestinationError(MakeRenamePlanError):
 
     def _get_format_string(self):
         return "Rename list is invalid: Both '{source_1}' and '{source_2}' are renamed to '{destination}'"
+
+
+class CaseInsensitiveConflictInSourcePathsError(MakeRenamePlanError):
+    def __init__(self, path_1, path_2):
+        super().__init__(path_1=path_1, path_2=path_2)
+
+    def _get_format_string(self):
+        return "Source paths '{path_1}' and '{path_2}' cannot be manipulated separately in a case insensitive file "\
+            "system"
+
+
+class CaseInsensitiveConflictInDestinationPathsError(MakeRenamePlanError):
+    def __init__(self, path_1, path_2):
+        super().__init__(path_1=path_1, path_2=path_2)
+
+    def _get_format_string(self):
+        return "Destination paths '{path_1}' and '{path_2}' cannot exist at the same time in a case insensitive file "\
+            "system"

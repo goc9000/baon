@@ -38,6 +38,13 @@ class BAONPath(object):
     def __hash__(self):
         return self.path_text().__hash__()
 
+    def equals_ignore_case(self, other):
+        self.assert_compatible_with(other)
+        return (
+            (len(self.components) == len(other.components)) and
+            all(a.lower() == b.lower() for a, b in zip(self.components, other.components))
+        )
+
     def is_root(self):
         return len(self.components) == 0
 
