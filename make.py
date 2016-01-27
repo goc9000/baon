@@ -153,6 +153,11 @@ def main():
                         help='Override list of UI packages to install/build')
 
     subparsers = parser.add_subparsers(title='commands', dest='command')
+
+    # HAX: sabotage prefix_chars to disable recognition of option arguments
+    sp = subparsers.add_parser('run', help='Run BAON directly from source', prefix_chars='\0')
+    sp.add_argument('run_args', nargs=argparse.REMAINDER, help='Program arguments')
+
     subparsers.add_parser('build', help='Build .whl packages for the core and GUIs')
     subparsers.add_parser('install', help='(Re)Install BAON in package form')
     subparsers.add_parser('uninstall', help='Uninstall BAON packages')
@@ -177,6 +182,10 @@ def main():
         install_app_packages(packages)
     elif raw_args.command == 'uninstall':
         uninstall_app_packages(packages)
-
+    elif raw_args.command == 'run':
+        subprocess.call([PYTHON, '-m', 'baon'] + raw_args.run_args, env=dict(
+            os.environ,
+            PYTHONPATH=os.pathsep.join(['packages/baon-core/src', 'packages/baon-gui-qt4/src']),
+        ))
 
 main()
