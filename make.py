@@ -172,6 +172,7 @@ def main():
     if raw_args.command == 'build':
         build_wheels(packages)
     elif raw_args.command == 'install':
+        build_wheels(packages)
         uninstall_app_packages(packages)
         install_app_packages(packages)
     elif raw_args.command == 'uninstall':
