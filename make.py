@@ -144,6 +144,11 @@ def uninstall_app_packages(packages):
         ensure_package_uninstalled(package)
 
 
+def clean_source():
+    silent_call(['find', 'packages', '-name', '*.pyc', '-delete'])
+    silent_call(['find', 'packages', '-name', '__pycache__', '-delete'])
+
+
 def main():
     known_uis = recon_ui_packages()
 
@@ -161,6 +166,8 @@ def main():
     subparsers.add_parser('build', help='Build .whl packages for the core and GUIs')
     subparsers.add_parser('install', help='(Re)Install BAON in package form')
     subparsers.add_parser('uninstall', help='Uninstall BAON packages')
+
+    subparsers.add_parser('clean_src', help='Clean source folders (remove .pyc files etc)')
 
     raw_args = parser.parse_args(sys.argv[1:])
 
@@ -187,5 +194,7 @@ def main():
             os.environ,
             PYTHONPATH=os.pathsep.join(['packages/baon-core/src', 'packages/baon-gui-qt4/src']),
         ))
+    elif raw_args.command == 'clean_src':
+        clean_source()
 
 main()
