@@ -76,18 +76,38 @@ def check_package_installed(package):
     return memo_val
 
 
-def install_package(package):
+def install_package(package, from_url=None):
     global memo_pkg_installed
 
-    print('Installing required package: {0}'.format(package))
     ensure_pip_installed()
-    silent_call([PIP, 'install', package])
+
+    if from_url is None:
+        print('Installing package: {0}'.format(package))
+        silent_call([PIP, 'install', package])
+    else:
+        print('Installing package: {0} from {1}'.format(package, from_url))
+        silent_call([PIP, 'install', from_url])
+
     memo_pkg_installed[package] = True
 
 
 def ensure_package_installed(package):
     if not check_package_installed(package):
         install_package(package)
+
+
+def uninstall_package(package):
+    global memo_pkg_installed
+
+    print('Uninstalling package: {0}'.format(package))
+    ensure_pip_installed()
+    silent_call([PIP, 'uninstall', '-y', package])
+    memo_pkg_installed[package] = False
+
+
+def ensure_package_uninstalled(package):
+    if check_package_installed(package):
+        uninstall_package(package)
 
 
 def build_wheels(uis):
@@ -114,11 +134,23 @@ def build_wheel(package):
         shutil.rmtree(egg_info_dir[0])
 
 
+def install_app_packages(uis):
+    for package in [CORE_PKG] + uis:
+        install_package(package, from_url=os.path.join('packages', package))
+
+
+def uninstall_app_packages(uis):
+    for package in [CORE_PKG] + uis:
+        ensure_package_uninstalled(package)
+
+
 def main():
     known_uis = recon_ui_packages()
 
     parser = argparse.ArgumentParser(description='Make script for BAON')
-    parser.add_argument('--build-wheels', action='store_true', help='Build .whl packages for the core and GUIs')
+    parser.add_argument('--build-pkg', action='store_true', help='Build .whl packages for the core and GUIs')
+    parser.add_argument('--install-pkg', action='store_true', help='(Re)Install BAON in package form')
+    parser.add_argument('--uninstall-pkg', action='store_true', help='Uninstall BAON packages')
     parser.add_argument('--ui-packages', default=','.join(known_uis), help='UI packages to install/build',
                         metavar='<ui1,ui2,...>')
 
@@ -130,8 +162,12 @@ def main():
             parser.error("No package for UI '{0}'".format(ui))
 
     to_do = []
-    if raw_args.build_wheels:
+    if raw_args.build_pkg:
         to_do.append(lambda: build_wheels(uis))
+    if raw_args.uninstall_pkg or raw_args.install_pkg:
+        to_do.append(lambda: uninstall_app_packages(uis))
+    if raw_args.install_pkg:
+        to_do.append(lambda: install_app_packages(uis))
 
     if len(to_do) == 0:
         parser.print_usage()
