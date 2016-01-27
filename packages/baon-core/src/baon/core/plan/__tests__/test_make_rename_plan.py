@@ -88,6 +88,20 @@ class TestMakeRenamePlan(MakeRenamePlanTestCaseBase):
             ),
         )
 
+    def test_file_moves_in_place_of_now_empty_dir(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'dir_then_file/file', 'dir_then_file'),
+            ),
+            (
+                ('CreateDirectory', '<STAGING_DIR>'),
+                ('MoveFile', 'dir_then_file/file', '<STAGING_DIR>/dir_then_file'),
+                ('DeleteEmptyDirectory', 'dir_then_file'),
+                ('MoveFile', '<STAGING_DIR>/dir_then_file', 'dir_then_file'),
+                ('DeleteEmptyDirectory', '<STAGING_DIR>'),
+            ),
+        )
+
     def test_chain(self):
         self._test_make_rename_plan(
             (
