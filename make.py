@@ -110,8 +110,8 @@ def ensure_package_uninstalled(package):
         uninstall_package(package)
 
 
-def build_wheels(uis):
-    for package in [CORE_PKG] + uis:
+def build_wheels(packages):
+    for package in packages:
         build_wheel(package)
 
 
@@ -134,13 +134,13 @@ def build_wheel(package):
         shutil.rmtree(egg_info_dir[0])
 
 
-def install_app_packages(uis):
-    for package in [CORE_PKG] + uis:
+def install_app_packages(packages):
+    for package in packages:
         install_package(package, from_url=os.path.join('packages', package))
 
 
-def uninstall_app_packages(uis):
-    for package in [CORE_PKG] + uis:
+def uninstall_app_packages(packages):
+    for package in packages:
         ensure_package_uninstalled(package)
 
 
@@ -148,32 +148,34 @@ def main():
     known_uis = recon_ui_packages()
 
     parser = argparse.ArgumentParser(description='Make script for BAON')
-    parser.add_argument('--build-pkg', action='store_true', help='Build .whl packages for the core and GUIs')
-    parser.add_argument('--install-pkg', action='store_true', help='(Re)Install BAON in package form')
-    parser.add_argument('--uninstall-pkg', action='store_true', help='Uninstall BAON packages')
-    parser.add_argument('--ui-packages', default=','.join(known_uis), help='UI packages to install/build',
-                        metavar='<ui1,ui2,...>')
+
+    parser.add_argument('--ui-packages', default=','.join(known_uis), metavar='<ui1,ui2,...>',
+                        help='Override list of UI packages to install/build')
+
+    subparsers = parser.add_subparsers(title='commands', dest='command')
+    subparsers.add_parser('build', help='Build .whl packages for the core and GUIs')
+    subparsers.add_parser('install', help='(Re)Install BAON in package form')
+    subparsers.add_parser('uninstall', help='Uninstall BAON packages')
 
     raw_args = parser.parse_args(sys.argv[1:])
+
+    if raw_args.command is None:
+        parser.print_usage()
+        return
 
     uis = [ui_spec.strip() for ui_spec in re.split(',', raw_args.ui_packages) if ui_spec.strip() != '']
     for ui in uis:
         if ui not in known_uis:
             parser.error("No package for UI '{0}'".format(ui))
+    packages = [CORE_PKG] + uis
 
-    to_do = []
-    if raw_args.build_pkg:
-        to_do.append(lambda: build_wheels(uis))
-    if raw_args.uninstall_pkg or raw_args.install_pkg:
-        to_do.append(lambda: uninstall_app_packages(uis))
-    if raw_args.install_pkg:
-        to_do.append(lambda: install_app_packages(uis))
+    if raw_args.command == 'build':
+        build_wheels(packages)
+    elif raw_args.command == 'install':
+        uninstall_app_packages(packages)
+        install_app_packages(packages)
+    elif raw_args.command == 'uninstall':
+        uninstall_app_packages(packages)
 
-    if len(to_do) == 0:
-        parser.print_usage()
-        return
-
-    for action in to_do:
-        action()
 
 main()
