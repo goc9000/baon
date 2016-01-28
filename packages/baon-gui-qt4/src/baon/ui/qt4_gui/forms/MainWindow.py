@@ -186,6 +186,11 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         if args.rules_text is not None:
             self._rules_editor.set_rules(args.rules_text)
 
+    @pyqtSlot()
+    def show_first_time(self):
+        self.show()
+        self.raise_()
+
     @pyqtSlot(BAONStatus)
     def report_status(self, status):
         files_busy = \

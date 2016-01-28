@@ -88,7 +88,7 @@ class BAONQtApplication(QApplication):
 
         # Core vs. main window
 
-        self._core.prologue_finished.connect(self._main_window.show)
+        self._core.prologue_finished.connect(self._main_window.show_first_time)
 
         self._core.status_changed.connect(self._main_window.report_status)
         self._core.scanned_files_updated.connect(self._main_window.update_scanned_files)
