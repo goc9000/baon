@@ -172,6 +172,117 @@ def compile_qt4_resources():
         ])
 
 
+def build_osx_app(packages):
+    ensure_package_installed('py2app')
+
+    with tempfile.TemporaryDirectory() as work_dir:
+        build_osx_icns(work_dir)
+
+        includes_option = []
+        if 'baon-gui-qt4' in packages:
+            includes_option.append('sip')
+
+        # The modules for all desired UIs need to be included explicitly, as BAON imports them dynamically
+        for package in packages:
+            package_ui_path = os.path.join('packages', package, 'src', 'baon', 'ui')
+            for module in os.listdir(package_ui_path):
+                if os.path.isdir(os.path.join(package_ui_path, module)):
+                    includes_option.append('baon.ui.' + module)
+
+        # BAON needs to be included as-is because ply uses inspect on its source, so the .pyc files are not sufficient
+        packages_option = ['baon']
+
+        # Merge all the code in one blob as py2app doesn't handle namespace packages well
+        for package in packages:
+            silent_call(['cp', '-r', os.path.join('packages', package, 'src', 'baon'), work_dir])
+
+        plist = dict(
+            CFBundleDisplayName=APP_NAME,
+            CFBundleName=APP_NAME,
+
+            CFBundleIdentifier='com.goc9000.osx.baon',
+            CFBundleVersion='3.0.0',
+            CFBundleShortVersionString='3.0',
+            LSApplicationCategoryType='public.app-category.utilities',
+
+            CFBundleDocumentTypes=[
+                dict(
+                    CFBundleTypeName='Folder',
+                    CFBundleTypeOSTypes=['fold'],
+                    CFBundleTypeRole='Viewer',
+                ),
+            ],
+
+            CFBundleGetInfoString='Mass file renamer with ANTLR-like syntax',
+            NSHumanReadableCopyright=u"Copyright © 2012-present, Cristian Dinu"
+        )
+
+        with open(os.path.join(work_dir, '{0}.py'.format(APP_NAME)), 'w') as f:
+            f.write("\n".join([
+                'from baon.core.app_args import parse_app_args',
+                'from baon.ui.ui_info import discover_uis',
+                '',
+                'ui_info = discover_uis()',
+                'args = parse_app_args(ui_info)',
+                'args.ui.start_function(args)',
+            ]))
+
+        with open(os.path.join(work_dir, 'setup.py'), 'w') as f:
+            f.write("\n".join([
+                "from setuptools import setup",
+                "",
+                "setup(",
+                "    app=['{0}.py'],".format(APP_NAME),
+                "    options={'py2app': dict(",
+                "        argv_emulation=True,",
+                "        iconfile='{0}.icns',".format(APP_NAME),
+                "        includes={0},".format(repr(includes_option)),
+                "        packages={0},".format(repr(packages_option)),
+                "        plist={0},".format(repr(plist)),
+                "    )},",
+                "    setup_requires=['py2app'],",
+                ")",
+            ]))
+
+        silent_call([PYTHON, 'setup.py', 'py2app'], cwd=work_dir)
+
+        if not os.path.isdir(DIST_DIR):
+            os.mkdir(DIST_DIR)
+
+        final_app_dir = os.path.join(DIST_DIR, '{0}.app'.format(APP_NAME))
+        if os.path.isdir(final_app_dir):
+            shutil.rmtree(final_app_dir)
+
+        os.rename(
+            os.path.join(work_dir, 'dist', '{0}.app'.format(APP_NAME)),
+            final_app_dir,
+        )
+
+
+def build_osx_icns(work_dir):
+    iconset_dir = os.path.join(work_dir, '{0}.iconset'.format(APP_NAME))
+
+    os.mkdir(iconset_dir)
+
+    for size in [16, 32, 64, 128, 256, 512]:
+        for retina in [False, True]:
+            silent_call([
+                'sips',
+                '-z',
+                str((size * 2) if retina else size),
+                str((size * 2) if retina else size),
+                os.path.join('resources', 'app_icon.png'),
+                '--out',
+                os.path.join(iconset_dir, 'icon_{0}x{0}{1}.png'.format(size, '@2x' if retina else '')),
+            ])
+
+    silent_call(['iconutil', '-c', 'icns', iconset_dir, '-o', os.path.join(work_dir, '{0}.icns'.format(APP_NAME))])
+
+    shutil.rmtree(iconset_dir)
+
+    return '{0}.icns'.format(APP_NAME)
+
+
 def main():
     known_uis = recon_ui_packages()
 
@@ -187,6 +298,7 @@ def main():
     sp.add_argument('run_args', nargs=argparse.REMAINDER, help='Program arguments')
 
     subparsers.add_parser('build', help='Build .whl packages for the core and GUIs')
+    subparsers.add_parser('build_app', help='Build OS X app')
     subparsers.add_parser('install', help='(Re)Install {0} in package form'.format(APP_NAME))
     subparsers.add_parser('uninstall', help='Uninstall {0} packages'.format(APP_NAME))
 
@@ -208,6 +320,8 @@ def main():
 
     if raw_args.command == 'build':
         build_wheels(packages)
+    elif raw_args.command == 'build_app':
+        build_osx_app(packages)
     elif raw_args.command == 'install':
         build_wheels(packages)
         uninstall_app_packages(packages)
