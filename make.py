@@ -10,6 +10,8 @@ import sys
 import tempfile
 
 
+APP_NAME = 'BAON'
+
 PIP = 'pip3'
 PYTHON = 'python3'
 
@@ -177,7 +179,7 @@ def compile_qt4_resources():
 def main():
     known_uis = recon_ui_packages()
 
-    parser = argparse.ArgumentParser(description='Make script for BAON')
+    parser = argparse.ArgumentParser(description='Make script for {0}'.format(APP_NAME))
 
     parser.add_argument('--ui-packages', default=','.join(known_uis), metavar='<ui1,ui2,...>',
                         help='Override list of UI packages to install/build')
@@ -185,12 +187,12 @@ def main():
     subparsers = parser.add_subparsers(title='commands', dest='command')
 
     # HAX: sabotage prefix_chars to disable recognition of option arguments
-    sp = subparsers.add_parser('run', help='Run BAON directly from source', prefix_chars='\0')
+    sp = subparsers.add_parser('run', help='Run {0} directly from source'.format(APP_NAME), prefix_chars='\0')
     sp.add_argument('run_args', nargs=argparse.REMAINDER, help='Program arguments')
 
     subparsers.add_parser('build', help='Build .whl packages for the core and GUIs')
-    subparsers.add_parser('install', help='(Re)Install BAON in package form')
-    subparsers.add_parser('uninstall', help='Uninstall BAON packages')
+    subparsers.add_parser('install', help='(Re)Install {0} in package form'.format(APP_NAME))
+    subparsers.add_parser('uninstall', help='Uninstall {0} packages'.format(APP_NAME))
 
     subparsers.add_parser('clean_src', help='Clean source folders (remove .pyc files etc)')
 
