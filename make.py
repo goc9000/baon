@@ -20,7 +20,7 @@ DIST_DIR = 'dist'
 CORE_PKG = 'baon-core'
 
 
-memo_pip_installed = None
+memo_program_installed = dict(which=True)
 memo_pkg_installed = dict()
 
 
@@ -39,34 +39,33 @@ def recon_ui_packages():
     ]
 
 
-def silent_call(*args, **kwargs):
-    return subprocess.call(*args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs) == 0
+def silent_call(program_args, *args, **kwargs):
+    ensure_program_installed(program_args[0])
+
+    return subprocess.call(program_args, *args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs) == 0
 
 
-def check_pip_installed():
-    global memo_pip_installed
+def check_program_installed(program):
+    global memo_program_installed
 
-    if memo_pip_installed is not None:
-        return memo_pip_installed
+    memo_val = memo_program_installed.get(program)
+    if memo_val is not None:
+        return memo_val
 
-    try:
-        silent_call(PIP)
-        memo_pip_installed = True
-    except:
-        memo_pip_installed = False
+    memo_val = silent_call(['which', program])
 
-    return memo_pip_installed
+    memo_program_installed[program] = memo_val
+
+    return memo_val
 
 
-def ensure_pip_installed():
-    if not check_pip_installed():
-        fail('ERROR: {0} is not installed, fix this and retry', PIP)
+def ensure_program_installed(program):
+    if not check_program_installed(program):
+        fail('ERROR: {0} is not installed, fix this and retry', program)
 
 
 def check_package_installed(package):
     global memo_pkg_installed
-
-    ensure_pip_installed()
 
     memo_val = memo_pkg_installed.get(package)
     if memo_val is not None:
@@ -81,8 +80,6 @@ def check_package_installed(package):
 
 def install_package(package, from_url=None):
     global memo_pkg_installed
-
-    ensure_pip_installed()
 
     if from_url is None:
         print('Installing package: {0}'.format(package))
@@ -103,7 +100,6 @@ def uninstall_package(package):
     global memo_pkg_installed
 
     print('Uninstalling package: {0}'.format(package))
-    ensure_pip_installed()
     silent_call([PIP, 'uninstall', '-y', package])
     memo_pkg_installed[package] = False
 
