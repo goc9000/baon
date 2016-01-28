@@ -7,8 +7,10 @@
 # Licensed under the GPL-3
 
 
+import baon.ui.qt4_gui.resources
+
 from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot
-from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QGroupBox, QHBoxLayout, QSizePolicy, QVBoxLayout,\
+from PyQt4.QtGui import QCheckBox, QDialog, QDialogButtonBox, QGroupBox, QHBoxLayout, QIcon, QSizePolicy, QVBoxLayout,\
     QMessageBox
 
 from baon.core.files.BAONPath import BAONPath
@@ -190,6 +192,9 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     def show_first_time(self):
         self.show()
         self.raise_()
+
+        # We need to do this here as otherwise the operation may fail on some platforms
+        self.setWindowIcon(QIcon(':/app_icon.png'))
 
     @pyqtSlot(BAONStatus)
     def report_status(self, status):

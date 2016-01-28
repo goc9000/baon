@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 
 PIP = 'pip3'
@@ -149,6 +150,30 @@ def clean_source():
     silent_call(['find', 'packages', '-name', '__pycache__', '-delete'])
 
 
+def compile_qt4_resources():
+    with tempfile.TemporaryDirectory() as work_dir:
+        shutil.copy(os.path.join('resources', 'app_icon.png'), os.path.join(work_dir, 'app_icon.png'))
+
+        with open(os.path.join(work_dir, 'resources.qrc'), 'w') as f:
+            f.write("\n".join([
+                '<!DOCTYPE RCC>',
+                '<RCC version="1.0">',
+                '  <qresource>',
+                '    <file>app_icon.png</file>',
+                '  </qresource>',
+                '</RCC>',
+            ]))
+
+        silent_call([
+            'pyrcc4',
+            '-no-compress',
+            '-py3',
+            os.path.join(work_dir, 'resources.qrc'),
+            '-o',
+            os.path.join('packages', 'baon-gui-qt4', 'src', 'baon', 'ui', 'qt4_gui', 'resources.py'),
+        ])
+
+
 def main():
     known_uis = recon_ui_packages()
 
@@ -168,6 +193,8 @@ def main():
     subparsers.add_parser('uninstall', help='Uninstall BAON packages')
 
     subparsers.add_parser('clean_src', help='Clean source folders (remove .pyc files etc)')
+
+    subparsers.add_parser('compile_qt4_res', help='Compile QT4 GUI resources')
 
     raw_args = parser.parse_args(sys.argv[1:])
 
@@ -196,5 +223,7 @@ def main():
         ))
     elif raw_args.command == 'clean_src':
         clean_source()
+    elif raw_args.command == 'compile_qt4_res':
+        compile_qt4_resources()
 
 main()
