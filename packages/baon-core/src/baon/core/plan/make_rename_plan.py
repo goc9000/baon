@@ -32,7 +32,7 @@ from baon.core.plan.__errors__.make_rename_plan_errors import \
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
 from baon.core.plan.actions.DeleteEmptyDirectoryAction import DeleteEmptyDirectoryAction
 from baon.core.plan.actions.MoveFileAction import MoveFileAction
-from baon.core.utils.file_utils import check_filesystem_at_path_case_insensitive
+from baon.core.utils.file_utils import check_filesystem_at_path_case_insensitive, check_file_rights
 from baon.core.utils.lang_utils import sets_union, pairwise
 
 STAGING_DIR_PATTERN = 'TMP_BAON_STAGING{0}'
@@ -148,7 +148,7 @@ class MakeRenamePlanInstance(object):
             raise BasePathNotFoundError(self.base_path)
         if not os.path.isdir(self.base_path):
             raise BasePathNotADirError(self.base_path)
-        if not os.access(self.base_path, os.R_OK | os.W_OK | os.X_OK):
+        if not check_file_rights(self.base_path, read=True, write=True, execute=True):
             raise NoPermissionsForBasePathError(self.base_path)
 
     def _set_case_insensitive(self):
@@ -192,7 +192,7 @@ class MakeRenamePlanInstance(object):
             from_path = renamed_fref.old_file_ref.path
             to_path = self._path_to_staging_dir(renamed_fref.path)
 
-            if not os.access(from_path.parent_path().real_path(), os.R_OK | os.W_OK | os.X_OK):
+            if not check_file_rights(from_path.parent_path().real_path(), read=True, write=True, execute=True):
                 raise CannotMoveFileNoWritePermissionForDirError(
                     from_path.path_text(),
                     to_path.path_text(),
@@ -218,7 +218,8 @@ class MakeRenamePlanInstance(object):
             if path in self.removed_entries_by_path:
                 files_in_dir -= self.removed_entries_by_path[path]
 
-            if len(files_in_dir) == 0 and os.access(path.parent_path().real_path(), os.R_OK | os.W_OK | os.X_OK):
+            if len(files_in_dir) == 0 and \
+                    check_file_rights(path.parent_path().real_path(), read=True, write=True, execute=True):
                 self.steps.append(DeleteEmptyDirectoryAction(path.real_path()))
                 self.removed_entries_by_path[path.parent_path()].add(path.basename())
             else:
@@ -237,11 +238,11 @@ class MakeRenamePlanInstance(object):
                 raise CannotCreateDestinationDirInaccessibleParentError(path.path_text())
             elif not os.path.isdir(path.parent_path().real_path()):
                 raise CannotCreateDestinationDirUnexpectedNonDirParentError(path.path_text())
-            elif not os.access(path.parent_path().real_path(), os.R_OK | os.X_OK):
+            elif not check_file_rights(path.parent_path().real_path(), read=True, execute=True):
                 raise CannotCreateDestinationDirNoReadPermissionForParentError(path.path_text())
 
             if self._is_path_removed(path) or not os.path.exists(path.real_path()):
-                if not os.access(path.parent_path().real_path(), os.W_OK):
+                if not check_file_rights(path.parent_path().real_path(), write=True):
                     raise CannotCreateDestinationDirNoWritePermissionForParentError(path.path_text())
 
                 self.steps.append(CreateDirectoryAction(path.real_path()))
@@ -269,7 +270,7 @@ class MakeRenamePlanInstance(object):
             if (
                 (not to_path.is_root()) and
                 (to_path.parent_path() not in self.created_dirs) and
-                (not os.access(to_path.parent_path().real_path(), os.W_OK))
+                (not check_file_rights(to_path.parent_path().real_path(), write=True))
             ):
                 raise CannotMoveFileNoWritePermissionForDirError(
                     from_path.path_text(),

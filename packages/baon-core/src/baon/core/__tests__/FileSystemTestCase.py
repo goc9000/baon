@@ -8,14 +8,13 @@
 
 
 import os
-import stat
 import tempfile
 from contextlib import contextmanager
 from unittest import TestCase
 
 from decorator import decorator
 
-from baon.core.utils.file_utils import check_filesystem_at_path_case_insensitive
+from baon.core.utils.file_utils import check_filesystem_at_path_case_insensitive, set_file_rights
 from baon.core.utils.lang_utils import swallow_os_errors
 
 
@@ -100,23 +99,7 @@ class FileSystemTestCase(TestCase):
             self.set_rights(link_path, read=read, write=write, execute=execute)
 
     def set_rights(self, path, read=None, write=None, execute=None):
-        def adjust_bits(mode, bitmask, condition):
-            if condition is True:
-                return mode | bitmask
-            elif condition is False:
-                return mode & ~bitmask
-            else:
-                return mode
-
-        full_path = self.resolve_test_path(path)
-
-        current_mode = os.lstat(full_path).st_mode
-
-        current_mode = adjust_bits(current_mode, stat.S_IRUSR, read)
-        current_mode = adjust_bits(current_mode, stat.S_IWUSR, write)
-        current_mode = adjust_bits(current_mode, stat.S_IXUSR, execute)
-
-        os.lchmod(full_path, current_mode)
+        set_file_rights(self.resolve_test_path(path), read=read, write=write, execute=execute)
 
     def make_file_structure(self, base_dir, files_repr):
         deferred_set_rights = {}
