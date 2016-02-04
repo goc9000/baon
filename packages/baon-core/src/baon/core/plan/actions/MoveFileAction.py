@@ -26,12 +26,12 @@ class MoveFileAction(RenamePlanAction):
 
     def execute(self):
         try:
-            if not os.path.exists(self.from_path):
-                raise CannotMoveFileDoesNotExistError(self.from_path, self.to_path)
             if os.path.exists(self.to_path):
                 raise CannotMoveFileDestinationExistsError(self.from_path, self.to_path)
 
             os.rename(self.from_path, self.to_path)
+        except FileNotFoundError:
+            raise CannotMoveFileDoesNotExistError(self.from_path, self.to_path) from None
         except PermissionError:
             raise CannotMoveFileNoPermissionsError(self.from_path, self.to_path) from None
         except OSError as e:

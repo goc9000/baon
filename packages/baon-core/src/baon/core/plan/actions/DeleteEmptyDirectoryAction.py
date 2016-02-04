@@ -25,16 +25,14 @@ class DeleteEmptyDirectoryAction(RenamePlanAction):
 
     def execute(self):
         try:
-            if os.path.isfile(self.path):
-                raise CannotDeleteDirIsAFileError(self.path)
-            if not os.path.exists(self.path):
-                raise CannotDeleteDirDoesNotExistError(self.path)
-
-            is_empty = (len(os.listdir(self.path)) == 0)
-            if not is_empty:
+            if len(os.listdir(self.path)) > 0:
                 raise CannotDeleteDirNotEmptyError(self.path)
 
             os.rmdir(self.path)
+        except NotADirectoryError:
+            raise CannotDeleteDirIsAFileError(self.path) from None
+        except FileNotFoundError:
+            raise CannotDeleteDirDoesNotExistError(self.path) from None
         except PermissionError:
             raise CannotDeleteDirNoPermissionsError(self.path) from None
         except OSError as e:
