@@ -40,9 +40,17 @@ class BasePathIsNotADirectoryError(ScanFilesError):
         return "'{path}' is not a directory"
 
 
-class CannotExploreBasePathError(ScanFilesError):
+class NoPermissionsForBasePathError(ScanFilesError):
+    def __init__(self, path):
+        super().__init__(path=path)
+
+    def _get_format_string(self):
+        return "We do not have permission to open and scan the path '{path}'"
+
+
+class CannotScanBasePathOtherError(ScanFilesError):
     def __init__(self, path, inner_error):
         super().__init__(path=path, inner_error=inner_error)
 
     def _get_format_string(self):
-        return "Cannot open directory '{path}' for exploration"
+        return "Cannot scan path '{path}' due to a special error: {inner_error}"

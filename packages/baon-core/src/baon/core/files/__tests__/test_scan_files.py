@@ -10,7 +10,7 @@
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_links_support, requires_unicode_support
 from baon.core.__tests__.abort_test_utils import abort_after_n_calls
 from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
-    CannotExploreBasePathError, ScanFilesAbortedError
+    NoPermissionsForBasePathError, ScanFilesAbortedError
 from baon.core.files.scan_files import scan_files
 from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
 
@@ -209,11 +209,19 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
                 scan_files(self.resolve_test_path('file1'))
 
     def test_scan_cannot_explore(self):
-        with self.assertRaises(CannotExploreBasePathError):
+        with self.assertRaises(NoPermissionsForBasePathError):
             with self.temp_file_structure('', (
                 ('DIR', 'no_read_dir', {'read': False}),
             )):
                 scan_files(self.resolve_test_path('no_read_dir'))
+
+    def test_scan_cannot_access_base_dir(self):
+        with self.assertRaises(NoPermissionsForBasePathError):
+            with self.temp_file_structure('', (
+                ('DIR', 'no_traverse_dir', {'execute': False}),
+                ('DIR', 'no_traverse_dir/subdir'),
+            )):
+                scan_files(self.resolve_test_path('no_traverse_dir/subdir'))
 
     def test_reports_progress(self):
         with self.verify_reported_progress() as on_progress:

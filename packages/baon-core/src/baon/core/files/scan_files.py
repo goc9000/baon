@@ -14,7 +14,7 @@ from baon.core.files.BAONPath import BAONPath
 from baon.core.files.FileReference import FileReference
 from baon.core.files.__errors__.file_reference_errors import CannotExploreDirectoryError
 from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
-    CannotExploreBasePathError, ScanFilesAbortedError
+    CannotScanBasePathOtherError, NoPermissionsForBasePathError, ScanFilesAbortedError
 from baon.core.utils.lang_utils import is_callable
 from baon.core.utils.progress.ProgressTracker import ProgressTracker
 
@@ -26,14 +26,16 @@ def scan_files(base_path, recursive=True, on_progress=None, check_abort=None):
 
     progress_tracker.report_more_total(1)
 
-    if not os.path.exists(base_path):
-        raise BasePathDoesNotExistError(path=base_path)
-    if not os.path.isdir(base_path):
-        raise BasePathIsNotADirectoryError(path=base_path)
     try:
         os.listdir(base_path)
+    except PermissionError:
+        raise NoPermissionsForBasePathError(path=base_path) from None
+    except FileNotFoundError:
+        raise BasePathDoesNotExistError(path=base_path) from None
+    except NotADirectoryError:
+        raise BasePathIsNotADirectoryError(path=base_path) from None
     except OSError as e:
-        raise CannotExploreBasePathError(path=base_path, inner_error=e) from None
+        raise CannotScanBasePathOtherError(path=base_path, inner_error=e) from None
 
     scan_queue = deque([BAONPath(base_path)])
     files = []
