@@ -75,19 +75,17 @@ class FileSystemTestCase(TestCase):
             if contents is not None:
                 f.write(contents)
 
-        if read is not None or write is not None or execute is not None:
-            self.set_rights(path, read=read, write=write, execute=execute)
+        self.set_rights(path, read=read, write=write, execute=execute)
 
-    def make_dir(self, path, read=None, write=None, execute=None):
+    def make_dir(self, path, read=None, write=None, traverse=None):
         full_dir_path = self.resolve_test_path(path)
 
         if not os.path.isdir(full_dir_path):
             os.makedirs(full_dir_path)
 
-        if read is not None or write is not None or execute is not None:
-            self.set_rights(path, read=read, write=write, execute=execute)
+        self.set_rights(path, read=read, write=write, traverse=traverse)
 
-    def make_link(self, link_path, target_path, read=None, write=None, execute=None):
+    def make_link(self, link_path, target_path, read=None, write=None, execute=None, traverse=None):
         dir_name, _ = os.path.split(link_path)
         self.make_dir(dir_name)
 
@@ -95,47 +93,44 @@ class FileSystemTestCase(TestCase):
         full_target_path = self.resolve_test_path(target_path)
         os.symlink(full_target_path, full_link_path)
 
-        if read is not None or write is not None or execute is not None:
-            self.set_rights(link_path, read=read, write=write, execute=execute)
+        self.set_rights(link_path, read=read, write=write, execute=execute, traverse=traverse)
 
-    def set_rights(self, path, read=None, write=None, execute=None):
-        set_file_rights(self.resolve_test_path(path), read=read, write=write, execute=execute)
+    def set_rights(self, path, read=None, write=None, execute=None, traverse=None):
+        set_file_rights(self.resolve_test_path(path), read=read, write=write, execute=execute, traverse=traverse)
 
     def make_file_structure(self, base_dir, files_repr):
         deferred_set_rights = {}
 
         for file_repr in files_repr:
-            kind, path1, path2, params = _parse_file_repr(file_repr)
+            kind, path1, path2, permissions = _parse_file_repr(file_repr)
 
             full_path1 = os.path.join(base_dir, path1)
             full_path2 = os.path.join(base_dir, path2) if path2 is not None else None
 
-            other_params = {k: v for k, v in params.items() if k not in {'read', 'write', 'execute'}}
-
             if kind == 'FILE':
-                self.make_file(full_path1, **other_params)
+                self.make_file(full_path1)
             elif kind == 'DIR':
-                self.make_dir(full_path1, **other_params)
+                self.make_dir(full_path1)
             elif kind == 'LINK':
-                self.make_link(full_path1, full_path2, **other_params)
+                self.make_link(full_path1, full_path2)
             else:
                 raise AssertionError('Unrecognized file type {0}'.format(kind))
 
-            rights = {k: v for k, v in params.items() if k in {'read', 'write', 'execute'}}
-            if len(rights) > 0:
-                deferred_set_rights[path1] = rights
+            if len(permissions) > 0:
+                deferred_set_rights[path1] = permissions
 
         for path in reversed(sorted(deferred_set_rights.keys())):
             self.set_rights(os.path.join(base_dir, path), **deferred_set_rights[path])
 
     def cleanup_files(self, path='', delete_root=False):
-        self.set_rights(path, read=True, write=True, execute=True)
-
         full_path = self.resolve_test_path(path)
 
         if os.path.isdir(full_path):
+            self.set_rights(path, read=True, write=True, traverse=True)
             for item in os.listdir(full_path):
                 self.cleanup_files(os.path.join(path, item), True)
+        else:
+            self.set_rights(path, read=True, write=True)
 
         if delete_root:
             if os.path.isdir(full_path):
@@ -232,10 +227,20 @@ def _parse_file_repr(file_repr):
         path1 = file_repr[1]
         path2 = file_repr[2] if arity > 1 else None
 
-        params = dict()
-        if len(file_repr) > 1 + arity:
-            params = file_repr[1 + arity]
+        permissions = dict()
 
-        return kind, path1, path2, params
+        for item in file_repr[1 + arity:]:
+            if item == '#noread':
+                permissions['read'] = False
+            elif item == '#nowrite':
+                permissions['write'] = False
+            elif item == '#noexecute':
+                permissions['execute'] = False
+            elif item == '#notraverse':
+                permissions['traverse'] = False
+            else:
+                raise ValueError()
+
+        return kind, path1, path2, permissions
     except Exception:
         raise AssertionError('Malformed test file representation: {0}'.format(file_repr)) from None

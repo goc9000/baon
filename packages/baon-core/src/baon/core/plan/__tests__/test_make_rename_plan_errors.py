@@ -42,7 +42,7 @@ class TestMakeRenamePlanErrors(MakeRenamePlanTestCaseBase):
                         ('FILE', 'dummy', 'dummy_renamed'),
                     ),
                     actual_files=(
-                        ('DIR', 'locked', {permission: False}),
+                        ('DIR', 'locked', '#noread'),
                         ('FILE', 'locked/dummy'),
                     ),
                     base_path_override='locked',

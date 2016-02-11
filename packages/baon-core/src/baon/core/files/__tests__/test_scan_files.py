@@ -156,15 +156,15 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
     PERMISSIONS_FILE_STRUCTURE = (
         ('FILE', 'normal_dir/file11.txt'),
         ('FILE', 'normal_dir/file12.txt'),
-        ('DIR', 'no_read_dir', {'read': False}),
+        ('DIR', 'no_read_dir', '#noread'),
         ('FILE', 'no_read_dir/file21.txt'),
         ('FILE', 'no_read_dir/file22.txt'),
-        ('DIR', 'no_exec_dir', {'execute': False}),
-        ('FILE', 'no_exec_dir/file31.txt'),
-        ('FILE', 'no_exec_dir/file32.txt'),
+        ('DIR', 'no_traverse_dir', '#notraverse'),
+        ('FILE', 'no_traverse_dir/file31.txt'),
+        ('FILE', 'no_traverse_dir/file32.txt'),
         ('FILE', 'normal.txt'),
-        ('FILE', 'no_read.txt', {'read': False}),
-        ('FILE', 'no_exec.txt', {'execute': False}),
+        ('FILE', 'no_read.txt', '#noread'),
+        ('FILE', 'no_exec.txt', '#noexecute'),
     )
 
     def test_permissions_non_recursive(self):
@@ -172,8 +172,8 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             setup_files=self.PERMISSIONS_FILE_STRUCTURE,
             recursive=False,
             expected_result=(
-                ('DIR', 'no_exec_dir'),
                 ('DIR', 'no_read_dir'),
+                ('DIR', 'no_traverse_dir'),
                 ('DIR', 'normal_dir'),
                 ('FILE', 'no_exec.txt'),
                 ('FILE', 'no_read.txt'),
@@ -186,9 +186,9 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             setup_files=self.PERMISSIONS_FILE_STRUCTURE,
             recursive=True,
             expected_result=(
-                ('FILE', 'no_exec_dir/file31.txt'),
-                ('FILE', 'no_exec_dir/file32.txt'),
                 ('DIR', 'no_read_dir', ('CannotExploreDirectoryError',)),
+                ('FILE', 'no_traverse_dir/file31.txt'),
+                ('FILE', 'no_traverse_dir/file32.txt'),
                 ('FILE', 'normal_dir/file11.txt'),
                 ('FILE', 'normal_dir/file12.txt'),
                 ('FILE', 'no_exec.txt'),
@@ -211,14 +211,14 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
     def test_scan_cannot_explore(self):
         with self.assertRaises(NoPermissionsForBasePathError):
             with self.temp_file_structure('', (
-                ('DIR', 'no_read_dir', {'read': False}),
+                ('DIR', 'no_read_dir', '#noread'),
             )):
                 scan_files(self.resolve_test_path('no_read_dir'))
 
     def test_scan_cannot_access_base_dir(self):
         with self.assertRaises(NoPermissionsForBasePathError):
             with self.temp_file_structure('', (
-                ('DIR', 'no_traverse_dir', {'execute': False}),
+                ('DIR', 'no_traverse_dir', '#notraverse'),
                 ('DIR', 'no_traverse_dir/subdir'),
             )):
                 scan_files(self.resolve_test_path('no_traverse_dir/subdir'))

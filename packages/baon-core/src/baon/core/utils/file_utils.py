@@ -10,6 +10,11 @@
 import os
 import stat
 
+from collections import namedtuple
+
+
+FileInfo = namedtuple('FileInfo', ['is_dir', 'is_link', 'stat_info'])
+
 
 def check_filesystem_at_path_case_insensitive(path):
     """
@@ -27,7 +32,24 @@ def check_filesystem_at_path_case_insensitive(path):
     return os.path.exists(full_path.swapcase())
 
 
-def set_file_rights(path, read=None, write=None, execute=None):
+def stat_file(path):
+    """
+    Gets information on a path entry. Returns a named tuple containing the fields:
+    - is_dir: True if the file is a directory (or a link pointing to a directory)
+    - is_link: True if the file is a symbolic link
+    - stat_info: Info reported by lstat (mode, etc.)
+
+    Unlike Python's standard functions, this will throw FileNotFound or PermissionError if the path does not exist
+    or cannot be accessed due to permissions issues.
+    """
+    return FileInfo(
+        is_dir=os.path.isdir(path),
+        is_link=os.path.islink(path),
+        stat_info=os.lstat(path),
+    )
+
+
+def set_file_rights(path, read=None, write=None, execute=None, traverse=None):
     def adjust_bits(mode, bitmask, condition):
         if condition is True:
             return mode | bitmask
@@ -36,11 +58,16 @@ def set_file_rights(path, read=None, write=None, execute=None):
         else:
             return mode
 
-    current_mode = os.lstat(path).st_mode
+    file_info = stat_file(path)
+    current_mode = file_info.stat_info.st_mode
+
+    assert execute is None or not file_info.is_dir, 'The execute permission applies only to files'
+    assert traverse is None or file_info.is_dir, 'The traverse permission applies only to directories'
 
     current_mode = adjust_bits(current_mode, stat.S_IRUSR, read)
     current_mode = adjust_bits(current_mode, stat.S_IWUSR, write)
     current_mode = adjust_bits(current_mode, stat.S_IXUSR, execute)
+    current_mode = adjust_bits(current_mode, stat.S_IXUSR, traverse)
 
     os.lchmod(path, current_mode)
 

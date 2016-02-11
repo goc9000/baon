@@ -54,7 +54,7 @@ class TestMoveFileAction(RenamePlanActionTestCase):
     def test_no_source_permission(self):
         self.make_file_structure('', (
             ('FILE', 'dir1/file'),
-            ('DIR', 'dir1', {'write': False}),
+            ('DIR', 'dir1', '#nowrite'),
             ('DIR', 'dir2'),
         ))
 
@@ -64,7 +64,7 @@ class TestMoveFileAction(RenamePlanActionTestCase):
     def test_no_destination_permission(self):
         self.make_file_structure('', (
             ('FILE', 'dir1/file'),
-            ('DIR', 'dir2', {'write': False}),
+            ('DIR', 'dir2', '#nowrite'),
         ))
 
         with self.assertRaises(CannotMoveFileNoPermissionsError):
