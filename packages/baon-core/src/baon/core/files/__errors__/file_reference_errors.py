@@ -17,6 +17,14 @@ class FileReferenceError(BAONError, metaclass=ABCMeta):
     pass
 
 
+class CannotAccessFileEntryError(FileReferenceError):
+    def __init__(self, inner_error):
+        super().__init__(inner_error=inner_error)
+
+    def _get_format_string(self):
+        return 'Cannot access entry, likely due to missing permissions'
+
+
 class CannotExploreDirectoryError(FileReferenceError):
     def __init__(self, inner_error):
         super().__init__(inner_error=inner_error)

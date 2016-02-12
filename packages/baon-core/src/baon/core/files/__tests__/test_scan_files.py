@@ -187,8 +187,8 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             recursive=True,
             expected_result=(
                 ('DIR', 'no_read_dir', ('CannotExploreDirectoryError',)),
-                ('FILE', 'no_traverse_dir/file31.txt'),
-                ('FILE', 'no_traverse_dir/file32.txt'),
+                ('FILE', 'no_traverse_dir/file31.txt', ('CannotAccessFileEntryError',)),
+                ('FILE', 'no_traverse_dir/file32.txt', ('CannotAccessFileEntryError',)),
                 ('FILE', 'normal_dir/file11.txt'),
                 ('FILE', 'normal_dir/file12.txt'),
                 ('FILE', 'no_exec.txt'),
