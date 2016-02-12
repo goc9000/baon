@@ -56,23 +56,34 @@ base_staging_dir = next(dir_variants)
 alt_staging_dir = next(dir_variants)
 
 
+def _replace_recursive(structure, *scalar_replace_functions):
+    def _replace_scalar(value):
+        for replace_function in scalar_replace_functions:
+            value = replace_function(value)
+        return value
+
+    def _replace_rec(value):
+        if is_string(value):
+            return _replace_scalar(value)
+        elif is_arrayish(value):
+            return tuple(_replace_rec(subitem) for subitem in value)
+        elif is_dictish(value):
+            return {key: _replace_rec(value) for key, value in value.items()}
+        else:
+            return value
+
+    return _replace_rec(structure)
+
+
 def _replace_staging_dir_placeholders(path_text):
     return path_text.replace('<STAGING_DIR>', base_staging_dir).replace('<ALTERNATE_STAGING_DIR>', alt_staging_dir)
 
 
-def _replace_recursive(value, scalar_replace_function):
-        if is_string(value):
-            return scalar_replace_function(value)
-        elif is_arrayish(value):
-            return tuple(_replace_recursive(subitem, scalar_replace_function) for subitem in value)
-        elif is_dictish(value):
-            return {key: _replace_recursive(value, scalar_replace_function) for key, value in value.items()}
-        else:
-            return value
-
-
 def _normalize_input_files(files_repr):
-    return _replace_recursive(files_repr, _replace_staging_dir_placeholders)
+    return _replace_recursive(
+        files_repr,
+        _replace_staging_dir_placeholders,
+    )
 
 
 def _normalize_actual_result(result, base_path):
@@ -80,11 +91,17 @@ def _normalize_actual_result(result, base_path):
     Normalizes the actual result by relativizing the absolute paths such that they can be compared with the
     necessarily relative paths in the expected result
     """
-    return _replace_recursive(result, lambda item: remove_prefix(item, base_path))
+    return _replace_recursive(
+        result,
+        lambda item: remove_prefix(item, base_path),
+    )
 
 
 def _normalize_expected_result(expected_result):
     """
     Normalizes the expected result by replacing placeholders like <STAGING_DIR> with the actual directory name.
     """
-    return _replace_recursive(expected_result, _replace_staging_dir_placeholders)
+    return _replace_recursive(
+        expected_result,
+        _replace_staging_dir_placeholders,
+    )
