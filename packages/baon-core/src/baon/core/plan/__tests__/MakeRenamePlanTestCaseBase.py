@@ -7,6 +7,8 @@
 # Licensed under the GPL-3
 
 
+import os
+
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
 from baon.core.plan.__errors__.make_rename_plan_errors import MakeRenamePlanError
 from baon.core.plan.make_rename_plan import make_rename_plan, staging_dir_variants
@@ -79,6 +81,10 @@ def _replace_staging_dir_placeholders(path_text):
     return path_text.replace('<STAGING_DIR>', base_staging_dir).replace('<ALTERNATE_STAGING_DIR>', alt_staging_dir)
 
 
+def _normalize_path_separators(path_text):
+    return path_text.replace(os.sep, '/')
+
+
 def _normalize_input_files(files_repr):
     return _replace_recursive(
         files_repr,
@@ -89,11 +95,12 @@ def _normalize_input_files(files_repr):
 def _normalize_actual_result(result, base_path):
     """
     Normalizes the actual result by relativizing the absolute paths such that they can be compared with the
-    necessarily relative paths in the expected result
+    necessarily relative paths in the expected result. The path separators are also normalized to '/'.
     """
     return _replace_recursive(
         result,
         lambda item: remove_prefix(item, base_path),
+        _normalize_path_separators,
     )
 
 
