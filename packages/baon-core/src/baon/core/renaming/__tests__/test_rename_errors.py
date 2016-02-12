@@ -110,7 +110,7 @@ class TestRenameErrors(RenameFilesTestCase):
                 ('FILE', 'dir1/dir2/file2.txt'),
                 ('FILE', 'dir1/dir2/file3.txt'),
             ),
-            rules_text='@"dir2/file3.txt"->"dir2"',
+            rules_text='.. "dir2" (%c "file3.txt")!',
             expected_result=(
                 ('DIR', 'dir1/dir2/dir3'),
                 ('FILE', 'dir1/dir2/file2.txt'),
@@ -142,7 +142,7 @@ class TestRenameErrors(RenameFilesTestCase):
                 ('FILE', 'dir1/dir2/file2.txt'),
                 ('FILE', 'dir1/dir2/file3.txt'),
             ),
-            rules_text='@"dir1/dir2/dir3"->"dir1"',
+            rules_text='(%path "dir3")->"dir1"',
             expected_result=(
                 ('DIR', 'dir1', ('WouldMergeImplicitlyWithOtherFoldersError',)),
                 ('FILE', 'dir1/dir2/file2.txt'),
