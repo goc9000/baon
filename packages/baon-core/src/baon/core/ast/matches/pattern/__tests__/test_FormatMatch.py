@@ -7,6 +7,8 @@
 # Licensed under the GPL-3
 
 
+import os
+
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
 from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
 
@@ -294,18 +296,21 @@ class TestFormatMatch(MatchTestCase):
             match=FormatMatch('incurlies', 7))
 
     def test_format_path(self):
+        def _normalize(path):
+            return path.replace('/', os.sep)
+
         self._test_no_match(
             text='filename',
             match=FormatMatch('path'))
         self._test_unique_match(
-            text='dir1/dir2/filename',
+            text=_normalize('dir1/dir2/filename'),
             match=FormatMatch('path'),
-            expected_solution={'matched_text': 'dir1/dir2/', 'position': 10})
+            expected_solution={'matched_text': _normalize('dir1/dir2/'), 'position': 10})
         self._test_unique_match(
-            text='/dir1/filename',
+            text=_normalize('/dir1/filename'),
             match=FormatMatch('path'),
-            expected_solution={'matched_text': '/dir1/', 'position': 6})
+            expected_solution={'matched_text': _normalize('/dir1/'), 'position': 6})
         self._test_unique_match(
-            text='   /dir1/filename',
+            text=_normalize('   /dir1/filename'),
             match=FormatMatch('path'),
-            expected_solution={'matched_text': '   /dir1/', 'position': 9})
+            expected_solution={'matched_text': _normalize('   /dir1/'), 'position': 9})
