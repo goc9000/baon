@@ -9,11 +9,24 @@
 
 import os
 import stat
+import tempfile
 
 from collections import namedtuple
+from functools import lru_cache
 
 
 FileInfo = namedtuple('FileInfo', ['is_dir', 'is_link', 'stat_info'])
+
+
+@lru_cache()
+def check_default_filesystem_case_insensitive():
+    """
+    Checks whether the default file system used in the current OS is case insensitive.
+
+    This function is cached.
+    """
+    with tempfile.NamedTemporaryFile(prefix="TEMP") as f:
+        return os.path.exists(f.name.swapcase())
 
 
 def check_filesystem_at_path_case_insensitive(path):

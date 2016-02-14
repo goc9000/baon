@@ -15,7 +15,7 @@ from unittest import TestCase
 
 from decorator import decorator
 
-from baon.core.utils.file_utils import check_filesystem_at_path_case_insensitive, set_file_rights
+from baon.core.utils.file_utils import check_default_filesystem_case_insensitive, set_file_rights
 from baon.core.utils.lang_utils import swallow_os_errors
 
 
@@ -30,7 +30,6 @@ class FileSystemTestCase(TestCase):
 
     links_supported = None
     unicode_supported = None
-    case_insensitive_filesystem = None
     posix_filesystem = None
 
     def setUp(self):
@@ -40,7 +39,6 @@ class FileSystemTestCase(TestCase):
 
         self.links_supported = self._check_links_supported()
         self.unicode_supported = os.path.supports_unicode_filenames
-        self.case_insensitive_filesystem = self._check_case_insensitive_filesystem()
         self.posix_filesystem = platform.system() in ['Linux', 'Darwin']
 
     def tearDown(self):
@@ -60,9 +58,6 @@ class FileSystemTestCase(TestCase):
         os.unlink(full_link_path)
 
         return True
-
-    def _check_case_insensitive_filesystem(self):
-        return check_filesystem_at_path_case_insensitive(self._test_dir_path)
 
     def resolve_test_path(self, relative_path):
         return os.path.join(self._test_dir_path, relative_path)
@@ -211,7 +206,7 @@ def requires_unicode_support(test_method, cls_or_self=None):
 def requires_case_insensitive_filesystem(test_method, cls_or_self=None):
     assert cls_or_self is not None, 'This decorator can only be used on a class or instance method'
 
-    if not cls_or_self.case_insensitive_filesystem:
+    if not check_default_filesystem_case_insensitive():
         cls_or_self.skipTest(
             'Skipping {0}: Test requires case insensitive filesystem'.format(test_method.__name__))
     else:
