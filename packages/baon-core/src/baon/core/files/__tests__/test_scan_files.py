@@ -168,6 +168,7 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
         ('FILE', 'no_exec.txt', '#noexecute'),
     )
 
+    @requires_permissions_support
     def test_permissions_non_recursive(self):
         self._test_scan_files(
             setup_files=self.PERMISSIONS_FILE_STRUCTURE,
