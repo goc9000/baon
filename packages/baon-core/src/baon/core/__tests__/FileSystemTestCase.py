@@ -98,7 +98,7 @@ class FileSystemTestCase(TestCase):
             traverse=True if is_dir and check_default_filesystem_is_posix() else None,
         )
 
-        if recursive:
+        if recursive and is_dir:
             for item in os.listdir(full_path):
                 self.reset_rights(os.path.join(path, item), True)
 
