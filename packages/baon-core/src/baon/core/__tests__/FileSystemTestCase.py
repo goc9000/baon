@@ -195,7 +195,7 @@ def requires_links_support(test_method, cls_or_self=None):
 def requires_unicode_support(test_method, cls_or_self=None):
     assert cls_or_self is not None, 'This decorator can only be used on a class or instance method'
 
-    if not cls_or_self.links_supported:
+    if not cls_or_self.unicode_supported:
         cls_or_self.skipTest(
             'Skipping {0}: Unicode filenames are not supported on this platform'.format(test_method.__name__))
     else:
