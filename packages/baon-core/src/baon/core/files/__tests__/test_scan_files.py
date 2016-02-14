@@ -7,6 +7,8 @@
 # Licensed under the GPL-3
 
 
+import unicodedata
+
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_links_support, \
     requires_unicode_support, requires_posix_filesystem
 from baon.core.__tests__.abort_test_utils import abort_after_n_calls
@@ -14,6 +16,7 @@ from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistErr
     NoPermissionsForBasePathError, ScanFilesAbortedError
 from baon.core.files.scan_files import scan_files
 from baon.core.utils.progress.ReportsProgressTestCase import ReportsProgressTestCase
+from baon.core.utils.test_utils import normalize_structure
 
 
 class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
@@ -138,8 +141,8 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             setup_files=self.UNICODE_FILE_STRUCTURE,
             recursive=False,
             expected_result=(
-                ('DIR', '\u0111\u0131r\u0327'),
-                ('FILE', '\u0192i\u0308\u0142e\u0301\u2460.txt'),
+                ('DIR', '\u0111\u0131\u0157'),
+                ('FILE', '\u0192\u00ef\u0142\u00e9\u2460.txt'),
             )
         )
 
@@ -149,8 +152,8 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             setup_files=self.UNICODE_FILE_STRUCTURE,
             recursive=True,
             expected_result=(
-                ('FILE', '\u0111\u0131r\u0327/\u0192i\u0308\u0142e\u0301\u2461.txt'),
-                ('FILE', '\u0192i\u0308\u0142e\u0301\u2460.txt'),
+                ('FILE', '\u0111\u0131\u0157/\u0192\u00ef\u0142\u00e9\u2461.txt'),
+                ('FILE', '\u0192\u00ef\u0142\u00e9\u2460.txt'),
             )
         )
 
@@ -272,6 +275,13 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             files = scan_files(self.resolve_test_path(''), **options)
 
         self.assertEqual(
-            tuple(f.test_repr() for f in files),
-            expected_result,
+            normalize_unicode(tuple(f.test_repr() for f in files)),
+            normalize_unicode(expected_result),
         )
+
+
+def normalize_unicode(actual_or_expected_result):
+    return normalize_structure(
+        actual_or_expected_result,
+        lambda item: unicodedata.normalize('NFC', item),
+    )
