@@ -35,14 +35,14 @@ class TestMakeRenamePlanErrors(MakeRenamePlanTestCaseBase):
         )
 
     def test_base_path_no_permissions(self):
-        for permission in ['read', 'write', 'execute']:
+        for permission in ['#noread', '#nowrite', '#notraverse']:
             with self.subTest(missing_permission=permission):
                 self._test_make_rename_plan(
                     (
                         ('FILE', 'dummy', 'dummy_renamed'),
                     ),
                     actual_files=(
-                        ('DIR', 'locked', '#noread'),
+                        ('DIR', 'locked', permission),
                         ('FILE', 'locked/dummy'),
                     ),
                     base_path_override='locked',
