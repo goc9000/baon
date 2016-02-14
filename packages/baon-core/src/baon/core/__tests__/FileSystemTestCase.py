@@ -16,7 +16,7 @@ from decorator import decorator
 
 from baon.core.utils.file_utils import check_default_filesystem_supports_links,\
     check_default_filesystem_case_insensitive, check_default_filesystem_is_posix,\
-    check_default_filesystem_supports_unicode, set_file_rights
+    check_default_filesystem_supports_unicode, check_default_filesystem_supports_permissions, set_file_rights
 from baon.core.utils.lang_utils import swallow_os_errors
 
 
@@ -208,6 +208,16 @@ def requires_posix_filesystem(test_method, cls_or_self=None):
         cls_or_self,
         check_default_filesystem_is_posix(),
         'Test requires POSIX filesystem (Linux or Mac)',
+    )
+
+
+@decorator
+def requires_permissions_support(test_method, cls_or_self=None):
+    _common_decorator_code(
+        test_method,
+        cls_or_self,
+        check_default_filesystem_supports_permissions(),
+        'Test requires file permissions support',
     )
 
 

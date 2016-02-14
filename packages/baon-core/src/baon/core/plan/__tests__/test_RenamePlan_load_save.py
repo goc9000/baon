@@ -7,7 +7,7 @@
 # Licensed under the GPL-3
 
 
-from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase
+from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_permissions_support
 from baon.core.plan.RenamePlan import RenamePlan
 from baon.core.plan.__errors__.rename_plan_errors import CannotSaveRenamePlanFailedWritingFileError,\
     CannotSaveRenamePlanPermissionsError, CannotLoadRenamePlanFailedReadingFileError, \
@@ -35,6 +35,7 @@ class TestRenamePlanLoadSave(RenamePlanTestCaseBase, FileSystemTestCase):
         with self.assertRaises(CannotSaveRenamePlanFailedWritingFileError):
             self._test_save_plan('not_a_dir/plan.json')
 
+    @requires_permissions_support
     def test_save_plan_fail_permissions(self):
         self.make_dir('no_write_dir', write=False)
 
@@ -58,6 +59,7 @@ class TestRenamePlanLoadSave(RenamePlanTestCaseBase, FileSystemTestCase):
         with self.assertRaises(CannotLoadRenamePlanFailedReadingFileError):
             self._test_load_plan('missing_file.json')
 
+    @requires_permissions_support
     def test_load_fail_permissions(self):
         self.make_file('locked.json', read=False)
 

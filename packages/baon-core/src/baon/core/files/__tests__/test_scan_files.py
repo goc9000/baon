@@ -10,7 +10,7 @@
 import unicodedata
 
 from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_links_support, \
-    requires_unicode_support, requires_posix_filesystem
+    requires_unicode_support, requires_posix_filesystem, requires_permissions_support
 from baon.core.__tests__.abort_test_utils import abort_after_n_calls
 from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
     NoPermissionsForBasePathError, ScanFilesAbortedError
@@ -181,6 +181,7 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             )
         )
 
+    @requires_permissions_support
     def test_permissions_recursive(self):
         self._test_scan_files(
             setup_files=self.PERMISSIONS_FILE_STRUCTURE,
@@ -236,6 +237,7 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             )):
                 scan_files(self.resolve_test_path('file1'))
 
+    @requires_permissions_support
     def test_scan_cannot_explore(self):
         with self.assertRaises(NoPermissionsForBasePathError):
             with self.temp_file_structure('', (

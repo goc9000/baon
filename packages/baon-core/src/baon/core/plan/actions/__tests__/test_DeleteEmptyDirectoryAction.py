@@ -7,6 +7,7 @@
 # Licensed under the GPL-3
 
 
+from baon.core.__tests__.FileSystemTestCase import requires_permissions_support
 from baon.core.plan.actions.DeleteEmptyDirectoryAction import DeleteEmptyDirectoryAction
 from baon.core.plan.actions.__errors__.plan_action_errors import CannotDeleteDirDoesNotExistError,\
     CannotDeleteDirIsAFileError, CannotDeleteDirNoPermissionsError, CannotDeleteDirNotEmptyError
@@ -38,6 +39,7 @@ class TestDeleteDirectoryIfEmptyAction(RenamePlanActionTestCase):
         with self.assertRaises(CannotDeleteDirIsAFileError):
             self._make_action('file').execute()
 
+    @requires_permissions_support
     def test_fail_no_write(self):
         self.make_file_structure('', (
             ('DIR', 'parent_dir', '#nowrite'),
@@ -46,6 +48,7 @@ class TestDeleteDirectoryIfEmptyAction(RenamePlanActionTestCase):
         with self.assertRaises(CannotDeleteDirNoPermissionsError):
             self._make_action('parent_dir/empty_dir').execute()
 
+    @requires_permissions_support
     def test_fail_no_read(self):
         self.make_dir('opaque_dir', read=False)
 

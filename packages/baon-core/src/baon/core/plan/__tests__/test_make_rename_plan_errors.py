@@ -7,7 +7,7 @@
 # Licensed under the GPL-3
 
 
-from baon.core.__tests__.FileSystemTestCase import requires_posix_filesystem
+from baon.core.__tests__.FileSystemTestCase import requires_posix_filesystem, requires_permissions_support
 from baon.core.plan.__tests__.MakeRenamePlanTestCaseBase import MakeRenamePlanTestCaseBase
 
 
@@ -35,6 +35,7 @@ class TestMakeRenamePlanErrors(MakeRenamePlanTestCaseBase):
             expected_result=('BasePathNotADirError', {'base_path': 'not_a_dir'}),
         )
 
+    @requires_permissions_support
     def test_base_path_no_permissions(self):
         for permission in ['#noread', '#nowrite']:
             with self.subTest(missing_permission=permission):

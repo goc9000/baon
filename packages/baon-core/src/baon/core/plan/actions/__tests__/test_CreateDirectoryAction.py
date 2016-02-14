@@ -7,6 +7,7 @@
 # Licensed under the GPL-3
 
 
+from baon.core.__tests__.FileSystemTestCase import requires_permissions_support
 from baon.core.plan.actions.CreateDirectoryAction import CreateDirectoryAction
 from baon.core.plan.actions.__errors__.plan_action_errors import CannotCreateDirAlreadyExistsError, \
     CannotCreateDirFileInWayError, CannotCreateDirParentDoesNotExistError, CannotCreateDirParentNotADirectoryError,\
@@ -43,6 +44,7 @@ class TestCreateDirectoryAction(RenamePlanActionTestCase):
         with self.assertRaises(CannotCreateDirParentNotADirectoryError):
             self._make_action('parent/new_dir').execute()
 
+    @requires_permissions_support
     def test_fail_parent_permissions(self):
         self.make_dir('parent', write=False)
 

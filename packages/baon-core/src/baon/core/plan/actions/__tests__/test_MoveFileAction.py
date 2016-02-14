@@ -7,6 +7,7 @@
 # Licensed under the GPL-3
 
 
+from baon.core.__tests__.FileSystemTestCase import requires_permissions_support
 from baon.core.plan.actions.MoveFileAction import MoveFileAction
 from baon.core.plan.actions.__errors__.plan_action_errors import CannotMoveFileDoesNotExistError,\
     CannotMoveFileDestinationExistsError, CannotMoveFileNoPermissionsError
@@ -51,6 +52,7 @@ class TestMoveFileAction(RenamePlanActionTestCase):
         with self.assertRaises(CannotMoveFileDestinationExistsError):
             self._make_action('file1', 'file2').execute()
 
+    @requires_permissions_support
     def test_no_source_permission(self):
         self.make_file_structure('', (
             ('FILE', 'dir1/file'),
@@ -61,6 +63,7 @@ class TestMoveFileAction(RenamePlanActionTestCase):
         with self.assertRaises(CannotMoveFileNoPermissionsError):
             self._make_action('dir1/file', 'dir2/file').execute()
 
+    @requires_permissions_support
     def test_no_destination_permission(self):
         self.make_file_structure('', (
             ('FILE', 'dir1/file'),

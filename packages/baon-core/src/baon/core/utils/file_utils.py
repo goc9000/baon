@@ -58,6 +58,19 @@ def check_default_filesystem_is_posix():
     return platform.system() in ['Linux', 'Darwin']
 
 
+def check_default_filesystem_supports_permissions():
+    """
+    Checks whether the default file systems supports at least basic file permissions AND that BAON is equipped to
+    set permissions in that environment.
+    """
+    if check_default_filesystem_is_posix():
+        return True
+
+    # TODO: add Windows support
+
+    return False
+
+
 def check_default_filesystem_supports_unicode():
     """
     Checks whether the default file system supports Unicode filenames.
