@@ -15,7 +15,8 @@ from unittest import TestCase
 
 from decorator import decorator
 
-from baon.core.utils.file_utils import check_default_filesystem_case_insensitive, set_file_rights
+from baon.core.utils.file_utils import check_default_filesystem_supports_links,\
+    check_default_filesystem_case_insensitive, set_file_rights
 from baon.core.utils.lang_utils import swallow_os_errors
 
 
@@ -28,7 +29,6 @@ class FileSystemTestCase(TestCase):
 
     _test_dir_path = ''
 
-    links_supported = None
     unicode_supported = None
     posix_filesystem = None
 
@@ -37,7 +37,6 @@ class FileSystemTestCase(TestCase):
 
         self._test_dir_path = tempfile.mkdtemp()
 
-        self.links_supported = self._check_links_supported()
         self.unicode_supported = os.path.supports_unicode_filenames
         self.posix_filesystem = platform.system() in ['Linux', 'Darwin']
 
@@ -45,19 +44,6 @@ class FileSystemTestCase(TestCase):
         self.cleanup_files(delete_root=True)
 
         super().tearDown()
-
-    def _check_links_supported(self):
-        full_link_path = self.resolve_test_path('temp_link')
-        full_target_path = self.resolve_test_path('')
-
-        try:
-            os.symlink(full_target_path, full_link_path)
-        except OSError:
-            return False
-
-        os.unlink(full_link_path)
-
-        return True
 
     def resolve_test_path(self, relative_path):
         return os.path.join(self._test_dir_path, relative_path)
@@ -185,7 +171,7 @@ class FileSystemTestCase(TestCase):
 def requires_links_support(test_method, cls_or_self=None):
     assert cls_or_self is not None, 'This decorator can only be used on a class or instance method'
 
-    if not cls_or_self.links_supported:
+    if not check_default_filesystem_supports_links():
         cls_or_self.skipTest('Skipping {0}: Links are not supported on this platform'.format(test_method.__name__))
     else:
         test_method(cls_or_self)

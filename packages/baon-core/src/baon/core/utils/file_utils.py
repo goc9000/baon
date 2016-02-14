@@ -29,6 +29,27 @@ def check_default_filesystem_case_insensitive():
         return os.path.exists(f.name.swapcase())
 
 
+@lru_cache()
+def check_default_filesystem_supports_links():
+    """
+    Checks whether the default file system supports symbolic links.
+
+    This function is cached.
+    """
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        full_link_path = os.path.join(tmp_dir, 'temp_link')
+        full_target_path = tmp_dir
+
+        try:
+            os.symlink(full_target_path, full_link_path)
+        except OSError:
+            return False
+
+        os.unlink(full_link_path)
+
+        return True
+
+
 def check_filesystem_at_path_case_insensitive(path):
     """
     Checks whether the file system at the specified path is case insensitive. The path must exist.
