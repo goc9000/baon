@@ -118,7 +118,8 @@ def set_file_rights(path, read=None, write=None, execute=None, traverse=None):
     current_mode = adjust_bits(current_mode, stat.S_IXUSR, execute)
     current_mode = adjust_bits(current_mode, stat.S_IXUSR, traverse)
 
-    os.lchmod(path, current_mode)
+    chmod_fn = getattr(os, 'lchmod', os.chmod)
+    chmod_fn(path, current_mode)
 
 
 def check_file_rights(path, read=None, write=None, execute=None):
