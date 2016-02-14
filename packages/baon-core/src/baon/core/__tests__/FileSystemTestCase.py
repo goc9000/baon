@@ -74,10 +74,33 @@ class FileSystemTestCase(TestCase):
         self.set_rights(link_path, read=read, write=write, execute=execute, traverse=traverse)
 
     def set_rights(self, path, read=None, write=None, execute=None, traverse=None):
-        assert traverse is not False or check_default_filesystem_is_posix,\
+        if read is None and write is None and execute is None and traverse is None:
+            return # Bail if nothing to do
+
+        assert check_default_filesystem_supports_permissions(), 'Cannot set permissions on this file system'
+        assert traverse is not False or check_default_filesystem_is_posix(),\
             'Traverse permission only makes sense in POSIX filesystems'
 
         set_file_rights(self.resolve_test_path(path), read=read, write=write, execute=execute, traverse=traverse)
+
+    def reset_rights(self, path, recursive=False):
+        if not check_default_filesystem_supports_permissions():
+            return
+
+        full_path = self.resolve_test_path(path)
+        is_dir = os.path.isdir(full_path)
+
+        set_file_rights(
+            full_path,
+            read=True,
+            write=True,
+            execute=True if not is_dir else None,
+            traverse=True if is_dir and check_default_filesystem_is_posix() else None,
+        )
+
+        if recursive:
+            for item in os.listdir(full_path):
+                self.reset_rights(os.path.join(path, item), True)
 
     def make_file_structure(self, base_dir, files_repr):
         deferred_set_rights = {}
@@ -104,14 +127,13 @@ class FileSystemTestCase(TestCase):
             self.set_rights(os.path.join(base_dir, path), **deferred_set_rights[path])
 
     def cleanup_files(self, path='', delete_root=False):
+        self.reset_rights(path, recursive=True)
+
         full_path = self.resolve_test_path(path)
 
         if os.path.isdir(full_path):
-            self.set_rights(path, read=True, write=True, traverse=True)
             for item in os.listdir(full_path):
                 self.cleanup_files(os.path.join(path, item), True)
-        else:
-            self.set_rights(path, read=True, write=True)
 
         if delete_root:
             if os.path.isdir(full_path):
