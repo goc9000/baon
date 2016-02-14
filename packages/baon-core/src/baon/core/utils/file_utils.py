@@ -8,6 +8,7 @@
 
 
 import os
+import platform
 import stat
 import tempfile
 
@@ -48,6 +49,20 @@ def check_default_filesystem_supports_links():
         os.unlink(full_link_path)
 
         return True
+
+
+def check_default_filesystem_is_posix():
+    """
+    Checks whether the default file system is POSIX (and thus POSIX permissions make sense for it)
+    """
+    return platform.system() in ['Linux', 'Darwin']
+
+
+def check_default_filesystem_supports_unicode():
+    """
+    Checks whether the default file system supports Unicode filenames.
+    """
+    return os.path.supports_unicode_filenames
 
 
 def check_filesystem_at_path_case_insensitive(path):

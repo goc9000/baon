@@ -8,7 +8,6 @@
 
 
 import os
-import platform
 import tempfile
 from contextlib import contextmanager
 from unittest import TestCase
@@ -16,7 +15,8 @@ from unittest import TestCase
 from decorator import decorator
 
 from baon.core.utils.file_utils import check_default_filesystem_supports_links,\
-    check_default_filesystem_case_insensitive, set_file_rights
+    check_default_filesystem_case_insensitive, check_default_filesystem_is_posix,\
+    check_default_filesystem_supports_unicode, set_file_rights
 from baon.core.utils.lang_utils import swallow_os_errors
 
 
@@ -29,16 +29,10 @@ class FileSystemTestCase(TestCase):
 
     _test_dir_path = ''
 
-    unicode_supported = None
-    posix_filesystem = None
-
     def setUp(self):
         super().setUp()
 
         self._test_dir_path = tempfile.mkdtemp()
-
-        self.unicode_supported = os.path.supports_unicode_filenames
-        self.posix_filesystem = platform.system() in ['Linux', 'Darwin']
 
     def tearDown(self):
         self.cleanup_files(delete_root=True)
@@ -80,7 +74,8 @@ class FileSystemTestCase(TestCase):
         self.set_rights(link_path, read=read, write=write, execute=execute, traverse=traverse)
 
     def set_rights(self, path, read=None, write=None, execute=None, traverse=None):
-        assert traverse != False or self.posix_filesystem, 'Traverse permission only makes sense in POSIX filesystems'
+        assert traverse is not False or check_default_filesystem_is_posix,\
+            'Traverse permission only makes sense in POSIX filesystems'
 
         set_file_rights(self.resolve_test_path(path), read=read, write=write, execute=execute, traverse=traverse)
 
@@ -167,47 +162,53 @@ class FileSystemTestCase(TestCase):
             return f.read()
 
 
-@decorator
-def requires_links_support(test_method, cls_or_self=None):
+def _common_decorator_code(test_method, cls_or_self, condition, skip_text):
     assert cls_or_self is not None, 'This decorator can only be used on a class or instance method'
 
-    if not check_default_filesystem_supports_links():
-        cls_or_self.skipTest('Skipping {0}: Links are not supported on this platform'.format(test_method.__name__))
+    if not condition:
+        cls_or_self.skipTest('Skipping {0}: {1}'.format(test_method.__name__, skip_text))
     else:
         test_method(cls_or_self)
+
+
+@decorator
+def requires_links_support(test_method, cls_or_self=None):
+    _common_decorator_code(
+        test_method,
+        cls_or_self,
+        check_default_filesystem_supports_links(),
+        'Links are not supported on this platform',
+    )
 
 
 @decorator
 def requires_unicode_support(test_method, cls_or_self=None):
-    assert cls_or_self is not None, 'This decorator can only be used on a class or instance method'
-
-    if not cls_or_self.unicode_supported:
-        cls_or_self.skipTest(
-            'Skipping {0}: Unicode filenames are not supported on this platform'.format(test_method.__name__))
-    else:
-        test_method(cls_or_self)
+    _common_decorator_code(
+        test_method,
+        cls_or_self,
+        check_default_filesystem_supports_unicode(),
+        'Unicode filenames are not supported on this platform',
+    )
 
 
 @decorator
 def requires_case_insensitive_filesystem(test_method, cls_or_self=None):
-    assert cls_or_self is not None, 'This decorator can only be used on a class or instance method'
-
-    if not check_default_filesystem_case_insensitive():
-        cls_or_self.skipTest(
-            'Skipping {0}: Test requires case insensitive filesystem'.format(test_method.__name__))
-    else:
-        test_method(cls_or_self)
+    _common_decorator_code(
+        test_method,
+        cls_or_self,
+        check_default_filesystem_case_insensitive(),
+        'Test requires case insensitive filesystem',
+    )
 
 
 @decorator
 def requires_posix_filesystem(test_method, cls_or_self=None):
-    assert cls_or_self is not None, 'This decorator can only be used on a class or instance method'
-
-    if not cls_or_self.posix_filesystem:
-        cls_or_self.skipTest(
-            'Skipping {0}: Test requires POSIX filesystem (Linux or Mac)'.format(test_method.__name__))
-    else:
-        test_method(cls_or_self)
+    _common_decorator_code(
+        test_method,
+        cls_or_self,
+        check_default_filesystem_is_posix(),
+        'Test requires POSIX filesystem (Linux or Mac)',
+    )
 
 
 def _parse_file_repr(file_repr):
