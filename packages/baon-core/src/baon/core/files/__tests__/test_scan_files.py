@@ -7,7 +7,8 @@
 # Licensed under the GPL-3
 
 
-from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_links_support, requires_unicode_support
+from baon.core.__tests__.FileSystemTestCase import FileSystemTestCase, requires_links_support, \
+    requires_unicode_support, requires_posix_filesystem
 from baon.core.__tests__.abort_test_utils import abort_after_n_calls
 from baon.core.files.__errors__.scan_files_errors import BasePathDoesNotExistError, BasePathIsNotADirectoryError,\
     NoPermissionsForBasePathError, ScanFilesAbortedError
@@ -159,9 +160,6 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
         ('DIR', 'no_read_dir', '#noread'),
         ('FILE', 'no_read_dir/file21.txt'),
         ('FILE', 'no_read_dir/file22.txt'),
-        ('DIR', 'no_traverse_dir', '#notraverse'),
-        ('FILE', 'no_traverse_dir/file31.txt'),
-        ('FILE', 'no_traverse_dir/file32.txt'),
         ('FILE', 'normal.txt'),
         ('FILE', 'no_read.txt', '#noread'),
         ('FILE', 'no_exec.txt', '#noexecute'),
@@ -173,7 +171,6 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             recursive=False,
             expected_result=(
                 ('DIR', 'no_read_dir'),
-                ('DIR', 'no_traverse_dir'),
                 ('DIR', 'normal_dir'),
                 ('FILE', 'no_exec.txt'),
                 ('FILE', 'no_read.txt'),
@@ -187,12 +184,40 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             recursive=True,
             expected_result=(
                 ('DIR', 'no_read_dir', ('CannotExploreDirectoryError',)),
-                ('FILE', 'no_traverse_dir/file31.txt', ('CannotAccessFileEntryError',)),
-                ('FILE', 'no_traverse_dir/file32.txt', ('CannotAccessFileEntryError',)),
                 ('FILE', 'normal_dir/file11.txt'),
                 ('FILE', 'normal_dir/file12.txt'),
                 ('FILE', 'no_exec.txt'),
                 ('FILE', 'no_read.txt'),
+                ('FILE', 'normal.txt'),
+            )
+        )
+
+    TRAVERSE_PERMISSIONS_FILE_STRUCTURE = (
+        ('DIR', 'no_traverse_dir', '#notraverse'),
+        ('FILE', 'no_traverse_dir/file31.txt'),
+        ('FILE', 'no_traverse_dir/file32.txt'),
+        ('FILE', 'normal.txt'),
+    )
+
+    @requires_posix_filesystem
+    def test_traverse_permissions_non_recursive(self):
+        self._test_scan_files(
+            setup_files=self.TRAVERSE_PERMISSIONS_FILE_STRUCTURE,
+            recursive=False,
+            expected_result=(
+                ('DIR', 'no_traverse_dir'),
+                ('FILE', 'normal.txt'),
+            )
+        )
+
+    @requires_posix_filesystem
+    def test_traverse_permissions_recursive(self):
+        self._test_scan_files(
+            setup_files=self.TRAVERSE_PERMISSIONS_FILE_STRUCTURE,
+            recursive=True,
+            expected_result=(
+                ('FILE', 'no_traverse_dir/file31.txt', ('CannotAccessFileEntryError',)),
+                ('FILE', 'no_traverse_dir/file32.txt', ('CannotAccessFileEntryError',)),
                 ('FILE', 'normal.txt'),
             )
         )
@@ -215,6 +240,7 @@ class TestScanFiles(FileSystemTestCase, ReportsProgressTestCase):
             )):
                 scan_files(self.resolve_test_path('no_read_dir'))
 
+    @requires_posix_filesystem
     def test_scan_cannot_access_base_dir(self):
         with self.assertRaises(NoPermissionsForBasePathError):
             with self.temp_file_structure('', (

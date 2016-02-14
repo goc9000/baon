@@ -7,6 +7,7 @@
 # Licensed under the GPL-3
 
 
+from baon.core.__tests__.FileSystemTestCase import requires_posix_filesystem
 from baon.core.plan.__tests__.MakeRenamePlanTestCaseBase import MakeRenamePlanTestCaseBase
 
 
@@ -35,7 +36,7 @@ class TestMakeRenamePlanErrors(MakeRenamePlanTestCaseBase):
         )
 
     def test_base_path_no_permissions(self):
-        for permission in ['#noread', '#nowrite', '#notraverse']:
+        for permission in ['#noread', '#nowrite']:
             with self.subTest(missing_permission=permission):
                 self._test_make_rename_plan(
                     (
@@ -48,6 +49,20 @@ class TestMakeRenamePlanErrors(MakeRenamePlanTestCaseBase):
                     base_path_override='locked',
                     expected_result=('NoPermissionsForBasePathError', {'base_path': 'locked'}),
                 )
+
+    @requires_posix_filesystem
+    def test_base_path_no_traverse_permissions(self):
+        self._test_make_rename_plan(
+            (
+                ('FILE', 'dummy', 'dummy_renamed'),
+            ),
+            actual_files=(
+                ('DIR', 'locked', '#notraverse'),
+                ('FILE', 'locked/dummy'),
+            ),
+            base_path_override='locked',
+            expected_result=('NoPermissionsForBasePathError', {'base_path': 'locked'}),
+        )
 
     def test_fail_if_renamed_files_have_errors(self):
         self._test_make_rename_plan(

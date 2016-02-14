@@ -8,6 +8,7 @@
 
 
 import os
+import platform
 import tempfile
 from contextlib import contextmanager
 from unittest import TestCase
@@ -30,6 +31,7 @@ class FileSystemTestCase(TestCase):
     links_supported = None
     unicode_supported = None
     case_insensitive_filesystem = None
+    posix_filesystem = None
 
     def setUp(self):
         super().setUp()
@@ -39,6 +41,7 @@ class FileSystemTestCase(TestCase):
         self.links_supported = self._check_links_supported()
         self.unicode_supported = os.path.supports_unicode_filenames
         self.case_insensitive_filesystem = self._check_case_insensitive_filesystem()
+        self.posix_filesystem = platform.system() in ['Linux', 'Darwin']
 
     def tearDown(self):
         self.cleanup_files(delete_root=True)
@@ -96,6 +99,8 @@ class FileSystemTestCase(TestCase):
         self.set_rights(link_path, read=read, write=write, execute=execute, traverse=traverse)
 
     def set_rights(self, path, read=None, write=None, execute=None, traverse=None):
+        assert traverse != False or self.posix_filesystem, 'Traverse permission only makes sense in POSIX filesystems'
+
         set_file_rights(self.resolve_test_path(path), read=read, write=write, execute=execute, traverse=traverse)
 
     def make_file_structure(self, base_dir, files_repr):
@@ -209,6 +214,17 @@ def requires_case_insensitive_filesystem(test_method, cls_or_self=None):
     if not cls_or_self.case_insensitive_filesystem:
         cls_or_self.skipTest(
             'Skipping {0}: Test requires case insensitive filesystem'.format(test_method.__name__))
+    else:
+        test_method(cls_or_self)
+
+
+@decorator
+def requires_posix_filesystem(test_method, cls_or_self=None):
+    assert cls_or_self is not None, 'This decorator can only be used on a class or instance method'
+
+    if not cls_or_self.posix_filesystem:
+        cls_or_self.skipTest(
+            'Skipping {0}: Test requires POSIX filesystem (Linux or Mac)'.format(test_method.__name__))
     else:
         test_method(cls_or_self)
 
