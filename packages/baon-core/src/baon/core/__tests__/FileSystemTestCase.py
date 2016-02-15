@@ -11,8 +11,9 @@ import os
 import tempfile
 from contextlib import contextmanager
 from unittest import TestCase
-
 from decorator import decorator
+
+import baon.core.utils.windows_utils as windows_utils
 
 from baon.core.utils.file_utils import check_default_filesystem_supports_links,\
     check_default_filesystem_case_insensitive, check_default_filesystem_is_posix,\
@@ -45,7 +46,7 @@ class FileSystemTestCase(TestCase):
     def open_file(self, path, *args):
         return open(self.resolve_test_path(path), *args)
 
-    def make_file(self, path, contents=None, read=None, write=None, execute=None):
+    def make_file(self, path, contents=None, read=None, write=None, execute=None, win_delete=None):
         dir_name, _ = os.path.split(path)
         self.make_dir(dir_name)
 
@@ -53,17 +54,17 @@ class FileSystemTestCase(TestCase):
             if contents is not None:
                 f.write(contents)
 
-        self.set_rights(path, read=read, write=write, execute=execute)
+        self.set_rights(path, read=read, write=write, execute=execute, win_delete=win_delete)
 
-    def make_dir(self, path, read=None, write=None, traverse=None):
+    def make_dir(self, path, read=None, write=None, traverse=None, win_delete=None):
         full_dir_path = self.resolve_test_path(path)
 
         if not os.path.isdir(full_dir_path):
             os.makedirs(full_dir_path)
 
-        self.set_rights(path, read=read, write=write, traverse=traverse)
+        self.set_rights(path, read=read, write=write, traverse=traverse, win_delete=win_delete)
 
-    def make_link(self, link_path, target_path, read=None, write=None, execute=None, traverse=None):
+    def make_link(self, link_path, target_path, read=None, write=None, execute=None, traverse=None, win_delete=None):
         dir_name, _ = os.path.split(link_path)
         self.make_dir(dir_name)
 
@@ -71,36 +72,49 @@ class FileSystemTestCase(TestCase):
         full_target_path = self.resolve_test_path(target_path)
         os.symlink(full_target_path, full_link_path)
 
-        self.set_rights(link_path, read=read, write=write, execute=execute, traverse=traverse)
+        self.set_rights(link_path, read=read, write=write, execute=execute, traverse=traverse, win_delete=win_delete)
 
-    def set_rights(self, path, read=None, write=None, execute=None, traverse=None):
-        if read is None and write is None and execute is None and traverse is None:
+    def set_rights(self, path, read=None, write=None, execute=None, traverse=None, win_delete=None):
+        if read is None and write is None and execute is None and traverse is None and win_delete is None:
             return # Bail if nothing to do
 
         assert check_default_filesystem_supports_permissions(), 'Cannot set permissions on this file system'
         assert traverse is not False or check_default_filesystem_is_posix(),\
             'Traverse permission only makes sense in POSIX filesystems'
 
-        set_file_rights(self.resolve_test_path(path), read=read, write=write, execute=execute, traverse=traverse)
+        full_path = self.resolve_test_path(path)
+
+        if check_default_filesystem_is_posix():
+            set_file_rights(full_path, read=read, write=write, execute=execute, traverse=traverse)
+        elif windows_utils.on_windows():
+            windows_utils.set_file_rights(full_path, read=read, write=write, execute=execute, delete=win_delete)
+        else:
+            raise AssertionError("Don't know how to set permissions on this file system")
 
     def reset_rights(self, path, recursive=False):
         if not check_default_filesystem_supports_permissions():
             return
 
         full_path = self.resolve_test_path(path)
-        is_dir = os.path.isdir(full_path)
 
-        set_file_rights(
-            full_path,
-            read=True,
-            write=True,
-            execute=True if not is_dir else None,
-            traverse=True if is_dir and check_default_filesystem_is_posix() else None,
-        )
+        if check_default_filesystem_is_posix():
+            is_dir = os.path.isdir(full_path)
 
-        if recursive and is_dir:
-            for item in os.listdir(full_path):
-                self.reset_rights(os.path.join(path, item), True)
+            set_file_rights(
+                full_path,
+                read=True,
+                write=True,
+                execute=True if not is_dir else None,
+                traverse=True if is_dir and check_default_filesystem_is_posix() else None,
+            )
+
+            if recursive and is_dir:
+                for item in os.listdir(full_path):
+                    self.reset_rights(os.path.join(path, item), True)
+        elif windows_utils.on_windows():
+            windows_utils.reset_file_rights(full_path, recursive=recursive)
+        else:
+            raise AssertionError("Don't know how to reset permissions on this file system")
 
     def make_file_structure(self, base_dir, files_repr):
         deferred_set_rights = {}
@@ -127,19 +141,19 @@ class FileSystemTestCase(TestCase):
             self.set_rights(os.path.join(base_dir, path), **deferred_set_rights[path])
 
     def cleanup_files(self, path='', delete_root=False):
-        self.reset_rights(path, recursive=True)
-
-        full_path = self.resolve_test_path(path)
-
-        if os.path.isdir(full_path):
-            for item in os.listdir(full_path):
-                self.cleanup_files(os.path.join(path, item), True)
-
-        if delete_root:
+        def _cleanup_rec(full_path, del_root):
             if os.path.isdir(full_path):
-                os.rmdir(full_path)
-            else:
-                os.unlink(full_path)
+                for item in os.listdir(full_path):
+                    _cleanup_rec(os.path.join(full_path, item), True)
+
+            if del_root:
+                if os.path.isdir(full_path):
+                    os.rmdir(full_path)
+                else:
+                    os.unlink(full_path)
+
+        self.reset_rights(path, recursive=True)
+        _cleanup_rec(self.resolve_test_path(path), delete_root)
 
     @contextmanager
     def temp_file_structure(self, base_path, files_repr):
@@ -268,6 +282,8 @@ def _parse_file_repr(file_repr):
                 permissions['execute'] = False
             elif item == '#notraverse':
                 permissions['traverse'] = False
+            elif item == '#win_nodelete':
+                permissions['win_delete'] = False
             else:
                 raise ValueError()
 

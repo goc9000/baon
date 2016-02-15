@@ -43,7 +43,7 @@ class TestDeleteDirectoryIfEmptyAction(RenamePlanActionTestCase):
     def test_fail_no_write(self):
         self.make_file_structure('', (
             ('DIR', 'parent_dir', '#nowrite'),
-            ('DIR', 'parent_dir/empty_dir'),
+            ('DIR', 'parent_dir/empty_dir', '#win_nodelete'),
         ))
         with self.assertRaises(CannotDeleteDirNoPermissionsError):
             self._make_action('parent_dir/empty_dir').execute()

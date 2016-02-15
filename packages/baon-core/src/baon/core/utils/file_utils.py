@@ -15,6 +15,8 @@ import tempfile
 from collections import namedtuple
 from functools import lru_cache
 
+from baon.core.utils.windows_utils import on_windows, permissions_supported
+
 
 FileInfo = namedtuple('FileInfo', ['is_dir', 'is_link', 'stat_info'])
 
@@ -65,8 +67,8 @@ def check_default_filesystem_supports_permissions():
     """
     if check_default_filesystem_is_posix():
         return True
-
-    # TODO: add Windows support
+    if on_windows():
+        return permissions_supported()
 
     return False
 

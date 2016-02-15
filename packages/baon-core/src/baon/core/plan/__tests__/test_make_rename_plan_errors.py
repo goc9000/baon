@@ -35,8 +35,10 @@ class TestMakeRenamePlanErrors(MakeRenamePlanTestCaseBase):
             expected_result=('BasePathNotADirError', {'base_path': 'not_a_dir'}),
         )
 
-    @requires_permissions_support
+    @requires_posix_filesystem
     def test_base_path_no_permissions(self):
+        # This test only works properly on POSIX, because under Windows we currently have no simple way of checking
+        # that the base path has full read/write access before we actually perform the operations.
         for permission in ['#noread', '#nowrite']:
             with self.subTest(missing_permission=permission):
                 self._test_make_rename_plan(

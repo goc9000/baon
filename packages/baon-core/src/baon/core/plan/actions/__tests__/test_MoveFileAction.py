@@ -55,7 +55,7 @@ class TestMoveFileAction(RenamePlanActionTestCase):
     @requires_permissions_support
     def test_no_source_permission(self):
         self.make_file_structure('', (
-            ('FILE', 'dir1/file'),
+            ('FILE', 'dir1/file', '#win_nodelete'),
             ('DIR', 'dir1', '#nowrite'),
             ('DIR', 'dir2'),
         ))
