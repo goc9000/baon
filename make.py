@@ -9,6 +9,8 @@ import subprocess
 import sys
 import tempfile
 
+from functools import lru_cache
+
 
 APP_NAME = 'BAON'
 
@@ -20,7 +22,6 @@ DIST_DIR = 'dist'
 CORE_PKG = 'baon-core'
 
 
-memo_program_installed = dict(which=True)
 memo_pkg_installed = dict()
 
 
@@ -45,18 +46,9 @@ def silent_call(program_args, *args, **kwargs):
     return subprocess.call(program_args, *args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs) == 0
 
 
+@lru_cache()
 def check_program_installed(program):
-    global memo_program_installed
-
-    memo_val = memo_program_installed.get(program)
-    if memo_val is not None:
-        return memo_val
-
-    memo_val = silent_call(['which', program])
-
-    memo_program_installed[program] = memo_val
-
-    return memo_val
+    return shutil.which(program) is not None
 
 
 def ensure_program_installed(program):
