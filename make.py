@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import argparse
 import glob
@@ -14,8 +14,8 @@ from functools import lru_cache
 
 APP_NAME = 'BAON'
 
-PIP = 'pip3'
-PYTHON = 'python3'
+PIP = 'pip'
+PYTHON = 'python'
 
 DIST_DIR = 'dist'
 
@@ -28,6 +28,36 @@ memo_pkg_installed = dict()
 def fail(format_str, *args, **kwargs):
     print(format_str.format(*args, **kwargs), file=sys.stderr)
     sys.exit(-1)
+
+
+def recon_python3():
+    global PYTHON
+
+    if check_program_installed('python3'):
+        PYTHON = 'python3'
+        return
+
+    PYTHON = 'python'
+    ensure_program_installed('python')
+
+    version = subprocess.check_output([PYTHON, '-V'], stderr=subprocess.STDOUT)
+
+    assert not version.startswith(b'2.'), 'This script requires Python 3 to be accessible via the command line'
+
+
+def recon_pip():
+    global PIP
+
+    if check_program_installed('pip3'):
+        PIP = 'pip3'
+        return
+
+    PIP = 'pip'
+    ensure_program_installed('pip')
+
+    version = subprocess.check_output([PIP, '-V'], stderr=subprocess.STDOUT)
+
+    assert b'ython 2' not in version, 'This script requires PIP for Python 3 to be accessible via the command line'
 
 
 def recon_ui_packages():
@@ -276,6 +306,9 @@ def build_osx_icns(work_dir):
 
 
 def main():
+    recon_python3()
+    recon_pip()
+
     known_uis = recon_ui_packages()
 
     parser = argparse.ArgumentParser(description='Make script for {0}'.format(APP_NAME))
