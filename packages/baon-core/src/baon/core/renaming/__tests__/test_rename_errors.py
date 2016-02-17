@@ -15,7 +15,7 @@ class TestRenameErrors(RenameFilesTestCase):
     def test_error_unprintable_char_in_filename(self):
         self._test_rename_files(
             input_description=(('FILE', 'dir1/dir2/file.txt'),),
-            rules_text='@"2"->"\\u0000"',
+            rules_text='@"2"->"\u0000"',
             expected_result=(('FILE', 'dir1/dir\u0000/file.txt', ('UnprintableCharacterInFilenameError',)),),
             use_path=True,
         )

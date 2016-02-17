@@ -76,7 +76,7 @@ def t_FORMAT_SPEC(t):
     return RulesToken(t, **extras)
 
 
-@TOKEN('"([^"\\n\\\\]|\\\\[^\\n]?)*(?P<end_dquote>"?)|\'([^\'\\n\\\\]|\\\\[^\\n]?)*(?P<end_quote>\'?)')
+@TOKEN('"([^"\\n]|"")*(?P<end_dquote>"?)|\'([^\'\\n]|\'\')*(?P<end_quote>\'?)')
 def t_STRING_LITERAL(t):
     last_quote_group = 'end_dquote' if t.value[0] == '"' else 'end_quote'
 

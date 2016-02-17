@@ -114,8 +114,8 @@ class TestTokenizeRules(TestCase):
         self.assertEqual(self.parse_result('"two" "literals"'),
                          [(0, 'STRING_LITERAL', '"two"', 1, 1, {'value': 'two'}),
                           (6, 'STRING_LITERAL', '"literals"', 1, 7, {'value': 'literals'})])
-        self.assertEqual(self.parse_result('"with\\\\escapes\\""'),
-                         [(0, 'STRING_LITERAL', '"with\\\\escapes\\""', 1, 1, {'value': 'with\\escapes"'})])
+        self.assertEqual(self.parse_result('"embedded""quotes"'),
+                         [(0, 'STRING_LITERAL', '"embedded""quotes"', 1, 1, {'value': 'embedded"quotes'})])
         self.assertEqual(self.parse_result('"unterminated'),
                          [(0, 'STRING_LITERAL', '"unterminated', 1, 1, {'unterminated': True})])
         self.assertEqual(self.parse_result('"unterminated\nnext line'),
@@ -123,20 +123,11 @@ class TestTokenizeRules(TestCase):
                           (13, 'RULE_SEP', '\n', 1, 14),
                           (14, 'ID', 'next', 2, 1),
                           (19, 'ID', 'line', 2, 6)])
-        self.assertEqual(self.parse_result('"unterm w escape\\'),
-                         [(0, 'STRING_LITERAL', '"unterm w escape\\', 1, 1, {'unterminated': True})])
-        self.assertEqual(self.parse_result('"unterm w escape\\\nnext line'),
-                         [(0, 'STRING_LITERAL', '"unterm w escape\\', 1, 1, {'unterminated': True}),
-                         (17, 'RULE_SEP', '\n', 1, 18),
-                         (18, 'ID', 'next', 2, 1),
-                         (23, 'ID', 'line', 2, 6)])
-        self.assertEqual(self.parse_result('"unterm w escape\\"'),
-                         [(0, 'STRING_LITERAL', '"unterm w escape\\"', 1, 1, {'unterminated': True})])
-        self.assertEqual(self.parse_result('"unterm w escape\\"\nnext line'),
-                         [(0, 'STRING_LITERAL', '"unterm w escape\\"', 1, 1, {'unterminated': True}),
-                          (18, 'RULE_SEP', '\n', 1, 19),
-                          (19, 'ID', 'next', 2, 1),
-                          (24, 'ID', 'line', 2, 6)])
+        self.assertEqual(self.parse_result('"unterm w ""embedded'),
+                         [(0, 'STRING_LITERAL', '"unterm w ""embedded', 1, 1, {'unterminated': True})])
+        self.assertEqual(self.parse_result('"with"trailer'),
+                         [(0, 'STRING_LITERAL', '"with"', 1, 1, {'value': 'with'}),
+                          (6, 'ID', 'trailer', 1, 7)])
 
     def test_parse_regex(self):
         self.assertEqual(self.parse_result('/normal regex/'),
@@ -181,14 +172,14 @@ class TestTokenizeRules(TestCase):
                           (9, 'error', '####', 2, 3)])
 
     def test_parse_complete(self):
-        text = '  %d+ ->"abc" ("efg\\"def"*->title->%4c ; ..! #:## @(/[a-z]/i->(<<abc|"x"?)))\n  $'
+        text = '  %d+ ->"abc" ("efg""def"*->title->%4c ; ..! #:## @(/[a-z]/i->(<<abc|"x"?)))\n  $'
         self.assertEqual(self.parse_result(text),
                          [(2, 'FORMAT_SPEC', '%d', 1, 3, {'specifier': 'd'}),
                           (4, 'OP_REPEAT', '+', 1, 5, {'max': None, 'min': 1}),
                           (6, 'OP_XFORM', '->', 1, 7),
                           (8, 'STRING_LITERAL', '"abc"', 1, 9, {'value': 'abc'}),
                           (14, 'PARA_OPEN', '(', 1, 15),
-                          (15, 'STRING_LITERAL', '"efg\\"def"', 1, 16, {'value': 'efg"def'}),
+                          (15, 'STRING_LITERAL', '"efg""def"', 1, 16, {'value': 'efg"def'}),
                           (25, 'OP_REPEAT', '*', 1, 26, {'max': None, 'min': 0}),
                           (26, 'OP_XFORM', '->', 1, 27),
                           (28, 'ID', 'title', 1, 29),

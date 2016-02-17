@@ -15,27 +15,22 @@ from baon.core.utils.baon_utils import decode_baon_string_literal
 
 class TestBaonUtilsPy(TestCase):
     def test_decode_baon_string_literal(self):
-        f_u_t = decode_baon_string_literal
-
-        self.assertEqual(f_u_t('"double quotes"'), 'double quotes')
-        self.assertEqual(f_u_t("'single quotes'"), 'single quotes')
-        self.assertEqual(f_u_t('"dodgy"quote"'), 'dodgy"quote')
-        self.assertEqual(f_u_t('"escaped\\"quote"'), 'escaped"quote')
-        self.assertEqual(f_u_t('"escape\\\\char"'), 'escape\\char')
-        self.assertEqual(f_u_t('"valid\\n\\tescapes"'), 'valid\n\tescapes')
-        self.assertEqual(f_u_t('"raw\n\tspace"'), 'raw\n\tspace')
-        self.assertEqual(f_u_t('"invalid\\escape"'), 'invalid\\escape')
-        self.assertEqual(f_u_t('"end escape\\"'), 'end escape\\')
-        self.assertEqual(f_u_t('"octal\\040escape"'), 'octal escape')
-        self.assertEqual(f_u_t('"invalid\\840octal"'), 'invalid\\840octal')
-        self.assertEqual(f_u_t('"unicode\\u1234escape"'), 'unicode\u1234escape')
-        self.assertEqual(f_u_t('"raw\u1234unicode"'), 'raw\u1234unicode')
-        self.assertEqual(f_u_t('"invalid\\u12g4unicode"'), 'invalid\\u12g4unicode')
-        self.assertEqual(f_u_t('"invalid_uni\\u123"'), 'invalid_uni\\u123')
+        for input, output in (
+            ('"double quotes"', 'double quotes'),
+            ("'single quotes'", 'single quotes'),
+            ('"dodgy"quote"', 'dodgy"quote'),
+            ('"escaped""double quote"', 'escaped"double quote'),
+            ("'escaped'single quote'", "escaped'single quote"),
+            ('"raw\n\tchars\u1234"', "raw\n\tchars\u1234"),
+            ('"backslash\\does\\not\\escape\\"', "backslash\\does\\not\\escape\\"),
+            ('"no unicode\\u1234escape"', 'no unicode\\u1234escape'),
+        ):
+            with self.subTest(input=input):
+                self.assertEqual(decode_baon_string_literal(input), output)
 
         with self.assertRaises(StringLiteralNotQuotedProperlyError):
-            f_u_t('unquoted')
+            decode_baon_string_literal('unquoted')
         with self.assertRaises(StringLiteralNotQuotedProperlyError):
-            f_u_t('"unterminated')
+            decode_baon_string_literal('"unterminated')
         with self.assertRaises(StringLiteralNotQuotedProperlyError):
-            f_u_t('"mismatch\'')
+            decode_baon_string_literal('"mismatch\'')
