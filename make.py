@@ -25,18 +25,6 @@ def fail(format_str, *args, **kwargs):
     sys.exit(-1)
 
 
-def ensure_correct_cwd():
-    if not os.path.isdir(os.path.join('packages', CORE_PKG)):
-        fail('ERROR: this script must be run from the project root dir')
-
-
-def load_app_metadata():
-    global APP_METADATA
-
-    sys.path.append(os.path.join('packages', CORE_PKG, 'src', 'baon'))
-    APP_METADATA = __import__('app_metadata')
-
-
 def recon_python3():
     global PYTHON
 
@@ -65,13 +53,6 @@ def recon_pip():
     version = subprocess.check_output([PIP, '-V'], stderr=subprocess.STDOUT)
 
     assert b'ython 2' not in version, 'This script requires PIP for Python 3 to be accessible via the command line'
-
-
-def recon_ui_packages():
-    return [
-        entry for entry in os.listdir('packages')
-        if entry != CORE_PKG and os.path.isdir(os.path.join('packages', entry))
-    ]
 
 
 def silent_call(program_args, *args, **kwargs):
@@ -325,14 +306,34 @@ def shorten_version(version):
     return '.'.join(version.split('.')[:2])
 
 
+def ensure_correct_cwd():
+    if not os.path.isdir(os.path.join('packages', CORE_PKG)):
+        fail('ERROR: this script must be run from the project root dir')
+
+
+def load_app_metadata():
+    global APP_METADATA
+
+    sys.path.append(os.path.join('packages', CORE_PKG, 'src', 'baon'))
+    APP_METADATA = __import__('app_metadata')
+
+
+def recon_ui_packages():
+    return [
+        entry for entry in os.listdir('packages')
+        if entry != CORE_PKG and os.path.isdir(os.path.join('packages', entry))
+    ]
+
+
 def main():
     ensure_correct_cwd()
     load_app_metadata()
-    recon_python3()
-    recon_pip()
+    known_uis = recon_ui_packages()
 
     app_name = APP_METADATA.APP_NAME
-    known_uis = recon_ui_packages()
+
+    recon_python3()
+    recon_pip()
 
     parser = argparse.ArgumentParser(description='Make script for {0}'.format(app_name))
 
