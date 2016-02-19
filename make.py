@@ -25,6 +25,22 @@ def fail(format_str, *args, **kwargs):
     sys.exit(-1)
 
 
+@lru_cache()
+def check_program_installed(program):
+    return shutil.which(program) is not None
+
+
+def ensure_program_installed(program):
+    if not check_program_installed(program):
+        fail('ERROR: {0} is not installed, fix this and retry', program)
+
+
+def silent_call(program_args, *args, **kwargs):
+    ensure_program_installed(program_args[0])
+
+    return subprocess.call(program_args, *args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs) == 0
+
+
 def recon_python3():
     global PYTHON
 
@@ -53,22 +69,6 @@ def recon_pip():
     version = subprocess.check_output([PIP, '-V'], stderr=subprocess.STDOUT)
 
     assert b'ython 2' not in version, 'This script requires PIP for Python 3 to be accessible via the command line'
-
-
-def silent_call(program_args, *args, **kwargs):
-    ensure_program_installed(program_args[0])
-
-    return subprocess.call(program_args, *args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs) == 0
-
-
-@lru_cache()
-def check_program_installed(program):
-    return shutil.which(program) is not None
-
-
-def ensure_program_installed(program):
-    if not check_program_installed(program):
-        fail('ERROR: {0} is not installed, fix this and retry', program)
 
 
 @lru_cache()
