@@ -16,7 +16,6 @@ DIST_DIR = 'dist'
 CORE_PKG = 'baon-core'
 
 APP_METADATA = None
-PIP = None
 PYTHON = None
 
 
@@ -56,33 +55,36 @@ def recon_python3():
     assert not version.startswith(b'2.'), 'This script requires Python 3 to be accessible via the command line'
 
 
-def recon_pip():
-    global PIP
-
+@lru_cache()
+def find_pip3():
     if check_program_installed('pip3'):
-        PIP = 'pip3'
-        return
+        return 'pip3'
 
-    PIP = 'pip'
     ensure_program_installed('pip')
 
-    version = subprocess.check_output([PIP, '-V'], stderr=subprocess.STDOUT)
+    version = subprocess.check_output(['pip', '-V'], stderr=subprocess.STDOUT)
 
     assert b'ython 2' not in version, 'This script requires PIP for Python 3 to be accessible via the command line'
+
+    return 'pip'
+
+
+def pip3(*args):
+    return silent_call([find_pip3()] + list(args))
 
 
 @lru_cache()
 def check_package_installed(package):
-    return silent_call([PIP, 'show', package])
+    return pip3('show', package)
 
 
 def install_package(package, from_url=None):
     if from_url is None:
         print('Installing package: {0}'.format(package))
-        silent_call([PIP, 'install', package])
+        pip3('install', package)
     else:
         print('Installing package: {0} from {1}'.format(package, from_url))
-        silent_call([PIP, 'install', from_url])
+        pip3('install', from_url)
 
     check_package_installed.cache_clear()
 
@@ -94,7 +96,7 @@ def ensure_package_installed(package):
 
 def uninstall_package(package):
     print('Uninstalling package: {0}'.format(package))
-    silent_call([PIP, 'uninstall', '-y', package])
+    pip3('uninstall', '-y', package)
 
     check_package_installed.cache_clear()
 
@@ -333,7 +335,6 @@ def main():
     app_name = APP_METADATA.APP_NAME
 
     recon_python3()
-    recon_pip()
 
     parser = argparse.ArgumentParser(description='Make script for {0}'.format(app_name))
 
