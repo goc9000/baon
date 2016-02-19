@@ -239,22 +239,14 @@ def build_osx_app(packages):
             NSHumanReadableCopyright=u"Copyright © 2012-present, Cristian Dinu"
         )
 
-        with open(os.path.join(work_dir, '{0}.py'.format(APP_NAME)), 'w') as f:
-            f.write("\n".join([
-                'from baon.core.app_args import parse_app_args',
-                'from baon.ui.ui_info import discover_uis',
-                '',
-                'ui_info = discover_uis()',
-                'args = parse_app_args(ui_info)',
-                'args.ui.start_function(args)',
-            ]))
+        start_script = write_start_script(work_dir)
 
         with open(os.path.join(work_dir, 'setup.py'), 'w') as f:
             f.write("\n".join([
                 "from setuptools import setup",
                 "",
                 "setup(",
-                "    app=['{0}.py'],".format(APP_NAME),
+                "    app=[{0}],".format(repr(start_script)),
                 "    options={'py2app': dict(",
                 "        argv_emulation=True,",
                 "        iconfile='{0}.icns',".format(APP_NAME),
@@ -279,6 +271,19 @@ def build_osx_app(packages):
             os.path.join(work_dir, 'dist', '{0}.app'.format(APP_NAME)),
             final_app_dir,
         )
+
+
+def write_start_script(work_dir):
+    script_name = 'start_baon.py'
+
+    with open(os.path.join(work_dir, script_name), 'w') as f:
+        f.write("\n".join([
+            'from baon.start import start_baon',
+            '',
+            'start_baon()',
+        ]))
+
+    return script_name
 
 
 def build_osx_icns(work_dir):
