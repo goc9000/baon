@@ -185,8 +185,6 @@ def build_osx_app(packages):
     ensure_package_installed('py2app')
 
     with tempfile.TemporaryDirectory() as work_dir:
-        build_osx_icns(work_dir)
-
         includes_option = []
         if 'baon-gui-qt4' in packages:
             includes_option.append('sip')
@@ -205,17 +203,15 @@ def build_osx_app(packages):
         for package in packages:
             silent_call(['cp', '-r', os.path.join('packages', package, 'src', 'baon'), work_dir])
 
-        start_script = write_start_script(work_dir)
-
         with open(os.path.join(work_dir, 'setup.py'), 'w') as f:
             f.write("\n".join([
                 "from setuptools import setup",
                 "",
                 "setup(",
-                "    app=[{0}],".format(repr(start_script)),
+                "    app=[{0}],".format(repr(write_start_script(work_dir))),
                 "    options={'py2app': dict(",
                 "        argv_emulation=True,",
-                "        iconfile='{0}.icns',".format(APP_NAME),
+                "        iconfile={0},".format(repr(build_osx_icns(work_dir))),
                 "        includes={0},".format(repr(includes_option)),
                 "        packages={0},".format(repr(packages_option)),
                 "        plist={0},".format(repr(get_plist())),
@@ -254,6 +250,7 @@ def write_start_script(work_dir):
 
 def build_osx_icns(work_dir):
     iconset_dir = os.path.join(work_dir, '{0}.iconset'.format(APP_NAME))
+    icon_name = '{0}.icns'.format(APP_NAME)
 
     os.mkdir(iconset_dir)
 
@@ -269,11 +266,11 @@ def build_osx_icns(work_dir):
                 os.path.join(iconset_dir, 'icon_{0}x{0}{1}.png'.format(size, '@2x' if retina else '')),
             ])
 
-    silent_call(['iconutil', '-c', 'icns', iconset_dir, '-o', os.path.join(work_dir, '{0}.icns'.format(APP_NAME))])
+    silent_call(['iconutil', '-c', 'icns', iconset_dir, '-o', os.path.join(work_dir, icon_name)])
 
     shutil.rmtree(iconset_dir)
 
-    return '{0}.icns'.format(APP_NAME)
+    return icon_name
 
 
 def get_plist():
