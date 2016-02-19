@@ -34,10 +34,10 @@ def ensure_program_installed(program):
         fail('ERROR: {0} is not installed, fix this and retry', program)
 
 
-def silent_call(program_args, *args, **kwargs):
+def silent_call(*program_args, **kwargs):
     ensure_program_installed(program_args[0])
 
-    return subprocess.call(program_args, *args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs) == 0
+    return subprocess.call(program_args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs) == 0
 
 
 def recon_python3():
@@ -69,8 +69,8 @@ def find_pip3():
     return 'pip'
 
 
-def pip3(*args):
-    return silent_call([find_pip3()] + list(args))
+def pip3(*args, **kwargs):
+    return silent_call(find_pip3(), *args, **kwargs)
 
 
 @lru_cache()
@@ -118,10 +118,7 @@ def build_wheel(package):
 
     package_dir = os.path.join('packages', package)
 
-    silent_call(
-        [PYTHON, 'setup.py', 'bdist_wheel', '-d', os.path.join('..', '..', DIST_DIR)],
-        cwd=package_dir,
-    )
+    silent_call(PYTHON, 'setup.py', 'bdist_wheel', '-d', os.path.join('..', '..', DIST_DIR), cwd=package_dir)
 
     # Cleanup
     shutil.rmtree(os.path.join(package_dir, 'build'))
@@ -141,8 +138,8 @@ def uninstall_app_packages(packages):
 
 
 def clean_source():
-    silent_call(['find', 'packages', '-name', '*.pyc', '-delete'])
-    silent_call(['find', 'packages', '-name', '__pycache__', '-delete'])
+    silent_call('find', 'packages', '-name', '*.pyc', '-delete')
+    silent_call('find', 'packages', '-name', '__pycache__', '-delete')
 
 
 def compile_qt4_resources():
@@ -159,14 +156,14 @@ def compile_qt4_resources():
                 '</RCC>',
             ]))
 
-        silent_call([
+        silent_call(
             'pyrcc4',
             '-no-compress',
             '-py3',
             os.path.join(work_dir, 'resources.qrc'),
             '-o',
             os.path.join('packages', 'baon-gui-qt4', 'src', 'baon', 'ui', 'qt4_gui', 'resources.py'),
-        ])
+        )
 
 
 def build_osx_app(packages):
@@ -200,7 +197,7 @@ def build_osx_app(packages):
                 ")",
             ]))
 
-        silent_call([PYTHON, 'setup.py', 'py2app'], cwd=work_dir)
+        silent_call(PYTHON, 'setup.py', 'py2app', cwd=work_dir)
 
         if not os.path.isdir(DIST_DIR):
             os.mkdir(DIST_DIR)
@@ -236,7 +233,7 @@ def write_sources_blob(work_dir, packages, namespace_packages):
     neither py2app nor cx_freeze handle namespace packages well.
     """
     for package in packages:
-        silent_call(['cp', '-r', os.path.join('packages', package, 'src', 'baon'), work_dir])
+        silent_call('cp', '-r', os.path.join('packages', package, 'src', 'baon'), work_dir)
 
     for package in namespace_packages:
         with open(os.path.join(work_dir, package.replace('.', os.path.sep), '__init__.py'), 'w') as f:
@@ -264,7 +261,7 @@ def build_osx_icns(work_dir):
 
     for size in [16, 32, 64, 128, 256, 512]:
         for retina in [False, True]:
-            silent_call([
+            silent_call(
                 'sips',
                 '-z',
                 str((size * 2) if retina else size),
@@ -272,9 +269,9 @@ def build_osx_icns(work_dir):
                 os.path.join('resources', 'app_icon.png'),
                 '--out',
                 os.path.join(iconset_dir, 'icon_{0}x{0}{1}.png'.format(size, '@2x' if retina else '')),
-            ])
+            )
 
-    silent_call(['iconutil', '-c', 'icns', iconset_dir, '-o', os.path.join(work_dir, icon_name)])
+    silent_call('iconutil', '-c', 'icns', iconset_dir, '-o', os.path.join(work_dir, icon_name))
 
     shutil.rmtree(iconset_dir)
 
