@@ -103,6 +103,8 @@ def install_package(package, from_url=None):
         print('Installing package: {0} from {1}'.format(package, from_url))
         silent_call([PIP, 'install', from_url])
 
+    check_package_installed.cache_clear()
+
 
 def ensure_package_installed(package):
     if not check_package_installed(package):
@@ -110,11 +112,10 @@ def ensure_package_installed(package):
 
 
 def uninstall_package(package):
-    global memo_pkg_installed
-
     print('Uninstalling package: {0}'.format(package))
     silent_call([PIP, 'uninstall', '-y', package])
-    memo_pkg_installed[package] = False
+
+    check_package_installed.cache_clear()
 
 
 def ensure_package_uninstalled(package):
