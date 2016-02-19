@@ -269,7 +269,21 @@ def write_sources_blob(work_dir, packages, namespace_packages):
     neither py2app nor cx_freeze handle namespace packages well.
     """
     for package in packages:
-        silent_call('cp', '-r', os.path.join('packages', package, 'src', 'baon'), work_dir)
+        package_src_dir = os.path.join('packages', package, 'src')
+        for item in scan_files(package_src_dir, full_paths=False, include_dirs=True):
+            full_src_path = os.path.join(package_src_dir, item)
+            full_dest_path = os.path.join(work_dir, item)
+            parent_dest_dir, _ = os.path.split(full_dest_path)
+
+            if is_source_junk_file(full_src_path):
+                continue
+            if not os.path.exists(parent_dest_dir):
+                continue  # This happens if one of the parent dirs was a junk file
+
+            if os.path.isdir(full_src_path):
+                os.makedirs(full_dest_path, exist_ok=True)
+            else:
+                shutil.copy2(full_src_path, full_dest_path)
 
     for package in namespace_packages:
         with open(os.path.join(work_dir, package.replace('.', os.path.sep), '__init__.py'), 'w') as f:
