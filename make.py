@@ -145,9 +145,37 @@ def uninstall_app_packages(packages):
         ensure_package_uninstalled(package)
 
 
+def scan_files(base_dir, full_paths=True, include_dirs=False):
+    output = []
+
+    def scan_rec(path):
+        full_path = os.path.join(base_dir, path)
+        if os.path.isdir(full_path):
+            if path != '' and include_dirs:
+                output.append(full_path if full_paths else path)
+
+            for item in os.listdir(full_path):
+                scan_rec(os.path.join(path, item))
+        else:
+            output.append(full_path if full_paths else path)
+
+    scan_rec('')
+
+    return output
+
+
+def is_source_junk_file(path):
+    return re.match(r'([.]DS_Store|__pycache__|.*[.]pyc)$', os.path.basename(path))
+
+
 def clean_source():
-    silent_call('find', 'packages', '-name', '*.pyc', '-delete')
-    silent_call('find', 'packages', '-name', '__pycache__', '-delete')
+    for path in scan_files('packages', include_dirs=True):
+        if is_source_junk_file(path) and os.path.exists(path):
+            print('Deleting: {0}'.format(path))
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.unlink(path)
 
 
 def compile_qt4_resources():
