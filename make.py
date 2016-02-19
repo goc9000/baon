@@ -189,23 +189,15 @@ def build_osx_app(packages):
     ensure_package_installed('py2app')
 
     with tempfile.TemporaryDirectory() as work_dir:
-        includes_option = []
+        write_sources_blob(work_dir, packages, ['baon', 'baon.ui'])
+
+        includes_option = get_ui_modules(packages)
         if 'baon-gui-qt4' in packages:
             includes_option.append('sip')
 
-        # The modules for all desired UIs need to be included explicitly, as BAON imports them dynamically
-        for package in packages:
-            package_ui_path = os.path.join('packages', package, 'src', 'baon', 'ui')
-            for module in os.listdir(package_ui_path):
-                if os.path.isdir(os.path.join(package_ui_path, module)):
-                    includes_option.append('baon.ui.' + module)
-
-        # BAON needs to be included as-is because ply uses inspect on its source, so the .pyc files are not sufficient
-        packages_option = ['baon']
-
-        # Merge all the code in one blob as py2app doesn't handle namespace packages well
-        for package in packages:
-            silent_call(['cp', '-r', os.path.join('packages', package, 'src', 'baon'), work_dir])
+        # This package needs to be included as-is because ply uses inspect on its source, so the .pyc files are not
+        # sufficient.
+        packages_option = ['baon.core.parsing']
 
         with open(os.path.join(work_dir, 'setup.py'), 'w') as f:
             f.write("\n".join([
@@ -237,6 +229,34 @@ def build_osx_app(packages):
             os.path.join(work_dir, 'dist', '{0}.app'.format(APP_METADATA.APP_NAME)),
             final_app_dir,
         )
+
+
+def get_ui_modules(packages):
+    """
+    Returns a list of all UI modules corresponding to the specified packages. This list is often necessary because
+    BAON imports UIs dynamically, so py2app and cx_freeze will not detect them.
+    """
+    modules = []
+    for package in packages:
+        package_ui_path = os.path.join('packages', package, 'src', 'baon', 'ui')
+        for module in os.listdir(package_ui_path):
+            if os.path.isdir(os.path.join(package_ui_path, module)):
+                modules.append('baon.ui.' + module)
+
+    return modules
+
+
+def write_sources_blob(work_dir, packages, namespace_packages):
+    """
+    Merge all the code in one local blob and add __init__.py files where necessary. This needs to be done because
+    neither py2app nor cx_freeze handle namespace packages well.
+    """
+    for package in packages:
+        silent_call(['cp', '-r', os.path.join('packages', package, 'src', 'baon'), work_dir])
+
+    for package in namespace_packages:
+        with open(os.path.join(work_dir, package.replace('.', os.path.sep), '__init__.py'), 'w') as f:
+            f.write('')
 
 
 def write_start_script(work_dir):
