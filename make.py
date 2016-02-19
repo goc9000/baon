@@ -205,27 +205,6 @@ def build_osx_app(packages):
         for package in packages:
             silent_call(['cp', '-r', os.path.join('packages', package, 'src', 'baon'), work_dir])
 
-        plist = dict(
-            CFBundleDisplayName=APP_NAME,
-            CFBundleName=APP_NAME,
-
-            CFBundleIdentifier='com.goc9000.osx.baon',
-            CFBundleVersion='3.0.0',
-            CFBundleShortVersionString='3.0',
-            LSApplicationCategoryType='public.app-category.utilities',
-
-            CFBundleDocumentTypes=[
-                dict(
-                    CFBundleTypeName='Folder',
-                    CFBundleTypeOSTypes=['fold'],
-                    CFBundleTypeRole='Viewer',
-                ),
-            ],
-
-            CFBundleGetInfoString='Mass file renamer with ANTLR-like syntax',
-            NSHumanReadableCopyright=u"Copyright © 2012-present, Cristian Dinu"
-        )
-
         start_script = write_start_script(work_dir)
 
         with open(os.path.join(work_dir, 'setup.py'), 'w') as f:
@@ -239,7 +218,7 @@ def build_osx_app(packages):
                 "        iconfile='{0}.icns',".format(APP_NAME),
                 "        includes={0},".format(repr(includes_option)),
                 "        packages={0},".format(repr(packages_option)),
-                "        plist={0},".format(repr(plist)),
+                "        plist={0},".format(repr(get_plist())),
                 "    )},",
                 "    setup_requires=['py2app'],",
                 ")",
@@ -295,6 +274,29 @@ def build_osx_icns(work_dir):
     shutil.rmtree(iconset_dir)
 
     return '{0}.icns'.format(APP_NAME)
+
+
+def get_plist():
+    return dict(
+        CFBundleDisplayName=APP_NAME,
+        CFBundleName=APP_NAME,
+
+        CFBundleIdentifier='com.goc9000.osx.baon',
+        CFBundleVersion='3.0.0',
+        CFBundleShortVersionString='3.0',
+        LSApplicationCategoryType='public.app-category.utilities',
+
+        CFBundleDocumentTypes=[
+            dict(
+                CFBundleTypeName='Folder',
+                CFBundleTypeOSTypes=['fold'],
+                CFBundleTypeRole='Viewer',
+            ),
+        ],
+
+        CFBundleGetInfoString='Mass file renamer with ANTLR-like syntax',
+        NSHumanReadableCopyright=u"Copyright © 2012-present, Cristian Dinu"
+    )
 
 
 def main():
