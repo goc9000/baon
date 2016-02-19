@@ -16,7 +16,6 @@ DIST_DIR = 'dist'
 CORE_PKG = 'baon-core'
 
 APP_METADATA = None
-PYTHON = None
 
 
 def fail(format_str, *args, **kwargs):
@@ -37,22 +36,32 @@ def ensure_program_installed(program):
 def silent_call(*program_args, **kwargs):
     ensure_program_installed(program_args[0])
 
-    return subprocess.call(program_args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs) == 0
+    my_kwargs = dict()
+
+    if kwargs.get('silent', True):
+        my_kwargs['stdout'] = subprocess.DEVNULL
+        my_kwargs['stderr'] = subprocess.DEVNULL
+
+    my_kwargs.update((k, v) for k, v in kwargs.items() if k not in ['silent'])
+
+    return subprocess.call(program_args, **my_kwargs) == 0
 
 
-def recon_python3():
-    global PYTHON
-
+@lru_cache()
+def find_python3():
     if check_program_installed('python3'):
-        PYTHON = 'python3'
-        return
+        return 'python3'
 
-    PYTHON = 'python'
     ensure_program_installed('python')
 
-    version = subprocess.check_output([PYTHON, '-V'], stderr=subprocess.STDOUT)
-
+    version = subprocess.check_output(['python', '-V'], stderr=subprocess.STDOUT)
     assert not version.startswith(b'2.'), 'This script requires Python 3 to be accessible via the command line'
+
+    return 'python'
+
+
+def python3(*args, **kwargs):
+    return silent_call(find_python3(), *args, **kwargs)
 
 
 @lru_cache()
@@ -63,7 +72,6 @@ def find_pip3():
     ensure_program_installed('pip')
 
     version = subprocess.check_output(['pip', '-V'], stderr=subprocess.STDOUT)
-
     assert b'ython 2' not in version, 'This script requires PIP for Python 3 to be accessible via the command line'
 
     return 'pip'
@@ -118,7 +126,7 @@ def build_wheel(package):
 
     package_dir = os.path.join('packages', package)
 
-    silent_call(PYTHON, 'setup.py', 'bdist_wheel', '-d', os.path.join('..', '..', DIST_DIR), cwd=package_dir)
+    python3('setup.py', 'bdist_wheel', '-d', os.path.join('..', '..', DIST_DIR), cwd=package_dir)
 
     # Cleanup
     shutil.rmtree(os.path.join(package_dir, 'build'))
@@ -197,7 +205,7 @@ def build_osx_app(packages):
                 ")",
             ]))
 
-        silent_call(PYTHON, 'setup.py', 'py2app', cwd=work_dir)
+        python3('setup.py', 'py2app', cwd=work_dir)
 
         if not os.path.isdir(DIST_DIR):
             os.mkdir(DIST_DIR)
@@ -331,8 +339,6 @@ def main():
 
     app_name = APP_METADATA.APP_NAME
 
-    recon_python3()
-
     parser = argparse.ArgumentParser(description='Make script for {0}'.format(app_name))
 
     parser.add_argument('--ui-packages', default=','.join(known_uis), metavar='<ui1,ui2,...>',
@@ -376,7 +382,7 @@ def main():
     elif raw_args.command == 'uninstall':
         uninstall_app_packages(packages)
     elif raw_args.command == 'run':
-        subprocess.call([PYTHON, '-m', 'baon'] + raw_args.run_args, env=dict(
+        python3('-m', 'baon', *raw_args.run_args, silent=False, env=dict(
             os.environ,
             PYTHONPATH=os.pathsep.join(['packages/baon-core/src', 'packages/baon-gui-qt4/src']),
         ))
