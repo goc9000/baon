@@ -28,6 +28,11 @@ def fail(format_str, *args, **kwargs):
     sys.exit(-1)
 
 
+def ensure_correct_cwd():
+    if not os.path.isdir(os.path.join('packages', CORE_PKG)):
+        fail('ERROR: this script must be run from the project root dir')
+
+
 def recon_python3():
     global PYTHON
 
@@ -59,9 +64,6 @@ def recon_pip():
 
 
 def recon_ui_packages():
-    if not os.path.isdir(os.path.join('packages', CORE_PKG)):
-        fail('ERROR: this script must be run from the project root dir')
-
     return [
         entry for entry in os.listdir('packages')
         if entry != CORE_PKG and os.path.isdir(os.path.join('packages', entry))
@@ -296,6 +298,7 @@ def build_osx_icns(work_dir):
 
 
 def main():
+    ensure_correct_cwd()
     recon_python3()
     recon_pip()
 
