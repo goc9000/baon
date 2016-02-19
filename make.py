@@ -22,8 +22,6 @@ DIST_DIR = 'dist'
 CORE_PKG = 'baon-core'
 
 
-memo_pkg_installed = dict()
-
 
 def fail(format_str, *args, **kwargs):
     print(format_str.format(*args, **kwargs), file=sys.stderr)
@@ -86,31 +84,18 @@ def ensure_program_installed(program):
         fail('ERROR: {0} is not installed, fix this and retry', program)
 
 
+@lru_cache()
 def check_package_installed(package):
-    global memo_pkg_installed
-
-    memo_val = memo_pkg_installed.get(package)
-    if memo_val is not None:
-        return memo_val
-
-    memo_val = silent_call([PIP, 'show', package])
-
-    memo_pkg_installed[package] = memo_val
-
-    return memo_val
+    return silent_call([PIP, 'show', package])
 
 
 def install_package(package, from_url=None):
-    global memo_pkg_installed
-
     if from_url is None:
         print('Installing package: {0}'.format(package))
         silent_call([PIP, 'install', package])
     else:
         print('Installing package: {0} from {1}'.format(package, from_url))
         silent_call([PIP, 'install', from_url])
-
-    memo_pkg_installed[package] = True
 
 
 def ensure_package_installed(package):
