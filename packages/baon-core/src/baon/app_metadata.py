@@ -8,8 +8,7 @@
 
 
 APP_NAME = 'BAON'
-APP_AUTHOR = 'DCM'
-
-APP_DESCRIPTION = """
-Mass file renamer.
-""".strip()
+APP_AUTHOR = 'Cristian Dinu'
+APP_DESCRIPTION = 'Mass file renamer with ANTLR-like syntax'
+APP_COPYRIGHT = 'Copyright © 2012-present, Cristian Dinu'
+APP_VERSION = '3.0.0'

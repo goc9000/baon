@@ -12,15 +12,12 @@ import tempfile
 from functools import lru_cache
 
 
-APP_NAME = 'BAON'
-
-PIP = 'pip'
-PYTHON = 'python'
-
 DIST_DIR = 'dist'
-
 CORE_PKG = 'baon-core'
 
+APP_METADATA = None
+PIP = None
+PYTHON = None
 
 
 def fail(format_str, *args, **kwargs):
@@ -31,6 +28,13 @@ def fail(format_str, *args, **kwargs):
 def ensure_correct_cwd():
     if not os.path.isdir(os.path.join('packages', CORE_PKG)):
         fail('ERROR: this script must be run from the project root dir')
+
+
+def load_app_metadata():
+    global APP_METADATA
+
+    sys.path.append(os.path.join('packages', CORE_PKG, 'src', 'baon'))
+    APP_METADATA = __import__('app_metadata')
 
 
 def recon_python3():
@@ -225,12 +229,12 @@ def build_osx_app(packages):
         if not os.path.isdir(DIST_DIR):
             os.mkdir(DIST_DIR)
 
-        final_app_dir = os.path.join(DIST_DIR, '{0}.app'.format(APP_NAME))
+        final_app_dir = os.path.join(DIST_DIR, '{0}.app'.format(APP_METADATA.APP_NAME))
         if os.path.isdir(final_app_dir):
             shutil.rmtree(final_app_dir)
 
         os.rename(
-            os.path.join(work_dir, 'dist', '{0}.app'.format(APP_NAME)),
+            os.path.join(work_dir, 'dist', '{0}.app'.format(APP_METADATA.APP_NAME)),
             final_app_dir,
         )
 
@@ -249,8 +253,8 @@ def write_start_script(work_dir):
 
 
 def build_osx_icns(work_dir):
-    iconset_dir = os.path.join(work_dir, '{0}.iconset'.format(APP_NAME))
-    icon_name = '{0}.icns'.format(APP_NAME)
+    iconset_dir = os.path.join(work_dir, '{0}.iconset'.format(APP_METADATA.APP_NAME))
+    icon_name = '{0}.icns'.format(APP_METADATA.APP_NAME)
 
     os.mkdir(iconset_dir)
 
@@ -275,12 +279,12 @@ def build_osx_icns(work_dir):
 
 def get_plist():
     return dict(
-        CFBundleDisplayName=APP_NAME,
-        CFBundleName=APP_NAME,
+        CFBundleDisplayName=APP_METADATA.APP_NAME,
+        CFBundleName=APP_METADATA.APP_NAME,
 
         CFBundleIdentifier='com.goc9000.osx.baon',
-        CFBundleVersion='3.0.0',
-        CFBundleShortVersionString='3.0',
+        CFBundleVersion=APP_METADATA.APP_VERSION,
+        CFBundleShortVersionString=shorten_version(APP_METADATA.APP_VERSION),
         LSApplicationCategoryType='public.app-category.utilities',
 
         CFBundleDocumentTypes=[
@@ -291,19 +295,25 @@ def get_plist():
             ),
         ],
 
-        CFBundleGetInfoString='Mass file renamer with ANTLR-like syntax',
-        NSHumanReadableCopyright=u"Copyright © 2012-present, Cristian Dinu"
+        CFBundleGetInfoString=APP_METADATA.APP_DESCRIPTION,
+        NSHumanReadableCopyright=APP_METADATA.APP_COPYRIGHT,
     )
+
+
+def shorten_version(version):
+    return '.'.join(version.split('.')[:2])
 
 
 def main():
     ensure_correct_cwd()
+    load_app_metadata()
     recon_python3()
     recon_pip()
 
+    app_name = APP_METADATA.APP_NAME
     known_uis = recon_ui_packages()
 
-    parser = argparse.ArgumentParser(description='Make script for {0}'.format(APP_NAME))
+    parser = argparse.ArgumentParser(description='Make script for {0}'.format(app_name))
 
     parser.add_argument('--ui-packages', default=','.join(known_uis), metavar='<ui1,ui2,...>',
                         help='Override list of UI packages to install/build')
@@ -311,13 +321,13 @@ def main():
     subparsers = parser.add_subparsers(title='commands', dest='command')
 
     # HAX: sabotage prefix_chars to disable recognition of option arguments
-    sp = subparsers.add_parser('run', help='Run {0} directly from source'.format(APP_NAME), prefix_chars='\0')
+    sp = subparsers.add_parser('run', help='Run {0} directly from source'.format(app_name), prefix_chars='\0')
     sp.add_argument('run_args', nargs=argparse.REMAINDER, help='Program arguments')
 
     subparsers.add_parser('build', help='Build .whl packages for the core and GUIs')
     subparsers.add_parser('build_app', help='Build OS X app')
-    subparsers.add_parser('install', help='(Re)Install {0} in package form'.format(APP_NAME))
-    subparsers.add_parser('uninstall', help='Uninstall {0} packages'.format(APP_NAME))
+    subparsers.add_parser('install', help='(Re)Install {0} in package form'.format(app_name))
+    subparsers.add_parser('uninstall', help='Uninstall {0} packages'.format(app_name))
 
     subparsers.add_parser('clean_src', help='Clean source folders (remove .pyc files etc)')
 
