@@ -563,7 +563,10 @@ def main():
     elif raw_args.command == 'run':
         python3('-m', 'baon', *raw_args.run_args, silent=False, env=dict(
             os.environ,
-            PYTHONPATH=os.pathsep.join(['packages/baon-core/src', 'packages/baon-gui-qt4/src']),
+            PYTHONPATH=os.pathsep.join([
+                os.path.join('packages', 'baon-core', 'src'),
+                os.path.join('packages', 'baon-gui-qt4', 'src'),
+            ]),
         ))
     elif raw_args.command == 'clean_src':
         clean_source()
