@@ -7,6 +7,8 @@
 # Licensed under the GPL-3
 
 
+import os
+
 from PyQt4.QtCore import QTimer, pyqtSignal
 from PyQt4.QtGui import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
 
@@ -74,7 +76,11 @@ class BasePathPanel(QWidget, SetupTabStopsMixin):
     def _on_browse_button_pressed(self):
         self._base_path_editor_quiescence_timer.stop()
 
-        directory = QFileDialog.getExistingDirectory(parent=self.window(), caption=self.BROWSE_DIALOG_CAPTION_TEXT)
+        directory = QFileDialog.getExistingDirectory(
+            parent=self.window(),
+            caption=self.BROWSE_DIALOG_CAPTION_TEXT,
+            directory=self.base_path() or os.path.expanduser('~'),
+        )
         if directory != '':
             self._base_path_editor.setText(directory)
 
