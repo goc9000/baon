@@ -208,7 +208,7 @@ def update_ico_resource():
 
     args = ['convert', os.path.join('resources', 'app_icon.png')]
 
-    for size in [16, 32, 48, 64, 256]:
+    for size in [16, 24, 32, 48, 64, 256]:
         args.extend(['(', '-clone', '0', '-resize', '{0}x{0}'.format(size), '-channel', 'A', '-threshold', '50%', ')'])
 
     args.extend(['-delete', '0', os.path.join('resources', 'app_icon-derived.ico')])
@@ -416,6 +416,78 @@ def shorten_version(version):
     return '.'.join(version.split('.')[:2])
 
 
+def build_windows_app(packages):
+    ensure_package_installed('cx-Freeze')
+    ensure_package_installed('pypiwin32')
+
+    with tempfile.TemporaryDirectory() as work_dir:
+        write_sources_blob(work_dir, packages, ['baon', 'baon.ui'])
+
+        # These sources needs to be included as-is because ply uses inspect on them, so the .pyc files are not
+        # sufficient.
+        zip_includes = [
+            (path, path) for path in [
+                os.path.join('baon', 'core', 'parsing', 'tokenize_rules.py'),
+                os.path.join('baon', 'core', 'parsing', 'parse_rules.py'),
+            ]
+        ]
+
+        shutil.copy(os.path.join('resources', 'app_icon-derived.ico'), os.path.join(work_dir, 'app_icon.ico'))
+
+        write_script(
+            os.path.join(work_dir, 'setup.py'),
+            """
+            from cx_Freeze import setup, Executable
+
+            setup(
+                name=##app_name##,
+                version=##app_version##,
+                description=##app_description##,
+                options={
+                    'build_exe': {
+                        'excludes': ['tkinter'],
+                        'packages': ##ui_modules##,
+                        'zip_includes': ##zip_includes##,
+                        'build_exe': 'dist',
+                        'include_msvcr': True,
+                    },
+                },
+                executables=[
+                    Executable(
+                        ##start_script##,
+                        base='Win32GUI',
+                        targetName=##exe_name##,
+                        compress=True,
+                        copyDependentFiles=True,
+                        icon='app_icon.ico',
+                    )
+                ],
+            )
+            """,
+            app_name=APP_METADATA.APP_NAME,
+            app_version=APP_METADATA.APP_VERSION,
+            app_description=APP_METADATA.APP_DESCRIPTION+'; '+APP_METADATA.APP_COPYRIGHT,
+            ui_modules=get_ui_modules(packages),
+            zip_includes=zip_includes,
+            start_script=write_start_script(work_dir),
+            exe_name=APP_METADATA.APP_NAME+'.exe',
+        )
+
+        python3('setup.py', 'build_exe', cwd=work_dir)
+
+        if not os.path.isdir(DIST_DIR):
+            os.mkdir(DIST_DIR)
+
+        final_app_dir = os.path.join(DIST_DIR, APP_METADATA.APP_NAME)
+        if os.path.isdir(final_app_dir):
+            shutil.rmtree(final_app_dir)
+
+        os.rename(
+            os.path.join(work_dir, 'dist'),
+            final_app_dir,
+        )
+
+
 def ensure_correct_cwd():
     if not os.path.isdir(os.path.join('packages', CORE_PKG)):
         fail('ERROR: this script must be run from the project root dir')
@@ -455,6 +527,7 @@ def main():
 
     subparsers.add_parser('build', help='Build .whl packages for the core and GUIs')
     subparsers.add_parser('build_app', help='Build OS X app')
+    subparsers.add_parser('build_exe', help='Build Windows application')
     subparsers.add_parser('install', help='(Re)Install {0} in package form'.format(app_name))
     subparsers.add_parser('uninstall', help='Uninstall {0} packages'.format(app_name))
 
@@ -479,6 +552,8 @@ def main():
         build_wheels(packages)
     elif raw_args.command == 'build_app':
         build_osx_app(packages)
+    elif raw_args.command == 'build_exe':
+        build_windows_app(packages)
     elif raw_args.command == 'install':
         build_wheels(packages)
         uninstall_app_packages(packages)
