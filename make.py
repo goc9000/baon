@@ -230,22 +230,31 @@ def build_osx_app(packages):
         # sufficient.
         packages_option = ['baon.core.parsing']
 
-        with open(os.path.join(work_dir, 'setup.py'), 'w') as f:
-            f.write("\n".join([
-                "from setuptools import setup",
-                "",
-                "setup(",
-                "    app=[{0}],".format(repr(write_start_script(work_dir))),
-                "    options={'py2app': dict(",
-                "        argv_emulation=True,",
-                "        iconfile={0},".format(repr(build_osx_icns(work_dir))),
-                "        includes={0},".format(repr(includes_option)),
-                "        packages={0},".format(repr(packages_option)),
-                "        plist={0},".format(repr(get_plist())),
-                "    )},",
-                "    setup_requires=['py2app'],",
-                ")",
-            ]))
+        write_script(
+            os.path.join(work_dir, 'setup.py'),
+            """
+            from setuptools import setup
+
+            setup(
+                app=##start_script##,
+                options=dict(
+                    py2app=dict(
+                        argv_emulation=True,
+                        includes=##includes_option##,
+                        packages=##packages_option##,
+                        plist=##plist##,
+                        iconfile=##icon_file##,
+                    ),
+                )
+                setup_requires=['py2app'],
+            )
+            """,
+            start_script=write_start_script(work_dir),
+            includes_option=includes_option,
+            packages_option=packages_option,
+            plist=get_plist(),
+            icon_file=build_osx_icns(work_dir),
+        )
 
         python3('setup.py', 'py2app', cwd=work_dir)
 
@@ -307,14 +316,52 @@ def write_sources_blob(work_dir, packages, namespace_packages):
 def write_start_script(work_dir):
     script_name = 'start_baon.py'
 
-    with open(os.path.join(work_dir, script_name), 'w') as f:
-        f.write("\n".join([
-            'from baon.start import start_baon',
-            '',
-            'start_baon()',
-        ]))
+    write_script(
+        os.path.join(work_dir, script_name),
+        """
+        from baon.start import start_baon
+
+        start_baon()
+        """
+    )
 
     return script_name
+
+
+def write_script(filename, code, **code_args):
+    lines = []
+    indent = None
+
+    for line in code.split("\n"):
+        if indent is None:
+            if line.strip() == '':
+                continue
+            indent = re.match(r'^\s*', line).group(0)
+
+        if line.startswith(indent):
+            line = line[len(indent):]
+        elif line.strip() == '':
+            line = ''
+        else:
+            raise AssertionError('Improper indent in script code')
+
+        lines.append(line)
+
+    code = "\n".join(lines).strip() + "\n"
+
+    def replacer(spec):
+        var_name = spec.group(1)
+
+        if var_name in code_args:
+            return repr(code_args[var_name])
+
+        raise AssertionError('Invalid spec: {0}'.format(var_name))
+
+    code = "# -*- coding: utf-8 -*-\n" + code
+    code = re.sub('##([^#]+)##', replacer, code)
+
+    with open(filename, 'wt', encoding='utf-8') as f:
+        f.write(code)
 
 
 def build_osx_icns(work_dir):
