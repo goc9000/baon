@@ -270,6 +270,8 @@ def build_osx_app(packages):
             final_app_dir,
         )
 
+    print('Mac OS X application built at {0}'.format(final_app_dir))
+
 
 def get_ui_modules(packages):
     """
@@ -416,7 +418,7 @@ def shorten_version(version):
     return '.'.join(version.split('.')[:2])
 
 
-def build_windows_app(packages):
+def build_windows_app(packages, installer=False):
     ensure_package_installed('cx-Freeze')
     ensure_package_installed('pypiwin32')
 
@@ -448,7 +450,6 @@ def build_windows_app(packages):
                         'excludes': ['tkinter'],
                         'packages': ##ui_modules##,
                         'zip_includes': ##zip_includes##,
-                        'build_exe': 'dist',
                         'include_msvcr': True,
                     },
                 },
@@ -473,19 +474,24 @@ def build_windows_app(packages):
             exe_name=APP_METADATA.APP_NAME+'.exe',
         )
 
-        python3('setup.py', 'build_exe', cwd=work_dir)
+        python3('setup.py', 'bdist_msi' if installer else 'build_exe', cwd=work_dir)
+
+        build_parent_dir = os.path.join(work_dir, 'dist' if installer else 'build')
+        build_item = os.path.join(build_parent_dir, os.listdir(build_parent_dir)[0])
+        final_app_name = os.path.basename(build_item) if installer else APP_METADATA.APP_NAME
+        final_app_path = os.path.join(DIST_DIR, final_app_name)
 
         if not os.path.isdir(DIST_DIR):
             os.mkdir(DIST_DIR)
+        if os.path.exists(final_app_path):
+            if os.path.isdir(final_app_path):
+                shutil.rmtree(final_app_path)
+            else:
+                os.unlink(final_app_path)
 
-        final_app_dir = os.path.join(DIST_DIR, APP_METADATA.APP_NAME)
-        if os.path.isdir(final_app_dir):
-            shutil.rmtree(final_app_dir)
+        os.rename(build_item, final_app_path)
 
-        os.rename(
-            os.path.join(work_dir, 'dist'),
-            final_app_dir,
-        )
+    print('{0} built at {1}'.format('Installer' if installer else 'Windows application', final_app_path))
 
 
 def ensure_correct_cwd():
@@ -528,6 +534,7 @@ def main():
     subparsers.add_parser('build', help='Build .whl packages for the core and GUIs')
     subparsers.add_parser('build_app', help='Build OS X app')
     subparsers.add_parser('build_exe', help='Build Windows application')
+    subparsers.add_parser('build_msi', help='Build MSI installer for Windows application')
     subparsers.add_parser('install', help='(Re)Install {0} in package form'.format(app_name))
     subparsers.add_parser('uninstall', help='Uninstall {0} packages'.format(app_name))
 
@@ -554,6 +561,8 @@ def main():
         build_osx_app(packages)
     elif raw_args.command == 'build_exe':
         build_windows_app(packages)
+    elif raw_args.command == 'build_msi':
+        build_windows_app(packages, installer=True)
     elif raw_args.command == 'install':
         build_wheels(packages)
         uninstall_app_packages(packages)
