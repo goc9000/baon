@@ -78,7 +78,7 @@ def find_pip3():
 
 
 def pip3(*args, **kwargs):
-    return silent_call(find_pip3(), *args, **kwargs)
+    return silent_call(find_pip3(), '--disable-pip-version-check', *args, **kwargs)
 
 
 @lru_cache()
