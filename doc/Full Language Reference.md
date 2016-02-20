@@ -43,19 +43,55 @@ Notes:
   - Type it directly, while making sure the pattern is delimited by a quote of a different kind, so that there is no confusion. For instance, `"Pan's Labyrinth"` (single quote inside double quotes) or `'Louis "Pops" Armstrong'` (double quotes inside single quotes)
   - If you need to use the same kind of quote as the one the pattern is delimited by, double it like this: `'Pan''s Labyrinth'`. BAON will interpret this as *<<Pan's Labyrinth>>*.
 
+#### Number Match
+
+Another very commonly used pattern is the **number match**, which takes the form:
+
+    %d
+
+It matches incoming text in the form of a **positive integer**, *including any leading zeroes and leading whitespace*.
+
+Thus, `%d` matches:
+
+- `1`
+- `1234`
+- `003`
+- `__004`
+
+But not:
+
+- `123__` (trailing whitespace)
+- `-45` (has sign)
+- `12.4` (is not an integer)
+- `12a` (has other characters)
+
+The reason for these particular limitations is that this pattern is intended for use with track numbers and years, which are the most common uses of numbers in filenames.
+
+A variant of this match is the **fixed width number match**, which is specified like this:
+
+    %5d
+
+Or `%1d`, `%2d`, `%15d` etc. This matches a **number consisting of exactly N digits** (where *N* is the number between the `%` and `d`), including any leading whitespace. Thus, `%5d` matches:
+
+- `12345`
+- `00123`
+- `___12345`
+
+But not:
+
+- `12345__` (trailing whitespace)
+- `123` (shorter)
+- `123456` (longer)
+- `0012345` (leading zeroes are part of the count, so still too long)
+
 ---
 
 REWRITING POINT HERE
 
 ---
 
-### Elementary Pattern Matches
 
 These are the most basic building blocks of any rule, being closest in behavior to the general concept of a match as described in the previous sections. Many of these may be familiar to C programmers as they closely resemble the format specifiers for `scanf` (but watch out for any differences!).
-
-* `%d` : Matches a **positive integer**, including any leading zeroes and leading whitespace.
-
-* `%Nd` : Matches a number consisting of exactly N digits, including any leading whitespace.
 
 * `%s` : Matches a **word**, including any leading whitespace. A word is defined as any sequence of contiguous characters (including digits and punctuation), up to the first whitespace character.
 
