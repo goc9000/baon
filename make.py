@@ -202,6 +202,20 @@ def compile_qt4_resources():
         )
 
 
+def update_ico_resource():
+    if not check_program_installed('mogrify'):  # Use this as there is already a Windows utility named convert
+        raise AssertionError('You need to install ImageMagick')
+
+    args = ['convert', os.path.join('resources', 'app_icon.png')]
+
+    for size in [16, 32, 48, 64, 256]:
+        args.extend(['(', '-clone', '0', '-resize', '{0}x{0}'.format(size), '-channel', 'A', '-threshold', '50%', ')'])
+
+    args.extend(['-delete', '0', os.path.join('resources', 'app_icon-derived.ico')])
+
+    silent_call(*args)
+
+
 def build_osx_app(packages):
     ensure_package_installed('py2app')
 
@@ -400,6 +414,7 @@ def main():
     subparsers.add_parser('clean_src', help='Clean source folders (remove .pyc files etc)')
 
     subparsers.add_parser('compile_qt4_res', help='Compile QT4 GUI resources')
+    subparsers.add_parser('update_ico', help='Update app ICO file using original PNG (requires ImageMagick)')
 
     raw_args = parser.parse_args(sys.argv[1:])
 
@@ -432,5 +447,7 @@ def main():
         clean_source()
     elif raw_args.command == 'compile_qt4_res':
         compile_qt4_resources()
+    elif raw_args.command == 'update_ico':
+        update_ico_resource()
 
 main()
