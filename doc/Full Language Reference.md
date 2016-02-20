@@ -3,8 +3,20 @@ BAON
 
 (C) Copyright 2012 Cristian Dinu (<goc9000@gmail.com>); Licensed under the GPLv3.
 
+---
+
+**WORK IN PROGRESS - THIS IS IN THE PROCESS OF BEING REWRITTEN**
+
+---
+
 Full Language Reference
 -----------------------
+
+---
+
+REWRITING POINT HERE
+
+---
 
 ### Elementary Pattern Matches
 
