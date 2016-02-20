@@ -12,6 +12,37 @@ BAON
 Full Language Reference
 -----------------------
 
+## Pattern Matches
+
+Pattern matches are the most basic building block of any rule. They specify a pattern that the incoming filename text must fit in order for it to be transformed through actions and thus cause the filename to change.
+
+### Elementary Pattern Matches
+
+#### Literal Text Match
+
+The simplest possible pattern match is the **literal text match**, which is specified like this:
+
+    'Exact text'
+
+Or
+
+    "Exact text"
+
+The incoming text is considered to fit the match if it **exactly** equals the text between the quotes. We then say that the match *succeeds*, and the text will be transformed according to any actions specified after the match.
+
+Notes:
+- By "exactly equals" we mean that all letters and spaces are in the same place, same amounts and same case ('A' is not equal to 'a'). Thus, the pattern `"abc DEF"` matches the text `abc DEF` but not:
+  - `Abc Def` (different case)
+  - `abc__DEF` (has extra whitespace; `_` has been used to represent space for clarity)
+  - `_abc_DEF` (has leading whitespace)
+  - `abc_DEF_` (has trailing whitespace)
+  - `ăbc DEF` (accented characters are not the same as the base character)
+- The pattern can include Unicode characters like national characters (e.g. `Ă`, `ș`, `ț`), symbols like the em dash, etc. Just type them in directly as you would any other letter.
+- There is no mechanism for specifying special characters by their ASCII code or Unicode code point. Even assuming the operating system lets you, putting characters in filenames that cannot be easily typed is nearly always a bad idea.
+- Some operating systems allow the quotes or double-quotes themselves to be part of a filename. To make a quote or double-quote part of the pattern, you have two options:
+  - Type it directly, while making sure the pattern is delimited by a quote of a different kind, so that there is no confusion. For instance, `"Pan's Labyrinth"` (single quote inside double quotes) or `'Louis "Pops" Armstrong'` (double quotes inside single quotes)
+  - If you need to use the same kind of quote as the one the pattern is delimited by, double it like this: `'Pan''s Labyrinth'`. BAON will interpret this as *<<Pan's Labyrinth>>*.
+
 ---
 
 REWRITING POINT HERE
@@ -35,10 +66,6 @@ These are the most basic building blocks of any rule, being closest in behavior 
 * `%Nc` : Matches a sequence of exactly N characters (normal or whitespace).
 
 * `%ws` : Matches any amount of whitespace (including none at all) up to the first non-whitespace character.
-
-* `'exact text'` or `"exact text"` : Matches the exact text between the quotes. The string literal may contain escapes such as `\'` or `\"` if you need to specify a quote character of the same kind as the quotes used for the literal. You can also include octal (e.g. `\100`) and Unicode escapes (e.g. `\u1234`).
-
-  Note that the comparison is case-sensitive. For case-insensitive matching, consider using the regex match below.
 
 * `/regular expresssion/` : Matches using the given regular expression (Python flavor) between the delimiters. To include the delimiter character in the regular expression use `//`. You can specify regular expression flags by adding lowercase letters right after the rightmost delimiter. At the moment, the only specifier supported is `i`, for case-insensitive matching.
 
