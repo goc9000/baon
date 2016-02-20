@@ -1,7 +1,7 @@
 BAON
 ====
 
-(C) Copyright 2012 Cristian Dinu (<goc9000@gmail.com>); Licensed under the GPLv3.
+(C) Copyright 2012-present Cristian Dinu (<goc9000@gmail.com>); Licensed under the GPLv3.
 
 ---
 
