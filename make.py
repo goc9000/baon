@@ -271,7 +271,7 @@ def get_ui_modules(packages):
     for package in packages:
         package_ui_path = os.path.join('packages', package, 'src', 'baon', 'ui')
         for module in os.listdir(package_ui_path):
-            if os.path.isdir(os.path.join(package_ui_path, module)):
+            if os.path.isdir(os.path.join(package_ui_path, module)) and not is_source_junk_file(module):
                 modules.append('baon.ui.' + module)
 
     return modules
