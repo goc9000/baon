@@ -84,24 +84,36 @@ But not:
 - `123456` (longer)
 - `0012345` (leading zeroes are part of the count, so still too long)
 
+### Advanced Pattern Matches
+
+For more exotic use cases, these patterns are available:
+
+- `%s` : Matches a **word**, including any leading whitespace. A word is defined as any sequence of contiguous characters (including digits and punctuation), up to the first whitespace character. Thus, this matches `abc`, `__abc`, `abc-def`, `abc5.3`, but not `ab_cde` (a word only lasts until a space, so this is actually two words).
+
+- `%Ns` : Matches a word consisting of exactly *N* characters, including any leading whitespace. The leading whitespace does not count towards the limit. Thus, `%4s` matches `abcd`, `__abcd`, `a-b5` but not `abc`, `_abc`, `abcde` etc.
+ 
+- `%c` : Matches a single character, including whitespace. Thus, `%c` matches `a`, `b`, `5`, `!`, `_`, etc. Note that since any character is accepted, the only way this can fail to match is if the incoming text is empty, e.g. when all of the filename has already been covered by previously encountered matches and we are at the very end of it.
+
+- `%Nc` : Matches a sequence of exactly *N* characters, including whitespace characters which are also part of the count. Thus, `%4c` matches `abcd`, `ab12`, `ab_c`, `___a`, `____` etc. As for `%c`, since any character matches, this will always succeed unless there are fewer than *N* characters left in the incoming text.
+
+- `%ws` : Matches any amount of whitespace (including none at all).
+
+- `%paras` : Matches text enclosed within parantheses, including the parantheses themselves and any leading whitespace. Thus, this matches `(1984)`, `__(1984)`, `(_radio_mix_)`, `()`, but not:
+  - `(1984)__` (trailing whitespace)
+  - `abc(def)` (has other text besides the parantheses)
+  - `(abc(def))` (nested parantheses are not allowed; such use is not common in filenames anyway)
+
+- `%braces`, `%curlies` : As above, but for straight braces `[` `]` and curly braces `{` `}` respectively.
+
+- `%path` : Matches incoming text in the form of a path leading up to a filename, save for the filename itself. In practical terms this means everything up to the last `/` character, inclusive (or `\` on Windows). If there is no such path separator in the incoming text at all, it is assumed that it consists entirely of a filename, and the match succeeds, but covers an imaginary empty span of text at the beginning of the filename text.
+
 ---
 
 REWRITING POINT HERE
 
 ---
 
-
-These are the most basic building blocks of any rule, being closest in behavior to the general concept of a match as described in the previous sections. Many of these may be familiar to C programmers as they closely resemble the format specifiers for `scanf` (but watch out for any differences!).
-
-* `%s` : Matches a **word**, including any leading whitespace. A word is defined as any sequence of contiguous characters (including digits and punctuation), up to the first whitespace character.
-
-* `%Ns` : Matches a word consisting of exactly N characters, including any leading whitespace.
-
-* `%c` : Matches a single character. If the incoming text begins with whitespace, the first whitespace character will be consumed.
-
-* `%Nc` : Matches a sequence of exactly N characters (normal or whitespace).
-
-* `%ws` : Matches any amount of whitespace (including none at all) up to the first non-whitespace character.
+Many of these may be familiar to C programmers as they closely resemble the format specifiers for `scanf` (but watch out for any differences!).
 
 * `/regular expresssion/` : Matches using the given regular expression (Python flavor) between the delimiters. To include the delimiter character in the regular expression use `//`. You can specify regular expression flags by adding lowercase letters right after the rightmost delimiter. At the moment, the only specifier supported is `i`, for case-insensitive matching.
 
@@ -109,15 +121,11 @@ These are the most basic building blocks of any rule, being closest in behavior 
 
 * `$` : Matches the very end of the filename. No text is consumed.
 
-* `%paras` : Matches text enclosed within parantheses, including the parantheses themselves and any leading whitespace. Nested parantheses are not supported (such use is not common in filenames anyway).
-
 * `%inparas` : Similar to the above, but matches only the enclosed text itself. Mostly useful in search-and-replace matches; for instance, `@%inparas->lower` will make any text enclosed in parantheses lowercase.
 
 * `%braces`, `%inbraces` : As above, but for straight braces, i.e. `[` and `]`.
 
 * `%curlies`, `%incurlies` : As above, but for curly braces, i.e. `{` and `}`.
-
-* `%path` : Matches the path leading up to a file, i.e. everything up to the last `/` character, inclusive (or `\` on Windows). If there is no path, an empty string is returned.
 
 ### Actions
 
