@@ -107,15 +107,39 @@ For more exotic use cases, these patterns are available:
 
 - `%path` : Matches incoming text in the form of a path leading up to a filename, save for the filename itself. In practical terms this means everything up to the last `/` character, inclusive (or `\` on Windows). If there is no such path separator in the incoming text at all, it is assumed that it consists entirely of a filename, and the match succeeds, but covers an imaginary empty span of text at the beginning of the filename text.
 
+### Regular Expression Matches
+
+For when you need maximum control over the pattern that the incoming text should fit, BAON supports **regular expression matches**, specified like this:
+
+    /pattern/
+
+i.e. the [regular expression](https://en.wikipedia.org/wiki/Regular_expression) should be delimited by `//`. For instance:
+
+- `/\s*[0-9]+/` will match a positive integer optionaly preceded by whitespace or leading zeroes, and thus exactly duplicate the functionality of `%d`.
+- `/([A-Za-z]+-)*[A-Za-z]/` will match a single word (e.g. `Dylan`) or hyphenated combination of words (e.g. `Jay-Z`), useful for names.
+
+Notes:
+- Practical regular expressions used in various environments and programming languages exhibit particular variations from the theoretical standard, called *flavors*. BAON is written in Python and thus uses [Python flavored regular expressions](https://docs.python.org/3.4/howto/regex.html).
+- By default, the regular expression is case sensitive, i.e. case differences matter. For instance, `/[a-z]+/` matches a sequence of lowercase letters only. To ignore case differences, append `i` after the last delimiter, e.g. `/[a-z]+/i` matches a sequence of both lowercase and uppercase letters.
+
 ---
 
 REWRITING POINT HERE
 
 ---
 
-Many of these may be familiar to C programmers as they closely resemble the format specifiers for `scanf` (but watch out for any differences!).
+## Actions
 
-* `/regular expresssion/` : Matches using the given regular expression (Python flavor) between the delimiters. To include the delimiter character in the regular expression use `//`. You can specify regular expression flags by adding lowercase letters right after the rightmost delimiter. At the moment, the only specifier supported is `i`, for case-insensitive matching.
+## Combining matches
+
+- pattern matches are greedy (!) - mention this in sequence match
+
+## Search-and-replace
+
+## Positional matches
+
+- mention regexes again, note that their positional features can be used
+
 
 * `^` : Matches the very beginning of the filename. No text is consumed.
 
