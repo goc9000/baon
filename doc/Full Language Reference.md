@@ -10,9 +10,11 @@ BAON
 ---
 
 Full Language Reference
------------------------
+=======================
 
-## Pattern Matches
+
+Pattern Matches
+---------------
 
 Pattern matches are the most basic building block of any rule. They specify a pattern that the incoming filename text must fit in order for it to be transformed through actions and thus cause the filename to change.
 
@@ -122,17 +124,102 @@ Notes:
 - Practical regular expressions used in various environments and programming languages exhibit particular variations from the theoretical standard, called *flavors*. BAON is written in Python and thus uses [Python flavored regular expressions](https://docs.python.org/3.4/howto/regex.html).
 - By default, the regular expression is case sensitive, i.e. case differences matter. For instance, `/[a-z]+/` matches a sequence of lowercase letters only. To ignore case differences, append `i` after the last delimiter, e.g. `/[a-z]+/i` matches a sequence of both lowercase and uppercase letters.
 
+
+Actions
+-------
+
+Before going into yet more advanced match types, it is necessary to introduce the second fundamental concept of **actions**. Actions specify what is to be done with the incoming text that fits the pattern described by matches, and thus how BAON fulfills its primary function of changing filenames such that files are renamed of moved.
+
+Actions are introduced by the `!`, `->` or `>>` characters right after a match. For instance:
+
+    'Album'->upper
+
+Has the following effect: if the incoming text matches the pattern described by `'Album'` (i.e. consists of that word in that exact spelling), that part of the text will be converted to uppercase (this is what the `->upper` action means), and thus the file will be renamed accordingly. Otherwise, if there is no match, the action will not be performed and the filename will remain unchanged. Thus, a directory named `Album` will be renamed to `ALBUM`. A file or directory with any other name, say, `Booklet`, or `01. Overture` will be left alone.
+
+BAON supports a limited number of powerful actions, divided into several categories:
+
+### Basic Text Processing Actions
+
+- `!` : Deletes the matched text. This is useful for removing unwanted junk from a filename. E.g. `'The '!` will delete the `The` particle from the beginning of a filename, if it starts with that particle.
+
+- `->'exact text'` or `->"exact text"` : Replaces the matched text by the exact text between the quotes (syntax is the same as for the literal text match). E.g. `'Ouverture'->'Overture'` will translate between the French and the English spelling of that musical term.
+
+- `->trim` : Removes leading and trailing whitespace from the matched text. Thus, `_ab_c__` becomes `ab_c`.
+
+### Capitalization Actions
+
+- `->upper` : Converts all letters in the matched text to uppercase. E.g. `AbcDE` becomes `ABCDE`.
+    
+- `->lower` : Converts all letters in the matched text to lowercase. E.g. `AbcDE` becomes `abcde`.
+
+- `->title` : One of the most common and powerful actions, this changes the capitalization of the matched text so as to conform to the English rules for titles. Thus, most words will have their first letter converted to uppercase and the rest to lowercase, with some exceptions made for special situations (e.g. particles like *on*, *and*, *the*, acronyms, etc.). For instance, the text `the girl In tHE paRK` becomes `The Girl in the Park`.
+
+### Brace Processing Actions
+
+- `->unbrace` : Removes all parantheses and braces from the matched text. E.g. `(remix[4])` becomes `remix4`.
+    
+- `->paras` : Adds parantheses around the matched text. Note that any leading or trailing whitespace will remain outside the parantheses, e.g. `'__test_'->paras` produces `__(test)_`.
+    
+- `->inparas` : Keeps only the text between the first pair of matching parantheses in the matched text. Nested parantheses are not supported. If there are no matching parantheses in the text, it will be completely deleted. E.g. `'Track 01 (radio mix)'->inparas` produces `radio mix`.
+    
+- `->braces`, `->inbraces` : As above, but for straight braces, i.e. `[` and `]`.
+    
+- `->curlies`, `->incurlies` : As above, but for curly braces, i.e. `{` and `}`.
+
+### Number Processing Actions
+
+- `->%Nd` : Reformats the matched text as a number with exactly *N* characters, padded with leading zeroes where necessary. Leading and trailing whitespace is preserved. It is an error if the matched text is not a number. Thus, if the action is `->%3d`:
+  - `24` becomes `024`
+  - `01` becomes `001`
+  - `123` remains `123`
+  - `1234` remains `1234`
+  - `___12_` becomes `___012_`
+  - `abc` causes an error and the file will not be renamed
+
+### The "Save to Alias" Action
+
+- `>>alias` : Saves the matched text to a variable (called an **alias**) whose name is given after the `>>`. For instance, `%d>>year` will look for a number in the incoming text, and save it in a variable called *year*. This text can be re-inserted into another part of the filename using the **insertion** constructs described in a later section.
+
+### The Apply Subrules Action
+
+- `->(rule1; rule2...)` : Passes the matched text through a set of rules, as if it was a filename in itself. For instance, if we have:
+
+  `%s->(%d->%3d; '000'->'Cover')`
+  
+  The effects will be as follows:
+  - Given the first word in the incoming text (`%s`):
+    - Apply subrule 1 (`%d->%3d`) : if the word starts with a number, that number will be reformatted so as to have 3 digits (including leading zeroes)
+    - Then apply subrule 2: (`'000'->'Cover'`) : if the transformed word resulting from applying the previous rule begins with `000`, that part will be replaced with the word `Cover`.
+  - The word has now been transformed according to the two rules.
+
+  Note: the rules within the parantheses can use aliases saved in the main rules, and viceversa.
+
+### Chaining Actions
+
+The final lesson in using actions is that they can be *chained* such that multiple actions apply to the result of a successful match, without needing to use the 'apply subrules' action. The result of one action will feed into another. For instance:
+
+    %d->%4d>>year!
+  
+Will have the following effect:
+
+  - If the incoming text matches a number (`%d`):
+    - Extend it to 4 characters (`->%4d`)
+    - Save the extended number to the alias *year* (`>>year`)
+    - And finally, delete the number from the place we found it (`!`)
+
+Note that the deletion of the number does not affect the value stored in the alias (as long as the deletion is specified *after* the save). In fact, storing the result of a match to an alias and then deleting it, then using the alias in an insertion later, is a common way of reordering parts of a filename (e.g. moving the artist name from the beginning to the end of a filename or viceversa).
+
 ---
 
 REWRITING POINT HERE
 
 ---
 
-## Actions
-
 ## Combining matches
 
 - pattern matches are greedy (!) - mention this in sequence match
+
+
 
 ## Search-and-replace
 
@@ -150,40 +237,6 @@ REWRITING POINT HERE
 * `%braces`, `%inbraces` : As above, but for straight braces, i.e. `[` and `]`.
 
 * `%curlies`, `%incurlies` : As above, but for curly braces, i.e. `{` and `}`.
-
-### Actions
-
-Actions are introduced by the `!`, `->` or `>>` characters right after a match. Actions may be chained, so that the result of one is fed into another, e.g. `%s->action1->action2`. BAON supports the following actions:
-
-* `!` : Deletes the matched text (i.e. transforms it to the empty string). This is useful for removing unwanted junk from a filename.
-
-* `->'exact text'` or `->"exact text"` : Replaces the matched text by the exact text given.
-
-* `->%Nd` : Reformats the matched text as a number with exactly N characters, padded with leading zeroes where necessary. Leading and trailing whitespace is preserved. It is an error if the matched text is not a number.
-
-* `->(rule1; rule2...)` : Passes the matched text through a set of rules. The ruleset between the braces operates within its own separate context; none of its side effects will be visible to matches in the main ruleset.
-
-* `->function` : Applies a built-in function to the matched text. At the moment the following functions are supported:
-
-    * `->trim` : Removes leading and trailing whitespace from the matched text.
-    
-    * `->upper` : Converts all letters in the matched text to uppercase.
-    
-    * `->lower` : Converts all letters in the matched text to lowercase.
-
-    * `->title` : Applies title case to the matched text. This mainly involves setting the first letter in every word to uppercase, with some caveats (particle words such as "an", "on", etc., as well as all-uppercase words that probably represent acronyms, are left alone)
-    
-    * `->unbrace` : Removes all parantheses and braces from the matched text.
-    
-    * `->paras` : Adds parantheses around the matched text. Note that any leading or trailing whitespace will remain outside the parantheses, e.g. `'  test '->paras` produces `  (test) `.
-    
-    * `->inparas` : Returns the text between the first pair of matching parantheses in the matched text. Nested parantheses are not supported. An empty string will be returned if there are no matching parantheses in the text.
-    
-    * `->braces`, `->inbraces` : As above, but for straight braces, i.e. `[` and `]`.
-    
-    * `->curlies`, ->incurlies` : As above, but for curly braces, i.e. `{` and `}`.
-
-* `>>alias` : Saves the matched text to a location identified by the given alias, while performing no other modification. The text can subsequently be pasted in another place within the filename.
 
 ### Insertion Matches
 
