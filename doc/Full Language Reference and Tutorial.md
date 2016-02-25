@@ -209,6 +209,54 @@ Will have the following effect:
 
 Note that the deletion of the number does not affect the value stored in the alias (as long as the deletion is specified *after* the save). In fact, storing the result of a match to an alias and then deleting it, then using the alias in an insertion later, is a common way of reordering parts of a filename (e.g. moving the artist name from the beginning to the end of a filename or viceversa).
 
+
+Combining Matches
+-----------------
+
+In order to achieve complex matching and transformation, BAON provides a series of ways to combine and group the elementary matches described above.
+
+### Matches in a Sequence
+
+The simplest way of combining matches is to place them in a **sequence**, by simply putting them one after the other, separated by whitespace:
+
+    match1->action1 match2->action2 match3->action3 ...
+
+Matches in a sequence will be processed in order:
+
+  - First, the incoming text will be matched against the pattern for *match1*. If it fits, the portion of the text that matched will be transformed according to *->action1*. The matched text will then be considered *consumed*, such that subsequent matches will look at the incoming text just past the part that matched.
+  - Then, the *remaining* incoming text will be matched against the pattern for *match2* and transformed according to *->action2*. The part of the text that matched will be consumed.
+  - Then, the *remaining* incoming text will be matched agains *match3* etc.
+  - **If, and only if, all the matches were successful**, the resulting incoming text will consist of the transformed matched text for *match1*, followed by the transformed text for *match2*, etc.
+    - If there are any matches after the sequence (which is possible using some of the operators described in future sections), they will act on the text that remains after all of the matches in the sequence have consumed their correspoding bits of matched text.
+  - Conversely, **if any of the matches fails** (the text at that point does not fit the pattern), **the entire sequence match will fail** and any modifications made by *match1*, *match2*, etc. up to the failed match will be **cancelled**.
+
+To illustrate with a concrete example:
+
+    %d->%02d ' - '->'. ' %s %paras!
+
+- `%d->%02d` : First, we will expect a number (e.g. a track number), and reformat it so that it has 2 digits.
+- `' - '->'. '` : Then, we will expect a space-flanked dash that separates the track number from the rest of the filename. We will change this into a period, a different style of punctuating the track number.
+- `%s`: Then, we will expect a single word. This will not be transformed in any way, it just needs to be there.
+- `%paras`: Finally, we will expect some paranthesized text to follow (like `(remix)`) and delete it.
+
+A filename that can match this sequence is `1 - Overture (original cut)`. It will be processed as follows:
+
+| Match+Action  | Matched Text      | Transformed Text |
+|---------------|-------------------|------------------|
+| `%d->%02d`    | `1`               | `01`             |
+| `' - '->'. '` | `_-_`             | `._`             |
+| `%s`          | `Overture`        | `Overture`       |
+| `%paras`      | `_(original_cut)` | *(empty text)*   |
+
+for a full result of `01. Overture`
+
+The following filenames will **not** match the sequence and will thus be left unmodified:
+
+- `Cover Art` (does not start with a number, `%d` fails)
+- `01. Overture (original cut)` (the track number is not separated by a dash, `' - '` fails)
+- `01 - Overture` (there is no text in parantheses, `%paras` fails)
+- `01 - Allegro assai (overture)` (the `%s` matches against the word `Allegro`, then the `%paras` fails because the word `assai`, still unconsumed, lies before the paranthesized text that would otherwise match)
+
 ---
 
 REWRITING POINT HERE
@@ -216,10 +264,6 @@ REWRITING POINT HERE
 ---
 
 ## Combining matches
-
-- pattern matches are greedy (!) - mention this in sequence match
-
-
 
 ## Search-and-replace
 
@@ -266,17 +310,6 @@ The characters `?`, `*` and `+` may be placed after a match to provide effects s
  
 * `+` works like `*`, but requires that the match succeed at least once. If it does not, the normal semantics for a failed match apply.
 
-### Match Sequences
-
-The most common way of combining matches is to place them in a *sequence*. This is achieved by simple juxtaposition:
-
-    match1  match2  match3  etc.
-
-The matches contained in a sequence will be executed in order. Each match will try to match text starting at the point where the previous one ended. Additional context effects such as alias setting will also be inherited.
-
-If, and only if, all of the component matches succeed, the result of the match sequence will be the concatenation of the individual match results. Otherwise, if any of the components fails to match, the match sequence itself will fail and any effects such as text consumption will be undone.
-
-One can note that this description is very similar to that of a rule. In fact, most rules consist of a single match sequence, but more complex constructions are possible, as we will see below.
 
 ### Special Match Constructs
 
