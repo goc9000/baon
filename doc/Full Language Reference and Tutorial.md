@@ -9,8 +9,8 @@ BAON
 
 ---
 
-Full Language Reference
-=======================
+Full Language Reference and Tutorial
+====================================
 
 
 Pattern Matches
@@ -43,7 +43,7 @@ Notes:
 - There is no mechanism for specifying special characters by their ASCII code or Unicode code point. Even assuming the operating system lets you, putting characters in filenames that cannot be easily typed is nearly always a bad idea.
 - Some operating systems allow the quotes or double-quotes themselves to be part of a filename. To make a quote or double-quote part of the pattern, you have two options:
   - Type it directly, while making sure the pattern is delimited by a quote of a different kind, so that there is no confusion. For instance, `"Pan's Labyrinth"` (single quote inside double quotes) or `'Louis "Pops" Armstrong'` (double quotes inside single quotes)
-  - If you need to use the same kind of quote as the one the pattern is delimited by, double it like this: `'Pan''s Labyrinth'`. BAON will interpret this as *<<Pan's Labyrinth>>*.
+  - If you need to use the same kind of quote as the one the pattern is delimited by, double it like this: `'Pan''s Labyrinth'`. BAON will collapse the repeated single quote and interpret the text as `Pan's Labyrinth`.
 
 #### Number Match
 
