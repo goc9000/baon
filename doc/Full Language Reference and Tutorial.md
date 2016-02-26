@@ -13,6 +13,26 @@ Full Language Reference and Tutorial
 ====================================
 
 
+Table of Contents
+-----------------
+
+1. [Pattern Matches] (#pattern-matches)
+  1. [The Literal Text Match] (#the-literal-text-match)
+  2. [The Number Match] (#the-number-match)
+  3. [Advanced Pattern Matches] (#advanced-pattern-matches)
+  4. [The Regular Expression Match] (#the-regular-expression-match)
+2. [Actions] (#actions)
+  1. [Basic Text Processing Actions] (#basic-text-processing-actions)
+  2. [Capitalization Actions] (#capitalization-actions)
+  3. [Brace Processing Actions] (#brace-processing-actions)
+  4. [Number Processing Actions] (#number-processing-actions)
+  5. [The Save to Alias Action] (#the-save-to-alias-action)
+  6. [The Apply Subrules Action] (#the-apply-subrules-action)
+  7. [Chaining Actions] (#chaining-actions)
+3. [Combining Matches] (#combining-matches)
+  1. [Matches in a Sequence] (#matches-in-a-sequence)
+
+
 Pattern Matches
 ---------------
 
@@ -20,7 +40,7 @@ Pattern matches are the most basic building block of any rule. They specify a pa
 
 ### Elementary Pattern Matches
 
-#### Literal Text Match
+#### The Literal Text Match
 
 The simplest possible pattern match is the **literal text match**, which is specified like this:
 
@@ -45,7 +65,7 @@ Notes:
   - Type it directly, while making sure the pattern is delimited by a quote of a different kind, so that there is no confusion. For instance, `"Pan's Labyrinth"` (single quote inside double quotes) or `'Louis "Pops" Armstrong'` (double quotes inside single quotes)
   - If you need to use the same kind of quote as the one the pattern is delimited by, double it like this: `'Pan''s Labyrinth'`. BAON will collapse the repeated single quote and interpret the text as `Pan's Labyrinth`.
 
-#### Number Match
+#### The Number Match
 
 Another very commonly used pattern is the **number match**, which takes the form:
 
@@ -109,7 +129,7 @@ For more exotic use cases, these patterns are available:
 
 - `%path` : Matches incoming text in the form of a path leading up to a filename, save for the filename itself. In practical terms this means everything up to the last `/` character, inclusive (or `\` on Windows). If there is no such path separator in the incoming text at all, it is assumed that it consists entirely of a filename, and the match succeeds, but covers an imaginary empty span of text at the beginning of the filename text.
 
-### Regular Expression Matches
+### The Regular Expression Match
 
 For when you need maximum control over the pattern that the incoming text should fit, BAON supports **regular expression matches**, specified like this:
 
@@ -176,7 +196,7 @@ BAON supports a limited number of powerful actions, divided into several categor
   - `___12_` becomes `___012_`
   - `abc` causes an error and the file will not be renamed
 
-### The "Save to Alias" Action
+### The Save to Alias Action
 
 - `>>alias` : Saves the matched text to a variable (called an **alias**) whose name is given after the `>>`. For instance, `%d>>year` will look for a number in the incoming text, and save it in a variable called *year*. This text can be re-inserted into another part of the filename using the **insertion** constructs described in a later section.
 
