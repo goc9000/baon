@@ -120,10 +120,10 @@ For more exotic use cases, these patterns are available:
 
 - `%ws` : Matches any amount of whitespace (including none at all).
 
-- `%paras` : Matches text enclosed within parantheses, including the parantheses themselves and any leading whitespace. Thus, this matches `(1984)`, `__(1984)`, `(_radio_mix_)`, `()`, but not:
+- `%paras` : Matches text enclosed within parentheses, including the parentheses themselves and any leading whitespace. Thus, this matches `(1984)`, `__(1984)`, `(_radio_mix_)`, `()`, but not:
   - `(1984)__` (trailing whitespace)
-  - `abc(def)` (has other text besides the parantheses)
-  - `(abc(def))` (nested parantheses are not allowed; such use is not common in filenames anyway)
+  - `abc(def)` (has other text besides the parentheses)
+  - `(abc(def))` (nested parentheses are not allowed; such use is not common in filenames anyway)
 
 - `%braces`, `%curlies` : As above, but for straight braces `[` `]` and curly braces `{` `}` respectively.
 
@@ -176,11 +176,11 @@ BAON supports a limited number of powerful actions, divided into several categor
 
 ### Brace Processing Actions
 
-- `->unbrace` : Removes all parantheses and braces from the matched text. E.g. `(remix[4])` becomes `remix4`.
+- `->unbrace` : Removes all parentheses and braces from the matched text. E.g. `(remix[4])` becomes `remix4`.
     
-- `->paras` : Adds parantheses around the matched text. Note that any leading or trailing whitespace will remain outside the parantheses, e.g. `'__test_'->paras` produces `__(test)_`.
+- `->paras` : Adds parentheses around the matched text. Note that any leading or trailing whitespace will remain outside the parentheses, e.g. `'__test_'->paras` produces `__(test)_`.
     
-- `->inparas` : Keeps only the text between the first pair of matching parantheses in the matched text. Nested parantheses are not supported. If there are no matching parantheses in the text, it will be completely deleted. E.g. `'Track 01 (radio mix)'->inparas` produces `radio mix`.
+- `->inparas` : Keeps only the text between the first pair of matching parentheses in the matched text. Nested parentheses are not supported. If there are no matching parentheses in the text, it will be completely deleted. E.g. `'Track 01 (radio mix)'->inparas` produces `radio mix`.
     
 - `->braces`, `->inbraces` : As above, but for straight braces, i.e. `[` and `]`.
     
@@ -212,7 +212,7 @@ BAON supports a limited number of powerful actions, divided into several categor
     - Then apply subrule 2: (`'000'->'Cover'`) : if the transformed word resulting from applying the previous rule begins with `000`, that part will be replaced with the word `Cover`.
   - The word has now been transformed according to the two rules.
 
-  Note: the rules within the parantheses can use aliases saved in the main rules, and viceversa.
+  Note: the rules within the parentheses can use aliases saved in the main rules, and viceversa.
 
 ### Chaining Actions
 
@@ -257,7 +257,7 @@ To illustrate with a concrete example:
 - `%d->%02d` : First, we will expect a number (e.g. a track number), and reformat it so that it has 2 digits.
 - `' - '->'. '` : Then, we will expect a space-flanked dash that separates the track number from the rest of the filename. We will change this into a period, a different style of punctuating the track number.
 - `%s`: Then, we will expect a single word. This will not be transformed in any way, it just needs to be there.
-- `%paras`: Finally, we will expect some paranthesized text to follow (like `(remix)`) and delete it.
+- `%paras`: Finally, we will expect some parenthesized text to follow (like `(remix)`) and delete it.
 
 A filename that can match this sequence is `1 - Overture (original cut)`. It will be processed as follows:
 
@@ -274,8 +274,8 @@ The following filenames will **not** match the sequence and will thus be left un
 
 - `Cover Art` (does not start with a number, `%d` fails)
 - `01. Overture (original cut)` (the track number is not separated by a dash, `' - '` fails)
-- `01 - Overture` (there is no text in parantheses, `%paras` fails)
-- `01 - Allegro assai (overture)` (the `%s` matches against the word `Allegro`, then the `%paras` fails because the word `assai`, still unconsumed, lies before the paranthesized text that would otherwise match)
+- `01 - Overture` (there is no text in parentheses, `%paras` fails)
+- `01 - Allegro assai (overture)` (the `%s` matches against the word `Allegro`, then the `%paras` fails because the word `assai`, still unconsumed, lies before the parenthesized text that would otherwise match)
 
 ---
 
@@ -296,7 +296,7 @@ REWRITING POINT HERE
 
 * `$` : Matches the very end of the filename. No text is consumed.
 
-* `%inparas` : Similar to the above, but matches only the enclosed text itself. Mostly useful in search-and-replace matches; for instance, `@%inparas->lower` will make any text enclosed in parantheses lowercase.
+* `%inparas` : Similar to the above, but matches only the enclosed text itself. Mostly useful in search-and-replace matches; for instance, `@%inparas->lower` will make any text enclosed in parentheses lowercase.
 
 * `%braces`, `%inbraces` : As above, but for straight braces, i.e. `[` and `]`.
 
@@ -335,7 +335,7 @@ The characters `?`, `*` and `+` may be placed after a match to provide effects s
 
 #### Subrules
 
-Groups of matches can be enclosed in parantheses so as to form a 'subrule' that is treated as a single match. For instance, we can have a sequence like:
+Groups of matches can be enclosed in parentheses so as to form a 'subrule' that is treated as a single match. For instance, we can have a sequence like:
 
     match1  (match2  match3)->action23?  match4  etc.
 
@@ -351,7 +351,7 @@ Intuitively speaking, a `..` specifier will match all of the text *between* the 
 
     %d  '. '  ..->title  '('
     
-means that we will first consume a number, then the sequence `'. '`, and then we will look for a paranthesis up ahead. When we have found one, all of the text from the end of the `'. '` sequence up to the open brace will be passed through the `title` filter. Therefore, between matches are a convenient way to avoid specifying a complex pattern for content that is best described by its position between two simpler patterns.
+means that we will first consume a number, then the sequence `'. '`, and then we will look for a parenthesis up ahead. When we have found one, all of the text from the end of the `'. '` sequence up to the open brace will be passed through the `title` filter. Therefore, between matches are a convenient way to avoid specifying a complex pattern for content that is best described by its position between two simpler patterns.
 
 Caveats:
 
@@ -373,7 +373,7 @@ Search-and-replace matches are introduced by specifying the `@` character before
   
 will mean that all incoming text remaining after `match1` will be transfomrmed so as to replace all spaces with slashes. The `match2` specifier and all subsequent ones will operate on this modified version of the incoming text.
 
-Note that, like all context effects, modifications to the incoming text persist even across parantheses. For instance, in the sequence:
+Note that, like all context effects, modifications to the incoming text persist even across parentheses. For instance, in the sequence:
 
     m1  (m2  @m3->a3  m4)?  m5
 
