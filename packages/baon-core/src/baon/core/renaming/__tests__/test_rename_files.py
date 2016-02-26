@@ -23,7 +23,7 @@ class TestRenameFiles(RenameFilesTestCase):
                 ('FILE', 'file2'),
                 ('FILE', 'file3'),
             ),
-            rules_text='..->paras',
+            rules_text='..->parens',
             expected_result=(
                 ('DIR', '(dir1)'),
                 ('DIR', '(dir2)'),
@@ -42,7 +42,7 @@ class TestRenameFiles(RenameFilesTestCase):
                 ('FILE', 'file2.txt'),
                 ('FILE', 'file3'),
             ),
-            rules_text='..->paras',
+            rules_text='..->parens',
             expected_result=(
                 ('DIR', '(dir1)'),
                 ('DIR', '(dir2.d)'),  # Directories always include the extension
@@ -62,7 +62,7 @@ class TestRenameFiles(RenameFilesTestCase):
                 ('FILE', 'file2.txt'),
                 ('FILE', 'file3'),
             ),
-            rules_text='..->paras',
+            rules_text='..->parens',
             expected_result=(
                 ('DIR', '(dir1)'),
                 ('DIR', '(dir2.d)'),
@@ -82,7 +82,7 @@ class TestRenameFiles(RenameFilesTestCase):
                 ('FILE', 'file2.txt'),
                 ('FILE', 'file3'),
             ),
-            rules_text='..->paras',
+            rules_text='..->parens',
             expected_result=(
                 ('FILE', 'dir1/(file11).txt'),
                 ('FILE', 'dir2.d/dir21/(file211)'),
@@ -102,7 +102,7 @@ class TestRenameFiles(RenameFilesTestCase):
                 ('FILE', 'file2.txt'),
                 ('FILE', 'file3'),
             ),
-            rules_text='..->paras',
+            rules_text='..->parens',
             expected_result=(
                 ('FILE', '(dir1/file11).txt'),
                 ('FILE', '(dir2.d/dir21/file211)'),
@@ -122,7 +122,7 @@ class TestRenameFiles(RenameFilesTestCase):
                 ('FILE', 'file2.txt'),
                 ('FILE', 'file3'),
             ),
-            rules_text='..->paras',
+            rules_text='..->parens',
             expected_result=(
                 ('FILE', 'dir3/dir4/[file341].bin', 'OVERRIDE'),
                 ('FILE', 'dir2.d/dir21/(file211)'),

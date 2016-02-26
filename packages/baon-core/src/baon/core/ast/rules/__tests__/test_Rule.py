@@ -27,7 +27,7 @@ class TestRule(TestCase):
             text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    LiteralMatch('abc').add_action(ApplyFunctionAction('paras')),
+                    LiteralMatch('abc').add_action(ApplyFunctionAction('parens')),
                     FormatMatch('ws').add_action(DeleteAction()),
                     FormatMatch('d').add_action(ApplyFunctionAction('braces')),
                 ),
@@ -40,7 +40,7 @@ class TestRule(TestCase):
             text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    LiteralMatch('abc').add_action(ApplyFunctionAction('paras')),
+                    LiteralMatch('abc').add_action(ApplyFunctionAction('parens')),
                     FormatMatch('ws').add_action(DeleteAction()),
                     LiteralMatch('x').add_action(ApplyFunctionAction('braces')),
                 ),
@@ -52,7 +52,7 @@ class TestRule(TestCase):
         self._test_rule(
             text='abc 123',
             rule=Rule(
-                LiteralMatch('ab').add_action(ApplyFunctionAction('paras')),
+                LiteralMatch('ab').add_action(ApplyFunctionAction('parens')),
             ),
             expected_text='(ab)c 123'
         )
@@ -62,7 +62,7 @@ class TestRule(TestCase):
             text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    LiteralMatch('ab').add_action(ApplyFunctionAction('paras')),
+                    LiteralMatch('ab').add_action(ApplyFunctionAction('parens')),
                     BetweenMatch().add_action(ApplyFunctionAction('braces')),
                 ),
             ),
@@ -75,7 +75,7 @@ class TestRule(TestCase):
             rule=Rule(
                 SequenceMatch(
                     BetweenMatch().add_action(ApplyFunctionAction('braces')),
-                    LiteralMatch('c').add_action(ApplyFunctionAction('paras')),
+                    LiteralMatch('c').add_action(ApplyFunctionAction('parens')),
                 ),
             ),
             expected_text='[ab](c) 123'

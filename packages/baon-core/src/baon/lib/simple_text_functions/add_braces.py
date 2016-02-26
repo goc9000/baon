@@ -7,7 +7,7 @@
 # Licensed under the GPL-3
 
 
-def paras(text):
+def parens(text):
     return _add_braces(text, '(', ')')
 
 

@@ -38,7 +38,7 @@ class TestSearchReplaceMatch(MatchTestCase):
             text='abracadabra',
             match=SearchReplaceMatch(
                 SequenceMatch(
-                    BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                    BetweenMatch().add_action(ApplyFunctionAction('parens')),
                     LiteralMatch('r').add_action(DeleteAction()),
                 )
             ),
@@ -50,7 +50,7 @@ class TestSearchReplaceMatch(MatchTestCase):
             match=SearchReplaceMatch(
                 SequenceMatch(
                     LiteralMatch('r').add_action(DeleteAction()),
-                    BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                    BetweenMatch().add_action(ApplyFunctionAction('parens')),
                 )
             ),
             expected_solution={'text': 'ab(acadab)(a)', 'matched_text': '', 'position': 0})
@@ -60,7 +60,7 @@ class TestSearchReplaceMatch(MatchTestCase):
             text='abracadabra',
             match=SearchReplaceMatch(
                 SequenceMatch(
-                    BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                    BetweenMatch().add_action(ApplyFunctionAction('parens')),
                     LiteralMatch('r').add_action(DeleteAction()),
                     BetweenMatch().add_action(ApplyFunctionAction('braces')),
                 )

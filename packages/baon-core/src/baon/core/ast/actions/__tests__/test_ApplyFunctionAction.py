@@ -29,11 +29,11 @@ class TestApplyFunctionAction(ActionTestCase):
         self._test_simple_text_action('(abc)', ApplyFunctionAction('unbrace'), 'abc')
 
     def test_add_brace_functions(self):
-        self._test_simple_text_action('abc', ApplyFunctionAction('paras'), '(abc)')
+        self._test_simple_text_action('abc', ApplyFunctionAction('parens'), '(abc)')
         self._test_simple_text_action('abc', ApplyFunctionAction('braces'), '[abc]')
         self._test_simple_text_action('abc', ApplyFunctionAction('curlies'), '{abc}')
 
     def test_extract_in_braces_functions(self):
-        self._test_simple_text_action('ab(cde)f', ApplyFunctionAction('inparas'), 'cde')
+        self._test_simple_text_action('ab(cde)f', ApplyFunctionAction('inparens'), 'cde')
         self._test_simple_text_action('ab[cde]f', ApplyFunctionAction('inbraces'), 'cde')
         self._test_simple_text_action('ab{cde}f', ApplyFunctionAction('incurlies'), 'cde')

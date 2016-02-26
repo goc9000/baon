@@ -120,7 +120,7 @@ For more exotic use cases, these patterns are available:
 
 - `%ws` : Matches any amount of whitespace (including none at all).
 
-- `%paras` : Matches text enclosed within parentheses, including the parentheses themselves and any leading whitespace. Thus, this matches `(1984)`, `__(1984)`, `(_radio_mix_)`, `()`, but not:
+- `%parens` : Matches text enclosed within parentheses, including the parentheses themselves and any leading whitespace. Thus, this matches `(1984)`, `__(1984)`, `(_radio_mix_)`, `()`, but not:
   - `(1984)__` (trailing whitespace)
   - `abc(def)` (has other text besides the parentheses)
   - `(abc(def))` (nested parentheses are not allowed; such use is not common in filenames anyway)
@@ -178,9 +178,9 @@ BAON supports a limited number of powerful actions, divided into several categor
 
 - `->unbrace` : Removes all parentheses and braces from the matched text. E.g. `(remix[4])` becomes `remix4`.
     
-- `->paras` : Adds parentheses around the matched text. Note that any leading or trailing whitespace will remain outside the parentheses, e.g. `'__test_'->paras` produces `__(test)_`.
+- `->parens` : Adds parentheses around the matched text. Note that any leading or trailing whitespace will remain outside the parentheses, e.g. `'__test_'->parens` produces `__(test)_`.
     
-- `->inparas` : Keeps only the text between the first pair of matching parentheses in the matched text. Nested parentheses are not supported. If there are no matching parentheses in the text, it will be completely deleted. E.g. `'Track 01 (radio mix)'->inparas` produces `radio mix`.
+- `->inparens` : Keeps only the text between the first pair of matching parentheses in the matched text. Nested parentheses are not supported. If there are no matching parentheses in the text, it will be completely deleted. E.g. `'Track 01 (radio mix)'->inparens` produces `radio mix`.
     
 - `->braces`, `->inbraces` : As above, but for straight braces, i.e. `[` and `]`.
     
@@ -252,12 +252,12 @@ Matches in a sequence will be processed in order:
 
 To illustrate with a concrete example:
 
-    %d->%02d ' - '->'. ' %s %paras!
+    %d->%02d ' - '->'. ' %s %parens!
 
 - `%d->%02d` : First, we will expect a number (e.g. a track number), and reformat it so that it has 2 digits.
 - `' - '->'. '` : Then, we will expect a space-flanked dash that separates the track number from the rest of the filename. We will change this into a period, a different style of punctuating the track number.
 - `%s`: Then, we will expect a single word. This will not be transformed in any way, it just needs to be there.
-- `%paras`: Finally, we will expect some parenthesized text to follow (like `(remix)`) and delete it.
+- `%parens`: Finally, we will expect some parenthesized text to follow (like `(remix)`) and delete it.
 
 A filename that can match this sequence is `1 - Overture (original cut)`. It will be processed as follows:
 
@@ -266,7 +266,7 @@ A filename that can match this sequence is `1 - Overture (original cut)`. It wil
 | `%d->%02d`    | `1`               | `01`             |
 | `' - '->'. '` | `_-_`             | `._`             |
 | `%s`          | `Overture`        | `Overture`       |
-| `%paras`      | `_(original_cut)` | *(empty text)*   |
+| `%parens`     | `_(original_cut)` | *(empty text)*   |
 
 for a full result of `01. Overture`
 
@@ -274,8 +274,8 @@ The following filenames will **not** match the sequence and will thus be left un
 
 - `Cover Art` (does not start with a number, `%d` fails)
 - `01. Overture (original cut)` (the track number is not separated by a dash, `' - '` fails)
-- `01 - Overture` (there is no text in parentheses, `%paras` fails)
-- `01 - Allegro assai (overture)` (the `%s` matches against the word `Allegro`, then the `%paras` fails because the word `assai`, still unconsumed, lies before the parenthesized text that would otherwise match)
+- `01 - Overture` (there is no text in parentheses, `%parens` fails)
+- `01 - Allegro assai (overture)` (the `%s` matches against the word `Allegro`, then the `%parens` fails because the word `assai`, still unconsumed, lies before the parenthesized text that would otherwise match)
 
 ---
 
@@ -296,7 +296,7 @@ REWRITING POINT HERE
 
 * `$` : Matches the very end of the filename. No text is consumed.
 
-* `%inparas` : Similar to the above, but matches only the enclosed text itself. Mostly useful in search-and-replace matches; for instance, `@%inparas->lower` will make any text enclosed in parentheses lowercase.
+* `%inparens` : Similar to the above, but matches only the enclosed text itself. Mostly useful in search-and-replace matches; for instance, `@%inparens->lower` will make any text enclosed in parentheses lowercase.
 
 * `%braces`, `%inbraces` : As above, but for straight braces, i.e. `[` and `]`.
 

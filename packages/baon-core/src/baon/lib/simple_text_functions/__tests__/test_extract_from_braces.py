@@ -13,8 +13,8 @@ import baon.lib.simple_text_functions.extract_from_braces
 
 
 class TestExtractFromBracesFunctions(TestCase):
-    def test_inparas(self):
-        f_u_t = baon.lib.simple_text_functions.extract_from_braces.inparas
+    def test_inparens(self):
+        f_u_t = baon.lib.simple_text_functions.extract_from_braces.inparens
 
         self.assertEqual(f_u_t('(abc)'), 'abc')
         self.assertEqual(f_u_t('abc (def)'), 'def')

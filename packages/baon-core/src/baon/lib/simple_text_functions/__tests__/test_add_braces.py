@@ -13,8 +13,8 @@ import baon.lib.simple_text_functions.add_braces
 
 
 class TestAddBracesFunctions(TestCase):
-    def test_paras(self):
-        f_u_t = baon.lib.simple_text_functions.add_braces.paras
+    def test_parens(self):
+        f_u_t = baon.lib.simple_text_functions.add_braces.parens
 
         self.assertEqual(f_u_t('abc'), '(abc)')
         self.assertEqual(f_u_t('  some text   '), '  (some text)   ')

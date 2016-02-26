@@ -10,7 +10,7 @@
 import re
 
 
-def inparas(text):
+def inparens(text):
     return _extract_text_from_braces(text, '(', ')', '')
 
 

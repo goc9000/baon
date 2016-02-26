@@ -44,7 +44,7 @@ class TestBetweenMatch(MatchTestCase):
         self._test_unique_match(
             text='Some text',
             match=SequenceMatch(
-                BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                BetweenMatch().add_action(ApplyFunctionAction('parens')),
                 EndAnchorMatch(),
             ),
             expected_solution={'matched_text': '(Some text)', 'position': 9})
@@ -53,7 +53,7 @@ class TestBetweenMatch(MatchTestCase):
         self._test_unique_match(
             text='Some text',
             match=SequenceMatch(
-                BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                BetweenMatch().add_action(ApplyFunctionAction('parens')),
                 BetweenMatch().add_action(ApplyFunctionAction('braces')),
                 BetweenMatch().add_action(ApplyFunctionAction('curlies')),
                 EndAnchorMatch(),
@@ -65,7 +65,7 @@ class TestBetweenMatch(MatchTestCase):
             text='Some text',
             match=SequenceMatch(
                 RepeatMatch(
-                    BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                    BetweenMatch().add_action(ApplyFunctionAction('parens')),
                     0,
                     None,
                 ),
@@ -77,7 +77,7 @@ class TestBetweenMatch(MatchTestCase):
         self._test_unique_match(
             text='Some text',
             match=SequenceMatch(
-                BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                BetweenMatch().add_action(ApplyFunctionAction('parens')),
                 InsertLiteralMatch('1'),
                 BetweenMatch().add_action(ApplyFunctionAction('braces')),
                 InsertLiteralMatch('2'),
@@ -90,7 +90,7 @@ class TestBetweenMatch(MatchTestCase):
         self._test_unique_match(
             text='abcdefghi',
             match=SequenceMatch(
-                BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                BetweenMatch().add_action(ApplyFunctionAction('parens')),
                 LiteralMatch('d'),
                 BetweenMatch().add_action(ApplyFunctionAction('braces')),
                 LiteralMatch('g'),
@@ -104,7 +104,7 @@ class TestBetweenMatch(MatchTestCase):
             text='abracadabra',
             match=SequenceMatch(
                 LiteralMatch('a'),
-                BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                BetweenMatch().add_action(ApplyFunctionAction('parens')),
                 LiteralMatch('a'),
             ),
             expected_solutions=[
@@ -118,7 +118,7 @@ class TestBetweenMatch(MatchTestCase):
         self._test_match(
             text='aabbaaba',
             match=SequenceMatch(
-                BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                BetweenMatch().add_action(ApplyFunctionAction('parens')),
                 RepeatMatch(
                     LiteralMatch('b'),
                     0,
@@ -141,7 +141,7 @@ class TestBetweenMatch(MatchTestCase):
         self._test_match(
             text='abracadabra',
             match=SequenceMatch(
-                BetweenMatch().add_action(ApplyFunctionAction('paras')),
+                BetweenMatch().add_action(ApplyFunctionAction('parens')),
                 SearchReplaceMatch(
                     LiteralMatch('a').add_action(ApplyFunctionAction('braces')),
                 ),

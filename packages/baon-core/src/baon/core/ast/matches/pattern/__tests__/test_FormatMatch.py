@@ -127,38 +127,38 @@ class TestFormatMatch(MatchTestCase):
             text='    ',
             match=FormatMatch('s', 3))
 
-    def test_format_match_paras(self):
+    def test_format_match_parens(self):
         self._test_unique_match(
             text='(abc def)hij',
-            match=FormatMatch('paras'),
+            match=FormatMatch('parens'),
             expected_solution={'matched_text': '(abc def)', 'position': 9})
         self._test_unique_match(
             text='()',
-            match=FormatMatch('paras'),
+            match=FormatMatch('parens'),
             expected_solution={'matched_text': '()', 'position': 2})
         self._test_unique_match(
             text='   (abc def)hij',
-            match=FormatMatch('paras'),
+            match=FormatMatch('parens'),
             expected_solution={'matched_text': '   (abc def)', 'position': 12})
         self._test_unique_match(
             text='   (abc def)hij',
-            match=FormatMatch('paras', 7),
+            match=FormatMatch('parens', 7),
             expected_solution={'matched_text': '   (abc def)', 'position': 12})
         self._test_no_match(
             text='   (abc def)hij',
-            match=FormatMatch('paras', 6))
+            match=FormatMatch('parens', 6))
         self._test_no_match(
             text='   (abc def)hij',
-            match=FormatMatch('paras', 8))
+            match=FormatMatch('parens', 8))
         self._test_no_match(
             text='abc',
-            match=FormatMatch('paras'))
+            match=FormatMatch('parens'))
         self._test_no_match(
             text='abc(1934)',
-            match=FormatMatch('paras'))
+            match=FormatMatch('parens'))
         self._test_no_match(
             text='(abc',
-            match=FormatMatch('paras'))
+            match=FormatMatch('parens'))
 
     def test_format_match_braces(self):
         self._test_unique_match(
@@ -226,28 +226,28 @@ class TestFormatMatch(MatchTestCase):
             text='{abc',
             match=FormatMatch('curlies'))
 
-    def test_format_match_inparas(self):
+    def test_format_match_inparens(self):
         self._test_no_match(
             text='ab(cde fg)hi',
-            match=FormatMatch('inparas'))
+            match=FormatMatch('inparens'))
         self._test_unique_match(
             text='ab(cde fg)hi',
             position=3,
-            match=FormatMatch('inparas'),
+            match=FormatMatch('inparens'),
             expected_solution={'matched_text': 'cde fg', 'position': 9})
         self._test_unique_match(
             text='ab(cde fg)hi',
             position=3,
-            match=FormatMatch('inparas', 6),
+            match=FormatMatch('inparens', 6),
             expected_solution={'matched_text': 'cde fg', 'position': 9})
         self._test_no_match(
             text='ab(cde fg)hi',
             position=3,
-            match=FormatMatch('inparas', 5))
+            match=FormatMatch('inparens', 5))
         self._test_no_match(
             text='ab(cde fg)hi',
             position=3,
-            match=FormatMatch('inparas', 7))
+            match=FormatMatch('inparens', 7))
 
     def test_format_match_inbraces(self):
         self._test_no_match(

@@ -27,7 +27,7 @@ class TestRuleSet(TestCase):
             rule_set=RuleSet(
                 Rule(
                     SequenceMatch(
-                        LiteralMatch('abc').add_action(ApplyFunctionAction('paras')),
+                        LiteralMatch('abc').add_action(ApplyFunctionAction('parens')),
                         FormatMatch('d').add_action(SaveToAliasAction('alias')),
                     ),
                 ),
