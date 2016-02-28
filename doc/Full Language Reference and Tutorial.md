@@ -31,6 +31,7 @@ Table of Contents
   7. [Chaining Actions] (#chaining-actions)
 3. [Combining Matches] (#combining-matches)
   1. [Matches in a Sequence] (#matches-in-a-sequence)
+  2. [Grouping Matches with Parantheses] (#grouping-matches-with-parantheses)
 
 
 Pattern Matches
@@ -277,6 +278,18 @@ The following filenames will **not** match the sequence and will thus be left un
 - `01 - Overture` (there is no text in parentheses, `%parens` fails)
 - `01 - Allegro assai (overture)` (the `%s` matches against the word `Allegro`, then the `%parens` fails because the word `assai`, still unconsumed, lies before the parenthesized text that would otherwise match)
 
+### Grouping Matches with Parantheses
+
+You can put parentheses around several matches in a sequence to mark them as part of a **group**. This does not affect their functioning, but allows you to treat them as a single match in certain operations. In particular, it allows you to add actions that act on the entire group. Actions on a group will take effect on the complete text covered by all the matches, after it has been transformed by the actions on the individual matches contained within the group. For instance:
+
+    %d (%d->parens %d->parens)->braces %d
+
+applied to `1 2 3 4` will yield:
+
+    1 [(2) (3)] 4
+
+The two `%d`'s in the group each matched the text `_2` and `_3` respectively, and then transformed it to `_(2)` and `_(3)` respectively according to their actions. Finally, the `->braces` action was applied to this group, and it transformed the complete text, `_(2)_(3)` to `_[(2)_(3)]`.
+
 ---
 
 REWRITING POINT HERE
@@ -332,14 +345,6 @@ The characters `?`, `*` and `+` may be placed after a match to provide effects s
 
 
 ### Special Match Constructs
-
-#### Subrules
-
-Groups of matches can be enclosed in parentheses so as to form a 'subrule' that is treated as a single match. For instance, we can have a sequence like:
-
-    match1  (match2  match3)->action23?  match4  etc.
-
-After `match1` succeeds, a match of the sequence `match2 match3` will be attempted. If the group succeeds, its matched text will be transformed according to `action23` and matching will continue with `match4`. Otherwise, the failed match semantics will apply for the entire group; due to the presence of the `?` operator, the context will be reset to the point after `match1` succeeded, and execution will continue with `match4`.
 
 #### 'Between' Matches
 
