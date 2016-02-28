@@ -7,8 +7,10 @@
 # Licensed under the GPL-3
 
 
+from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
 from baon.core.ast.matches.control.AlternativesMatch import AlternativesMatch
+from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
@@ -44,3 +46,20 @@ class TestAlternativesMatch(MatchTestCase):
         self._test_no_match(
             text='  123abc',
             match=AlternativesMatch())
+
+    def test_backtracking(self):
+        """
+        Tests the backtracking mechanism as applied to alternative matches. The idea tested here is that even if an
+        alternative succeeds by itself, BAON may still choose the next alternative if this is the only way to make
+        the overall match succeed.
+        """
+        self._test_unique_match(
+            text='abracadabra',
+            match=SequenceMatch(
+                AlternativesMatch(
+                    LiteralMatch('abraca'),
+                    LiteralMatch('abr'),
+                ).add_action(ApplyFunctionAction('parens')),
+                LiteralMatch('acadabra'),
+            ),
+            expected_solution={'matched_text': '(abr)acadabra', 'position': 11})
