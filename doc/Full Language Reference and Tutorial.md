@@ -32,6 +32,7 @@ Table of Contents
 3. [Combining Matches] (#combining-matches)
   1. [Matches in a Sequence] (#matches-in-a-sequence)
   2. [Grouping Matches with Parantheses] (#grouping-matches-with-parantheses)
+  3. [Match Alternatives] (#match-alternatives)
 
 
 Pattern Matches
@@ -290,6 +291,58 @@ applied to `1 2 3 4` will yield:
 
 The two `%d`'s in the group each matched the text `_2` and `_3` respectively, and then transformed it to `_(2)` and `_(3)` respectively according to their actions. Finally, the `->braces` action was applied to this group, and it transformed the complete text, `_(2)_(3)` to `_[(2)_(3)]`.
 
+Groups can be nested, as in this example:
+
+    %d (%d (%d %d)->braces %d)->parens %d
+
+It is also possible to form a group with just one match (though generally useless).
+
+### Match Alternatives
+
+By using the `|` character to separate matches within a rule or paranthesized group, you can set up **match alternatives**. This means that in this example:
+
+    match1 (match2 match3 | match4) match5
+
+BAON will first try to fit the incoming text according to the pattern described by `match1 match2 match3 match5` (i.e. it considers the first alternative). If this fails, it will then backtrack and switch to the second alternative, and attempt to fit the text to `match1 match4 match5`. If this also fails, the alternatives will have been exhausted and the filename will be left unmodified.
+
+For a more concrete example:
+
+    %d->%2d (' - '->'. ' | '. ') %s->upper
+
+Will handle both:
+
+    1 - overture
+
+and
+
+    1. overture
+
+transforming them both to `01. OVERTURE`.
+
+In the first case, first the track number will be matched and transformed, and then BAON will go with the first alternative, find the `_-_` and transform it to `._`. Finally, the track title will be found and transformed to uppercase. In the second case, the track number will be transformed, and then BAON will go with the first alternative, see that it doesn't match, then try the second. `._` does match, and thus we continue again to the `%s` matching the track title, which is then uppercased. Conversely, a filename like `1--overture` would be left unchanged because it matches none of the alternatives.
+
+Notes:
+
+- You can specify more than two alternatives, and any number of alternative groups within a rule:
+
+  `match1 (match2 match3 | match4 | match5 match6) (match7 | match8)`
+
+  This will attempt to match the incoming text against the following 6 patterns, in order:
+  - `match1 match2 match3 match7`
+  - `match1 match2 match3 match8`
+  - `match1 match4 match7`
+  - `match1 match4 match8`
+  - `match1 match5 match6 match7`
+  - `match1 match5 match6 match8`
+
+- If the `|` is not used within a paranthesized group, the scope of the alternative will be the entire rule text. Thus, in this example:
+
+  `match1 match2 | match3`
+  
+  The two alternatives are `match1 match2` and `match3`, not `match1 match2` and `match1 match3`.
+
+- Actions can be attached as normal to a paranthesized group that contains alternatives. The text they act on will be the matched and transformed text for the alternative that was selected in the end by BAON.
+
 ---
 
 REWRITING POINT HERE
@@ -383,17 +436,3 @@ Note that, like all context effects, modifications to the incoming text persist 
     m1  (m2  @m3->a3  m4)?  m5
 
 matches `m1` and `m2` will operate on the original incoming text; both matches `m4` and `m5` will see the incoming text as modified by `m3`; however, if the `m2`..`m4` subrule fails, the modifications will be cancelled, so that `m5` will also operate on the original text.
-
-#### Alternatives ('OR' Matches)
-
-The final special match in our toolset is the 'or' match. This is introduced by using the `|` operator in between matches that represent alternative ways of representing a filename. For instance, in the rule:
-
-    match1  match2  |  match3  |  match4  match5  match6
-
-The text will first be matched against the sequence `match1  match2`, then, if this fails, against `match3`, then, if this fails as well, against `match4  match5  match6`. The first alternative that succeeds will represent the result of the entire rule. If all alternatives fail the rule fails as well.
-
-If you want to use the `|` operator for alternative ways of matching a single filename component, you will have to use braces, e.g.:
-
-    match1  (match2  |  match3)  match4
-
-matches `match1`, then either `match2` or `match3`, whichever suceeds first, then finally `match4`.
