@@ -33,6 +33,7 @@ Table of Contents
   1. [Matches in a Sequence] (#matches-in-a-sequence)
   2. [Grouping Matches with Parantheses] (#grouping-matches-with-parantheses)
   3. [Match Alternatives] (#match-alternatives)
+  4. [Optional Matches] (#optional-matches)
 
 
 Pattern Matches
@@ -342,6 +343,54 @@ Notes:
   The two alternatives are `match1 match2` and `match3`, not `match1 match2` and `match1 match3`.
 
 - Actions can be attached as normal to a paranthesized group that contains alternatives. The text they act on will be the matched and transformed text for the alternative that was selected in the end by BAON.
+
+### Optional Matches
+
+Adding the character `?` after a match makes it **optional**. This indicates to BAON that the match can be skipped if it either fails, or if it should be skipped in order for the rest of the matches to succeed.
+
+For instance:
+
+    %s %d? %s
+
+will match both of:
+
+  - `Time 2 Die` (all three matches succeed)
+  - `Time Die` (the `%d` match fails but is skipped)
+
+Somewhat less obviously, it will also match:
+
+    `Time 2`
+
+What happens here is that the `%d` match does succeed, but this leaves no text for the final `%s` to match. Thus BAON backtracks and skips the match, allowing the final `%s` to match with the `_2`. In retrospect, this makes sense, since the text would be matched by the pattern `%s %s` where we omitted the optional match outright.
+
+Essentially, the behavior of `?` can best be understood by the metaphor that BAON will first see the match as mandatory and try to fit the pattern; if it fails, it will remove the match and try to fit again; if this fails as well, it will finally give up. Another way of expressing this is to consider that:
+
+    match?
+
+is equivalent to:
+
+    (match | '')
+
+Notes:
+
+- The operator applies to normal matches and anything that behaves as a single match, in particular paranthesized groups. Thus one can often find constructs like:
+
+  `match1 (match2 match3)? match4`
+
+- The original match in combination with the `?` sign are seen as a single match (without needing to use parantheses), to which actions can also be attached, as in this example:
+
+  `match->action1->action2?->action3->action4`
+  
+  Here, `match->action1->action2` is the original match with two actions attached. To this we add the `?` sign to make it optional, and to this combined match we also add two more actions, `->action3->action4`. Note that unlike the actions attached to the original match, these will *always* be executed regardless of whether the match was skipped or not. If the match succeeded, they will apply to the matched text and basically chain with `->action1->action2`. If the match was skipped, they will apply to the empty text, as if the match had been just `''`. For instance:
+  
+  `%s %d->parens?->braces %s`
+  
+  - applied to `Time 2 Die` will produce `Time [(2)] Die`
+  - applied to `Time Die` will produce `Time[] Die`
+  
+  Note that the 'put in parantheses' action was only performed when we actually found a number. However, the 'put in braces' action was performed in both cases, first on the already-parenthesized number, and, when no number was found, simply on the empty text.
+
+- Any number of optional matches can be present in a rule, and their backtracking behavior is the same as for the alternatives match.
 
 ---
 
