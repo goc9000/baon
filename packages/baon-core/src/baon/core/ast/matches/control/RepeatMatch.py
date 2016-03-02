@@ -42,14 +42,10 @@ class RepeatMatch(MatchWithActions):
             yield solution
 
     def _generate_solutions_rec(self, context, matches_so_far, must_advance_position):
-        continuations_found = False
-
         if self.at_most is None or len(matches_so_far) < self.at_most:
             for solution in self.match.execute(context):
                 if solution.position == context.position and must_advance_position:
                     continue
-
-                continuations_found = True
 
                 for item in self._generate_solutions_rec(
                         solution,
@@ -58,5 +54,5 @@ class RepeatMatch(MatchWithActions):
                 ):
                     yield item
 
-        if not continuations_found and len(matches_so_far) >= self.at_least:
+        if len(matches_so_far) >= self.at_least:
             yield context._replace(matched_text=''.join(matches_so_far))

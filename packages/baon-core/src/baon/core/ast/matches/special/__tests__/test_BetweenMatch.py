@@ -61,7 +61,7 @@ class TestBetweenMatch(MatchTestCase):
             expected_solution={'matched_text': '(Some text)[]{}', 'position': 9})
 
     def test_repeated_between_match(self):
-        self._test_unique_match(
+        self._test_match(
             text='Some text',
             match=SequenceMatch(
                 RepeatMatch(
@@ -71,7 +71,10 @@ class TestBetweenMatch(MatchTestCase):
                 ),
                 EndAnchorMatch(),
             ),
-            expected_solution={'matched_text': '(Some text)()', 'position': 9})
+            expected_solutions=[
+                {'matched_text': '(Some text)()', 'position': 9},
+                {'matched_text': '(Some text)', 'position': 9},
+            ])
 
     def test_insert_matches_are_not_anchors(self):
         self._test_unique_match(
@@ -129,10 +132,14 @@ class TestBetweenMatch(MatchTestCase):
                 {'matched_text': '()', 'position': 0, 'anchored': False},
                 {'matched_text': '(a)', 'position': 1, 'anchored': False},
                 {'matched_text': '(aa)bb', 'position': 4, 'anchored': True},
+                {'matched_text': '(aa)b', 'position': 3, 'anchored': True},
+                {'matched_text': '(aa)', 'position': 2, 'anchored': False},
                 {'matched_text': '(aab)b', 'position': 4, 'anchored': True},
+                {'matched_text': '(aab)', 'position': 3, 'anchored': False},
                 {'matched_text': '(aabb)', 'position': 4, 'anchored': False},
                 {'matched_text': '(aabba)', 'position': 5, 'anchored': False},
                 {'matched_text': '(aabbaa)b', 'position': 7, 'anchored': True},
+                {'matched_text': '(aabbaa)', 'position': 6, 'anchored': False},
                 {'matched_text': '(aabbaab)', 'position': 7, 'anchored': False},
                 {'matched_text': '(aabbaaba)', 'position': 8, 'anchored': False},
             ])
