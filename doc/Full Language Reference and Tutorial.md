@@ -34,6 +34,7 @@ Table of Contents
   2. [Grouping Matches with Parantheses] (#grouping-matches-with-parantheses)
   3. [Match Alternatives] (#match-alternatives)
   4. [Optional Matches] (#optional-matches)
+  5. [Repeated Matches] (#repeated-matches)
 
 
 Pattern Matches
@@ -392,6 +393,44 @@ Notes:
 
 - Any number of optional matches can be present in a rule, and their backtracking behavior is the same as for the alternatives match.
 
+### Repeated Matches
+
+Adding the `+` character after a match will change its operation so that it is **repeated** until the incoming text no longer fits the pattern, after which processing will continue with the next match. For instance, whereas `%d 'Go'` matches:
+
+- `1 Go` (a single word followed by 'Go')
+
+But not:
+
+- `1 2 3 Go`
+
+By applying `+` to `%d` we get `%d+ 'Go'` which can match:
+
+- `1 Go`
+- `1 2 3 Go`,
+- `6 0 3 1 Go`, and in general any amount of numbers followed by a 'Go'.
+
+Notes:
+- The pattern has to fit at least once for the match to be successful. If it doesn't fit even once, the usual semantics of a failed match apply (i.e. the containing sequence also fails etc.). There is an alternative operator, `*`, which works the same except zero repetitions are allowed. In fact, you can think of `*` as a cross between `+` and `?`.
+  - As a technical note, the symbols for `?`, `+` and `*` were not chosen arbitrarily, they are very similar in form and function to the same operators as found in [regular expressions](https://en.wikipedia.org/wiki/Regular_expression).
+- As for the optional match, the match and `+` together also form a single match-like entity to which actions can be applied. The significance of the actions is as follows:
+  - The actions on the original match apply to the matched text on every repetition
+  - The actions on the overall match apply to the entire text that was covered by all the repetitions, after it has been transformed by the attached actions.
+  
+  For example, if we apply the match `%d->parens+->braces 'Go'` to the text `1 2 3 Go`, the result will be:
+
+  `[(1) (2) (3)] Go`
+  
+  i.e. the `->parens` action was applied on every repetition, as if the match had been `%d->parens %d->parens %d->parens`, whereas the `->braces` action was applied on the entire matched and transformed text `_(1)_(2)_(3)`.
+- BAON will *backtrack* on repeat matches just like it does on optional matches. This means that, initially, BAON will repeat the match as many times as possible (until the text no longer fits). If there is a failure in the matches after the repeated match, instead of giving up, BAON will return to the repeated match and do one less repetition, in the hopes that this will allow the remaining text (which now also includes the part that would have been consumed by the last repetition) to fit the pattern of the remaining matches. This continues with fewer and fewer repetitions, until either the overall match succeeds, or we go down to 0 repetitions, in which case BAON finally gives up.
+
+  This behavior is what allows a pattern like `%d+ %d 'Go'` to also fit `1 2 3 Go`. BAON will go through the following steps:
+  
+  - First, it will allow the first `%d+` to go as far as possible. It will match and consume the initial `1 2 3`.
+  - BAON now has to match the second `%d` against the remaining `Go`, which fails
+  - It then backtracks to the first `%d+` and does one less repetition so that it only consumes `1 2`
+  - Then, the second `%d` successfully matches against the `3`
+  - Finally, the `'Go'` matches with the remaining `Go` and the overall process succeeds.
+
 ---
 
 REWRITING POINT HERE
@@ -424,26 +463,6 @@ These special match constructs are used to insert text at various places within 
 * `<<'exact text'` or `<<"exact text"` : Pastes the exact text supplied.
 
 * `<<alias` : Pastes the text stored under the given alias. This can be used for moving text from one part of the filename to another. It is allowed for the alias capture to occur at a later point in the match sequence, but anything more complicated than that has undefined results.
-
-### Optional and Repeated Matches
-
-The characters `?`, `*` and `+` may be placed after a match to provide effects similar to the ones they have in regular expressions:
-
-* `?` makes the previous match optional. This means that, if the match fails, instead of the entire containing sequence failing, the matched text for this component will be empty and no text will be consumed.
-
-  Note that any side-effects within the match (i.e. saving aliases, partial text consumption if the match is a complex sequence, etc.) will be undone if the match fails.
-
-* `*` repeats the match until failure. The matched text will consist of the concatentation of the matched texts for every instance of the match. If the match never succeeded once, the matched text will be empty as for the `?` case.
-
-  Be sure to understand how repeat operators combine with actions:
-  
-  * `match1*->action1` means : apply *match1* repeatedly, concatenate the results, and apply *action1* to the final result.
-
-  * `match1->action1*` means : apply *match1* repeately, apply *action1* individually to the matched text for each instance, then concatenate the individual results and return that as the final output.
-
-  * `match1->action1*->action2` : as above, then apply *action2* to the combined results.
- 
-* `+` works like `*`, but requires that the match succeed at least once. If it does not, the normal semantics for a failed match apply.
 
 
 ### Special Match Constructs
