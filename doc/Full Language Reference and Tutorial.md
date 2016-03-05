@@ -38,6 +38,7 @@ Table of Contents
 4. [Insertions] (#insertions)
   1. [The Literal Text Insertion] (#the-literal-text-insertion)
   2. [The Alias Insertion] (#the-alias-insertion)
+5. [The 'Between' Match] (#the-between-match)
 
 
 Pattern Matches
@@ -413,8 +414,10 @@ By applying `+` to `%d` we get `%d+ 'Go'` which can match:
 - `6 0 3 1 Go`, and in general any amount of numbers followed by a 'Go'.
 
 Notes:
+
 - The pattern has to fit at least once for the match to be successful. If it doesn't fit even once, the usual semantics of a failed match apply (i.e. the containing sequence also fails etc.). There is an alternative operator, `*`, which works the same except zero repetitions are allowed. In fact, you can think of `*` as a cross between `+` and `?`.
   - As a technical note, the symbols for `?`, `+` and `*` were not chosen arbitrarily, they are very similar in form and function to the same operators as found in [regular expressions](https://en.wikipedia.org/wiki/Regular_expression).
+
 - As for the optional match, the match and `+` together also form a single match-like entity to which actions can be applied. The significance of the actions is as follows:
   - The actions on the original match apply to the matched text on every repetition
   - The actions on the overall match apply to the entire text that was covered by all the repetitions, after it has been transformed by the attached actions.
@@ -424,6 +427,7 @@ Notes:
   `[(1) (2) (3)] Go`
   
   i.e. the `->parens` action was applied on every repetition, as if the match had been `%d->parens %d->parens %d->parens`, whereas the `->braces` action was applied on the entire matched and transformed text `_(1)_(2)_(3)`.
+
 - BAON will *backtrack* on repeat matches just like it does on optional matches. This means that, initially, BAON will repeat the match as many times as possible (until the text no longer fits). If there is a failure in the matches after the repeated match, instead of giving up, BAON will return to the repeated match and do one less repetition, in the hopes that this will allow the remaining text (which now also includes the part that would have been consumed by the last repetition) to fit the pattern of the remaining matches. This continues with fewer and fewer repetitions, until either the overall match succeeds, or we go down to 0 repetitions, in which case BAON finally gives up.
 
   This behavior is what allows a pattern like `%d+ %d 'Go'` to also fit `1 2 3 Go`. BAON will go through the following steps:
@@ -510,6 +514,24 @@ Notes:
 
   `>>trackno! %s+ <<' (track ' <<trackno->%2d <<')'`
 
+
+The 'Between' Match
+-------------------
+
+The **'between' match** is a very useful and common construct, represented by the symbol `..`. It is generally placed in sequences, like:
+
+    match1  ..  match2
+
+Intuitively speaking, a `..` match will fit all of the text *between* the matches that enclose it. For instance, the sequence:
+
+    %d  '. '  ..->title  '('
+    
+means that BAON will first consume a number, then the `'._'` separator, and then it will look for a parenthesis up ahead. When it has found one, all of the text from the end of the `'._'` up to the open brace will be passed through the `title` filter. Therefore, between matches are a convenient way to avoid specifying a complex pattern for content that is best described by its position between two simpler patterns.
+
+Notes:
+- A `..` can also be used with no preceding or following match, in which case it will fit text from the very beginning of the filename or to its end, respectively.
+- A `..` right after another `..` will never be expanded. Any actions on it will act only on empty text.
+
 ---
 
 REWRITING POINT HERE
@@ -538,31 +560,7 @@ REWRITING POINT HERE
 ## rules and rulesets
 
 
-### Special Match Constructs
 
-#### 'Between' Matches
-
-'Between' matches are represented by the symbol `..` and are generally placed in sequences, like:
-
-    match1  ..  match2
-
-Intuitively speaking, a `..` specifier will match all of the text *between* the matches that enclose it. For instance, the sequence:
-
-    %d  '. '  ..->title  '('
-    
-means that we will first consume a number, then the sequence `'. '`, and then we will look for a parenthesis up ahead. When we have found one, all of the text from the end of the `'. '` sequence up to the open brace will be passed through the `title` filter. Therefore, between matches are a convenient way to avoid specifying a complex pattern for content that is best described by its position between two simpler patterns.
-
-Caveats:
-
-* A `..` with no preceding match will simply match text from the beginning of the incoming text to the first occurence of the following match.
-
-* A `..` placed at the very end of a sequence will match everything up to the end of the incoming text. This may not be what you expected, especially this occurs at the end of a subrule. For instance, in the sequence `m1 (m2 ..) m3`, if both `m1` and `m2` succeed, the `..` will match all of the remaining text in the rule, and only then will a match of `m3` be attempted on the (empty) remaining text. The `..` specifier does not 'see' any subsequent matches if they occur at a higher level.
-
-* In parser parlance, the `..` match is not greedy and does not backtrack. This means that in an example such as:
-
-  `01. Diamond Dogs - David Bowie - 1974.mp3`
-  
-  with the rule `%d  ..  ' - '  %d`, the match will always fail because the first `' - '` found will always be picked, even though picking the second one is the only way for the global match to succeed.
 
 #### Search-and-Replace Matches
 
