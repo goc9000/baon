@@ -35,6 +35,9 @@ Table of Contents
   3. [Match Alternatives] (#match-alternatives)
   4. [Optional Matches] (#optional-matches)
   5. [Repeated Matches] (#repeated-matches)
+4. [Insertions] (#insertions)
+  1. [The Literal Text Insertion] (#the-literal-text-insertion)
+  2. [The Alias Insertion] (#the-alias-insertion)
 
 
 Pattern Matches
@@ -431,13 +434,87 @@ Notes:
   - Then, the second `%d` successfully matches against the `3`
   - Finally, the `'Go'` matches with the remaining `Go` and the overall process succeeds.
 
+
+Insertions
+----------
+
+Whereas *matches* fit text and transform it, **insertions** are constructs that add text regardless of what is already in the filename. BAON supports two types of insertions:
+
+### The Literal Text Insertion
+
+Literal text insertions are specified like this:
+
+    <<'exact text'
+
+or:
+
+    <<"exact text"
+
+The effect is the insertion of the specified text at the current position, without any incoming text being consumed. For instance, given a track filename like:
+
+    01. sorry seems to be the hardest word
+
+The rule:
+
+    %d '. ' <<'ELTON JOHN - ' %s+->title
+
+Will transform it to:
+
+    01. ELTON JOHN - Sorry Seems to Be the Hardest Word
+
+Note how the insertion added the artist name prior to the rest of the title words being captured by another match and recapitalized.
+
+Notes:
+
+- The quoting rules are the same as for the literal text match or the 'replace by literal text' action.
+- Other than not actually matching any text, insertions behave like matches in that they can be grouped and support actions. Actions are generally not useful with literal text insertions, but rather with the *alias insertions* described in a future section. 
+- In fact, an insertion is almost equivalent to a match like:
+
+  `''->'exact text'`
+  
+  except it behaves differently when placed after expanding constructs like a match with `+` or `*`, or `..`. Essentially the insertion does not limit the expansion of these constructs as a match would. Instead, they will be expanded up to the first "real" match that follows.
+
+### The Alias Insertion
+
+**Alias insertions** are specified like this:
+
+    <<alias
+
+The effect is the insertion of the text that was stored in the *alias* with that name, by a corresponding *store to alias* action.
+
+Alias insertions and store-to-alias actions work together to allow parts of the filename to be moved around or duplicated. For instance, this will move the track number from the beginning to the end of a filename:
+
+    %d>>trackno! '. '! %s+ <<' (track ' <<trackno <<')'
+
+Thus turning:
+
+    01. Overture
+
+into:
+
+    Overture (track 01)
+
+Note how `>>trackno` is used to store the track number to the *trackno* alias, which is then deleted via `!` from its initial place at the start of the filename. Later on, the track number is re-inserted into the proper place via the `<<trackno` insertion.
+
+Notes:
+
+- It is possible to refer to an alias that is stored at a later point in the match. This happens often when moving things from the end to the beginning of the filename. For instance, a rule to undo the previous example would look like:
+
+  `<<trackno <<'. ' %s+ '(track '! %d>>trackno ')'!`
+
+  In such situations, BAON will try to do the smart thing and constructs like this will work as expected, and even more complicated ones in which text inserted by aliases is itself put into other aliases, etc.
+
+- If you refer to an alias that is not stored to, even later in the match, the insertion will have no effect (the alias will be seen as containing empty text).
+
+- Actions can be applied to alias insertions, causing the text to be transformed as it is inserted. For instance, a track number with no leading zeroes could have them inserted like this:
+
+  `>>trackno! %s+ <<' (track ' <<trackno->%2d <<')'`
+
 ---
 
 REWRITING POINT HERE
 
 ---
-
-## Combining matches
 
 ## Search-and-replace
 
@@ -456,13 +533,9 @@ REWRITING POINT HERE
 
 * `%curlies`, `%incurlies` : As above, but for curly braces, i.e. `{` and `}`.
 
-### Insertion Matches
 
-These special match constructs are used to insert text at various places within the filename. They fit within the match framework in that they produce "matched text" that can be subsequently passed to actions. However, the matched text does not correspond to anything in the filename at that position. Insertion matches consume no text and always succeed.
 
-* `<<'exact text'` or `<<"exact text"` : Pastes the exact text supplied.
-
-* `<<alias` : Pastes the text stored under the given alias. This can be used for moving text from one part of the filename to another. It is allowed for the alias capture to occur at a later point in the match sequence, but anything more complicated than that has undefined results.
+## rules and rulesets
 
 
 ### Special Match Constructs
