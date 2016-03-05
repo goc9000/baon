@@ -39,6 +39,7 @@ Table of Contents
   1. [The Literal Text Insertion] (#the-literal-text-insertion)
   2. [The Alias Insertion] (#the-alias-insertion)
 5. [The 'Between' Match] (#the-between-match)
+6. [The Search and Replace Match] (#the-search-and-replace-match)
 
 
 Pattern Matches
@@ -532,13 +533,49 @@ Notes:
 - A `..` can also be used with no preceding or following match, in which case it will fit text from the very beginning of the filename or to its end, respectively.
 - A `..` right after another `..` will never be expanded. Any actions on it will act only on empty text.
 
+
+The Search and Replace Match
+----------------------------
+
+**Search-and-replace matches** are introduced by placing the `@` character before a match. This radically alters the functioning of the match in the following way: instead of matching, consuming and transforming only the filename text at the current position, the pattern will be looked for *everywhere* in the incoming text, and transformed *wherever it matches*. All matches that follow will operate on this transformed incoming text.
+
+For instance, let's suppose we want to clean up and titleize filenames like:
+
+    01_a_day_in_the_life
+
+If we just use:
+
+    %d '_'->'. ' ..->title
+
+We will get something like `01. A_day_in_the_life` because the underscores cause the track title to be seen as a single compound word. What we need is to transform them to spaces before the transform is applied:
+
+    %d '_'->'. ' @'_'->' ' ..->title
+
+Now the result will be:
+
+    01. A Day in the Life
+
+What happened was that after the first two matches, when the remaining incoming text was `a_day_in_the_life`, we applied a simple literal text replacement match `'_'->' '` under the search-and-replace operator `@`, causing the incoming text to be transformed to `a day in the life`. This is then picked up and titleized by the following `..->title` match.
+
+Notes:
+
+- You can also use groups with the `@` operator, and in fact this is how the most powerful replacements are often made. For instance:
+
+  `@('IN'|'THE')->lower`
+
+  will ensure all appearances of the words `IN` or `THE` are lowercased.
+
+- Like other special effects such as saving to aliases, modifications to the incoming text persist even across parentheses. For instance, in the sequence:
+
+  `match1  (match2  @match3->action3  match4)?  match5`
+
+  Matches `match1` and `match2` will operate on the original incoming text; both matches `match4` and `match5` will see the incoming text as modified by `match3`; however, if BAON backtracks and skips the `match2`..`match4` group, the modifications will be cancelled, so that `match5` will also operate on the original text.
+
 ---
 
 REWRITING POINT HERE
 
 ---
-
-## Search-and-replace
 
 ## Positional matches
 
@@ -559,19 +596,3 @@ REWRITING POINT HERE
 
 ## rules and rulesets
 
-
-
-
-#### Search-and-Replace Matches
-
-Search-and-replace matches are introduced by specifying the `@` character before a match. This radically alters the semantics of the succeeding match in the following way: the match will be looked for repeatedly anywhere in the incoming text, and wherever it succeeds, the matched portion of the incoming text will be replaced by the match result. The transformed incoming text will then be visible to all following matches. For instance:
-
-    match1  @' '->'/'  match2
-  
-will mean that all incoming text remaining after `match1` will be transfomrmed so as to replace all spaces with slashes. The `match2` specifier and all subsequent ones will operate on this modified version of the incoming text.
-
-Note that, like all context effects, modifications to the incoming text persist even across parentheses. For instance, in the sequence:
-
-    m1  (m2  @m3->a3  m4)?  m5
-
-matches `m1` and `m2` will operate on the original incoming text; both matches `m4` and `m5` will see the incoming text as modified by `m3`; however, if the `m2`..`m4` subrule fails, the modifications will be cancelled, so that `m5` will also operate on the original text.
