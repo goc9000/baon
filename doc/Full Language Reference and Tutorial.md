@@ -3,11 +3,6 @@ BAON
 
 (C) Copyright 2012-present Cristian Dinu (<goc9000@gmail.com>); Licensed under the GPLv3.
 
----
-
-**WORK IN PROGRESS - THIS IS IN THE PROCESS OF BEING REWRITTEN**
-
----
 
 Full Language Reference and Tutorial
 ====================================
@@ -44,6 +39,7 @@ Table of Contents
   1. [Anchor Matches] (#anchor-matches)
   2. [In-Brace Matches] (#in-brace-matches)
   3. [The Regular Expression Match Redux] (#the-regular-expression-match-redux)
+8. [Rules and Rule Sets] (#rules-and-rule-sets)
 
 
 Pattern Matches
@@ -626,10 +622,31 @@ The reason for mentioning the regular expression match again in this section is 
 - Word boundary conditions can be used: `@/\ba/->''` will delete all `a`'s at the beginning of a word
 - Positive and negative lookahead and lookbehind assertions can be used: `@/The(?! Who)/->''` will delete all `The`'s unless they are followed by ` Who`.
 
----
 
-REWRITING POINT HERE
+Rules and Rule Sets
+-------------------
 
----
+Some final words on how **rules** and **rule sets** work in BAON.
 
-## rules and rulesets
+A **rule** is essentially the complete set of matches that are applied to a filename in order to potentially transform it. Unlike an individual match, which usually scans only a portion of the filename text, and returns only a (transformed) portion of it, a rule's scope is the entire filename. Essentially, a rule works as follows:
+
+  - Start at the beginning of the filename
+  - Allow all matches specified in the rule to transform parts of the filename
+    - If we got through all the matches and they succeeded:
+      - There may be some leftover text. This will be preserved as it is, without transformation.
+      - The resulting filename is the text covered and transformed by the matches, plus the untransformed remainder
+    - Otherwise, if we could not get all matches to succeed:
+      - The filename remains unchanged (all transformations are cancelled)
+
+Thus, a rule like:
+
+    %d->%2d ' - '->'. '
+
+will transform the filename `1 - Overture` into `01. Overture` even though the matches cover only the track number and separator. Filenames that do not match this pattern will be left unchanged.
+
+A **rule set** is a collection of rules executed in sequence. This is what the user ultimately specifies both as a primary input to BAON, and within the parentheses of a 'apply subrules' action. Rules are separated by either a newline or `;`, and they will all be executed for a filename regardless of whether the matches within succeed or not. Whenever a rule causes a filename to change, the rules that follow it will operate on the transformed filename. Thus:
+
+    @%paras!
+    %d->%2d '. ' ..->title
+
+will transform filenames like `1. Overture (remix)` into `01. Overture`. The first rule removes the `(remix)`, and then the second reformats the track number and titleizes the track name.
