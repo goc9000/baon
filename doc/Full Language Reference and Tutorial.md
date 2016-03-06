@@ -40,6 +40,10 @@ Table of Contents
   2. [The Alias Insertion] (#the-alias-insertion)
 5. [The 'Between' Match] (#the-between-match)
 6. [The Search and Replace Match] (#the-search-and-replace-match)
+7. [Positional Matches] (#positional-matches)
+  1. [Anchor Matches] (#anchor-matches)
+  2. [In-Brace Matches] (#in-brace-matches)
+  3. [The Regular Expression Match Redux] (#the-regular-expression-match-redux)
 
 
 Pattern Matches
@@ -571,28 +575,61 @@ Notes:
 
   Matches `match1` and `match2` will operate on the original incoming text; both matches `match4` and `match5` will see the incoming text as modified by `match3`; however, if BAON backtracks and skips the `match2`..`match4` group, the modifications will be cancelled, so that `match5` will also operate on the original text.
 
+
+Positional Matches
+------------------
+
+The final item in BAON's bag of tricks are **positional matches**. Unlike *pattern matches*, whose effect depends on the *content* of the incoming text, positional matches are mainly influenced by the *position* or *context* of the incoming text. As such, they are particularly suited for use within search-and-replace matches, although they can also be used outside of these.
+
+### Anchor Matches
+
+The simplest positional matches are the **anchor matches**, represented by the `^` and `$` symbols, which match, respectively, the beginning and the end of the filename text. These matches are generally used to constrain the behavior of other, more concrete matches. For instance, supposed we wanted to delete the last word in a filename. If we used a pattern like:
+
+    .. %s!
+
+The effect would be the deletion of the *first* word in the filename, which is not what we want. To make sure that the overall pattern matches only when the word captured by `%s` is the last thing in the filename, we just add the `$` anchor:
+
+    .. %s! $
+
+Note that an alternative way of achieving the same thing would be to use a search-and-replace match:
+
+    @(%s! $)
+
+The `^` is much less useful than `$`, as most matches that need to apply only to the beginning of the filename can just be placed first for the same effect. However, one situation in which the `^` may be used is within a repeating match, so as to do something special only for the first iteration. For instance, if we had a text like:
+
+    one two three
+
+And we wanted to add commas between every word, one way of doing it would be:
+
+    ((^|<<',') %s)+
+
+Which produces the properly transformed text `one, two, three`. What happens here is that every time a word is matched, we need to add a comma to the previous word (we can't always add it after matching, as we don't know whether any word will follow). However, this should not be done for the first word, and this is where `^` comes in: in the alternative `(^|<<',')`, if we are at the beginning of the text, we do nothing, otherwise, the second alternative kicks in and we insert a comma.
+
+### In-Brace Matches
+
+You may remember the `%parens`, `%braces` and `%curlies` pattern matches from the previous sections. The **in-brace matches** `%inparens`, `%inbraces` and `%incurlies` are related constructs that function similarly, but with a twist. Unlike `%parens` which matches a pair of parentheses and the text within, `%inparens` matches *only the text contained within parentheses*. The following illustration should make the difference clear. Given:
+
+    01. Overture (1812)
+
+- `@%parens->'DELETED'` produces: `01. OvertureDELETED`
+- `@%inparens->'DELETED'` produces: `01. Overture (DELETED)`
+
+Similarly, `%inbraces` and `%incurlies` match text contained within braces `[` `]` and curly brackets `{` `}` respectively.
+
+These matches are nearly always used only as part of a search-and-replace match.
+
+### The Regular Expression Match Redux
+
+The reason for mentioning the regular expression match again in this section is that the positional aspects of the regular expression language can also be used for positional matches in BAON. For instance:
+
+- `/^/` and `/$/` are equivalent to `^` and `$` respectively
+- Word boundary conditions can be used: `@/\ba/->''` will delete all `a`'s at the beginning of a word
+- Positive and negative lookahead and lookbehind assertions can be used: `@/The(?! Who)/->''` will delete all `The`'s unless they are followed by ` Who`.
+
 ---
 
 REWRITING POINT HERE
 
 ---
 
-## Positional matches
-
-- mention regexes again, note that their positional features can be used
-
-
-* `^` : Matches the very beginning of the filename. No text is consumed.
-
-* `$` : Matches the very end of the filename. No text is consumed.
-
-* `%inparens` : Similar to the above, but matches only the enclosed text itself. Mostly useful in search-and-replace matches; for instance, `@%inparens->lower` will make any text enclosed in parentheses lowercase.
-
-* `%braces`, `%inbraces` : As above, but for straight braces, i.e. `[` and `]`.
-
-* `%curlies`, `%incurlies` : As above, but for curly braces, i.e. `{` and `}`.
-
-
-
 ## rules and rulesets
-
