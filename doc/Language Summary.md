@@ -54,3 +54,12 @@ Actions
 | `>>alias`                  | Save text to alias                    | `>>trackno`           | `some text`               | (stores `some text` to `trackno`) |
 | `->(rule1; rule2)`         | Transform text according to rules     | `->('abc'!; %d->%2d)` | `abc3` `def`              | `03` `def`                        |
 | `->action1->action2`       | Chain actions                         | `->lower->parens`     | `REMIX`                   | `(remix)`                         |
+
+
+Insertions
+----------
+
+| Form                     | Description                 | Example Usage | Example Output                    |
+|--------------------------|-----------------------------|---------------|-----------------------------------|
+| `<<'text'` or `<<"text"` | Insert that exact text      | `<<"abc"`     | `abc`                             |
+| `<<alias`                | Insert text stored in alias | `<<trackno`   | `02` (if `trackno` contains `02`) |
