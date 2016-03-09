@@ -63,3 +63,16 @@ Insertions
 |--------------------------|-----------------------------|---------------|-----------------------------------|
 | `<<'text'` or `<<"text"` | Insert that exact text      | `<<"abc"`     | `abc`                             |
 | `<<alias`                | Insert text stored in alias | `<<trackno`   | `02` (if `trackno` contains `02`) |
+
+
+Combining Matches
+-----------------
+
+| Form                         | Description                                         | Example Usage           | Matching Text Examples          | Non-matching Text Examples |
+|------------------------------|-----------------------------------------------------|-------------------------|---------------------------------|----------------------------|
+| `match1 match2 match3 ...`   | Matches `match1` followed by `match2` etc.          | `%d " - " %s`           | `1 - Overture` `004 - abc`      | `abc` `01 - `              |
+| `(match1 match2 match3 ...)` | Group matches so that they behave as a single match | `%d (%d %d)->parens %d` | `1 2 3 4` (output: `1 (2 3) 4`) |                            |
+| `match1 | match2 | ...`      | Matches `match1` or `match2` etc.                   | `(%d | "abc") %d`       | `1 2` `abc 5`                   | `def 5`                    |
+| `match?`                     | Optional match, can be skipped                      | `"Ready" %d? "Go"`      | `Ready 2 Go` `Ready Go`         | `Ready 2`                  |
+| `match+`                     | Matches `match` repeated as many times as possible  | `%d+ "Go"`              | `1 Go` `60 31 79 1 Go`          | `Go` `1 2 abc 3 Go`        |
+| `match*`                     | Ditto, and also optional                            | `%d* "Go"`              | `Go` `1 2 3 Go`                 | `1 2 3`                    |
