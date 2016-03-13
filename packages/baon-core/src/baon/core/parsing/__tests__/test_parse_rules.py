@@ -91,12 +91,13 @@ class TestRulesLexer(TestCase):
                           ('SequenceMatch',
                            ('LiteralMatch', 'abc'))))
         self.assertEqual(self.parse_result('match', '($|..*)!'),
-                         ('AlternativesMatch',
-                          ('SequenceMatch',
-                           ('EndAnchorMatch',)),
-                          ('SequenceMatch',
-                           ('RepeatMatch', 0, None,
-                            ('BetweenMatch',))),
+                         ('MatchWithActions',
+                          ('AlternativesMatch',
+                           ('SequenceMatch',
+                            ('EndAnchorMatch',)),
+                           ('SequenceMatch',
+                            ('RepeatMatch', 0, None,
+                             ('BetweenMatch',)))),
                           ('DeleteAction',)))
 
     def test_parse_delete_action(self):
@@ -148,15 +149,18 @@ class TestRulesLexer(TestCase):
                            ('Rule',
                             ('AlternativesMatch',
                              ('SequenceMatch',
-                              ('LiteralMatch', 'abc',
+                              ('MatchWithActions',
+                               ('LiteralMatch', 'abc'),
                                ('DeleteAction',))))))))
 
     def test_parse_match_with_actions(self):
         self.assertEqual(self.parse_result('match', '"abc"!'),
-                         ('LiteralMatch', 'abc',
+                         ('MatchWithActions',
+                          ('LiteralMatch', 'abc'),
                           ('DeleteAction',)))
         self.assertEqual(self.parse_result('match', '%d>>ghi->"def"'),
-                         ('FormatMatch', 'd',
+                         ('MatchWithActions',
+                          ('FormatMatch', 'd'),
                           ('SaveToAliasAction', 'ghi'),
                           ('ReplaceByLiteralAction', 'def')))
 
@@ -171,27 +175,33 @@ class TestRulesLexer(TestCase):
     def test_parse_match_with_actions_and_repeats(self):
         self.assertEqual(self.parse_result('match', '"abc"!*'),
                          ('RepeatMatch', 0, None,
-                          ('LiteralMatch', 'abc',
+                          ('MatchWithActions',
+                           ('LiteralMatch', 'abc'),
                            ('DeleteAction',))))
         self.assertEqual(self.parse_result('match', '"abc"+->"def"'),
-                         ('RepeatMatch', 1, None,
-                          ('LiteralMatch', 'abc'),
+                         ('MatchWithActions',
+                          ('RepeatMatch', 1, None,
+                           ('LiteralMatch', 'abc')),
                           ('ReplaceByLiteralAction', 'def')))
         self.assertEqual(self.parse_result('match', '"abc"+->"def"*!'),
-                         ('RepeatMatch', 0, None,
-                          ('RepeatMatch', 1, None,
-                           ('LiteralMatch', 'abc'),
-                           ('ReplaceByLiteralAction', 'def')),
+                         ('MatchWithActions',
+                          ('RepeatMatch', 0, None,
+                           ('MatchWithActions',
+                            ('RepeatMatch', 1, None,
+                             ('LiteralMatch', 'abc')),
+                            ('ReplaceByLiteralAction', 'def'))),
                           ('DeleteAction',)))
 
     def test_parse_search_match(self):
         self.assertEqual(self.parse_result('sequence_match_term', '@"abc"!'),
                          ('SearchReplaceMatch',
-                          ('LiteralMatch', 'abc',
+                          ('MatchWithActions',
+                           ('LiteralMatch', 'abc'),
                            ('DeleteAction',))))
         self.assertEqual(self.parse_result('sequence_match_term', '@..>>etc!'),
                          ('SearchReplaceMatch',
-                          ('BetweenMatch',
+                          ('MatchWithActions',
+                           ('BetweenMatch',),
                            ('SaveToAliasAction', 'etc'),
                            ('DeleteAction',))))
 
@@ -202,9 +212,11 @@ class TestRulesLexer(TestCase):
                           ('EndAnchorMatch',)))
         self.assertEqual(self.parse_result('sequence_match', '^->"abc"..>>def$'),
                          ('SequenceMatch',
-                          ('StartAnchorMatch',
+                          ('MatchWithActions',
+                           ('StartAnchorMatch',),
                            ('ReplaceByLiteralAction', 'abc')),
-                          ('BetweenMatch',
+                          ('MatchWithActions',
+                           ('BetweenMatch',),
                            ('SaveToAliasAction', 'def')),
                           ('EndAnchorMatch',)))
 
@@ -225,10 +237,12 @@ class TestRulesLexer(TestCase):
                          ('Rule',
                           ('AlternativesMatch',
                            ('SequenceMatch',
-                            ('FormatMatch', 'd',
+                            ('MatchWithActions',
+                             ('FormatMatch', 'd'),
                              ('ReplaceByLiteralAction', 'a'))),
                            ('SequenceMatch',
-                            ('BetweenMatch',
+                            ('MatchWithActions',
+                             ('BetweenMatch',),
                              ('DeleteAction',)),
                             ('EndAnchorMatch',)),
                            ('SequenceMatch',
@@ -240,14 +254,16 @@ class TestRulesLexer(TestCase):
                           ('Rule',
                            ('AlternativesMatch',
                             ('SequenceMatch',
-                             ('BetweenMatch',
+                             ('MatchWithActions',
+                              ('BetweenMatch',),
                               ('ApplyFunctionAction', 'title'))))),
                           ('Rule',
                            ('AlternativesMatch',
                             ('SequenceMatch',
                              ('StartAnchorMatch',)),
                             ('SequenceMatch',
-                             ('LiteralMatch', 'a',
+                             ('MatchWithActions',
+                              ('LiteralMatch', 'a'),
                               ('DeleteAction',)))))))
 
     def test_syntax_errors(self):
