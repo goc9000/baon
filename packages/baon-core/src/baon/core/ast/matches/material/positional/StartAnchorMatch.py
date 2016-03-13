@@ -7,13 +7,13 @@
 # Licensed under the GPL-3
 
 
-from baon.core.ast.matches.Match import Match
+from baon.core.ast.matches.material.MaterialMatch import MaterialMatch
 
 
-class StartAnchorMatch(Match):
+class StartAnchorMatch(MaterialMatch):
     def __init__(self):
-        Match.__init__(self)
+        MaterialMatch.__init__(self)
     
-    def execute(self, context):
+    def _execute_material_match_impl(self, context):
         if context.position == 0:
-            yield context._replace(matched_text='', anchored=True)
+            yield context._replace(matched_text='')
