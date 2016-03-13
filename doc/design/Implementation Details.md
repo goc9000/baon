@@ -51,6 +51,47 @@ The evolution of the context will be as follows:
 | Match sequence processed      | `1. ouverture` *              | `01. Ouverture` | trackno=`01` | No       |
 | Processing complete           | `1. ouverture` *              | `01. Ouverture` | trackno=`01` | No       |
 
+### Matches (preliminary)
+
+Within the framework set up by the *context* concept above, a **match** can be preliminarily described as an entity that takes in a context, and, if the right conditions are met (i.e. it fits a pattern), produces another context, called a **solution**. In maths parlance, a match can be said to be a *partial function* from C to C, where C is the set of all possible contexts.
+
+For instance, a simple pattern match such as `%d` will inspect the `text` and `position` attributes of the input context so as to see whether the incoming text matches its specific pattern (a number). If the pattern fits, it will produce a solution context where the number text has been consumed and placed in the `matched_text` attribute, as illustrated here:
+
+|                   | Text (position marked with *) | Matched Text    | Aliases      | Anchored          |
+|-------------------|-------------------------------|-----------------|--------------|-------------------|
+| Input context     | `The Year `* `2000`           | N/A             | Not relevant | Not relevant      |
+| Solution          | `The Year 2000` *             | `2000`          | Not affected | Always set to Yes |
+
+Note that this definition is actually incomplete, but it covers the most fundamental pattern and positional matches from which more complex matches are formed. A complete definition will be given in a subsequent section, after actions are also introduced.
+
+### Actions
+
+Similarly to matches, **actions** also take in a context and produce a resulting context. However, unlike matches, actions only inspect and affect the `matched_text` and `aliases` attributes, as they are designed to act upon the result of a previously executed match.
+
+Here is an illustration of an input context (following a match) and the resulting contexts following the execution of various actions:
+
+|                    | Text (position marked with *) | Matched Text  | Aliases            | Anchored     |
+|--------------------|-------------------------------|---------------|--------------------|--------------|
+| Input context      | `The quick brown fox` *       | `brown fox`   | -                  | Not relevant |
+| `!`                | Not affected                  | (empty text)  | -                  | Not affected |
+| `->upper`          | Not affected                  | `BROWN FOX`   | -                  | Not affected |
+| `->braces`         | Not affected                  | `[BROWN FOX]` | -                  | Not affected |
+| `>>phrase`         | Not affected                  | `brown fox`   | phrase=`brown fox` | Not affected |
+| `->(%s>>word %s!)` | Not affected                  | `brown`       | word=`brown`       | Not affected |
+
+### Insertions
+
+**Insertions** are simply "matches" that produce a `matched_text` regardless of the current `text` and `position` attributes, which are neither consulted nor affected.
+
+For instance, here is an illustration of an input context before and after some possible insertions:
+
+|                    | Text (position marked with *) | Matched Text  | Aliases      | Anchored     |
+|--------------------|-------------------------------|---------------|--------------|--------------|
+| Input context      | Not relevant                  | N/A           | word=`quick` | Not relevant |
+| `<<"brown fox"`    | Not affected                  | `brown fox `  | word=`quick` | Not affected |
+| `<<word`           | Not affected                  | `quick`       | word=`quick` | Not affected |
+
+Insertions are *immaterial*, in that they never cause the `anchored` attribute to revert to `true`. This is the main difference between them and the almost equivalent construct `''->'brown fox'`.
 
 -------------
 
