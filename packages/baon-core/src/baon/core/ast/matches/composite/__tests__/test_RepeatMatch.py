@@ -1,4 +1,4 @@
-# baon/core/ast/matches/control/__tests__/test_RepeatMatch.py
+# baon/core/ast/matches/composite/__tests__/test_RepeatMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -9,9 +9,9 @@
 
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
 from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
-from baon.core.ast.matches.control.AlternativesMatch import AlternativesMatch
-from baon.core.ast.matches.control.RepeatMatch import RepeatMatch
-from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
+from baon.core.ast.matches.composite.AlternativesMatch import AlternativesMatch
+from baon.core.ast.matches.composite.RepeatMatch import RepeatMatch
+from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMatch
 from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch

@@ -1,4 +1,4 @@
-# baon/core/ast/matches/control/__tests__/test_SequenceMatch.py
+# baon/core/ast/matches/composite/__tests__/test_SequenceMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -8,7 +8,7 @@
 
 
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
-from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
+from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
 
 

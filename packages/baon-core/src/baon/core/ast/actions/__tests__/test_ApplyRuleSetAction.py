@@ -13,7 +13,7 @@ from baon.core.ast.actions.DeleteAction import DeleteAction
 from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
 from baon.core.ast.rules.RuleSet import RuleSet
 from baon.core.ast.rules.Rule import Rule
-from baon.core.ast.matches.control.SequenceMatch import SequenceMatch
+from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMatch
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch

@@ -1,4 +1,4 @@
-# baon/core/ast/matches/control/SequenceMatch.py
+# baon/core/ast/matches/composite/SequenceMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
