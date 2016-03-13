@@ -12,6 +12,54 @@ REWRITE IN PROGRESS
 
 
 Implementation Details
+======================
+
+
+The Text Matching and Transformation Model
+------------------------------------------
+
+### Contexts
+
+The first fundamental concept that underlies the matching engine is the **context**. A context is a description of the situation at any time during the matching and transformation process, and consists of the following attributes:
+
+- `text`: The complete filename text that is to be parsed and potentially transformed. Usually this is constant throughout the match process, but may be changed by a search-and-replace match.
+- `position`: The position, within the above text, at which we are currently looking for a match. This starts from 0 and advances as we consume more of the text.
+- `aliases`: All the saved aliases and their content.
+- `matched_text`: The text matched and/or transformed by the match that was last processed.
+- `anchored`: A flag that affects the behavior of the 'between' match. Basically, the context becomes unanchored following a 'between' match, and becomes anchored again after a *material* match, i.e. one that depends on the content of or position in the incoming text (as opposed to things like insertions or search-and-replace matches, which can apply anywhere in the text).
+
+For instance, given the following input filename:
+
+    1. overture
+
+And the rule:
+
+    %d->%2d>>trackno ". " @"o"->"ou" ..->title
+
+The evolution of the context will be as follows:
+
+| Moment                        | Text (position marked with *) | Matched Text    | Aliases      | Anchored |
+|-------------------------------|-------------------------------|-----------------|--------------|----------|
+| Beginning of processing       | * `1. overture`               | N/A             | -            | Yes      |
+| `%d` processed                | `1` * `. overture`            | `1`             | -            | Yes      |
+| `->%2d` action processed      | `1` * `. overture`            | `01`            | -            | Yes      |
+| `>>trackno` action processed  | `1` * `. overture`            | `01`            | trackno=`01` | Yes      |
+| `". "` processed              | `1._` * `overture`            | `._`            | trackno=`01` | Yes      |
+| `@"o"->"ou"` processed        | `1._` * `ouverture`           | N/A             | trackno=`01` | Yes      |
+| `..` processed                | `1. ouverture` *              | `ouverture`     | trackno=`01` | No       |
+| `->title` action processed    | `1. ouverture` *              | `Ouverture`     | trackno=`01` | No       |
+| Match sequence processed      | `1. ouverture` *              | `01. Ouverture` | trackno=`01` | No       |
+| Processing complete           | `1. ouverture` *              | `01. Ouverture` | trackno=`01` | No       |
+
+
+-------------
+
+REWRITE POINT
+
+-------------
+
+
+Implementation Details
 ----------------------
 
 ### Matches
