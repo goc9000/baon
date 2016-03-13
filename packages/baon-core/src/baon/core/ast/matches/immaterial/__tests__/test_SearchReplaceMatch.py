@@ -1,4 +1,4 @@
-# baon/core/ast/matches/special/__tests__/test_SearchReplaceMatch.py
+# baon/core/ast/matches/immaterial/__tests__/test_SearchReplaceMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -12,9 +12,9 @@ from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase, mark_parens, mark_braces, delete_action
 from baon.core.ast.matches.composite.MatchWithActions import MatchWithActions
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
+from baon.core.ast.matches.immaterial.SearchReplaceMatch import SearchReplaceMatch
 from baon.core.ast.matches.material.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
-from baon.core.ast.matches.special.SearchReplaceMatch import SearchReplaceMatch
 
 
 class TestSearchReplaceMatch(MatchTestCase):

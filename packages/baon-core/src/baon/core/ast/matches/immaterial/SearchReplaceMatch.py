@@ -1,4 +1,4 @@
-# baon/core/ast/matches/special/SearchReplaceMatch.py
+# baon/core/ast/matches/immaterial/SearchReplaceMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -8,22 +8,22 @@
 
 
 from baon.core.ast.ASTNode import ast_node_child
-from baon.core.ast.matches.Match import Match
 from baon.core.ast.matches.composite.AlternativesMatch import AlternativesMatch
 from baon.core.ast.matches.composite.RepeatMatch import RepeatMatch
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
+from baon.core.ast.matches.immaterial.ImmaterialMatch import ImmaterialMatch
 from baon.core.ast.matches.material.positional.EndAnchorMatch import EndAnchorMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
 
 
-class SearchReplaceMatch(Match):
+class SearchReplaceMatch(ImmaterialMatch):
     term = ast_node_child()
     
     def __init__(self, term):
-        Match.__init__(self)
+        ImmaterialMatch.__init__(self)
         self.term = term
 
-    def execute(self, context):
+    def _execute_immaterial_match_impl(self, context):
         temp_match = SequenceMatch(
             RepeatMatch(
                 AlternativesMatch(
