@@ -129,32 +129,46 @@ def p_match_add_repeat(p):
     _set_source_span(p[0], p[1], p[2])
 
 
-def p_match_anchor_start(p):
-    """match : ANCHOR_START"""
+def p_match_group(p):
+    """match : PARA_OPEN composite_match PARA_CLOSE"""
+    p[0] = p[2]
+    _set_source_span(p[0], p[1], p[3])
+
+
+def p_match_simple_match(p):
+    """match : simple_match"""
+    p[0] = p[1]
+
+
+# Simple matches (i.e. they do not contain other matches or actions)
+
+
+def p_simple_match_anchor_start(p):
+    """simple_match : ANCHOR_START"""
     p[0] = StartAnchorMatch()
     _set_source_span(p[0], p[1])
 
 
-def p_match_anchor_end(p):
-    """match : ANCHOR_END"""
+def p_simple_match_anchor_end(p):
+    """simple_match : ANCHOR_END"""
     p[0] = EndAnchorMatch()
     _set_source_span(p[0], p[1])
 
 
-def p_match_between(p):
-    """match : BETWEEN"""
+def p_simple_match_between(p):
+    """simple_match : BETWEEN"""
     p[0] = BetweenMatch()
     _set_source_span(p[0], p[1])
 
 
-def p_match_literal(p):
-    """match : STRING_LITERAL"""
+def p_simple_match_literal(p):
+    """simple_match : STRING_LITERAL"""
     p[0] = LiteralMatch(_handle_literal_token(p[1]))
     _set_source_span(p[0], p[1])
 
 
-def p_match_regex(p):
-    """match : REGEX"""
+def p_simple_match_regex(p):
+    """simple_match : REGEX"""
     regex_info = p[1].extras
     if 'unterminated' in regex_info and regex_info['unterminated']:
         raise UnterminatedRegexError(p[1].source_span)
@@ -164,22 +178,16 @@ def p_match_regex(p):
     _set_source_span(p[0], p[1])
 
 
-def p_match_format(p):
-    """match : FORMAT_SPEC"""
+def p_simple_match_format(p):
+    """simple_match : FORMAT_SPEC"""
     specifier, width, leading_zeros = _handle_format_token(p[1])
 
     p[0] = FormatMatch(specifier, width, leading_zeros)
     _set_source_span(p[0], p[1])
 
 
-def p_match_group(p):
-    """match : PARA_OPEN composite_match PARA_CLOSE"""
-    p[0] = p[2]
-    _set_source_span(p[0], p[1], p[3])
-
-
-def p_match_insertion(p):
-    """match : insertion"""
+def p_simple_match_insertion(p):
+    """simple_match : insertion"""
     p[0] = p[1]
 
 
