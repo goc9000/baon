@@ -9,6 +9,9 @@
 
 from unittest import TestCase
 
+from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
+from baon.core.ast.actions.DeleteAction import DeleteAction
+from baon.core.ast.matches.composite.MatchWithActions import MatchWithActions
 from baon.core.rules.MatchContext import MatchContext
 
 
@@ -34,3 +37,31 @@ class MatchTestCase(TestCase):
 
     def _test_no_match(self, text, match, **extras):
         self._test_match(text, match, (), **extras)
+
+
+def mark_parens(match):
+    """
+    Shortcut for decorating a match under test with an "put in parentheses" action
+    """
+    return MatchWithActions(match, ApplyFunctionAction('parens'))
+
+
+def mark_braces(match):
+    """
+    Shortcut for decorating a match under test with an "put in straight braces" action
+    """
+    return MatchWithActions(match, ApplyFunctionAction('braces'))
+
+
+def mark_curlies(match):
+    """
+    Shortcut for decorating a match under test with an "put in curly braces" action
+    """
+    return MatchWithActions(match, ApplyFunctionAction('curlies'))
+
+
+def delete_action(match):
+    """
+    Shortcut for adding a delete action to a match under test
+    """
+    return MatchWithActions(match, DeleteAction())

@@ -9,8 +9,9 @@
 
 from unittest import TestCase
 
-from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
 from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
+from baon.core.ast.matches.__tests__.MatchTestCase import mark_parens
+from baon.core.ast.matches.composite.MatchWithActions import MatchWithActions
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.insertion.InsertAliasMatch import InsertAliasMatch
 from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
@@ -27,8 +28,8 @@ class TestRuleSet(TestCase):
             rule_set=RuleSet(
                 Rule(
                     SequenceMatch(
-                        LiteralMatch('abc').add_action(ApplyFunctionAction('parens')),
-                        FormatMatch('d').add_action(SaveToAliasAction('alias')),
+                        mark_parens(LiteralMatch('abc')),
+                        MatchWithActions(FormatMatch('d'), SaveToAliasAction('alias')),
                     ),
                 ),
                 Rule(

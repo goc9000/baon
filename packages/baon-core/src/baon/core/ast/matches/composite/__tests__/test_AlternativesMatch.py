@@ -7,8 +7,7 @@
 # Licensed under the GPL-3
 
 
-from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
-from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
+from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase, mark_parens
 from baon.core.ast.matches.composite.AlternativesMatch import AlternativesMatch
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
@@ -56,10 +55,12 @@ class TestAlternativesMatch(MatchTestCase):
         self._test_unique_match(
             text='abracadabra',
             match=SequenceMatch(
-                AlternativesMatch(
-                    LiteralMatch('abraca'),
-                    LiteralMatch('abr'),
-                ).add_action(ApplyFunctionAction('parens')),
+                mark_parens(
+                    AlternativesMatch(
+                        LiteralMatch('abraca'),
+                        LiteralMatch('abr'),
+                    ),
+                ),
                 LiteralMatch('acadabra'),
             ),
             expected_solution={'matched_text': '(abr)acadabra', 'position': 11})

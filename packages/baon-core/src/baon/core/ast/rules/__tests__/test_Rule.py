@@ -9,9 +9,9 @@
 
 from unittest import TestCase
 
-from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
-from baon.core.ast.actions.DeleteAction import DeleteAction
 from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
+from baon.core.ast.matches.__tests__.MatchTestCase import mark_parens, mark_braces, delete_action
+from baon.core.ast.matches.composite.MatchWithActions import MatchWithActions
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.insertion.InsertAliasMatch import InsertAliasMatch
 from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
@@ -27,9 +27,9 @@ class TestRule(TestCase):
             text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    LiteralMatch('abc').add_action(ApplyFunctionAction('parens')),
-                    FormatMatch('ws').add_action(DeleteAction()),
-                    FormatMatch('d').add_action(ApplyFunctionAction('braces')),
+                    mark_parens(LiteralMatch('abc')),
+                    delete_action(FormatMatch('ws')),
+                    mark_braces(FormatMatch('d')),
                 ),
             ),
             expected_text='(abc)[123]'
@@ -40,9 +40,9 @@ class TestRule(TestCase):
             text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    LiteralMatch('abc').add_action(ApplyFunctionAction('parens')),
-                    FormatMatch('ws').add_action(DeleteAction()),
-                    LiteralMatch('x').add_action(ApplyFunctionAction('braces')),
+                    mark_parens(LiteralMatch('abc')),
+                    delete_action(FormatMatch('ws')),
+                    mark_braces(LiteralMatch('x')),
                 ),
             ),
             expected_text='abc 123'
@@ -52,7 +52,7 @@ class TestRule(TestCase):
         self._test_rule(
             text='abc 123',
             rule=Rule(
-                LiteralMatch('ab').add_action(ApplyFunctionAction('parens')),
+                mark_parens(LiteralMatch('ab')),
             ),
             expected_text='(ab)c 123'
         )
@@ -62,8 +62,8 @@ class TestRule(TestCase):
             text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    LiteralMatch('ab').add_action(ApplyFunctionAction('parens')),
-                    BetweenMatch().add_action(ApplyFunctionAction('braces')),
+                    mark_parens(LiteralMatch('ab')),
+                    mark_braces(BetweenMatch()),
                 ),
             ),
             expected_text='(ab)[c 123]'
@@ -74,8 +74,8 @@ class TestRule(TestCase):
             text='abc 123',
             rule=Rule(
                 SequenceMatch(
-                    BetweenMatch().add_action(ApplyFunctionAction('braces')),
-                    LiteralMatch('c').add_action(ApplyFunctionAction('parens')),
+                    mark_braces(BetweenMatch()),
+                    mark_parens(LiteralMatch('c')),
                 ),
             ),
             expected_text='[ab](c) 123'
@@ -87,7 +87,10 @@ class TestRule(TestCase):
             rule=Rule(
                 SequenceMatch(
                     LiteralMatch('abc'),
-                    FormatMatch('d').add_action(SaveToAliasAction('alias')),
+                    MatchWithActions(
+                        FormatMatch('d'),
+                        SaveToAliasAction('alias'),
+                    ),
                     InsertAliasMatch('alias'),
                 ),
             ),
@@ -102,7 +105,10 @@ class TestRule(TestCase):
                 SequenceMatch(
                     InsertAliasMatch('alias'),
                     LiteralMatch('abc'),
-                    FormatMatch('d').add_action(SaveToAliasAction('alias')),
+                    MatchWithActions(
+                        FormatMatch('d'),
+                        SaveToAliasAction('alias'),
+                    ),
                 ),
             ),
             expected_text=' 123abc 123',

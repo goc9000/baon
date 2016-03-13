@@ -7,8 +7,7 @@
 # Licensed under the GPL-3
 
 
-from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
-from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
+from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase, mark_parens, mark_braces, mark_curlies
 from baon.core.ast.matches.composite.AlternativesMatch import AlternativesMatch
 from baon.core.ast.matches.composite.RepeatMatch import RepeatMatch
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
@@ -68,10 +67,12 @@ class TestRepeatMatch(MatchTestCase):
         self._test_match(
             text='abcabcabca',
             match=RepeatMatch(
-                AlternativesMatch(
-                    LiteralMatch('abc'),
-                    LiteralMatch('abcabca'),
-                ).add_action(ApplyFunctionAction('parens')),
+                mark_parens(
+                    AlternativesMatch(
+                        LiteralMatch('abc'),
+                        LiteralMatch('abcabca'),
+                    ),
+                ),
                 0, None),
             expected_solutions=[
                 {'matched_text': '(abc)(abc)(abc)', 'position': 9},
@@ -92,10 +93,12 @@ class TestRepeatMatch(MatchTestCase):
         self._test_match(
             text='abcabca',
             match=RepeatMatch(
-                AlternativesMatch(
-                    LiteralMatch('abc'),
-                    InsertLiteralMatch(','),
-                ).add_action(ApplyFunctionAction('parens')),
+                mark_parens(
+                    AlternativesMatch(
+                        LiteralMatch('abc'),
+                        InsertLiteralMatch(','),
+                    ),
+                ),
                 0, None),
             expected_solutions=[
                 {'matched_text': '(abc)(abc)(,)', 'position': 6},
@@ -116,9 +119,9 @@ class TestRepeatMatch(MatchTestCase):
 
     def test_optional_match(self):
         match = SequenceMatch(
-            FormatMatch('s').add_action(ApplyFunctionAction('parens')),
-            RepeatMatch(FormatMatch('d'), 0, 1).add_action(ApplyFunctionAction('braces')),
-            FormatMatch('s').add_action(ApplyFunctionAction('curlies')),
+            mark_parens(FormatMatch('s')),
+            mark_braces(RepeatMatch(FormatMatch('d'), 0, 1)),
+            mark_curlies(FormatMatch('s')),
             EndAnchorMatch(),
         )
 

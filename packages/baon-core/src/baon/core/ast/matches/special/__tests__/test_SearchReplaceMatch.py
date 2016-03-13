@@ -7,11 +7,10 @@
 # Licensed under the GPL-3
 
 
-from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
-from baon.core.ast.actions.DeleteAction import DeleteAction
 from baon.core.ast.actions.ReplaceByLiteralAction import ReplaceByLiteralAction
 from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
-from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
+from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase, mark_parens, mark_braces, delete_action
+from baon.core.ast.matches.composite.MatchWithActions import MatchWithActions
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
@@ -23,13 +22,13 @@ class TestSearchReplaceMatch(MatchTestCase):
     def test_basic(self):
         self._test_unique_match(
             text='abracadabra',
-            match=SearchReplaceMatch(LiteralMatch('a').add_action(DeleteAction())),
+            match=SearchReplaceMatch(delete_action(LiteralMatch('a'))),
             expected_solution={'text': 'brcdbr', 'matched_text': '', 'position': 0})
 
     def test_start_in_middle(self):
         self._test_unique_match(
             text='abracadabra',
-            match=SearchReplaceMatch(LiteralMatch('a').add_action(DeleteAction())),
+            match=SearchReplaceMatch(delete_action(LiteralMatch('a'))),
             position=5,
             expected_solution={'text': 'abracdbr', 'matched_text': '', 'position': 5})
 
@@ -38,9 +37,9 @@ class TestSearchReplaceMatch(MatchTestCase):
             text='abracadabra',
             match=SearchReplaceMatch(
                 SequenceMatch(
-                    BetweenMatch().add_action(ApplyFunctionAction('parens')),
-                    LiteralMatch('r').add_action(DeleteAction()),
-                )
+                    mark_parens(BetweenMatch()),
+                    delete_action(LiteralMatch('r')),
+                ),
             ),
             expected_solution={'text': '(ab)(acadab)a', 'matched_text': '', 'position': 0})
 
@@ -49,9 +48,9 @@ class TestSearchReplaceMatch(MatchTestCase):
             text='abracadabra',
             match=SearchReplaceMatch(
                 SequenceMatch(
-                    LiteralMatch('r').add_action(DeleteAction()),
-                    BetweenMatch().add_action(ApplyFunctionAction('parens')),
-                )
+                    delete_action(LiteralMatch('r')),
+                    mark_parens(BetweenMatch()),
+                ),
             ),
             expected_solution={'text': 'ab(acadab)(a)', 'matched_text': '', 'position': 0})
 
@@ -60,10 +59,10 @@ class TestSearchReplaceMatch(MatchTestCase):
             text='abracadabra',
             match=SearchReplaceMatch(
                 SequenceMatch(
-                    BetweenMatch().add_action(ApplyFunctionAction('parens')),
-                    LiteralMatch('r').add_action(DeleteAction()),
-                    BetweenMatch().add_action(ApplyFunctionAction('braces')),
-                )
+                    mark_parens(BetweenMatch()),
+                    delete_action(LiteralMatch('r')),
+                    mark_braces(BetweenMatch()),
+                ),
             ),
             expected_solution={'text': '(ab)[acadab]()[a]', 'matched_text': '', 'position': 0})
 
@@ -72,11 +71,14 @@ class TestSearchReplaceMatch(MatchTestCase):
             text='abracadabra',
             match=SearchReplaceMatch(
                 SequenceMatch(
-                    LiteralMatch('r').add_action(DeleteAction()),
+                    delete_action(LiteralMatch('r')),
                     SearchReplaceMatch(
-                        LiteralMatch('a').add_action(ReplaceByLiteralAction('i'))
-                    )
-                )
+                        MatchWithActions(
+                            LiteralMatch('a'),
+                            ReplaceByLiteralAction('i'),
+                        ),
+                    ),
+                ),
             ),
             expected_solution={'text': 'abicidibi', 'matched_text': '', 'position': 0})
 
@@ -84,6 +86,9 @@ class TestSearchReplaceMatch(MatchTestCase):
         self._test_unique_match(
             text='abracadabra',
             match=SearchReplaceMatch(
-                LiteralMatch('r').add_action(SaveToAliasAction('alias')),
+                MatchWithActions(
+                    LiteralMatch('r'),
+                    SaveToAliasAction('alias'),
+                ),
             ),
             expected_solution={'text': 'abracadabra', 'matched_text': '', 'position': 0, 'aliases': {'alias': 'r'}})
