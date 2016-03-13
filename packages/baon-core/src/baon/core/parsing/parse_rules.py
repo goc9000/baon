@@ -64,9 +64,14 @@ def p_rule_set_base(p):
 
 
 def p_rule(p):
-    """rule : alternatives_match"""
+    """rule : composite_match"""
     p[0] = Rule(p[1])
     _set_source_span(p[0], p[1])
+
+
+def p_composite_match(p):
+    """composite_match : alternatives_match"""
+    p[0] = p[1]
 
 
 def p_alternatives_match_add_sequence_match(p):
@@ -100,12 +105,12 @@ def p_sequence_match_empty(p):
         p[0].source_span = SourceSpan.at_beginning()
 
 
-def p_match_term_match(p):
+def p_sequence_match_term_match(p):
     """sequence_match_term : match"""
     p[0] = p[1]
 
 
-def p_match_term_search(p):
+def p_sequence_match_term_search(p):
     """sequence_match_term : OP_SEARCH match"""
     p[0] = SearchReplaceMatch(p[2])
     _set_source_span(p[0], p[1], p[2])
@@ -167,16 +172,16 @@ def p_match_format(p):
     _set_source_span(p[0], p[1])
 
 
+def p_match_group(p):
+    """match : PARA_OPEN composite_match PARA_CLOSE"""
+    p[0] = p[2]
+    _set_source_span(p[0], p[1], p[3])
+
+
 def p_match_insert_id(p):
     """match : OP_INSERT ID"""
     p[0] = InsertAliasMatch(p[2].text)
     _set_source_span(p[0], p[1], p[2])
-
-
-def p_match_subrule(p):
-    """match : PARA_OPEN alternatives_match PARA_CLOSE"""
-    p[0] = p[2]
-    _set_source_span(p[0], p[1], p[3])
 
 
 def p_match_insert_literal(p):
