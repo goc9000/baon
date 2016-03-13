@@ -8,20 +8,20 @@
 
 
 from baon.core.ast.ASTNode import ast_node_children
-from baon.core.ast.matches.MatchWithActions import MatchWithActions
+from baon.core.ast.matches.Match import Match
 
 
-class SequenceMatch(MatchWithActions):
+class SequenceMatch(Match):
     terms = ast_node_children()
 
     def __init__(self, *terms):
-        MatchWithActions.__init__(self)
+        Match.__init__(self)
         self.terms = list(terms)
 
     def is_empty(self):
         return len(self.terms) == 0
 
-    def _execute_match_with_actions_impl(self, context):
+    def execute(self, context):
         for solution in self._generate_solutions_rec(context, []):
             yield solution
 

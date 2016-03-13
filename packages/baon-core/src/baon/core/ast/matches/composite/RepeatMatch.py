@@ -10,16 +10,16 @@
 from baon.core.ast.ASTNode import ast_node_field, ast_node_child
 from baon.core.ast.__errors__.rule_check_errors import MinimumMatchesNotSpecifiedError, MinimumMatchesNegativeError, \
     MaximumMatchesZeroOrNegativeError, MinimumMatchesGreaterThanMaximumError
-from baon.core.ast.matches.MatchWithActions import MatchWithActions
+from baon.core.ast.matches.Match import Match
 
 
-class RepeatMatch(MatchWithActions):
+class RepeatMatch(Match):
     match = ast_node_child()
     at_least = ast_node_field(never_hide=True)
     at_most = ast_node_field(never_hide=True)
     
     def __init__(self, match, at_least, at_most):
-        MatchWithActions.__init__(self)
+        Match.__init__(self)
         
         self.match = match
         self.at_least = at_least
@@ -37,7 +37,7 @@ class RepeatMatch(MatchWithActions):
             if self.at_least > self.at_most:
                 raise MinimumMatchesGreaterThanMaximumError()
 
-    def _execute_match_with_actions_impl(self, context):
+    def execute(self, context):
         for solution in self._generate_solutions_rec(context, [], False):
             yield solution
 

@@ -7,13 +7,13 @@
 # Licensed under the GPL-3
 
 
-from baon.core.ast.matches.MatchWithActions import MatchWithActions
+from baon.core.ast.matches.Match import Match
 
 
-class EndAnchorMatch(MatchWithActions):
+class EndAnchorMatch(Match):
     def __init__(self):
-        MatchWithActions.__init__(self)
+        Match.__init__(self)
     
-    def _execute_match_with_actions_impl(self, context):
+    def execute(self, context):
         if context.position == len(context.text):
             yield context._replace(matched_text='', anchored=True)

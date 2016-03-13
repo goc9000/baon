@@ -11,14 +11,14 @@ import re
 from abc import abstractmethod
 
 from baon.core.ast.__errors__.rule_check_errors import ErrorInRegularExpressionError
-from baon.core.ast.matches.MatchWithActions import MatchWithActions
+from baon.core.ast.matches.Match import Match
 
 
-class ElementaryPatternMatch(MatchWithActions):
+class ElementaryPatternMatch(Match):
     _cached_regex = None
 
     def __init__(self):
-        MatchWithActions.__init__(self)
+        Match.__init__(self)
 
     @abstractmethod
     def _get_pattern_impl(self):
@@ -46,7 +46,7 @@ class ElementaryPatternMatch(MatchWithActions):
         self._cached_regex = self._compile_regex()
         return self._cached_regex
 
-    def _execute_match_with_actions_impl(self, context):
+    def execute(self, context):
         regex = self._get_regex()
 
         regex_match = regex.match(context.text, context.position)

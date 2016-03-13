@@ -8,14 +8,14 @@
 
 
 from baon.core.ast.ASTNode import ast_node_children
-from baon.core.ast.matches.MatchWithActions import MatchWithActions
+from baon.core.ast.matches.Match import Match
 
 
-class AlternativesMatch(MatchWithActions):
+class AlternativesMatch(Match):
     alternatives = ast_node_children()
     
     def __init__(self, *alternatives):
-        MatchWithActions.__init__(self)
+        Match.__init__(self)
         self.alternatives = list(alternatives)
 
     def is_empty(self):
@@ -25,7 +25,7 @@ class AlternativesMatch(MatchWithActions):
         self.alternatives.append(alternative)
         return self
 
-    def _execute_match_with_actions_impl(self, context):
+    def execute(self, context):
         for alternative in self.alternatives:
             for solution in alternative.execute(context):
                 yield solution

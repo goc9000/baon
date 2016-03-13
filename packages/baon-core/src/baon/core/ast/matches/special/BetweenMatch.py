@@ -7,14 +7,14 @@
 # Licensed under the GPL-3
 
 
-from baon.core.ast.matches.MatchWithActions import MatchWithActions
+from baon.core.ast.matches.Match import Match
 
 
-class BetweenMatch(MatchWithActions):
+class BetweenMatch(Match):
     def __init__(self):
-        MatchWithActions.__init__(self)
+        Match.__init__(self)
 
-    def _execute_match_with_actions_impl(self, context):
+    def execute(self, context):
         if context.anchored:
             for end in range(context.position, len(context.text) + 1):
                 yield context._replace(
