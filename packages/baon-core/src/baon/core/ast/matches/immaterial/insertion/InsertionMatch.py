@@ -9,14 +9,14 @@
 
 from abc import abstractmethod
 
-from baon.core.ast.matches.Match import Match
+from baon.core.ast.matches.immaterial.ImmaterialMatch import ImmaterialMatch
 
 
-class InsertionMatch(Match):
+class InsertionMatch(ImmaterialMatch):
     def __init__(self):
-        Match.__init__(self)
+        ImmaterialMatch.__init__(self)
 
-    def execute(self, context):
+    def _execute_immaterial_match_impl(self, context):
         yield context._replace(matched_text=self._get_inserted_text_impl(context))
 
     @abstractmethod
