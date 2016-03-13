@@ -13,6 +13,10 @@ from baon.core.ast.matches.Match import Match
 
 
 class ImmaterialMatch(Match):
+    """
+    Immaterial matches are those that do not depend on the incoming text for succeeding. They will always "match",
+    consume no text input, and do not change the anchoring status.
+    """
     def __init__(self):
         Match.__init__(self)
 

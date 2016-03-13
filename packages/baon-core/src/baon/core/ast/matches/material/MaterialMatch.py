@@ -13,6 +13,12 @@ from baon.core.ast.matches.Match import Match
 
 
 class MaterialMatch(Match):
+    """
+    Material matches are those that depend on the content of and position in the input text.
+
+    After the execution of a material match, the 'anchored' context field is guaranteed to be true. This is significant
+    in the functioning of the Between match, which essentially will extend to the next anchored match.
+    """
     def __init__(self):
         Match.__init__(self)
 
