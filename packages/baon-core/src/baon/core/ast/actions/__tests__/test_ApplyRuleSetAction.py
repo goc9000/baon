@@ -16,7 +16,7 @@ from baon.core.ast.rules.Rule import Rule
 from baon.core.ast.matches.__tests__.MatchTestCase import delete_action
 from baon.core.ast.matches.composite.MatchWithActions import MatchWithActions
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
-from baon.core.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMatch
+from baon.core.ast.matches.immaterial.insertion.InsertLiteralMatch import InsertLiteralMatch
 from baon.core.ast.matches.material.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
 

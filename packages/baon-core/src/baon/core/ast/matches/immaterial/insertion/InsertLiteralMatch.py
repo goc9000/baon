@@ -1,4 +1,4 @@
-# baon/core/ast/matches/insertion/InsertLiteralMatch.py
+# baon/core/ast/matches/immaterial/insertion/InsertLiteralMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -8,7 +8,7 @@
 
 
 from baon.core.ast.ASTNode import ast_node_field
-from baon.core.ast.matches.insertion.InsertionMatch import InsertionMatch
+from baon.core.ast.matches.immaterial.insertion.InsertionMatch import InsertionMatch
 
 
 class InsertLiteralMatch(InsertionMatch):

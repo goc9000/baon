@@ -13,7 +13,7 @@ from baon.core.ast.actions.SaveToAliasAction import SaveToAliasAction
 from baon.core.ast.matches.__tests__.MatchTestCase import mark_parens
 from baon.core.ast.matches.composite.MatchWithActions import MatchWithActions
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
-from baon.core.ast.matches.insertion.InsertAliasMatch import InsertAliasMatch
+from baon.core.ast.matches.immaterial.insertion.InsertAliasMatch import InsertAliasMatch
 from baon.core.ast.matches.material.pattern.FormatMatch import FormatMatch
 from baon.core.ast.matches.material.pattern.LiteralMatch import LiteralMatch
 from baon.core.ast.rules.Rule import Rule

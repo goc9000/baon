@@ -1,4 +1,4 @@
-# baon/core/ast/matches/insertion/__tests__/test_InsertLiteralMatch.py
+# baon/core/ast/matches/immaterial/insertion/__tests__/test_InsertLiteralMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -8,7 +8,7 @@
 
 
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
-from baon.core.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMatch
+from baon.core.ast.matches.immaterial.insertion.InsertLiteralMatch import InsertLiteralMatch
 
 
 class TestInsertLiteralMatch(MatchTestCase):

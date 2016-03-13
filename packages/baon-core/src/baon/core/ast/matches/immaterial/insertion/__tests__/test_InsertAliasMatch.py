@@ -1,4 +1,4 @@
-# baon/core/ast/matches/insertion/__tests__/test_InsertAliasMatch.py
+# baon/core/ast/matches/immaterial/insertion/__tests__/test_InsertAliasMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -8,7 +8,7 @@
 
 
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
-from baon.core.ast.matches.insertion.InsertAliasMatch import InsertAliasMatch
+from baon.core.ast.matches.immaterial.insertion.InsertAliasMatch import InsertAliasMatch
 
 
 class TestInsertAliasMatch(MatchTestCase):
