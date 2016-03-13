@@ -178,16 +178,27 @@ def p_match_group(p):
     _set_source_span(p[0], p[1], p[3])
 
 
-def p_match_insert_id(p):
-    """match : OP_INSERT ID"""
+def p_match_insertion(p):
+    """match : insertion"""
+    p[0] = p[1]
+
+
+# Insertions
+
+
+def p_insertion_insert_id(p):
+    """insertion : OP_INSERT ID"""
     p[0] = InsertAliasMatch(p[2].text)
     _set_source_span(p[0], p[1], p[2])
 
 
-def p_match_insert_literal(p):
-    """match : OP_INSERT STRING_LITERAL"""
+def p_insertion_insert_literal(p):
+    """insertion : OP_INSERT STRING_LITERAL"""
     p[0] = InsertLiteralMatch(_handle_literal_token(p[2]))
     _set_source_span(p[0], p[1], p[2])
+
+
+# Actions
 
 
 def p_action_delete(p):
