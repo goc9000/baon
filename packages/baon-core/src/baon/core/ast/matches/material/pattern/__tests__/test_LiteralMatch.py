@@ -1,4 +1,4 @@
-# baon/core/ast/matches/pattern/__tests__/test_LiteralMatch.py
+# baon/core/ast/matches/material/pattern/__tests__/test_LiteralMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -8,7 +8,7 @@
 
 
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
-from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
+from baon.core.ast.matches.material.pattern.LiteralMatch import LiteralMatch
 
 
 class TestLiteralMatch(MatchTestCase):

@@ -9,7 +9,7 @@
 
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
-from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
+from baon.core.ast.matches.material.pattern.LiteralMatch import LiteralMatch
 
 
 class TestSequenceMatch(MatchTestCase):

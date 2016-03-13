@@ -1,4 +1,4 @@
-# baon/core/ast/matches/pattern/LiteralMatch.py
+# baon/core/ast/matches/material/pattern/LiteralMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -10,7 +10,7 @@
 import re
 
 from baon.core.ast.ASTNode import ast_node_field
-from baon.core.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
+from baon.core.ast.matches.material.pattern.ElementaryPatternMatch import ElementaryPatternMatch
 
 
 class LiteralMatch(ElementaryPatternMatch):

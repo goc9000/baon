@@ -11,7 +11,7 @@ from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
 from baon.core.ast.actions.ApplyFunctionAction import ApplyFunctionAction
 from baon.core.ast.actions.DeleteAction import DeleteAction
 from baon.core.ast.matches.composite.MatchWithActions import MatchWithActions
-from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
+from baon.core.ast.matches.material.pattern.LiteralMatch import LiteralMatch
 
 
 class TestMatchWithActions(MatchTestCase):

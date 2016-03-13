@@ -1,4 +1,4 @@
-# baon/core/ast/matches/pattern/FormatMatch.py
+# baon/core/ast/matches/material/pattern/FormatMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 
@@ -14,7 +14,7 @@ from baon.core.ast.ASTNode import ast_node_field
 from baon.core.ast.__errors__.rule_check_errors import UnrecognizedFormatSpecifierError, \
     WidthMustBeAtLeast1ForSpecifierError, WidthInapplicableToSpecifierError, \
     Leading0sInapplicableToSpecifierError, InvalidWidthForSpecifierError
-from baon.core.ast.matches.pattern.ElementaryPatternMatch import ElementaryPatternMatch
+from baon.core.ast.matches.material.pattern.ElementaryPatternMatch import ElementaryPatternMatch
 
 FORMAT_DICT = {
     'ws':         (r'(\s##)', '*'),

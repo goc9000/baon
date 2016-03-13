@@ -22,11 +22,11 @@ from baon.core.ast.matches.composite.RepeatMatch import RepeatMatch
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
 from baon.core.ast.matches.insertion.InsertAliasMatch import InsertAliasMatch
 from baon.core.ast.matches.insertion.InsertLiteralMatch import InsertLiteralMatch
-from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
-from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
-from baon.core.ast.matches.pattern.RegexMatch import RegexMatch
-from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
-from baon.core.ast.matches.positional.StartAnchorMatch import StartAnchorMatch
+from baon.core.ast.matches.material.pattern.FormatMatch import FormatMatch
+from baon.core.ast.matches.material.pattern.LiteralMatch import LiteralMatch
+from baon.core.ast.matches.material.pattern.RegexMatch import RegexMatch
+from baon.core.ast.matches.material.positional.EndAnchorMatch import EndAnchorMatch
+from baon.core.ast.matches.material.positional.StartAnchorMatch import StartAnchorMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
 from baon.core.ast.matches.special.SearchReplaceMatch import SearchReplaceMatch
 from baon.core.ast.rules.Rule import Rule

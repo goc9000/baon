@@ -12,7 +12,7 @@ from baon.core.ast.matches.Match import Match
 from baon.core.ast.matches.composite.AlternativesMatch import AlternativesMatch
 from baon.core.ast.matches.composite.RepeatMatch import RepeatMatch
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
-from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
+from baon.core.ast.matches.material.positional.EndAnchorMatch import EndAnchorMatch
 from baon.core.ast.matches.special.BetweenMatch import BetweenMatch
 
 

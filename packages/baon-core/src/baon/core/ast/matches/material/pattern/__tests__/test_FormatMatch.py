@@ -1,4 +1,4 @@
-# baon/core/ast/matches/pattern/__tests__/test_FormatMatch.py
+# baon/core/ast/matches/material/pattern/__tests__/test_FormatMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 #
@@ -10,7 +10,7 @@
 import os
 
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase
-from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
+from baon.core.ast.matches.material.pattern.FormatMatch import FormatMatch
 
 
 class TestFormatMatch(MatchTestCase):

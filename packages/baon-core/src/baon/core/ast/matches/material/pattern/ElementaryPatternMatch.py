@@ -1,4 +1,4 @@
-# baon/core/ast/matches/pattern/ElementaryPatternMatch.py
+# baon/core/ast/matches/material/pattern/ElementaryPatternMatch.py
 #
 # (C) Copyright 2012-present  Cristian Dinu <goc9000@gmail.com>
 # 

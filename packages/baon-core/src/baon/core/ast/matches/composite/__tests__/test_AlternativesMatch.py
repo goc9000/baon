@@ -10,9 +10,9 @@
 from baon.core.ast.matches.__tests__.MatchTestCase import MatchTestCase, mark_parens
 from baon.core.ast.matches.composite.AlternativesMatch import AlternativesMatch
 from baon.core.ast.matches.composite.SequenceMatch import SequenceMatch
-from baon.core.ast.matches.pattern.FormatMatch import FormatMatch
-from baon.core.ast.matches.pattern.LiteralMatch import LiteralMatch
-from baon.core.ast.matches.positional.EndAnchorMatch import EndAnchorMatch
+from baon.core.ast.matches.material.pattern.FormatMatch import FormatMatch
+from baon.core.ast.matches.material.pattern.LiteralMatch import LiteralMatch
+from baon.core.ast.matches.material.positional.EndAnchorMatch import EndAnchorMatch
 
 
 class TestAlternativesMatch(MatchTestCase):
