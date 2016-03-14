@@ -15,6 +15,16 @@ Implementation Details
 ======================
 
 
+Table of Contents
+-----------------
+
+1. [The Text Matching and Transformation Model] (#the-text-matching-and-transformation-model)
+  1. [Contexts] (#contexts)
+  2. [Matches] (#matches)
+  3. [Taxonomy of Matches] (#taxonomy-of-matches)
+  4. [Actions] (#actions)
+
+
 The Text Matching and Transformation Model
 ------------------------------------------
 
