@@ -90,6 +90,47 @@ Optional and repeated matches also produce multiple solutions in order to implem
 
 Note that the *order of the solutions* is important, and in fact determines which variant BAON will try first. As one can see, the variants with the most repetitions will be tried first, then, if this does not succeed, fewer and fewer repetitions will be attempted, until either the global match is successful, or the repeated match is skipped entirely.
 
+### Taxonomy of Matches
+
+Matches can be roughly categorized as follows:
+
+- **Material matches**: Material matches are those that depend on the content of the incoming text and/or the position within it. Thus, they consult and modify the `text` and `position` fields, and may succeed or fail depending on whether the text matches their programmed pattern. They behave closest to what would be intuitively thought of as a match.
+  - **Pattern matches**: Depend on the content of the incoming text, regardless of position.
+    - *Literal text matches*
+    - Most *format matches*: `%d`, `%s`, `%c`, `%parens` etc.
+  - **Positional matches**: Depend on the position in the filename text.
+    - The *anchor matches*: `^` and `$`
+  - **Mixed pattern/positional matches**: Depend on both the content and the position.
+    - `%inparens`, `%inbraces`, `%incurlies`
+    - *Regular expression matches* (positional features like lookahead/behind etc. work as expected)
+
+  Notes:
+  - The `anchored` field of the context will always be set to `true` following the success of a material match.
+  - Currently, all pattern and positional matches translate to an equivalent regex in the backend.
+
+- **Immaterial matches**: Immaterial matches do not depend on the content of or position in the incoming text in order to succeed. They always execute, consume no text, and do not limit the expansion of constructs such as `..`.
+  - **Insertions**: Insertions basically just set the `matched_text` field directly to whatever needs to be inserted (literal text or the contents of an alias)
+  - *The search-and-replace match*: Technically this does affect the incoming text, but in a different, out-of-band fashion with respect to the normal streaming paradigm of matching. The position is also always unchanged. Only text past the current position is affected.
+  
+  Notes:
+  - The `position` and `anchored` fields of the context are guaranteed to be unchanged following an immaterial match.
+  - The search-and-replace match is technically also a *composite* match (see below).
+
+- **Composite matches**: Composite matches are objects that contain other matches (simple or themselves composite) and execute them in an organized way, or change their functioning.
+  - *Match sequences*
+  - *Match alternatives*
+  - *Optional matches*
+  - *Repeated matches*
+  - *Matches with actions*
+  
+  Notes:
+  - Optional and repeated matches are actually the same object. In fact, the object supports full regex-like counting semantics for minimum and maximum repetitions, but this functionality is not fully exposed in the syntax. Instead, we have the `?`, `*`, `+` operators which map to (min=0, max=1), (min=0, max=Inf) and (min=1, max=Inf) respectively.
+  - Composite matches behave like a material or immaterial match depending on the matches they contain and the circumstances of the execution (i.e. the currently selected alternative, whether an optional match was skipped, etc.).
+  - Match groups are not mentioned because they only exist on a syntactic level. In the AST they are present as sequence, alternative, actioned, etc. matches.
+
+- **Special matches**: Currently this contains only one entry:
+  - *The 'between' match*: Neither material, immaterial, nor composite. This is the match that actually makes use of the `anchored` flag and the only one that can set it to false. Consult the dedicated section for details.
+
 ### Actions
 
 The subject of **actions** consists of two main parts:
@@ -119,36 +160,6 @@ It should be noted that matches, as defined previously, have no concept of actio
 REWRITE POINT
 
 -------------
-
-
-### Insertions
-
-**Insertions** are simply "matches" that produce a `matched_text` regardless of the current `text` and `position` attributes, which are neither consulted nor affected.
-
-For instance, here is an illustration of an input context before and after some possible insertions:
-
-|                    | Text (position marked with *) | Matched Text  | Aliases      | Anchored     |
-|--------------------|-------------------------------|---------------|--------------|--------------|
-| Input context      | Not relevant                  | N/A           | word=`quick` | Not relevant |
-| `<<"brown fox"`    | Not affected                  | `brown fox `  | word=`quick` | Not affected |
-| `<<word`           | Not affected                  | `quick`       | word=`quick` | Not affected |
-
-Insertions are *immaterial*, in that they never cause the `anchored` attribute to revert to `true`. This is the main difference between them and the almost equivalent construct `''->'brown fox'`.
-
-
-
-Implementation Details
-----------------------
-
-### Matches
-
-In order to better understand how BAON works, we will start at the fundamental entity involved in the renaming process, the *match*.
-
-A match is, essentially, an entity that looks at incoming text and checks whether part of it (usually a prefix) fits some pattern specific to the match type. If it does, then the match is said to *succeed*, and the matched prefix is removed ("consumed") from the incoming text and stored for further processing. If the text does not fit the pattern, the match is said to *fail*, and the incoming text will be unaffected.
-
-The part of the text that was extracted is called the *matched text* and represents a preliminary *output* for the match. Once extracted, this text is filtered through a series of *actions* attached to the match. An action simply receives the current matched text and transforms it according to an algorithm specific to the action type (which may include side effects), after which the result is passed to the next action, and so on. The output of the last action is the *final result* of the match.
-
-Note that matches may have no actions attached, in which case they simply serve as a condition that cause no modifications to the corresponding segment of the text.
 
 ### Rules
 
