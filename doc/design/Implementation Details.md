@@ -97,7 +97,7 @@ The subject of **actions** consists of two main parts:
 - How actions are integrated with matches
 
 Like matches, actions also do a mapping from one context to another, but with two important differences:
-- Actions operate on a reduced kind of context called an **action context**, which consists of only two fields: `text` and `aliases`.
+- Actions operate on a reduced kind of context called an **action context**, which consists of only two fields: `text` and `aliases`. These are loaded from the `matched_text` and `aliases` fields of the match context, and stored back when actions have finished executing. Thus, *actions cannot consult or influence the incoming text*, and only act on the matched text produced by the match to be last executed.
 - Actions always have exactly one "solution", which is to say that they always succeed in transforming the text and always transform it in only one way, specific to their nature.
 
 The following table illustrates the effects of various actions given a starting action context:
@@ -111,7 +111,15 @@ The following table illustrates the effects of various actions given a starting 
 | `>>phrase`           | `brown fox`   | phrase=`brown fox` |
 | `->(%s>>word %s!)`   | `brown`       | word=`brown`       |
 
-Actions are integrated into the match framework through the use of a composite match called **match with actions**. A construct like `core_match->action1->action2->...` will be represented internally as a match-with-actions object storing the base `core_match` as well as a list of the actions `action1`, `action2` etc. The solutions produced by the match-with-actions object are all of the solutions of the core match, transformed by passing their `matched_text` and `aliases` fields through all the actions in the list.
+It should be noted that matches, as defined previously, have no concept of actions. The way actions are integrated into the match framework is through the use of a special composite match type called **MatchWithActions**. A match object of this type stores a core match and a list of actions, and makes them act like a single, actionless match from the outside. The algorithm is simple: the solutions produced by the MatchWithActions object are all of the solutions of the core match, transformed by passing their `matched_text` and `aliases` fields through all the stored actions.
+
+
+-------------
+
+REWRITE POINT
+
+-------------
+
 
 ### Insertions
 
@@ -127,11 +135,6 @@ For instance, here is an illustration of an input context before and after some 
 
 Insertions are *immaterial*, in that they never cause the `anchored` attribute to revert to `true`. This is the main difference between them and the almost equivalent construct `''->'brown fox'`.
 
--------------
-
-REWRITE POINT
-
--------------
 
 
 Implementation Details
