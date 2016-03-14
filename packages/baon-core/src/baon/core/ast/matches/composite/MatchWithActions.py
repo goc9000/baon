@@ -9,6 +9,7 @@
 
 from baon.core.ast.ASTNode import ast_node_child, ast_node_children
 from baon.core.ast.matches.Match import Match
+from baon.core.rules.ActionContext import ActionContext
 
 
 class MatchWithActions(Match):
@@ -26,7 +27,10 @@ class MatchWithActions(Match):
 
     def execute(self, context):
         for solution in self.core_match.execute(context):
-            for action in self.actions:
-                solution = action.execute(solution)
 
-            yield solution
+            action_context = ActionContext(text=solution.matched_text, aliases=solution.aliases)
+
+            for action in self.actions:
+                action_context = action.execute(action_context)
+
+            yield solution._replace(matched_text=action_context.text, aliases=action_context.aliases)

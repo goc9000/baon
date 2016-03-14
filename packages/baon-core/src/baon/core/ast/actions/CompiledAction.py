@@ -13,11 +13,11 @@ from baon.core.ast.actions.Action import Action
 
 
 def wrap_simple_text_function(function):
-    def wrapper(context):
-        new_text = function(context.matched_text)
+    def wrapper(action_context):
+        new_text = function(action_context.text)
         if new_text is False:
             return False
-        return context._replace(matched_text=new_text)
+        return action_context._replace(text=new_text)
 
     return wrapper
 

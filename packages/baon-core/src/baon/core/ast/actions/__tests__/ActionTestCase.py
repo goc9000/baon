@@ -9,35 +9,23 @@
 
 from unittest import TestCase
 
-from baon.core.rules.MatchContext import MatchContext
+from baon.core.rules.ActionContext import ActionContext
 
 
 class ActionTestCase(TestCase):
 
     def _test_simple_text_action(self, text, action, expected_text):
-        test_context = MatchContext(
-            text='ignored',
-            position=0,
-            aliases=dict(),
-            matched_text=text,
-            anchored=True,
-        )
+        test_context = ActionContext(text=text, aliases=dict())
 
         result_context = action.execute(test_context)
 
         self.assertEquals(
             result_context,
-            test_context._replace(matched_text=expected_text)
+            test_context._replace(text=expected_text)
         )
 
     def _test_aliases_action(self, aliases, action, expected_aliases):
-        test_context = MatchContext(
-            text='ignored',
-            position=0,
-            aliases=aliases,
-            matched_text='Matched text',
-            anchored=True,
-        )
+        test_context = ActionContext(text='Matched text', aliases=aliases)
 
         result_context = action.execute(test_context)
 

@@ -19,5 +19,5 @@ class ReplaceByLiteralAction(Action):
 
         self.text = text
 
-    def execute(self, context):
-        return context._replace(matched_text=self.text)
+    def execute(self, action_context):
+        return action_context._replace(text=self.text)

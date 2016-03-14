@@ -17,5 +17,5 @@ class Action(ASTNode, metaclass=ABCMeta):
         ASTNode.__init__(self)
 
     @abstractmethod
-    def execute(self, context):
-        return context
+    def execute(self, action_context):
+        return action_context

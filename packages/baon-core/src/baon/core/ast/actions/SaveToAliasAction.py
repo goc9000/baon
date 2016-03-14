@@ -19,8 +19,8 @@ class SaveToAliasAction(Action):
         
         self.alias = alias
     
-    def execute(self, context):
-        new_aliases = dict(context.aliases)
-        new_aliases[self.alias] = context.matched_text
+    def execute(self, action_context):
+        new_aliases = dict(action_context.aliases)
+        new_aliases[self.alias] = action_context.text
 
-        return context._replace(aliases=new_aliases)
+        return action_context._replace(aliases=new_aliases)

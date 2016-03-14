@@ -14,5 +14,5 @@ class DeleteAction(Action):
     def __init__(self):
         Action.__init__(self)
 
-    def execute(self, context):
-        return context._replace(matched_text='')
+    def execute(self, action_context):
+        return action_context._replace(text='')
