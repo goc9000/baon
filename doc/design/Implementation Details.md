@@ -51,18 +51,44 @@ The evolution of the context will be as follows:
 | Match sequence processed      | `1. ouverture` *              | `01. Ouverture` | trackno=`01` | No       |
 | Processing complete           | `1. ouverture` *              | `01. Ouverture` | trackno=`01` | No       |
 
-### Matches (preliminary)
+### Matches
 
-Within the framework set up by the *context* concept above, a **match** can be preliminarily described as an entity that takes in a context, and, if the right conditions are met (i.e. it fits a pattern), produces another context, called a **solution**. In maths parlance, a match can be said to be a *partial function* from C to C, where C is the set of all possible contexts.
+Within the framework set up by the *context* concept above, a **match** in the most abstract sense can be described as an entity that takes in a context and produces *zero, one, or more* resulting contexts, called **solutions**.
 
-For instance, a simple pattern match such as `%d` will inspect the `text` and `position` attributes of the input context so as to see whether the incoming text matches its specific pattern (a number). If the pattern fits, it will produce a solution context where the number text has been consumed and placed in the `matched_text` attribute, as illustrated here:
+For instance, a simple pattern match such as `%d` will inspect the `text` and `position` attributes of the input context so as to see whether the incoming text matches its specific pattern (a number). If the pattern fits, it will produce a single solution context where the number text has been consumed and placed in the `matched_text` attribute, as illustrated here:
 
 |                   | Text (position marked with *) | Matched Text    | Aliases      | Anchored          |
 |-------------------|-------------------------------|-----------------|--------------|-------------------|
 | Input context     | `The Year `* `2000`           | N/A             | Not relevant | Not relevant      |
 | Solution          | `The Year 2000` *             | `2000`          | Not affected | Always set to Yes |
 
-Note that this definition is actually incomplete, but it covers the most fundamental pattern and positional matches from which more complex matches are formed. A complete definition will be given in a subsequent section, after actions are also introduced.
+If the pattern does not fit, no solutions will be produced. In general, pattern matches will produce either one solution or none, depending on whether the pattern fits or not. However, composite matches may have multiple solutions. For instance, an alternatives match:
+
+    ('abr'|%d|'a'|%s)
+
+Applied to the text `abracadabra` will yield:
+
+| Match                    | Text (position marked with *) | Matched Text    | Aliases      | Anchored          |
+|--------------------------|-------------------------------|-----------------|--------------|-------------------|
+| Input context            | * `abracadabra`               | N/A             | Not relevant | Not relevant      |
+| Solution 1 (for `'abr'`) | `abr` * `acadabra`            | `abr`           | Not affected | Always set to Yes |
+| Solution 2 (for `'a'`)   | `a` * `bracadabra`            | `a`             | Not affected | Always set to Yes |
+| Solution 3 (for `%s`)    | `abracadabra` *               | `abracadabra`   | Not affected | Always set to Yes |
+
+Note how a solution is produced for every alternative that matches the incoming text.
+
+Optional and repeated matches also produce multiple solutions in order to implement their backtracking semantics. For instance, `abc*` applied to the text `abcabcabcabc` yields:
+
+| Match                    | Text (position marked with *) | Matched Text    | Aliases      | Anchored          |
+|--------------------------|-------------------------------|-----------------|--------------|-------------------|
+| Input context            | * `abcabcabcabc`              | N/A             | Not relevant | Not relevant      |
+| Solution 1               | `abcabcabcabc` *              | `abcabcabcabc`  | Not affected | Yes               |
+| Solution 2               | `abcabcabc` * `abc`           | `abcabcabc`     | Not affected | Yes               |
+| Solution 3               | `abcabc` * `abcabc`           | `abcabc`        | Not affected | Yes               |
+| Solution 4               | `abc` * `abcabcabc`           | `abc`           | Not affected | Yes               |
+| Solution 5               | * `abcabcabcabc`              | (empty text)    | Not affected | Not affected      |
+
+Note that the *order of the solutions* is important, and in fact determines which variant BAON will try first. As one can see, the variants with the most repetitions will be tried first, then, if this does not succeed, fewer and fewer repetitions will be attempted, until either the global match is successful, or the repeated match is skipped entirely.
 
 ### Actions
 
