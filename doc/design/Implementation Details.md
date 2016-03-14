@@ -92,18 +92,26 @@ Note that the *order of the solutions* is important, and in fact determines whic
 
 ### Actions
 
-Similarly to matches, **actions** also take in a context and produce a resulting context. However, unlike matches, actions only inspect and affect the `matched_text` and `aliases` attributes, as they are designed to act upon the result of a previously executed match.
+The subject of **actions** consists of two main parts:
+- What the actions themselves are
+- How actions are integrated with matches
 
-Here is an illustration of an input context (following a match) and the resulting contexts following the execution of various actions:
+Like matches, actions also do a mapping from one context to another, but with two important differences:
+- Actions operate on a reduced kind of context called an **action context**, which consists of only two fields: `text` and `aliases`.
+- Actions always have exactly one "solution", which is to say that they always succeed in transforming the text and always transform it in only one way, specific to their nature.
 
-|                    | Text (position marked with *) | Matched Text  | Aliases            | Anchored     |
-|--------------------|-------------------------------|---------------|--------------------|--------------|
-| Input context      | `The quick brown fox` *       | `brown fox`   | -                  | Not relevant |
-| `!`                | Not affected                  | (empty text)  | -                  | Not affected |
-| `->upper`          | Not affected                  | `BROWN FOX`   | -                  | Not affected |
-| `->braces`         | Not affected                  | `[BROWN FOX]` | -                  | Not affected |
-| `>>phrase`         | Not affected                  | `brown fox`   | phrase=`brown fox` | Not affected |
-| `->(%s>>word %s!)` | Not affected                  | `brown`       | word=`brown`       | Not affected |
+The following table illustrates the effects of various actions given a starting action context:
+
+|                      | Text          | Aliases            |
+|----------------------|---------------|--------------------|
+| Input action context | `brown fox`   | -                  |
+| `!`                  | (empty text)  | -                  |
+| `->upper`            | `BROWN FOX`   | -                  |
+| `->braces`           | `[BROWN FOX]` | -                  |
+| `>>phrase`           | `brown fox`   | phrase=`brown fox` |
+| `->(%s>>word %s!)`   | `brown`       | word=`brown`       |
+
+Actions are integrated into the match framework through the use of a composite match called **match with actions**. A construct like `core_match->action1->action2->...` will be represented internally as a match-with-actions object storing the base `core_match` as well as a list of the actions `action1`, `action2` etc. The solutions produced by the match-with-actions object are all of the solutions of the core match, transformed by passing their `matched_text` and `aliases` fields through all the actions in the list.
 
 ### Insertions
 
