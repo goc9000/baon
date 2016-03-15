@@ -23,6 +23,8 @@ Table of Contents
   2. [Matches] (#matches)
   3. [Taxonomy of Matches] (#taxonomy-of-matches)
   4. [Actions] (#actions)
+  5. [How the 'Between' Match Works] (#how-the-between-match-works)
+  6. [How Rules Work] (#how-rules-work)
 
 
 The Text Matching and Transformation Model
@@ -164,21 +166,54 @@ The following table illustrates the effects of various actions given a starting 
 
 It should be noted that matches, as defined previously, have no concept of actions. The way actions are integrated into the match framework is through the use of a special composite match type called **MatchWithActions**. A match object of this type stores a core match and a list of actions, and makes them act like a single, actionless match from the outside. The algorithm is simple: the solutions produced by the MatchWithActions object are all of the solutions of the core match, transformed by passing their `matched_text` and `aliases` fields through all the stored actions.
 
+### How the 'Between' Match Works
+
+The 'between' match has a complex behavior and yet a very simple implementation:
+- If the `anchored` flag is `true`, we will produce solutions that cover, in order, 0, 1, 2, 3 etc. characters from the incoming text, regardless of its content. These solutions will also have the `anchored` flag set to `false`.
+- Otherwise, we will produce a single solution consisting of the empty text. The `anchored` flag remains `false`.
+
+To see why this will cause the 'between' match to ultimately span up to the first material match, let us consider what happens depending on which kind of match is executed after the 'between' match:
+
+- *Composite match*: regardless of whether this is an alternative, sequence, etc., ultimately we will come to evaluating one of the simple matches inside (material or immaterial) at the `position` to which the 'between' match spans. The problem is restated for this match.
+- *Immaterial match*: the match will execute, but by definition, `position` will not be affected. The problem is restated for the match that follows.
+- *Another 'between' match*: by definition, this will always resolve to the empty text. The `position` will stay the same, and the problem is restated for the match that follows.
+- *Material match*: by now it should be clear that this match will always be evaluated at the `position` to which the 'between' match spans. Then:
+  - If the match is successful, then indeed the 'between' match spans to the first material match, Q.E.D.
+  - If the match is not successful, BAON will backtrack and eventually try the next, longer solution for the 'between' match. The problem is restated for this longer match and an incremented `position`, until the material match is successful.
+  - If we exhaust all solutions for the 'between' match (i.e. it covers the entire remaining text) without the material match being successful, the 'between' match fails, thereby transmitting the failure upstream. This again makes sense.
+
+An interesting situation arises when *there is no next match*, i.e. the `..` is the last thing in the rule. By the algorithm previously described, one would expect that this last `..` would always be empty, because there is no next match to place any constraint on its ending position, so the first solution (0 characters) will always be chosen. And yet, what happens is what would be intuitively expected, which is that this last `..` will indeed extend until it covers the entire remaining text. To see why this is the case, consult the next section on how rules operate.
+
+### How Rules Work
+
+A **rule** is an abstract object that wraps a match and directs its execution against a complete filename (we say 'a match' and not 'a number of matches' because any combination of matches ultimately resolves to one composite master match, usually a sequence match). Essentially a rule solves three problems:
+
+- A rule operates on *text* (i.e. it maps from an input filename to a transformed filename), whereas the master match operates on *match contexts*. Thus, when presented with a filename, the rule will create an initial context corresponding to that input (i.e. `text` set to the filename, `position` to 0, and `anchored` to `true`), run the master match against it, and finally extract the transformed filename from the `matched_text` field of the first found solution.
+
+- A rule needs to transform the entire filename text, but the master match may only cover part of it. There is also the problem of `..` matches placed at the end. We elegantly solve these problems with a little trick: instead of running the master_match, we will actually run a sequence match consisting of the following three terms:
+
+  `master_match .. $`
+
+  We can see that:
+  - If the `master_match` covers only part of the text, the extra `..` will cover the rest of the text until the `$` (the end of the filename).
+  - If the `master_match` ends with a `..`, then the extra `..` will be forced to zero length, and we will immediately match against `$`, the end of the filename. The final `..` in the master match will thus grow until it extends to the end of the filename.
+
+- Finally, there is the question of aliases being referred to before they are set (or even more complex dependencies like aliases feeding into other aliases). A rule solves this problem in the following manner: if running the match resulted in any change in the aliases, the matching will be repeated, this time with the aliases already set. The process will repeat itself until either the aliases have converged to a stable set, or we exceed a certain number of iterations. For instance, given the rule:
+
+  `<<alias2->upper (<<alias1 <<'def')>>alias2 'abc'>>alias1`
+  
+  applied to the text `abc`, we will go through the following steps:
+  
+  | Initial `alias1` | Initial `alias2` | Final text        | Final `alias1` | Final `alias2` |
+  |------------------|------------------|-------------------|----------------|----------------|
+  | (empty)          | (empty)          | `defabc`          | `abc`          | `def`          |
+  | `abc`            | `def`            | `DEFabcdefabc`    | `abc`          | `abcdef`       |
+  | `abc`            | `abcdef`         | `ABCDEFabcdefabc` | `abc`          | `abcdef`       |
+
+  The final text is obtained after 3 iterations, when the aliases have stabilized.
 
 -------------
 
 REWRITE POINT
 
 -------------
-
-### Rules
-
-A rule's function is simply to apply a sequence of matches to a piece of text (usually a filename). If, and only if, *all* of the matches in the sequence map succeed, the rule will output the concatenation of the matched and transformed text for each component. Otherwise, the rule will undo all modifications and return the filename unchanged.
-
-Note that the matches might not consume all of the filename text. Any remaining incoming text will be copied unchanged to the output.
-
-### The ruleset
-
-The topmost entity involved in the renaming process is the *ruleset*. The ruleset is responsible for mapping every file in a list to a transfomed destination filename. It does so by independently passing each filename entry through the user-supplied list of *rules*. Every time a rule 'matches' the filename, the filename text may change according to the transformations specified in the rule. Subsequent rules will be matched against the transformed text instead of the original filename.
-
-Unless otherwise specified, a file will be be passed through every rule in the set and transformed every time a rule matches. The final transformed text obtained after all rules have been applied will be used by the ruleset as the final result of the renaming operation for that file.
