@@ -8,6 +8,26 @@ Design Decisions
 ================
 
 
+Why an ANTLR-like matching language?
+------------------------------------
+
+- It's just what I find most natural
+- Strikes a balance between expressivity and power (language is definitely far more powerful than regexes)
+- Several killer features vs. most other ad-hoc languages used in renamers:
+  - The 'between' match
+  - Backtracking (most other matchers are greedy)
+  - Transformations are inline with the matching (i.e. `match1->action1 `instead of `match1` and `action1` in two separate fields, requiring one to remember the association)
+
+
+Why support backtracking?
+-------------------------
+
+- Needed to produce an intuitive result for patterns such as `%d %d? %d` versus the text `1 2`.
+- Filenames are relatively short (rarely more than several hundred chars)
+- The full exponential cost is not trivial to produce by accident. For most practical patterns, the complexity is more like polynomial.
+- Could be optimized via memoization if need be
+
+
 Why Python?
 -----------
 
@@ -77,3 +97,11 @@ Why use platform-specific path separators inside BAON?
   - Advantage: Fewer assumptions are made about the underlying filesystem
 
 - Based on the above, decided for platform-specific separators
+
+
+Why use PLY for parsing?
+------------------------
+
+- Is fairly simple and well-integrated with Python idioms
+- First version of BAON actually used ANTLR - this was removed as it was a very heavy Java dependency and integration with Python was poor and buggy
+- BAON is not a particularly complex language, could also write a parser by hand for it
