@@ -8,6 +8,20 @@ Design Decisions
 ================
 
 
+Table of Contents
+-----------------
+
+1. [Why an ANTLR-like matching language?] (#why-an-antlr-like-matching-language)
+2. [Why support backtracking?] (#why-support-backtracking)
+3. [Why a staging-directory-based rename plan algorithm?] (#why-a-staging-directory-based-rename-plan-algorithm)
+4. [Why use platform-specific path separators inside BAON?] (#why-use-platform-specific-path-separators-inside-baon)
+5. [Why Python?] (#why-python)
+6. [Why Python 3?] (#why-python-3)
+7. [Why QT?] (#why-qt)
+8. [Why support for multiple UIs?] (#why-support-for-multiple-uis)
+9. [Why use PLY for parsing?] (#why-use-ply-for-parsing)
+
+
 Why an ANTLR-like matching language?
 ------------------------------------
 
@@ -26,39 +40,6 @@ Why support backtracking?
 - Filenames are relatively short (rarely more than several hundred chars)
 - The full exponential cost is not trivial to produce by accident. For most practical patterns, the complexity is more like polynomial.
 - Could be optimized via memoization if need be
-
-
-Why Python?
------------
-
-- Excellent support for lambdas and generators, which are crucial to the match engine. The multiple solutions of a match MUST be evaluated lazily, recursively and in a very specific order, and Python generators are perfect for elegantly expressing this.
-- Rejected C#: Probably powerful enough, but has poor traction outside Windows.
-- Rejected Java: Strong typing and comes with Swing built-in, which I know to be very good for this job. However, poor/no support for generators. Also packaging it with the application is problematic due to its large size vs. Python.
-- Rejected Haskell: Definitely has excellent expressivity, but the UI support is relatively poor.
-
-
-Why Python 3?
--------------
-
-- Main reason is improved and more uniform Unicode support. I had lots of problems with forgotten encodes/decodes in obscure places.
-
-
-Why QT?
--------
-
-- Actually not a strong decision, there is support for multiple UIs
-- I know it well
-- The signal/slot mechanism is very handy in creating a non-blocking UI
-- Disappointed with `wxWidgets`, found it to be crash-prone on Unices
-
-
-Why support for multiple UIs?
------------------------------
-
-- I find I need it often in the command line, I have plans for `ncurses` or `readline` UIs.
-- QT is overkill, and support might be harder in the future
-- A very good exercise in separating the core vs the UI
-
 
 Why a staging-directory-based rename plan algorithm?
 ----------------------------------------------------
@@ -97,6 +78,38 @@ Why use platform-specific path separators inside BAON?
   - Advantage: Fewer assumptions are made about the underlying filesystem
 
 - Based on the above, decided for platform-specific separators
+
+
+Why Python?
+-----------
+
+- Excellent support for lambdas and generators, which are crucial to the match engine. The multiple solutions of a match MUST be evaluated lazily, recursively and in a very specific order, and Python generators are perfect for elegantly expressing this.
+- Rejected C#: Probably powerful enough, but has poor traction outside Windows.
+- Rejected Java: Strong typing and comes with Swing built-in, which I know to be very good for this job. However, poor/no support for generators. Also packaging it with the application is problematic due to its large size vs. Python.
+- Rejected Haskell: Definitely has excellent expressivity, but the UI support is relatively poor.
+
+
+Why Python 3?
+-------------
+
+- Main reason is improved and more uniform Unicode support. I had lots of problems with forgotten encodes/decodes in obscure places.
+
+
+Why QT?
+-------
+
+- Actually not a strong decision, there is support for multiple UIs
+- I know it well
+- The signal/slot mechanism is very handy in creating a non-blocking UI
+- Disappointed with `wxWidgets`, found it to be crash-prone on Unices
+
+
+Why support for multiple UIs?
+-----------------------------
+
+- I find I need it often in the command line, I have plans for `ncurses` or `readline` UIs.
+- QT is overkill, and support might be harder in the future
+- A very good exercise in separating the core vs the UI
 
 
 Why use PLY for parsing?
