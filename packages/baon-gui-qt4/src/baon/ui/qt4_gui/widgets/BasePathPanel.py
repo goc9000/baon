@@ -9,7 +9,7 @@
 
 import os
 
-from PyQt4.QtCore import Qt, QTimer, pyqtSignal, pyqtSlot
+from PyQt4.QtCore import Qt, QDir, QTimer, pyqtSignal, pyqtSlot
 from PyQt4.QtGui import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
 
 from baon.ui.qt4_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
