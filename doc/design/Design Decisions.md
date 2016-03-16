@@ -57,6 +57,8 @@ Why a staging-directory-based rename plan algorithm?
   - Would be too expensive at evaluation time (BAON might be run on structures with 10,000s of files)
   - Again, overkill for this application
 
+- This specific order of operations makes it much easier to deduce the exact step at which the program crashed mid-rename
+
 
 Why use platform-specific path separators inside BAON?
 ------------------------------------------------------
