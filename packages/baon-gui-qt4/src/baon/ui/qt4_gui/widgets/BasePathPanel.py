@@ -58,6 +58,8 @@ class BasePathPanel(QWidget, SetupTabStopsMixin):
             self._browse_button,
         )
 
+        self.setAcceptDrops(True)
+
     def base_path(self):
         return self._base_path_editor.text()
 
@@ -95,3 +97,43 @@ class BasePathPanel(QWidget, SetupTabStopsMixin):
         if self.base_path() != self._last_emitted_path:
             self._last_emitted_path = self.base_path()
             self.path_edited.emit(self.base_path())
+
+    def dragEnterEvent(self, drag_enter_event):
+        path = _decode_dragged_data(drag_enter_event.mimeData())
+
+        if path is not None:
+            _adjust_proposed_action(drag_enter_event)
+            drag_enter_event.accept()
+
+    def dropEvent(self, drop_event):
+        path = _decode_dragged_data(drop_event.mimeData())
+
+        if path is not None:
+            _adjust_proposed_action(drop_event)
+            drop_event.accept()
+
+            self.set_base_path(path)
+
+
+def _decode_dragged_data(data):
+    if data.hasUrls():
+        items = [QDir.toNativeSeparators(url.toLocalFile()) for url in data.urls() if url.isLocalFile()]
+    elif data.hasText():
+        items = data.text().strip().split("\n")
+    else:
+        return None
+
+    if len(items) == 0:
+        return None
+
+    first_path = os.path.abspath(items[0])
+
+    if (len(items) > 1) or (not os.path.isdir(first_path)):
+        first_path, _ = os.path.split(first_path)
+
+    return first_path
+
+
+def _adjust_proposed_action(drag_event):
+    if drag_event.dropAction() == Qt.MoveAction:
+        drag_event.setDropAction(Qt.LinkAction)
