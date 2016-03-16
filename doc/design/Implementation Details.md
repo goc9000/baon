@@ -4,13 +4,6 @@ BAON
 (C) Copyright 2012-present Cristian Dinu (<goc9000@gmail.com>); Licensed under the GPLv3.
 
 
--------------------
-
-REWRITE IN PROGRESS
-
--------------------
-
-
 Implementation Details
 ======================
 
@@ -25,6 +18,7 @@ Table of Contents
   4. [Actions] (#actions)
   5. [How the 'Between' Match Works] (#how-the-between-match-works)
   6. [How Rules Work] (#how-rules-work)
+2. [The Rename Plan] (#the-rename-plan)
 
 
 The Text Matching and Transformation Model
@@ -212,8 +206,30 @@ A **rule** is an abstract object that wraps a match and directs its execution ag
 
   The final text is obtained after 3 iterations, when the aliases have stabilized.
 
--------------
 
-REWRITE POINT
+The Rename Plan
+---------------
 
--------------
+As BAON does more than just move files - it also restructures directories -, the sequence of operations to be executed can be quite complex, and as such a *rename plan* must be made.
+
+The plan is assembled based on a list of abstract renamings, i.e. pairs of the old filename path vs the new filename path. BAON will figure out which directories should be created or removed, as well as which files should be moved and when. The result will be a sequence of three kinds of operations:
+
+- Moving a file (or a directory)
+- Creating a directory
+- Removing an empty directory
+
+The plan is assembled in 6 stages:
+
+1. First, a temporary **staging directory** is created in the *base directory* (where the files were scanned for renaming). The name of this directory will always be picked such that it does not conflict with any other entry in the base directory. Naturally, write access for the base directory is required. Then, *create directory* operations are issued such that the final desired directory structure is recreated within the staging directory. This provides temporary destinations for all the files that are to be moved.
+
+2. *Move file* operations are issued for all files that are to be moved or renamed. The files will be moved from their original position to a path within the staging directory that mirrors their desired final path in the staging directory.
+
+3. *Remove directory* operations are issued for all directories that will have been left empty by the above move. These operations are orchestrated recursively from leaf to root. Note how this means that the old directory structure will be torn down except where it contains files that will not move - thus freeing the namespace for creating the new directory structure.
+
+4. *Create directory* operations are issued for creating the new directory structure, as described by the list of final paths. This provides final destinations for all the files that are to be moved.
+
+5. *Move file* operations are issued such that all files are moved from the staging directory to their final positions in the base directory (which now contains the new file structure).
+
+6. Finally, *Remove directory* operations are issued, tearing down the staging directory and the structure within.
+
+Note how this plan is relatively inefficient in the number of operations, in that all files will move twice, and destination directories may be torn down and re-created with the same name. Nevertheless, this particular order of operations avoids many corner cases with case sensitivity, permissions, etc. that a more exact implementation would have to tackle. Additionally, should the program fail mid-rename, it is much easier to deduce the stage of the rename (and thus revert it correctly) from any given intermediary position with this algorithm.
