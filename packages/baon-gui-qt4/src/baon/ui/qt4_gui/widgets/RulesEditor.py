@@ -49,9 +49,9 @@ class RulesEditor(QTextEdit):
     @pyqtSlot()
     def set_rules(self, rules_text):
         self._quiescence_timer.stop()
-        self._last_emitted_text = rules_text
         self.document().setPlainText(rules_text)
         self.clear_error()
+        self._maybe_emit_rules_edited()
 
     @pyqtSlot()
     def show_error(self, error_span):

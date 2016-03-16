@@ -9,7 +9,7 @@
 
 import os
 
-from PyQt4.QtCore import QTimer, pyqtSignal
+from PyQt4.QtCore import Qt, QTimer, pyqtSignal, pyqtSlot
 from PyQt4.QtGui import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
 
 from baon.ui.qt4_gui.mixins.SetupTabStopsMixin import SetupTabStopsMixin
@@ -61,18 +61,22 @@ class BasePathPanel(QWidget, SetupTabStopsMixin):
     def base_path(self):
         return self._base_path_editor.text()
 
+    @pyqtSlot()
     def set_base_path(self, base_path):
         self._base_path_editor_quiescence_timer.stop()
-        self._last_emitted_path = base_path
         self._base_path_editor.setText(base_path)
+        self._maybe_emit_path_edited()
 
+    @pyqtSlot()
     def _on_base_path_editor_finished(self):
         self._base_path_editor_quiescence_timer.stop()
         self._maybe_emit_path_edited()
 
+    @pyqtSlot()
     def _on_base_path_editor_quiescence_timer_timeout(self):
         self._maybe_emit_path_edited()
 
+    @pyqtSlot()
     def _on_browse_button_pressed(self):
         self._base_path_editor_quiescence_timer.stop()
 
@@ -86,6 +90,7 @@ class BasePathPanel(QWidget, SetupTabStopsMixin):
 
         self._maybe_emit_path_edited()
 
+    @pyqtSlot()
     def _maybe_emit_path_edited(self):
         if self.base_path() != self._last_emitted_path:
             self._last_emitted_path = self.base_path()
