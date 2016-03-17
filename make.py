@@ -33,18 +33,31 @@ def ensure_program_installed(program):
         fail('ERROR: {0} is not installed, fix this and retry', program)
 
 
-def silent_call(*program_args, **kwargs):
+def silent_call(*program_args, silent=True, silent_error=False, **kwargs):
     ensure_program_installed(program_args[0])
 
-    my_kwargs = dict()
+    program = subprocess.Popen(
+        program_args,
+        stdout=subprocess.PIPE if silent else None,
+        stderr=subprocess.PIPE if silent else None,
+        **kwargs
+    )
 
-    if kwargs.get('silent', True):
-        my_kwargs['stdout'] = subprocess.DEVNULL
-        my_kwargs['stderr'] = subprocess.DEVNULL
+    output, errors = program.communicate()
 
-    my_kwargs.update((k, v) for k, v in kwargs.items() if k not in ['silent'])
+    if program.returncode != 0:
+        if silent_error:
+            return False
 
-    return subprocess.call(program_args, **my_kwargs) == 0
+        print('*** ERROR running:', ' '.join(program_args))
+        print('*** Output:')
+        print(output.decode('utf-8'))
+        print('*** Errors:')
+        print(errors.decode('utf-8'))
+
+        sys.exit(1)
+
+    return True
 
 
 @lru_cache()
@@ -83,7 +96,7 @@ def pip3(*args, **kwargs):
 
 @lru_cache()
 def check_package_installed(package):
-    return pip3('show', package)
+    return pip3('show', package, silent_error=True)
 
 
 def install_package(package, from_url=None):
