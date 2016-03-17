@@ -7,6 +7,8 @@
 # Licensed under the GPL-3
 
 
+import platform
+
 import baon.ui.qt4_gui.resources
 
 from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot
@@ -233,28 +235,32 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
     @pyqtSlot()
     def _confirm_rename(self):
         if self._files_display.has_rename_warnings():
-            answer = QMessageBox.question(
-                self,
-                self.RENAME_WARNINGS_DIALOG_CAPTION,
-                self.RENAME_WARNINGS_DIALOG_TEXT,
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No,
-            )
-            if answer != QMessageBox.Yes:
+            if not self._ask_user(self.RENAME_WARNINGS_DIALOG_CAPTION, self.RENAME_WARNINGS_DIALOG_TEXT):
                 return
 
         self.request_do_rename.emit()
 
     def _on_rename_completed(self):
-        answer = QMessageBox.question(
-            self,
-            self.RENAME_COMPLETE_DIALOG_CAPTION,
-            self.RENAME_COMPLETE_DIALOG_TEXT,
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
-        )
-        if answer == QMessageBox.Yes:
-            self.request_rescan.emit()
-            self._rules_editor.clear()
+        self._rules_editor.clear()
+        self.request_rescan.emit()
+
+        if self._ask_user(self.RENAME_COMPLETE_DIALOG_CAPTION, self.RENAME_COMPLETE_DIALOG_TEXT):
+            pass
         else:
             self.reject()
+
+    def _ask_user(self, caption, text):
+        on_mac = platform.system() == 'Darwin'
+
+        dialog = QMessageBox(
+            QMessageBox.Question,
+            caption,
+            text,
+            QMessageBox.Yes | QMessageBox.No,
+            self,
+            Qt.Sheet if on_mac else Qt.Dialog | Qt.MSWindowsFixedSizeDialogHint,
+        )
+        dialog.setDefaultButton(QMessageBox.No)
+        dialog.setWindowModality(Qt.WindowModal)
+
+        return dialog.exec_() == QMessageBox.Yes
