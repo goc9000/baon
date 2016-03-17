@@ -249,16 +249,15 @@ def build_osx_app(packages):
             from setuptools import setup
 
             setup(
-                app=##start_script##,
+                app=[##start_script##],
                 options=dict(
                     py2app=dict(
-                        argv_emulation=True,
                         includes=##includes_option##,
                         packages=##packages_option##,
                         plist=##plist##,
                         iconfile=##icon_file##,
                     ),
-                )
+                ),
                 setup_requires=['py2app'],
             )
             """,
