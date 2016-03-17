@@ -196,6 +196,10 @@ class MainWindow(QDialog, SetupTabStopsMixin, CenterOnScreenMixin):
         # We need to do this here as otherwise the operation may fail on some platforms
         self.setWindowIcon(QIcon(':/app_icon.png'))
 
+    @pyqtSlot(str)
+    def set_base_path(self, base_path):
+        self._base_path_panel.set_base_path(base_path)
+
     @pyqtSlot(BAONStatus)
     def report_status(self, status):
         files_busy = \

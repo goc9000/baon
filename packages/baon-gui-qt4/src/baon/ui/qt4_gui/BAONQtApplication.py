@@ -7,10 +7,11 @@
 # Licensed under the GPL-3
 
 
+import os
 import sys
 
 from PyQt4.QtCore import Qt, QThread, QUrl, QMetaObject, pyqtSlot, pyqtSignal
-from PyQt4.QtGui import QApplication, QMessageBox, QProgressDialog, QDesktopServices
+from PyQt4.QtGui import QApplication, QFileOpenEvent, QMessageBox, QProgressDialog, QDesktopServices
 
 from baon.core.plan.rename_plan_backup import get_rename_plan_backup_filename
 from baon.ui.qt4_gui.BAONQtCore import BAONQtCore
@@ -61,6 +62,17 @@ class BAONQtApplication(QApplication):
         self._init_main_objects(args)
         self._connect_main_objects()
         self._start_core()
+
+    def event(self, evt):
+        if isinstance(evt, QFileOpenEvent):
+            path = evt.file()
+            if not os.path.isdir(path):
+                path, _ = os.path.split(path)
+
+            self._main_window.set_base_path(path)
+            return True
+
+        return super().event(evt)
 
     def _init_threads(self):
         self._core_thread = QThread()
