@@ -35,7 +35,7 @@ will rename a file like `3 - kaiser waltz.mp3` to `03. Kaiser Waltz.mp3`.
 
 In this example, the `%d` pattern matches the track number, and the corresponding action `->%2d` means that it will be extended with leading zeroes so that it has 2 characters. The `' - '` pattern matches the separator that follows the track number, i.e. a dash flanked by spaces, and the action `->'. '` means that it will be replaced by a period and a space. Finally, the `..` pattern matches against the rest of the filename, which will then be passed through the transformation `->title` that adjusts its capitalization in accordance to the rules for English titles.
 
-For details about other patterns and actions available, check out the `Full Language Reference` and `Language Summary` documents.
+For details about other patterns and actions available, check out the *Full Language Reference* and *Language Summary* documents.
 
 Note that the extension is not processed by default. Normally, the scope of the renaming is the filename itself, excluding its extension and path prefix. You can check the **Use Path** and **Use Extension** boxes if you want renaming to affect these. **A very powerful feature of BAON is that changing the path of a file will cause BAON to move files between directories and in general create and remove directories so as to recreate the directory structure reflected by the new paths**.
 
