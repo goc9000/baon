@@ -46,3 +46,15 @@ As you type in rules, BAON will apply them to the scanned filenames and show you
 - Filenames that have not changed (i.e. matched no rules or were not modified by the rewrites). This is not an error, but rendering these differently helps the user.
 
 Once you are satisfied with the result and there are no problems, you can press **OK**. BAON will formulate a plan for renaming the files (and/or modifying the directory structure) and execute it. Should an unexpected error occur in the middle of the renaming process, the actions undertaken so far will be cancelled and you will not be left with a partial state on disk. BAON also saves a temporary copy of the renaming plan in your home directory, so that it can roll back the plan even if the application or computer crashed in the middle of the renaming process.
+
+
+Trivia
+------
+
+BAON draws its name from a verse in William Shakespeare's *Romeo and Juliet*:
+
+> What's in a name? That which we call a rose
+>
+> **By any other name** would smell as sweet
+
+It's supposed to be pronounced like the beginning of *bayonet*.
