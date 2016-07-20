@@ -50,10 +50,12 @@ def silent_call(*program_args, silent=True, silent_error=False, **kwargs):
             return False
 
         print('*** ERROR running:', ' '.join(program_args))
-        print('*** Output:')
-        print(output.decode('utf-8'))
-        print('*** Errors:')
-        print(errors.decode('utf-8'))
+
+        if silent:
+            print('*** Output:')
+            print(output.decode('utf-8'))
+            print('*** Errors:')
+            print(errors.decode('utf-8'))
 
         sys.exit(1)
 
