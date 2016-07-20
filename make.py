@@ -238,7 +238,7 @@ def build_osx_app(packages):
         write_sources_blob(work_dir, packages, ['baon', 'baon.ui'])
 
         includes_option = get_ui_modules(packages)
-        if 'baon-gui-qt4' in packages:
+        if ('baon-gui-qt4' in packages) or ('baon-gui-qt5' in packages):
             includes_option.append('sip')
 
         # These packages need to be included as-is:
