@@ -241,9 +241,10 @@ def build_osx_app(packages):
         if 'baon-gui-qt4' in packages:
             includes_option.append('sip')
 
-        # This package needs to be included as-is because ply uses inspect on its source, so the .pyc files are not
-        # sufficient.
-        packages_option = ['baon.core.parsing']
+        # These packages need to be included as-is:
+        # - baon.core.parsing: ply uses inspect on its source
+        # - baon.lib.*_functions: BAON uses inspect here to discover available text functions
+        packages_option = ['baon.core.parsing', 'baon.lib.action_functions', 'baon.lib.simple_text_functions']
 
         write_script(
             os.path.join(work_dir, 'setup.py'),
@@ -586,10 +587,7 @@ def main():
     elif raw_args.command == 'run':
         python3('-m', 'baon', *raw_args.run_args, silent=False, env=dict(
             os.environ,
-            PYTHONPATH=os.pathsep.join([
-                os.path.join('packages', 'baon-core', 'src'),
-                os.path.join('packages', 'baon-gui-qt4', 'src'),
-            ]),
+            PYTHONPATH=os.pathsep.join([os.path.join('packages', pkg, 'src') for pkg in packages]),
         ))
     elif raw_args.command == 'clean_src':
         clean_source()
