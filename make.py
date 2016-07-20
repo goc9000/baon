@@ -15,6 +15,11 @@ from functools import lru_cache
 DIST_DIR = 'dist'
 CORE_PKG = 'baon-core'
 
+QT5_PLUGINS = [
+    'platforms/libqcocoa.dylib',
+    'platforms/libqminimal.dylib',
+]
+
 APP_METADATA = None
 
 
@@ -179,6 +184,14 @@ def scan_files(base_dir, full_paths=True, include_dirs=False):
     return output
 
 
+def copy_creating_dest_dirs(source_path, dest_path):
+    dest_dir, _ = os.path.split(dest_path)
+    if not os.path.isdir(dest_dir):
+        os.makedirs(dest_dir)
+
+    shutil.copy2(source_path, dest_path)
+
+
 def is_source_junk_file(path):
     return re.match(r'([.]DS_Store|__pycache__|.*[.]pyc)$', os.path.basename(path))
 
@@ -273,6 +286,10 @@ def build_osx_app(packages):
 
         python3('setup.py', 'py2app', cwd=work_dir)
 
+        temp_app_dir = os.path.join(work_dir, 'dist', '{0}.app'.format(APP_METADATA.APP_NAME))
+        if 'baon-gui-qt5' in packages:
+            apply_qt5_fix(temp_app_dir)
+
         if not os.path.isdir(DIST_DIR):
             os.mkdir(DIST_DIR)
 
@@ -280,12 +297,67 @@ def build_osx_app(packages):
         if os.path.isdir(final_app_dir):
             shutil.rmtree(final_app_dir)
 
-        os.rename(
-            os.path.join(work_dir, 'dist', '{0}.app'.format(APP_METADATA.APP_NAME)),
-            final_app_dir,
-        )
+        os.rename(temp_app_dir, final_app_dir)
 
     print('Mac OS X application built at {0}'.format(final_app_dir))
+
+
+def apply_qt5_fix(app_dir):
+    """
+    Applies some post-processing fixes so that the generated QT5 app bundle works on OS X. Basically, this implies
+    bundling the plugins (which are not auto-detected by py2app), and adjusting their dependencies so that they refer
+    only to the locally bundled frameworks, not the system ones.
+    """
+    qt5_deploy_path = shutil.which('macdeployqt')
+    assert qt5_deploy_path is not None, "Could not find macdeployqt, ensure Qt5 is installed and in your path"
+
+    qt5_plugins_dir = os.path.abspath(os.path.join(qt5_deploy_path, '..', '..', 'plugins'))
+    assert os.path.isdir(qt5_plugins_dir), "Failed to find Qt5 plugins dir at {0}".format(qt5_plugins_dir)
+
+    app_plugins_dir = os.path.join(app_dir, 'Contents', 'PlugIns')
+
+    for plugin in QT5_PLUGINS:
+        copy_creating_dest_dirs(os.path.join(qt5_plugins_dir, plugin), os.path.join(app_plugins_dir, plugin))
+
+    # Now run macdeployqt, which adds the frameworks required by the plugins, and the qt.conf file
+    silent_call('macdeployqt', app_dir)
+
+    # Finally, resolve external references unhandled by macdeployqt or py2app
+    for file in scan_files(os.path.join(app_dir, 'Contents')):
+        fix_qt5_external_references(file)
+
+
+def analyze_reference(path):
+    match = re.match("^\t?(/.*/)(Qt\\w+[.]framework/Versions/5/Qt\\w+)", path)
+    if match is not None:
+        return match.group(1) + match.group(2), '@executable_path/../Frameworks/' + match.group(2)
+
+    match = re.match("^\t?(/.*/plugins/)(.*dylib)", path)
+    if match is not None:
+        return match.group(1) + match.group(2), '@executable_path/../PlugIns/' + match.group(2)
+
+    return None, None
+
+
+def fix_qt5_external_references(file):
+    ensure_program_installed('otool')
+    ensure_program_installed('install_name_tool')
+
+    id_output = subprocess.check_output(['otool', '-D', file], stderr=subprocess.STDOUT).decode('utf-8').split("\n")
+    if len(id_output) < 2 or id_output[1] == "":
+        return
+
+    _, id_to = analyze_reference(id_output[1])
+
+    if id_to is not None:
+        silent_call('install_name_tool', '-id', id_to, file)
+
+    for deps_line in subprocess.check_output(['otool', '-L', file]).decode('utf-8').split("\n"):
+        if deps_line.startswith("\t"):
+            dep_from, dep_to = analyze_reference(deps_line)
+
+            if dep_to is not None:
+                silent_call('install_name_tool', '-change', dep_from, dep_to, file)
 
 
 def get_ui_modules(packages):
